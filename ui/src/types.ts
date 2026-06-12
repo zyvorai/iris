@@ -21,6 +21,7 @@ export interface AppMeta {
   dependsOn?: string[]
   recommended?: boolean
   ingressHosts?: string[]
+  meshRoutes?: string[]
 }
 
 export interface ShareLink {
@@ -31,6 +32,11 @@ export interface ShareLink {
   createdAt: string
   label?: string
   createdBy?: string
+}
+
+export interface FederatedApp extends HermesApp {
+  clusterId: string
+  clusterName: string
 }
 
 export interface SearchIntent {

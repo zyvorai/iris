@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/dynamic"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 
 	"github.com/ssahani/hermes/controller/discovery"
@@ -30,6 +31,7 @@ func main() {
 	discoverAll := env("HERMES_DISCOVER_ALL", "true") != "false"
 	discoverIngress := env("HERMES_DISCOVER_INGRESS", "true") != "false"
 	discoverGatewayAPI := env("HERMES_DISCOVER_GATEWAY_API", "true") != "false"
+	discoverMesh := env("HERMES_DISCOVER_MESH", "true") != "false"
 	watchNS := splitCSV(env("HERMES_WATCH_NAMESPACES", ""))
 	healthInterval := 30 * time.Second
 
@@ -57,6 +59,15 @@ func main() {
 		}
 	}
 
+	var dynClient dynamic.Interface
+	if discoverMesh {
+		dynClient, err = dynamic.NewForConfig(restCfg)
+		if err != nil {
+			log.Printf("dynamic client unavailable: %v", err)
+			discoverMesh = false
+		}
+	}
+
 	cfg := discovery.Config{
 		PublicBaseURL:      publicBase,
 		PublicPathPrefix:   publicPathPrefix,
@@ -65,9 +76,10 @@ func main() {
 		DiscoverAll:        discoverAll,
 		DiscoverIngress:    discoverIngress,
 		DiscoverGatewayAPI: discoverGatewayAPI,
+		DiscoverMesh:       discoverMesh,
 		WatchNS:            watchNS,
 	}
-	w := discovery.NewWatcher(client, gwClient, st, cfg)
+	w := discovery.NewWatcher(client, gwClient, dynClient, st, cfg)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -78,8 +90,8 @@ func main() {
 
 	go w.RefreshHealth(ctx, healthInterval)
 
-	log.Printf("hermes-controller watching (autoPublish=%v autoSuggest=%v discoverAll=%v discoverIngress=%v discoverGatewayAPI=%v)",
-		autoPublish, autoSuggest, discoverAll, discoverIngress, discoverGatewayAPI)
+	log.Printf("hermes-controller watching (autoPublish=%v autoSuggest=%v discoverAll=%v discoverIngress=%v discoverGatewayAPI=%v discoverMesh=%v)",
+		autoPublish, autoSuggest, discoverAll, discoverIngress, discoverGatewayAPI, discoverMesh)
 	if err := w.Run(ctx); err != nil {
 		log.Fatalf("watcher: %v", err)
 	}

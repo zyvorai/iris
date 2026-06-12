@@ -17,6 +17,7 @@ const (
 	SourceSignature  = "signature"
 	SourceService    = "service"
 	SourceIngress    = "ingress"
+	SourceMesh       = "mesh"
 	SourceManual     = "manual"
 )
 
@@ -45,6 +46,7 @@ type AppMeta struct {
 	DependsOn    []string `json:"dependsOn,omitempty"`
 	Recommended  bool     `json:"recommended,omitempty"`
 	IngressHosts []string `json:"ingressHosts,omitempty"`
+	MeshRoutes   []string `json:"meshRoutes,omitempty"`
 }
 
 type App struct {

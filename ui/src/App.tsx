@@ -12,6 +12,7 @@ import AppDetailPage, { HealthPage } from './pages/AppDetailPage'
 import ActivityPage from './pages/ActivityPage'
 import TeamsPage from './pages/TeamsPage'
 import GraphPage from './pages/GraphPage'
+import FederatedPage from './pages/FederatedPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/apps" element={<AppsPage />} />
         <Route path="/cluster" element={<ClusterPage />} />
         <Route path="/graph" element={<GraphPage />} />
+        <Route path="/federated" element={<FederatedPage />} />
         <Route path="/teams" element={<TeamsPage />} />
         <Route path="/apps/:id" element={<AppDetailPage />} />
         <Route path="/spaces" element={<SpacesPage />} />

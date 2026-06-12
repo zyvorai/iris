@@ -12,10 +12,12 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, build_graph, build_team_owners, build_workspaces, filter_apps_by_workspace,
-    list_clusters_with_federation, resolve_search_intent, App, AppDiagnosis, AppGraph, AuditEvent,
-    CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, SearchIntent,
-    ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    allowed_namespaces_for_groups, build_diagnosis, build_federated_catalog, build_graph,
+    build_team_owners, build_workspaces, can_perform_action, filter_apps_by_workspace,
+    list_clusters_with_federation, resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis,
+    AppGraph, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp,
+    HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace,
+    WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -27,6 +29,7 @@ pub struct ApiState {
     pub admin_users: Vec<String>,
     pub admin_groups: Vec<String>,
     pub workspace_rules: Vec<WorkspaceRule>,
+    pub role_rules: Vec<RoleRule>,
 }
 
 pub fn routes(state: ApiState) -> Router {
@@ -34,6 +37,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/apps", get(list_apps))
         .route("/apps/{*id}", get(get_app_or_diagnosis))
         .route("/catalog", get(list_catalog))
+        .route("/catalog/federated", get(list_federated_catalog))
         .route("/catalog/export", get(export_catalog))
         .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
@@ -47,6 +51,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/discovery/hide/{*id}", post(hide_app))
         .route("/search", get(search))
         .route("/search/intent", get(search_intent))
+        .route("/search/llm", get(search_llm))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -112,11 +117,26 @@ fn filter_apps_for_user(
     groups: &[String],
     apps: Vec<App>,
 ) -> Vec<App> {
-    let apps = filter_apps(st, apps);
-    if is_admin(st, user, groups) || st.workspace_rules.is_empty() {
-        return apps;
+    let admin = is_admin(st, user, groups);
+    let mut apps = filter_apps(st, apps);
+    if !admin {
+        if let Some(allowed_ns) = allowed_namespaces_for_groups(groups, &st.role_rules) {
+            apps.retain(|a| allowed_ns.iter().any(|ns| ns == &a.namespace));
+        }
     }
-    filter_apps_by_workspace(&apps, groups, &st.workspace_rules)
+    if admin || st.workspace_rules.is_empty() {
+        apps
+    } else {
+        filter_apps_by_workspace(&apps, groups, &st.workspace_rules)
+    }
+}
+
+fn require_action(st: &ApiState, user: &str, groups: &[String], action: &str) -> Result<(), AppError> {
+    if can_perform_action(groups, &st.role_rules, action, is_admin(st, user, groups)) {
+        Ok(())
+    } else {
+        Err(AppError::Forbidden)
+    }
 }
 
 fn app_allowed(st: &ApiState, app: &App) -> bool {
@@ -198,6 +218,34 @@ fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppErr
         }
     }
     Ok(build_diagnosis(&app))
+}
+
+async fn list_federated_catalog(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<FederatedApp>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    Ok(Json(build_federated_catalog(&apps).await))
+}
+
+async fn search_llm(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<SearchQuery>,
+) -> Result<Json<SearchIntent>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let intent = resolve_search_with_llm(&apps, &q.q).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("llm={} q={}", intent.intent, q.q.trim()),
+    );
+    Ok(Json(intent))
 }
 
 async fn list_catalog(
@@ -321,10 +369,15 @@ async fn publish_app(
     id: axum::extract::Path<String>,
 ) -> Result<StatusCode, AppError> {
     let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "publish")?;
     let id = normalize_id(id);
     if let Some(app) = st.store.get_app(&id)? {
         if !app_allowed(&st, &app) {
             return Err(AppError::NotFound);
+        }
+        if !hermes_core::namespace_allowed(&app.namespace, &groups).await {
+            return Err(AppError::Forbidden);
         }
     }
     st.store.publish_app(&id)?;
@@ -338,6 +391,8 @@ async fn publish_namespace(
     namespace: axum::extract::Path<String>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "publish")?;
     let ns = normalize_id(namespace);
     if !st.allowed_namespaces.is_empty()
         && !st.allowed_namespaces.iter().any(|n| n == &ns)
@@ -360,6 +415,8 @@ async fn hide_app(
     id: axum::extract::Path<String>,
 ) -> Result<StatusCode, AppError> {
     let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "hide")?;
     let id = normalize_id(id);
     if let Some(app) = st.store.get_app(&id)? {
         if !app_allowed(&st, &app) {
@@ -611,6 +668,8 @@ async fn create_share(
     Json(body): Json<CreateShareRequest>,
 ) -> Result<Json<ShareLinkResponse>, AppError> {
     let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "share")?;
     if body.app_id.trim().is_empty() {
         return Err(AppError::BadRequest);
     }

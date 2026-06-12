@@ -46,6 +46,8 @@ pub struct AppMeta {
     pub recommended: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub ingress_hosts: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mesh_routes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -145,22 +147,33 @@ pub struct CurrentUser(pub String);
 
 pub mod cluster;
 pub mod diagnosis;
+pub mod federation;
 pub mod graph;
 pub mod intent;
+pub mod k8s_rbac;
+pub mod llm;
+pub mod rbac;
 pub mod share;
 pub mod store;
 pub mod workspace;
 pub mod workspace_acl;
 
 pub use cluster::{
-    federated_cluster_configs, list_clusters, list_clusters_with_federation, ClusterInfo,
-    FederatedClusterConfig,
+    federated_cluster_configs, fetch_remote_cluster, list_clusters, list_clusters_with_federation,
+    local_cluster, ClusterInfo, FederatedClusterConfig,
 };
 pub use workspace_acl::{
     allowed_workspaces, filter_apps_by_workspace, workspace_rules_from_env, WorkspaceRule,
 };
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
+pub use federation::{build_federated_catalog, FederatedApp};
 pub use intent::{resolve_search_intent, SearchIntent};
+pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
+pub use llm::{llm_config_from_env, resolve_search_with_llm, LlmConfig};
+pub use rbac::{
+    allowed_actions_for_groups, allowed_namespaces_for_groups, can_perform_action,
+    role_rules_from_env, RoleRule,
+};
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
 pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};

@@ -12,6 +12,7 @@ import type {
   HealthSummary,
   HermesApp,
   SearchHit,
+  FederatedApp,
   SearchIntent,
   ShareLink,
   TeamOwner,
@@ -40,6 +41,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 export const hermesApi = {
   listApps: () => req<HermesApp[]>('/apps'),
   listCatalog: () => req<HermesApp[]>('/catalog'),
+  listFederatedCatalog: () => req<FederatedApp[]>('/catalog/federated'),
   exportCatalog: () => fetch('/api/v1/catalog/export').then((r) => r.blob()),
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
@@ -59,6 +61,7 @@ export const hermesApi = {
   hide: (id: string) => req<void>(`/discovery/hide/${encodeURIComponent(id)}`, { method: 'POST' }),
   search: (q: string) => req<SearchHit[]>(`/search?q=${encodeURIComponent(q)}&limit=20`),
   searchIntent: (q: string) => req<SearchIntent>(`/search/intent?q=${encodeURIComponent(q)}`),
+  searchLlm: (q: string) => req<SearchIntent>(`/search/llm?q=${encodeURIComponent(q)}`),
   listFavorites: () => req<HermesApp[]>('/favorites'),
   addFavorite: (id: string) => req<void>(`/favorites/${encodeURIComponent(id)}`, { method: 'PUT' }),
   removeFavorite: (id: string) => req<void>(`/favorites/${encodeURIComponent(id)}`, { method: 'DELETE' }),
@@ -158,6 +161,8 @@ export function sourceLabel(source: string): string {
       return 'Ingress'
     case 'gateway':
       return 'Gateway API'
+    case 'mesh':
+      return 'Service mesh'
     case 'service':
       return 'Cluster service'
     default:

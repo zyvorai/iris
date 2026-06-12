@@ -40,6 +40,7 @@ async fn main() -> anyhow::Result<()> {
     let admin_users = auth::split_csv(&env::var("HERMES_ADMIN_USERS").unwrap_or_default());
     let admin_groups = auth::split_csv(&env::var("HERMES_ADMIN_GROUPS").unwrap_or_default());
     let workspace_rules = hermes_core::workspace_acl::workspace_rules_from_env();
+    let role_rules = hermes_core::rbac::role_rules_from_env();
     let auth_cfg = auth::AuthConfig::from_env(default_user.clone())?;
 
     let store = Arc::new(Store::open(&db_path).context("open store")?);
@@ -56,6 +57,7 @@ async fn main() -> anyhow::Result<()> {
         admin_users,
         admin_groups,
         workspace_rules,
+        role_rules,
     };
 
     let gateway_state = GatewayState {

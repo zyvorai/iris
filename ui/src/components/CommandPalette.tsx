@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, Server, Users } from 'lucide-react'
+import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, History, Home, Layers, Server, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import { appDetailPath, hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
@@ -20,6 +20,7 @@ const navItems = [
   { label: 'Apps catalog', path: '/apps', icon: Grid3X3 },
   { label: 'Spaces', path: '/spaces', icon: Layers },
   { label: 'Cluster services', path: '/cluster', icon: Server },
+  { label: 'Federated', path: '/federated', icon: Globe },
   { label: 'Graph', path: '/graph', icon: GitBranch },
   { label: 'Teams', path: '/teams', icon: Users },
   { label: 'Discovery', path: '/discovery', icon: Compass },
@@ -72,6 +73,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const depQuery = depMatch(q.trim())
   const ownerQuery = ownerMatch(q.trim())
   const envQuery = envMatch(q.trim())
+  const isLlmQuery = q.trim().toLowerCase().startsWith('ai:') || q.trim().toLowerCase().startsWith('llm:')
+  const llmQuery = isLlmQuery ? q.trim().replace(/^(ai:|llm:)/i, '').trim() : ''
   const isTeamQuery = ['team', 'team picks', 'picks', 'recommended'].includes(query)
   const isIntentQuery =
     q.trim().length > 2 &&
@@ -79,6 +82,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     !ownerQuery &&
     !envQuery &&
     !isTeamQuery &&
+    !isLlmQuery &&
     query !== 'broken' &&
     (query.includes('depend') ||
       query.includes('unhealthy') ||
@@ -97,7 +101,14 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       !envQuery &&
       !isTeamQuery &&
       !isIntentQuery &&
+      !isLlmQuery &&
       query !== 'broken',
+  })
+
+  const llm = useQuery({
+    queryKey: ['search-llm', llmQuery],
+    queryFn: () => hermesApi.searchLlm(llmQuery),
+    enabled: isLlmQuery && llmQuery.length > 0,
   })
 
   const intent = useQuery({
@@ -139,6 +150,20 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
           icon: HeartPulse,
           meta: count > 0 ? `${count} unhealthy apps` : 'View health dashboard',
         },
+      ]
+    }
+
+    if (isLlmQuery && llm.data) {
+      return [
+        {
+          kind: 'action' as const,
+          label: llm.data.answer,
+          meta: `${llm.data.intent} · ${llm.data.apps.length} apps`,
+          run: () => {},
+        },
+        ...llm.data.apps.slice(0, 8).flatMap((app) => [
+          { kind: 'app' as const, app, action: 'open' as const },
+        ]),
       ]
     }
 
@@ -226,6 +251,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     ownerQuery,
     envQuery,
     isTeamQuery,
+    isLlmQuery,
+    llm.data,
     intent.data,
     matchesWorkspace,
     setWorkspaceId,

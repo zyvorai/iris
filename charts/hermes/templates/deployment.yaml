@@ -47,6 +47,8 @@ spec:
               value: {{ .Values.controller.discoverIngress | quote }}
             - name: HERMES_DISCOVER_GATEWAY_API
               value: {{ .Values.controller.discoverGatewayAPI | quote }}
+            - name: HERMES_DISCOVER_MESH
+              value: {{ .Values.controller.discoverMesh | quote }}
             {{- if .Values.controller.watchNamespaces }}
             - name: HERMES_WATCH_NAMESPACES
               value: {{ join "," .Values.controller.watchNamespaces | quote }}
@@ -112,6 +114,26 @@ spec:
             {{- if .Values.server.workspaceRules }}
             - name: HERMES_WORKSPACE_RULES
               value: {{ .Values.server.workspaceRules | quote }}
+            {{- end }}
+            {{- if .Values.server.roleRules }}
+            - name: HERMES_ROLE_RULES
+              value: {{ .Values.server.roleRules | quote }}
+            {{- end }}
+            {{- if .Values.server.k8sRbac }}
+            - name: HERMES_K8S_RBAC
+              value: "true"
+            {{- end }}
+            {{- if .Values.server.llm.apiUrl }}
+            - name: HERMES_LLM_API_URL
+              value: {{ .Values.server.llm.apiUrl | quote }}
+            {{- end }}
+            {{- if .Values.server.llm.apiKey }}
+            - name: HERMES_LLM_API_KEY
+              value: {{ .Values.server.llm.apiKey | quote }}
+            {{- end }}
+            {{- if .Values.server.llm.model }}
+            - name: HERMES_LLM_MODEL
+              value: {{ .Values.server.llm.model | quote }}
             {{- end }}
             - name: HERMES_UI_DIR
               value: /app/ui

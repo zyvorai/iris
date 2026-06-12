@@ -25,6 +25,7 @@ import (
 	"github.com/ssahani/hermes/controller/store"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 	gwexternalversions "sigs.k8s.io/gateway-api/pkg/client/informers/externalversions"
+	"k8s.io/client-go/dynamic"
 )
 
 const (
@@ -55,26 +56,31 @@ type Config struct {
 	DiscoverAll     bool
 	DiscoverIngress    bool
 	DiscoverGatewayAPI bool
+	DiscoverMesh       bool
 	WatchNS            []string
 }
 
 type Watcher struct {
 	client       kubernetes.Interface
 	gwClient     gwclientset.Interface
+	dynClient    dynamic.Interface
 	store        *store.Store
 	cfg          Config
 	endpoints    map[string]int // key: ns/name -> ready count
 	ingressHosts map[string][]string
+	meshRoutes   map[string][]string
 }
 
-func NewWatcher(client kubernetes.Interface, gwClient gwclientset.Interface, st *store.Store, cfg Config) *Watcher {
+func NewWatcher(client kubernetes.Interface, gwClient gwclientset.Interface, dynClient dynamic.Interface, st *store.Store, cfg Config) *Watcher {
 	return &Watcher{
 		client:       client,
 		gwClient:     gwClient,
+		dynClient:    dynClient,
 		store:        st,
 		cfg:          cfg,
 		endpoints:    make(map[string]int),
 		ingressHosts: make(map[string][]string),
+		meshRoutes:   make(map[string][]string),
 	}
 }
 
@@ -379,6 +385,15 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 			desc = "Route: " + strings.Join(hosts, ", ")
 		}
 	}
+	if mesh := w.meshRoutesForService(svc); len(mesh) > 0 {
+		score += 10
+		if source == model.SourceService {
+			source = model.SourceMesh
+		}
+		if desc == "" {
+			desc = "Mesh: " + strings.Join(mesh, ", ")
+		}
+	}
 
 	base := strings.TrimRight(w.cfg.PublicBaseURL, "/")
 	pathPrefix := strings.Trim(w.cfg.PublicPathPrefix, "/")
@@ -406,6 +421,9 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 	}
 	if hosts, ok := w.ingressHosts[svcKey]; ok && len(hosts) > 0 {
 		meta.IngressHosts = append([]string(nil), hosts...)
+	}
+	if mesh := w.meshRoutesForService(svc); len(mesh) > 0 {
+		meta.MeshRoutes = append([]string(nil), mesh...)
 	}
 
 	return model.App{
@@ -486,6 +504,28 @@ func (w *Watcher) RefreshHealth(ctx context.Context, interval time.Duration) {
 
 // ResyncAll lists all services once at startup.
 func (w *Watcher) ResyncAll(ctx context.Context) error {
+	if w.cfg.DiscoverIngress {
+		ingList, e := w.client.NetworkingV1().Ingresses("").List(ctx, metav1.ListOptions{})
+		if e == nil {
+			for i := range ingList.Items {
+				w.indexIngress(&ingList.Items[i])
+			}
+		}
+	}
+	if w.cfg.DiscoverGatewayAPI && w.gwClient != nil {
+		hrList, e := w.gwClient.GatewayV1().HTTPRoutes("").List(ctx, metav1.ListOptions{})
+		if e == nil {
+			for i := range hrList.Items {
+				w.indexHTTPRoute(&hrList.Items[i])
+			}
+		}
+	}
+	if w.cfg.DiscoverMesh {
+		if err := w.syncMeshRoutes(ctx); err != nil {
+			log.Printf("mesh route sync: %v", err)
+		}
+	}
+
 	var list *corev1.ServiceList
 	var err error
 	if len(w.cfg.WatchNS) == 0 {
@@ -513,22 +553,6 @@ func (w *Watcher) ResyncAll(ctx context.Context) error {
 	if err == nil {
 		for i := range epsList.Items {
 			w.onEndpointSlice(&epsList.Items[i])
-		}
-	}
-	if w.cfg.DiscoverIngress {
-		ingList, e := w.client.NetworkingV1().Ingresses("").List(ctx, metav1.ListOptions{})
-		if e == nil {
-			for i := range ingList.Items {
-				w.indexIngress(&ingList.Items[i])
-			}
-		}
-	}
-	if w.cfg.DiscoverGatewayAPI && w.gwClient != nil {
-		hrList, e := w.gwClient.GatewayV1().HTTPRoutes("").List(ctx, metav1.ListOptions{})
-		if e == nil {
-			for i := range hrList.Items {
-				w.indexHTTPRoute(&hrList.Items[i])
-			}
 		}
 	}
 	return nil

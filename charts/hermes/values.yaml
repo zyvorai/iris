@@ -38,6 +38,7 @@ controller:
   discoverAll: true
   discoverIngress: true
   discoverGatewayAPI: true
+  discoverMesh: true
   publicBaseUrl: ""
   publicPathPrefix: ""
   healthIntervalSeconds: 30
@@ -58,6 +59,12 @@ server:
   adminUsers: []
   adminGroups: []
   workspaceRules: ""
+  roleRules: ""
+  k8sRbac: false
+  llm:
+    apiUrl: ""
+    apiKey: ""
+    model: gpt-4o-mini
 
 cluster:
   id: local

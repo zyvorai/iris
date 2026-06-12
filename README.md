@@ -348,10 +348,15 @@ Honest checklist of what ships now:
 - [x] Federated cluster registry (`HERMES_FEDERATED_CLUSTERS`) with remote health
 - [x] Workspace permissions via OIDC groups (`HERMES_WORKSPACE_RULES`)
 - [x] Ingress host metadata on discovered apps
+- [x] Service mesh route discovery (Istio VirtualService + Linkerd annotations)
+- [x] Federated catalog merge across remote Hermes clusters
+- [x] LLM search API with rule-based fallback (`/api/v1/search/llm`, Spotlight `ai:` prefix)
+- [x] Gateway SSE streaming and gRPC content-type pass-through
+- [x] Enterprise role rules (`HERMES_ROLE_RULES`) and optional K8s SAR RBAC
 
 **Not yet (roadmap):**
 
-Service mesh route discovery · LLM search · enterprise K8s RBAC · gRPC/SSE gateway · full multi-cluster write federation
+Full multi-cluster write federation · deep Istio/Linkerd policy UI · native gRPC/HTTP2 backend pools
 
 ---
 

@@ -151,6 +151,16 @@ export default function AppDetailPage() {
               </span>
             </div>
           ) : null}
+          {a.meta?.meshRoutes?.length ? (
+            <div className="detail-row">
+              <span>Mesh routes</span>
+              <span className="ingress-host-list">
+                {a.meta.meshRoutes.map((route) => (
+                  <code key={route}>{route}</code>
+                ))}
+              </span>
+            </div>
+          ) : null}
         </div>
       </section>
 

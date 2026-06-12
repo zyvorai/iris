@@ -95,6 +95,8 @@ struct AuthMe {
     groups: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     allowed_workspaces: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    allowed_actions: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -339,12 +341,19 @@ async fn me(State(auth): State<AuthConfig>, headers: HeaderMap) -> Json<AuthMe> 
         .map(str::to_string)
         .collect::<Vec<_>>();
     let rules = hermes_core::workspace_acl::workspace_rules_from_env();
+    let role_rules = hermes_core::rbac::role_rules_from_env();
+    let user_id = user.clone().unwrap_or_else(|| auth.fallback_user.clone());
+    let admin_users = split_csv(&std::env::var("HERMES_ADMIN_USERS").unwrap_or_default());
+    let admin_groups = split_csv(&std::env::var("HERMES_ADMIN_GROUPS").unwrap_or_default());
+    let is_admin = (!admin_users.is_empty() && admin_users.iter().any(|u| u == &user_id))
+        || groups.iter().any(|g| admin_groups.iter().any(|ag| ag == g));
     Json(AuthMe {
         authenticated: user.is_some(),
-        user_id: user.unwrap_or_else(|| auth.fallback_user.clone()),
+        user_id,
         mode: auth.mode.clone(),
         groups: groups.clone(),
         allowed_workspaces: hermes_core::workspace_acl::allowed_workspaces(&groups, &rules),
+        allowed_actions: hermes_core::rbac::allowed_actions_for_groups(&groups, &role_rules, is_admin),
     })
 }
 

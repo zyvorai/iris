@@ -11,6 +11,7 @@ use axum::{
     routing::any,
     Router,
 };
+use axum::body::Bytes;
 use futures_util::{SinkExt, StreamExt};
 use hermes_core::store::Store;
 
@@ -217,6 +218,22 @@ fn is_websocket_upgrade(headers: &HeaderMap) -> bool {
         .unwrap_or(false)
 }
 
+fn wants_streaming(headers: &HeaderMap) -> bool {
+    if headers
+        .get(header::ACCEPT)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.contains("text/event-stream"))
+        .unwrap_or(false)
+    {
+        return true;
+    }
+    headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.starts_with("application/grpc"))
+        .unwrap_or(false)
+}
+
 async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
     let backend_path = build_backend_path(&app, &rest);
     let target = format!(
@@ -258,6 +275,22 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
                         out_headers.insert(k.clone(), val);
                     }
                 }
+            }
+            if wants_streaming(&headers)
+                || resp
+                    .headers()
+                    .get(header::CONTENT_TYPE)
+                    .and_then(|v| v.to_str().ok())
+                    .map(|v| v.contains("text/event-stream"))
+                    .unwrap_or(false)
+            {
+                let stream = resp.bytes_stream().map(|chunk| {
+                    chunk
+                        .map(Bytes::from)
+                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+                });
+                let body = Body::from_stream(stream);
+                return (status, out_headers, body).into_response();
             }
             let body = resp.bytes().await.unwrap_or_default();
             (status, out_headers, body).into_response()
