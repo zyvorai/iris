@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Copy, ExternalLink, Star, X } from 'lucide-react'
 import AppIcon from '../AppIcon'
 import MeshPolicyPanel from '../MeshPolicyPanel'
@@ -48,6 +48,15 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
     enabled: !!appId,
   })
   const insight = useZeusAiInsight(appId, app.data?.displayName ?? '', !!appId)
+  const publish = useMutation({
+    mutationFn: () => hermesApi.publish(appId!),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['app', appId] })
+      void qc.invalidateQueries({ queryKey: ['catalog'] })
+      void qc.invalidateQueries({ queryKey: ['apps'] })
+      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+    },
+  })
 
   if (!appId) return null
 
@@ -91,9 +100,17 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
             <div className="inspector-status-strip">
               <span className={`status-chip ${statusTone(app.data.status)}`}>{statusLabel(app.data.status)}</span>
               <span>{app.data.namespace}</span>
+              {!app.data.visibility.published ? (
+                <span className="chip chip-warn">Not published — launchpad blocked</span>
+              ) : null}
             </div>
             <div className="inspector-actions">
-              <button type="button" className="btn btn-primary" onClick={() => openApp(app.data!)}>
+              {!app.data.visibility.published ? (
+                <button type="button" className="btn btn-primary" disabled={publish.isPending} onClick={() => void publish.mutate()}>
+                  Publish to launchpad
+                </button>
+              ) : null}
+              <button type="button" className="btn btn-primary" onClick={() => void openApp(app.data!)}>
                 <ExternalLink size={14} /> Open
               </button>
               <button type="button" className="btn" onClick={() => void toggleFavorite()}>

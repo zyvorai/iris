@@ -25,8 +25,10 @@ export default function ServiceTile({ app, variant = 'detail', onInspect }: Serv
 
   const onClick = () => {
     if (onInspect) onInspect(app)
-    else openApp(app)
+    else if (canOpen) openApp(app)
   }
+
+  const canOpen = app.status !== 'broken' && app.readyEndpoints > 0
 
   if (variant === 'compact') {
     return (
@@ -52,14 +54,22 @@ export default function ServiceTile({ app, variant = 'detail', onInspect }: Serv
   }
 
   return (
-    <button type="button" className="service-tile detail" onClick={onClick} title={app.displayName}>
+    <button
+      type="button"
+      className={`service-tile detail${canOpen ? '' : ' service-tile-disabled'}`}
+      onClick={onClick}
+      title={`${app.displayName}${app.statusMessage ? ` · ${app.statusMessage}` : ''}`}
+    >
       <AppIcon icon={app.icon} name={app.displayName} size="sm" />
       <div className="service-tile-meta">
         <strong>{app.displayName}</strong>
         <span>{app.namespace}</span>
       </div>
       <span className={`status-dot ${statusTone(app.status)}`} aria-label={statusLabel(app.status)} />
-      <span className="service-tile-routes">{routes} routes</span>
+      <span className="service-tile-routes">
+        {app.readyEndpoints} ready · {routes} routes
+        {!app.visibility.published ? ' · unpublished' : ''}
+      </span>
       <span className="service-tile-updated">{updated}</span>
     </button>
   )

@@ -22,23 +22,37 @@ function greeting() {
   return 'Good evening'
 }
 
+function statusRank(status: string): number {
+  if (status === 'broken') return 0
+  if (status === 'degraded') return 1
+  return 2
+}
+
 export default function HomePage() {
-  const apps = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
-  const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
   const { matchesWorkspace, workspaceId } = useWorkspace()
   const { openInspector } = useInspector()
 
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const filterWs = (list: HermesApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
-  const unhealthy = filterWs(health.data?.apps)
-  const allApps = filterWs(apps.data)
-  const serviceCount = cluster.data?.total ?? catalog.data?.length ?? allApps.length
+  const catalogApps = filterWs(catalog.data)
+  const serviceCount = cluster.data?.total ?? catalogApps.length
   const namespaceCount = cluster.data?.namespaces ?? 0
+  const healthy = cluster.data?.healthy ?? catalogApps.filter((a) => a.status === 'healthy').length
+  const degraded = cluster.data?.degraded ?? catalogApps.filter((a) => a.status === 'degraded').length
+  const broken = cluster.data?.broken ?? catalogApps.filter((a) => a.status === 'broken').length
+
+  const unhealthy = useMemo(
+    () =>
+      [...catalogApps]
+        .filter((a) => a.status !== 'healthy')
+        .sort((a, b) => statusRank(a.status) - statusRank(b.status) || a.displayName.localeCompare(b.displayName)),
+    [catalogApps],
+  )
 
   const pinnedAndRecent = useMemo(() => {
     const seen = new Set<string>()
@@ -64,12 +78,13 @@ export default function HomePage() {
         userId={auth.data?.userId}
         serviceCount={serviceCount}
         namespaceCount={namespaceCount}
-        attentionCount={unhealthy.length}
-        healthy={health.data?.healthy ?? 0}
+        healthy={healthy}
+        degraded={degraded}
+        broken={broken}
         onResolveIssues={onResolveIssues}
       />
 
-      <MissionControlSpaces apps={allApps} onInspect={onInspect} />
+      <MissionControlSpaces apps={catalogApps} onInspect={onInspect} />
 
       {workspaceId ? (
         <section className="glass-section workspace-banner">

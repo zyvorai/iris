@@ -2527,6 +2527,11 @@ button {
   overflow: auto;
 }
 
+.service-tile-disabled {
+  opacity: 0.72;
+  border-color: rgba(255, 77, 109, 0.35);
+}
+
 .inspector-backdrop {
   position: fixed;
   inset: 0;

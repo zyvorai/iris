@@ -233,6 +233,28 @@ func (s *Store) DeleteApp(id string) error {
 	return err
 }
 
+// PruneDiscoveredApps removes catalog rows whose Kubernetes Service no longer exists.
+func (s *Store) PruneDiscoveredApps(keepIDs map[string]struct{}) (int, error) {
+	apps, err := s.ListApps(false)
+	if err != nil {
+		return 0, err
+	}
+	pruned := 0
+	for _, app := range apps {
+		if app.Source == model.SourceManual {
+			continue
+		}
+		if _, ok := keepIDs[app.ID]; ok {
+			continue
+		}
+		if err := s.DeleteApp(app.ID); err != nil {
+			return pruned, err
+		}
+		pruned++
+	}
+	return pruned, nil
+}
+
 func (s *Store) HideApp(id string) error {
 	parts := strings.SplitN(id, "/", 2)
 	if len(parts) == 2 {

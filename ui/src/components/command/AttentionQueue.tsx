@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, ExternalLink, Stethoscope } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import AppIcon from '../AppIcon'
 import { appDetailPath, openApp, statusLabel, statusTone } from '../../services/hermesApi'
 import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
@@ -35,8 +36,8 @@ function AttentionCard({ app, onInspect }: { app: HermesApp; onInspect: (app: He
         <button type="button" className="btn btn-primary" onClick={() => onInspect(app)}>
           <Stethoscope size={14} /> Diagnose
         </button>
-        <button type="button" className="btn" onClick={() => openApp(app)}>
-          <ExternalLink size={14} /> Open
+        <button type="button" className="btn" onClick={() => openApp(app)} disabled={app.status === 'broken' || app.readyEndpoints === 0}>
+          <ExternalLink size={14} /> {app.readyEndpoints === 0 ? 'No endpoints' : 'Open'}
         </button>
         <a className="btn" href={appDetailPath(app)}>
           Check Route
@@ -65,6 +66,7 @@ function AttentionCard({ app, onInspect }: { app: HermesApp; onInspect: (app: He
 }
 
 export default function AttentionQueue({ apps, onInspect }: AttentionQueueProps) {
+  const visible = apps.slice(0, 12)
   if (!apps.length) return null
 
   return (
@@ -72,9 +74,14 @@ export default function AttentionQueue({ apps, onInspect }: AttentionQueueProps)
       <div className="section-head">
         <h2>Attention Queue</h2>
         <span className="chip chip-warn">{apps.length}</span>
+        {apps.length > visible.length ? (
+          <Link to="/cluster" className="section-link">
+            View all in cluster
+          </Link>
+        ) : null}
       </div>
       <div className="attention-list">
-        {apps.map((app) => (
+        {visible.map((app) => (
           <AttentionCard key={app.id} app={app} onInspect={onInspect} />
         ))}
       </div>

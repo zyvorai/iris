@@ -138,18 +138,35 @@ export function copyShareUrl(sharePath: string) {
 }
 
 export function appLaunchPath(app: HermesApp): string {
-  if (app.canonicalSlug) return `/apps/${app.canonicalSlug}`
-  return app.routePath
+  const path = app.routePath || `/a/${app.namespace}/${app.slug}`
+  if (path.startsWith('/launchpad/')) return path
+  if (path.startsWith('/a/')) return `/launchpad${path}`
+  return path
 }
 
 export function appPublicUrl(app: HermesApp): string {
-  if (app.publicUrl) return app.publicUrl
   return window.location.origin + appLaunchPath(app)
 }
 
-export function openApp(app: HermesApp) {
-  void hermesApi.recordRecent(app.id)
-  window.open(appLaunchPath(app), '_blank', 'noopener,noreferrer')
+export async function openApp(app: HermesApp) {
+  if (app.status === 'broken' || app.readyEndpoints === 0) {
+    window.location.href = appDetailPath(app, true)
+    return
+  }
+
+  let launchApp = app
+  if (!app.visibility.published) {
+    try {
+      await hermesApi.publish(app.id)
+      launchApp = { ...app, visibility: { ...app.visibility, published: true } }
+    } catch {
+      window.location.href = appDetailPath(app)
+      return
+    }
+  }
+
+  void hermesApi.recordRecent(launchApp.id)
+  window.open(appLaunchPath(launchApp), '_blank', 'noopener,noreferrer')
 }
 
 export function statusTone(status: string): string {

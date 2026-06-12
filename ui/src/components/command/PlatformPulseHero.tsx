@@ -10,8 +10,9 @@ interface PlatformPulseHeroProps {
   userId?: string
   serviceCount: number
   namespaceCount: number
-  attentionCount: number
   healthy: number
+  degraded: number
+  broken: number
   onResolveIssues?: () => void
 }
 
@@ -20,22 +21,34 @@ export default function PlatformPulseHero({
   userId,
   serviceCount,
   namespaceCount,
-  attentionCount,
   healthy,
+  degraded,
+  broken,
   onResolveIssues,
 }: PlatformPulseHeroProps) {
   const who = userId ? userId.split('@')[0] : 'operator'
+  const attentionCount = broken + degraded
+  const healthPct = serviceCount > 0 ? Math.round((healthy / serviceCount) * 100) : 100
+  const headline =
+    broken > 0
+      ? 'needs attention'
+      : degraded > 0
+        ? 'is degraded'
+        : healthPct >= 95
+          ? 'is alive'
+          : 'is partially healthy'
 
   return (
     <section className="platform-pulse-hero zeus-glass" data-testid="platform-pulse-hero">
       <div className="platform-pulse-copy">
         <p className="hero-kicker">{greeting}</p>
         <h2 className="hero-title">
-          {who}. Your platform is <em>alive</em>.
+          {who}. Your platform <em>{headline}</em>.
         </h2>
         <p className="hero-sub">
-          {serviceCount} services across {namespaceCount} namespaces
-          {attentionCount > 0 ? ` · ${attentionCount} need attention` : ' · all systems nominal'}.
+          {serviceCount} discovered services across {namespaceCount} namespaces · {healthy} healthy
+          {degraded > 0 ? ` · ${degraded} degraded` : ''}
+          {broken > 0 ? ` · ${broken} broken` : ''}.
         </p>
         <div className="platform-pulse-ctas">
           <a href="#mission-control" className="btn btn-primary">

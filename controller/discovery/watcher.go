@@ -551,8 +551,16 @@ func (w *Watcher) ResyncAll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	seen := make(map[string]struct{}, len(list.Items))
 	for i := range list.Items {
+		id := fmt.Sprintf("%s/%s", list.Items[i].Namespace, list.Items[i].Name)
+		seen[id] = struct{}{}
 		w.onService(&list.Items[i])
+	}
+	if pruned, err := w.store.PruneDiscoveredApps(seen); err != nil {
+		log.Printf("prune stale apps: %v", err)
+	} else if pruned > 0 {
+		log.Printf("pruned %d stale discovered apps", pruned)
 	}
 	epsList, err := w.client.DiscoveryV1().EndpointSlices("").List(ctx, metav1.ListOptions{})
 	if err == nil {

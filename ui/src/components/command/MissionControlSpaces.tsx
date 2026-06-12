@@ -40,7 +40,13 @@ export default function MissionControlSpaces({ apps, onInspect }: MissionControl
       <div className="mission-control-layout">
         <div className="mission-control-grid">
           {spacesWithApps.map((space) => {
-            const spaceApps = (grouped.get(space.id) ?? []).slice(0, APPS_PER_SPACE)
+            const spaceApps = (grouped.get(space.id) ?? [])
+              .slice()
+              .sort((a, b) => {
+                const rank = (s: string) => (s === 'healthy' ? 0 : s === 'degraded' ? 1 : 2)
+                return rank(a.status) - rank(b.status) || a.displayName.localeCompare(b.displayName)
+              })
+              .slice(0, APPS_PER_SPACE)
             return (
               <div key={space.id} className="mission-control-space zeus-glass">
                 <div className="mission-control-space-head">
