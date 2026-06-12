@@ -16,6 +16,8 @@ type Match struct {
 	Icon          string
 	Port          int32
 	Score         int
+	DependsOn     []string
+	Recommended   bool
 }
 
 type rule struct {
@@ -34,13 +36,13 @@ var rules = []rule{
 		test: func(_, name string, labels map[string]string, _ []corev1.ServicePort) bool {
 			return strings.Contains(name, "grafana") || labels["app.kubernetes.io/name"] == "grafana"
 		},
-		match: Match{DisplayName: "Grafana", CanonicalSlug: "grafana", Category: "Monitoring", Icon: "grafana", Port: 80, Score: 50},
+		match: Match{DisplayName: "Grafana", CanonicalSlug: "grafana", Category: "Monitoring", Icon: "grafana", Port: 80, Score: 50, DependsOn: []string{"prometheus"}, Recommended: true},
 	},
 	{
 		test: func(_, name string, _ map[string]string, _ []corev1.ServicePort) bool {
 			return strings.Contains(name, "prometheus")
 		},
-		match: Match{DisplayName: "Prometheus", CanonicalSlug: "prometheus", Category: "Monitoring", Icon: "prometheus", Port: 9090, Score: 50},
+		match: Match{DisplayName: "Prometheus", CanonicalSlug: "prometheus", Category: "Monitoring", Icon: "prometheus", Port: 9090, Score: 50, Recommended: true},
 	},
 	{
 		test: func(_, name string, _ map[string]string, _ []corev1.ServicePort) bool {

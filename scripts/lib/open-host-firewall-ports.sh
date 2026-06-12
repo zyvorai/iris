@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Open Hermes NodePort on host firewall (iptables/firewalld/ufw).
 open_hermes_firewall_ports() {
-    local port="${HERMES_NODE_PORT:-30880}"
+    local port="${HERMES_NODE_PORT:-31847}"
     if command -v firewall-cmd >/dev/null 2>&1; then
         sudo firewall-cmd --permanent --add-port="${port}/tcp" 2>/dev/null || true
         sudo firewall-cmd --reload 2>/dev/null || true

@@ -15,6 +15,13 @@ export interface Visibility {
   favorite: boolean
 }
 
+export interface AppMeta {
+  environment?: string
+  owner?: string
+  dependsOn?: string[]
+  recommended?: boolean
+}
+
 export interface HermesApp {
   id: string
   slug: string
@@ -35,6 +42,16 @@ export interface HermesApp {
   visibility: Visibility
   readyEndpoints: number
   updatedAt: string
+  meta?: AppMeta
+}
+
+export interface CatalogStats {
+  total: number
+  published: number
+  environments: { label: string; count: number }[]
+  categories: { label: string; count: number }[]
+  sources: { label: string; count: number }[]
+  recommended: number
 }
 
 export interface SearchHit {

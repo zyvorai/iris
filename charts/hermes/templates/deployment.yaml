@@ -1,7 +1,7 @@
 {{- $publicBase := .Values.controller.publicBaseUrl -}}
 {{- if not $publicBase -}}
 {{- if eq .Values.service.type "NodePort" -}}
-{{- $publicBase = printf "http://%s:%v" .Values.global.domain (.Values.service.nodePort | default 30880) -}}
+{{- $publicBase = printf "http://%s:%v" .Values.global.domain (.Values.service.nodePort | default .Values.global.hermesPort) -}}
 {{- else -}}
 {{- $publicBase = printf "https://%s" .Values.ingress.host -}}
 {{- end -}}
@@ -56,7 +56,7 @@ spec:
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.global.hermesPort }}
           env:
             - name: HERMES_BIND
               value: {{ .Values.server.bind | quote }}

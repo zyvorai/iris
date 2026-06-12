@@ -2,7 +2,7 @@
 # Post-deploy verification for Hermes (run from laptop or CI).
 set -euo pipefail
 
-BASE="${1:-${HERMES_E2E_BASE:-http://127.0.0.1:30880}}"
+BASE="${1:-${HERMES_E2E_BASE:-http://127.0.0.1:31847}}"
 BASE="${BASE%/}"
 NS="${HERMES_NAMESPACE:-hermes-system}"
 
@@ -30,6 +30,8 @@ check "cluster summary" "curl -sf '${BASE}/api/v1/cluster/summary'"
 check "search API" "curl -sf '${BASE}/api/v1/search?q=gra'"
 check "health summary" "curl -sf '${BASE}/api/v1/health/apps'"
 check "audit API" "curl -sf '${BASE}/api/v1/audit?limit=5'"
+check "stats API" "curl -sf '${BASE}/api/v1/stats'"
+check "metrics" "curl -sf '${BASE}/metrics' | grep -q hermes_apps_total"
 
 # Wait for demo apps (Grafana/Prometheus) to appear in catalog
 found_demo=false

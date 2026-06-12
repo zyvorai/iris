@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import type { AuditEvent, ClusterSummary, HealthSummary, HermesApp, SearchHit } from '../types'
+import type { AuditEvent, CatalogStats, ClusterSummary, HealthSummary, HermesApp, SearchHit } from '../types'
 
 const base = '/api/v1'
 
@@ -20,10 +20,17 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 export const hermesApi = {
   listApps: () => req<HermesApp[]>('/apps'),
   listCatalog: () => req<HermesApp[]>('/catalog'),
+  exportCatalog: () => fetch('/api/v1/catalog/export').then((r) => r.blob()),
+  catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
   getApp: (id: string) => req<HermesApp>(`/apps/${encodeURIComponent(id)}`),
   listDiscovery: () => req<HermesApp[]>('/discovery'),
   publish: (id: string) => req<void>(`/discovery/publish/${encodeURIComponent(id)}`, { method: 'POST' }),
+  publishNamespace: (namespace: string) =>
+    req<{ published: number; namespace: string }>(
+      `/discovery/publish-namespace/${encodeURIComponent(namespace)}`,
+      { method: 'POST' },
+    ),
   hide: (id: string) => req<void>(`/discovery/hide/${encodeURIComponent(id)}`, { method: 'POST' }),
   search: (q: string) => req<SearchHit[]>(`/search?q=${encodeURIComponent(q)}&limit=20`),
   listFavorites: () => req<HermesApp[]>('/favorites'),
@@ -98,12 +105,19 @@ export function sourceLabel(source: string): string {
   }
 }
 
+export function environmentLabel(env?: string): string {
+  if (!env) return 'Unknown'
+  return env.charAt(0).toUpperCase() + env.slice(1)
+}
+
 export function actionLabel(action: string): string {
   switch (action) {
     case 'launch':
       return 'Launched'
     case 'publish':
       return 'Published'
+    case 'publish_namespace':
+      return 'Bulk publish'
     case 'hide':
       return 'Hidden'
     case 'search':

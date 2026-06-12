@@ -3,8 +3,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Compass, Grid3X3, HeartPulse, Home, Server } from 'lucide-react'
+import { Compass, Grid3X3, HeartPulse, History, Home, Server } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import AppIcon from './AppIcon'
 import { hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
 
@@ -18,6 +19,7 @@ const navItems = [
   { label: 'Cluster services', path: '/cluster', icon: Server },
   { label: 'Discovery', path: '/discovery', icon: Compass },
   { label: 'Health', path: '/health', icon: HeartPulse },
+  { label: 'Activity', path: '/activity', icon: History },
 ]
 
 export default function CommandPalette({ onClose }: CommandPaletteProps) {
@@ -144,7 +146,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
                   onClose()
                 }}
               >
-                <div className={`app-icon icon-${row.app.icon}`}>{row.app.displayName.slice(0, 2).toUpperCase()}</div>
+                <AppIcon icon={row.app.icon} name={row.app.displayName} size="sm" />
                 <div>
                   <strong>{row.app.displayName}</strong>
                   <div className="app-meta">

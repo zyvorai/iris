@@ -33,6 +33,19 @@ pub struct Rewrite {
     pub add_prefix: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AppMeta {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub environment: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub owner: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub depends_on: Vec<String>,
+    #[serde(default)]
+    pub recommended: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct App {
@@ -62,6 +75,8 @@ pub struct App {
     #[serde(default)]
     pub ready_endpoints: i32,
     pub updated_at: String,
+    #[serde(default)]
+    pub meta: AppMeta,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -91,6 +106,24 @@ pub struct ClusterSummary {
     pub healthy: usize,
     pub degraded: usize,
     pub broken: usize,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CatalogStats {
+    pub total: usize,
+    pub published: usize,
+    pub environments: Vec<LabelCount>,
+    pub categories: Vec<LabelCount>,
+    pub sources: Vec<LabelCount>,
+    pub recommended: usize,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LabelCount {
+    pub label: String,
+    pub count: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]

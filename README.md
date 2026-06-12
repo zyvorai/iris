@@ -333,6 +333,9 @@ Honest checklist of what ships now:
 - [x] Favorites, recents, cluster-wide search, audit log
 - [x] API key and OIDC authentication (optional)
 - [x] Namespace-scoped API filter (`HERMES_ALLOWED_NAMESPACES`)
+- [x] App metadata: environment, owner, dependencies, team recommendations
+- [x] Prometheus `/metrics` and catalog `/api/v1/stats`
+- [x] Bulk namespace publish and catalog JSON export
 - [x] Real-time health polling and status in UI
 - [x] Helm chart and remote K3s deploy tooling
 - [x] Demo apps (Grafana + Prometheus) for quick validation
@@ -361,7 +364,7 @@ Open `https://hermes.zeus.local/` (or NodePort if ingress is disabled).
 
 ```bash
 ./scripts/deploy-remote.sh <host> <user> deploy
-./scripts/e2e-deploy-verify.sh http://<host>:30880
+./scripts/e2e-deploy-verify.sh http://<host>:31847
 ```
 
 ### Local development
@@ -371,7 +374,7 @@ make build
 ./scripts/smoke-test.sh
 ```
 
-Open http://localhost:8080
+Open http://localhost:31847
 
 ### Enrich a custom application (optional)
 

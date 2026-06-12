@@ -13,7 +13,7 @@ DEPLOY_PROFILE="k3s"
 DEPLOY_LOG="${HERMES_DEPLOY_LOG:-${HOME}/.hermes/deploy-$(date +%Y%m%d-%H%M%S).log}"
 
 HERMES_NAMESPACE="${HERMES_NAMESPACE:-hermes-system}"
-HERMES_NODE_PORT="${HERMES_NODE_PORT:-30880}"
+HERMES_NODE_PORT="${HERMES_NODE_PORT:-31847}"
 HERMES_TAG="${HERMES_TAG:-0.1.0}"
 
 K3S_MODE=true
@@ -60,7 +60,7 @@ Options:
 
 Environment:
   HERMES_NAMESPACE     K8s namespace (default: hermes-system)
-  HERMES_NODE_PORT     NodePort (default: 30880)
+  HERMES_NODE_PORT     NodePort (default: 31847)
   HERMES_TAG           Image tag (default: 0.1.0)
 
 Examples:

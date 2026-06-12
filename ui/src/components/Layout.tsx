@@ -5,6 +5,7 @@ import { Compass, Grid3X3, HeartPulse, History, Home, Search, Server } from 'luc
 import { NavLink, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import CommandPalette from './CommandPalette'
+import AppIcon from './AppIcon'
 import { hermesApi, openApp } from '../services/hermesApi'
 
 interface LayoutProps {
@@ -21,11 +22,6 @@ const titles: Record<string, string> = {
   '/discovery': 'Discovery',
   '/health': 'Health',
   '/activity': 'Activity',
-}
-
-function iconLetter(icon: string, name: string) {
-  if (icon && icon !== 'app') return icon.slice(0, 2).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
 }
 
 export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
@@ -96,7 +92,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
             title={app.displayName}
             onClick={() => openApp(app)}
           >
-            <span className="dock-fav-icon">{iconLetter(app.icon, app.displayName)}</span>
+            <AppIcon icon={app.icon} name={app.displayName} size="sm" />
           </button>
         ))}
         <button type="button" className="dock-item dock-spotlight" title="Spotlight" onClick={onPaletteOpen}>

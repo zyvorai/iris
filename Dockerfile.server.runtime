@@ -3,6 +3,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY target/release/hermes-server /usr/local/bin/hermes-server
 COPY ui/dist /app/ui
 ENV HERMES_UI_DIR=/app/ui
-EXPOSE 8080
+EXPOSE 31847
 USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/hermes-server"]

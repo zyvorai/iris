@@ -34,7 +34,7 @@ make build
 ./scripts/smoke-test.sh
 ```
 
-Open http://localhost:8080
+Open http://localhost:31847
 
 ## Configuration
 
@@ -46,7 +46,7 @@ Open http://localhost:8080
 | `HERMES_AUTO_SUGGEST` | controller | Suggest known apps without annotation |
 | `HERMES_DISCOVER_ALL` | controller | Index all eligible cluster services (default `true`) |
 | `HERMES_DISCOVER_INGRESS` | controller | Discover apps from Ingress hosts (default `true`) |
-| `HERMES_BIND` | server | Listen address (default `0.0.0.0:8080`) |
+| `HERMES_BIND` | server | Listen address (default `0.0.0.0:31847`) |
 | `HERMES_AUTH_MODE` | server | `none`, `api_key`, or `oidc` |
 | `HERMES_API_KEY` | server | API key when auth mode is `api_key` |
 | `HERMES_OIDC_ISSUER` | server | OIDC issuer URL (e.g. Keycloak realm) |

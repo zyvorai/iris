@@ -1,5 +1,6 @@
 global:
   domain: zeus.local
+  hermesPort: 31847
 
 replicaCount: 1
 
@@ -40,7 +41,7 @@ controller:
   healthIntervalSeconds: 30
 
 server:
-  bind: "0.0.0.0:8080"
+  bind: "0.0.0.0:31847"
   auth:
     mode: none
     apiKey: ""
@@ -55,8 +56,8 @@ server:
 
 service:
   type: NodePort
-  port: 80
-  nodePort: 30880
+  port: 31847
+  nodePort: 31847
 
 ingress:
   enabled: false

@@ -83,8 +83,13 @@ CREATE TABLE IF NOT EXISTS hidden_services (
 	}
 	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''`)
 	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)`)
+	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'`)
 	return nil
 }
+
+const appSelectCols = `id, slug, canonical_slug, display_name, description, namespace, category, icon,
+  backend_json, route_path, public_url, status, status_message, source,
+  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at, meta_json`
 
 func (s *Store) UpsertApp(app model.App) error {
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -93,8 +98,8 @@ func (s *Store) UpsertApp(app model.App) error {
 INSERT INTO apps (
   id, slug, canonical_slug, display_name, description, namespace, category, icon,
   backend_json, route_path, public_url, status, status_message, source,
-  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at, meta_json
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
   slug=excluded.slug,
   canonical_slug=excluded.canonical_slug,
@@ -118,29 +123,23 @@ ON CONFLICT(id) DO UPDATE SET
   END,
   rewrite_json=excluded.rewrite_json,
   ready_endpoints=excluded.ready_endpoints,
-  updated_at=excluded.updated_at
+  updated_at=excluded.updated_at,
+  meta_json=excluded.meta_json
 `,
 		app.ID, app.Slug, app.CanonicalSlug, app.DisplayName, app.Description, app.Namespace, app.Category, app.Icon,
 		app.BackendJSON(), app.RoutePath, app.PublicURL, app.Status, app.StatusMsg, app.Source,
-		app.AuthMode, app.Score, app.VisibilityJSON(), app.RewriteJSON(), app.ReadyCount, app.UpdatedAt,
+		app.AuthMode, app.Score, app.VisibilityJSON(), app.RewriteJSON(), app.ReadyCount, app.UpdatedAt, app.MetaJSON(),
 	)
 	return err
 }
 
 func (s *Store) GetApp(id string) (*model.App, error) {
-	row := s.db.QueryRow(`
-SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
-  backend_json, route_path, public_url, status, status_message, source,
-  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-FROM apps WHERE id = ?`, id)
+	row := s.db.QueryRow(`SELECT `+appSelectCols+` FROM apps WHERE id = ?`, id)
 	return scanApp(row)
 }
 
 func (s *Store) ListApps(publishedOnly bool) ([]model.App, error) {
-	q := `SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
-  backend_json, route_path, public_url, status, status_message, source,
-  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-FROM apps`
+	q := `SELECT ` + appSelectCols + ` FROM apps`
 	if publishedOnly {
 		q += ` WHERE json_extract(visibility_json, '$.published') = 1 AND json_extract(visibility_json, '$.hidden') = 0`
 	}
@@ -163,9 +162,7 @@ FROM apps`
 
 func (s *Store) ListDiscovery() ([]model.App, error) {
 	rows, err := s.db.Query(`
-SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
-  backend_json, route_path, public_url, status, status_message, source,
-  auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
+SELECT ` + appSelectCols + `
 FROM apps
 WHERE json_extract(visibility_json, '$.published') = 0
   AND json_extract(visibility_json, '$.hidden') = 0
@@ -190,6 +187,22 @@ func (s *Store) PublishApp(id string) error {
 	_, err := s.db.Exec(`UPDATE apps SET visibility_json = ?, updated_at = ? WHERE id = ?`,
 		mustJSON(vis), time.Now().UTC().Format(time.RFC3339), id)
 	return err
+}
+
+func (s *Store) PublishNamespace(namespace string) (int64, error) {
+	res, err := s.db.Exec(`
+UPDATE apps SET visibility_json = ?, updated_at = ?
+WHERE namespace = ?
+  AND json_extract(visibility_json, '$.hidden') = 0
+  AND json_extract(visibility_json, '$.published') = 0`,
+		mustJSON(model.Visibility{Published: true}),
+		time.Now().UTC().Format(time.RFC3339),
+		namespace,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }
 
 func (s *Store) DeleteApp(id string) error {
@@ -221,11 +234,11 @@ func (s *Store) HideService(ns, name string) error {
 
 func scanApp(row *sql.Row) (*model.App, error) {
 	var app model.App
-	var backendJSON, visJSON, rewriteJSON string
+	var backendJSON, visJSON, rewriteJSON, metaJSON string
 	err := row.Scan(
 		&app.ID, &app.Slug, &app.CanonicalSlug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
 		&backendJSON, &app.RoutePath, &app.PublicURL, &app.Status, &app.StatusMsg, &app.Source,
-		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt,
+		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt, &metaJSON,
 	)
 	if err != nil {
 		return nil, err
@@ -233,16 +246,17 @@ func scanApp(row *sql.Row) (*model.App, error) {
 	app.Backend = model.ParseBackend(backendJSON)
 	app.Visibility = model.ParseVisibility(visJSON)
 	app.Rewrite = model.ParseRewrite(rewriteJSON)
+	app.Meta = model.ParseMeta(metaJSON)
 	return &app, nil
 }
 
 func scanAppRows(rows *sql.Rows) (*model.App, error) {
 	var app model.App
-	var backendJSON, visJSON, rewriteJSON string
+	var backendJSON, visJSON, rewriteJSON, metaJSON string
 	err := rows.Scan(
 		&app.ID, &app.Slug, &app.CanonicalSlug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
 		&backendJSON, &app.RoutePath, &app.PublicURL, &app.Status, &app.StatusMsg, &app.Source,
-		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt,
+		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt, &metaJSON,
 	)
 	if err != nil {
 		return nil, err
@@ -250,6 +264,7 @@ func scanAppRows(rows *sql.Rows) (*model.App, error) {
 	app.Backend = model.ParseBackend(backendJSON)
 	app.Visibility = model.ParseVisibility(visJSON)
 	app.Rewrite = model.ParseRewrite(rewriteJSON)
+	app.Meta = model.ParseMeta(metaJSON)
 	return &app, nil
 }
 

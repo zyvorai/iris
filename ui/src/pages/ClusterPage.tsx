@@ -11,6 +11,7 @@ export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [view, setView] = useState<'grid' | 'namespace'>('namespace')
+  const [envFilter, setEnvFilter] = useState('')
   const qc = useQueryClient()
 
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
@@ -39,13 +40,32 @@ export default function ClusterPage() {
     return [...set].sort()
   }, [catalog.data])
 
+  const publishNs = useMutation({
+    mutationFn: hermesApi.publishNamespace,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['catalog'] })
+      void qc.invalidateQueries({ queryKey: ['discovery'] })
+      void qc.invalidateQueries({ queryKey: ['apps'] })
+      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+    },
+  })
+
+  const environments = useMemo(() => {
+    const set = new Set<string>()
+    for (const app of catalog.data ?? []) {
+      if (app.meta?.environment) set.add(app.meta.environment)
+    }
+    return [...set].sort()
+  }, [catalog.data])
+
   const filtered = useMemo(() => {
     return (catalog.data ?? []).filter((a) => {
       if (nsFilter && a.namespace !== nsFilter) return false
       if (statusFilter && a.status !== statusFilter) return false
+      if (envFilter && a.meta?.environment !== envFilter) return false
       return true
     })
-  }, [catalog.data, nsFilter, statusFilter])
+  }, [catalog.data, nsFilter, statusFilter, envFilter])
 
   const byNamespace = useMemo(() => {
     const map = new Map<string, typeof filtered>()
@@ -106,6 +126,40 @@ export default function ClusterPage() {
           <option value="broken">Broken</option>
           <option value="unknown">Unknown</option>
         </select>
+        <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)} aria-label="Environment filter">
+          <option value="">All environments</option>
+          {environments.map((env) => (
+            <option key={env} value={env}>
+              {env}
+            </option>
+          ))}
+        </select>
+        {nsFilter ? (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => publishNs.mutate(nsFilter)}
+            disabled={publishNs.isPending}
+          >
+            Publish all in {nsFilter}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            void hermesApi.exportCatalog().then((blob) => {
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'hermes-catalog.json'
+              a.click()
+              URL.revokeObjectURL(url)
+            })
+          }}
+        >
+          Export JSON
+        </button>
         <div className="view-toggle">
           <button type="button" className={view === 'namespace' ? 'active' : ''} onClick={() => setView('namespace')}>
             By namespace

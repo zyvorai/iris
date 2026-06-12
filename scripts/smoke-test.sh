@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DB="${HERMES_DB_PATH:-/tmp/hermes-smoke.db}"
-PORT="${HERMES_PORT:-8080}"
+PORT="${HERMES_PORT:-31847}"
 BASE="http://127.0.0.1:${PORT}"
 
 cd "$ROOT"

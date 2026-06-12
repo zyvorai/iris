@@ -6,12 +6,12 @@ use std::sync::Arc;
 use axum::{
     extract::{Query, State},
     http::{HeaderMap, StatusCode},
-    response::IntoResponse,
+    response::{IntoResponse, Response},
     routing::{get, post, put},
     Json, Router,
 };
 use hermes_core::store::Store;
-use hermes_core::{App, AuditEvent, ClusterSummary, HealthSummary, SearchHit};
+use hermes_core::{App, AuditEvent, CatalogStats, ClusterSummary, HealthSummary, SearchHit};
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -26,9 +26,12 @@ pub fn routes(state: ApiState) -> Router {
         .route("/apps", get(list_apps))
         .route("/apps/{*id}", get(get_app))
         .route("/catalog", get(list_catalog))
+        .route("/catalog/export", get(export_catalog))
+        .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
         .route("/discovery", get(list_discovery))
         .route("/discovery/publish/{*id}", post(publish_app))
+        .route("/discovery/publish-namespace/{*namespace}", post(publish_namespace))
         .route("/discovery/hide/{*id}", post(hide_app))
         .route("/search", get(search))
         .route("/favorites", get(list_favorites))
@@ -113,6 +116,27 @@ async fn list_catalog(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppE
     Ok(Json(filter_apps(&st, st.store.list_catalog()?)))
 }
 
+async fn export_catalog(State(st): State<ApiState>) -> Result<Response, AppError> {
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    let body = serde_json::to_string_pretty(&apps)?;
+    Ok((
+        [(axum::http::header::CONTENT_TYPE, "application/json")],
+        body,
+    )
+        .into_response())
+}
+
+async fn catalog_stats(State(st): State<ApiState>) -> Result<Json<CatalogStats>, AppError> {
+    let mut stats = st.store.catalog_stats()?;
+    if !st.allowed_namespaces.is_empty() {
+        let apps = filter_apps(&st, st.store.list_catalog()?);
+        stats.total = apps.len();
+        stats.published = apps.iter().filter(|a| a.visibility.published).count();
+        stats.recommended = apps.iter().filter(|a| a.meta.recommended).count();
+    }
+    Ok(Json(stats))
+}
+
 async fn cluster_summary(State(st): State<ApiState>) -> Result<Json<ClusterSummary>, AppError> {
     let apps = filter_apps(&st, st.store.list_catalog()?);
     let mut namespaces = std::collections::HashSet::new();
@@ -165,6 +189,28 @@ async fn publish_app(
     st.store.publish_app(&id)?;
     let _ = st.store.record_audit(&uid, "publish", &id, "published from discovery");
     Ok(StatusCode::NO_CONTENT)
+}
+
+async fn publish_namespace(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    namespace: axum::extract::Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let ns = normalize_id(namespace);
+    if !st.allowed_namespaces.is_empty()
+        && !st.allowed_namespaces.iter().any(|n| n == &ns)
+    {
+        return Err(AppError::NotFound);
+    }
+    let n = st.store.publish_namespace(&ns)?;
+    let _ = st.store.record_audit(
+        &uid,
+        "publish_namespace",
+        &ns,
+        &format!("published {n} apps"),
+    );
+    Ok(Json(serde_json::json!({ "published": n, "namespace": ns })))
 }
 
 async fn hide_app(
@@ -327,6 +373,12 @@ pub enum AppError {
 impl From<anyhow::Error> for AppError {
     fn from(e: anyhow::Error) -> Self {
         AppError::Internal(e)
+    }
+}
+
+impl From<serde_json::Error> for AppError {
+    fn from(e: serde_json::Error) -> Self {
+        AppError::Internal(e.into())
     }
 }
 

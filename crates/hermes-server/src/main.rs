@@ -2,6 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 mod auth;
+mod metrics;
 
 use std::env;
 use std::net::SocketAddr;
@@ -31,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
 
-    let bind = env::var("HERMES_BIND").unwrap_or_else(|_| "0.0.0.0:8080".into());
+    let bind = env::var("HERMES_BIND").unwrap_or_else(|_| "0.0.0.0:31847".into());
     let db_path = env::var("HERMES_DB_PATH").unwrap_or_else(|_| "/data/hermes/hermes.db".into());
     let ui_dir = env::var("HERMES_UI_DIR").unwrap_or_else(|_| "./ui/dist".into());
     let default_user = env::var("HERMES_DEFAULT_USER").unwrap_or_else(|_| "local".into());
@@ -54,6 +55,10 @@ async fn main() -> anyhow::Result<()> {
     let api = hermes_api::routes(api_state);
     let gateway = hermes_gateway::routes(gateway_state);
     let auth_routes = auth::routes(auth_cfg.clone());
+    let metrics_routes = metrics::routes(metrics::MetricsState {
+        store: store.clone(),
+        started_at: chrono::Utc::now().timestamp(),
+    });
 
     let ui_path = PathBuf::from(&ui_dir);
     let index = ui_path.join("index.html");
@@ -67,6 +72,7 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/healthz", get(|| async { axum::http::StatusCode::OK }))
         .route("/api/v1/ws-echo", get(auth::ws_echo))
+        .merge(metrics_routes)
         .merge(auth_routes)
         .merge(protected)
         .fallback_service(spa)

@@ -39,6 +39,13 @@ type Rewrite struct {
 	AddPrefix   string `json:"addPrefix,omitempty"`
 }
 
+type AppMeta struct {
+	Environment string   `json:"environment,omitempty"`
+	Owner       string   `json:"owner,omitempty"`
+	DependsOn   []string `json:"dependsOn,omitempty"`
+	Recommended bool     `json:"recommended,omitempty"`
+}
+
 type App struct {
 	ID            string     `json:"id"`
 	Slug          string     `json:"slug"`
@@ -60,6 +67,7 @@ type App struct {
 	Rewrite     Rewrite    `json:"rewrite,omitempty"`
 	ReadyCount  int        `json:"readyEndpoints"`
 	UpdatedAt   string     `json:"updatedAt"`
+	Meta        AppMeta    `json:"meta,omitempty"`
 }
 
 func (a App) BackendJSON() string {
@@ -75,6 +83,17 @@ func (a App) VisibilityJSON() string {
 func (a App) RewriteJSON() string {
 	b, _ := json.Marshal(a.Rewrite)
 	return string(b)
+}
+
+func (a App) MetaJSON() string {
+	b, _ := json.Marshal(a.Meta)
+	return string(b)
+}
+
+func ParseMeta(raw string) AppMeta {
+	var m AppMeta
+	_ = json.Unmarshal([]byte(raw), &m)
+	return m
 }
 
 func ParseBackend(raw string) Backend {

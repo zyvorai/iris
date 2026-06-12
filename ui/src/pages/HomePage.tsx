@@ -1,6 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
@@ -24,6 +25,10 @@ export default function HomePage() {
 
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const unhealthy = health.data?.apps ?? []
+  const recommended = useMemo(
+    () => (catalog.data ?? []).filter((a) => a.meta?.recommended).slice(0, 6),
+    [catalog.data],
+  )
 
   return (
     <>
@@ -67,6 +72,20 @@ export default function HomePage() {
           </div>
           <div className="app-grid">
             {unhealthy.slice(0, 4).map((app) => (
+              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {recommended.length > 0 ? (
+        <section className="glass-section">
+          <div className="section-head">
+            <h2>Team picks</h2>
+            <span className="chip chip-accent">{recommended.length}</span>
+          </div>
+          <div className="app-grid">
+            {recommended.map((app) => (
               <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
             ))}
           </div>

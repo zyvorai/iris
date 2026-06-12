@@ -4,7 +4,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
-import { appLaunchPath, appPublicUrl, hermesApi, openApp, statusTone } from '../services/hermesApi'
+import { appLaunchPath, appPublicUrl, environmentLabel, hermesApi, openApp, statusTone } from '../services/hermesApi'
 
 export default function AppDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -45,6 +45,24 @@ export default function AppDetailPage() {
           <span>Public URL</span>
           <span>{appPublicUrl(a)}</span>
         </div>
+        {a.meta?.environment ? (
+          <div className="detail-row">
+            <span>Environment</span>
+            <span>{environmentLabel(a.meta.environment)}</span>
+          </div>
+        ) : null}
+        {a.meta?.owner ? (
+          <div className="detail-row">
+            <span>Owner</span>
+            <span>{a.meta.owner}</span>
+          </div>
+        ) : null}
+        {a.meta?.dependsOn?.length ? (
+          <div className="detail-row">
+            <span>Depends on</span>
+            <span>{a.meta.dependsOn.join(', ')}</span>
+          </div>
+        ) : null}
         <div className="detail-row">
           <span>Backend</span>
           <span>

@@ -12,7 +12,7 @@ use crate::{App, AuditEvent, Backend, SearchHit, Visibility};
 
 const APP_SELECT: &str = "SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
               backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at";
+              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at, meta_json";
 
 pub struct Store {
     conn: Arc<Mutex<Connection>>,
@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS audit_events (
             "CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)",
             [],
         );
+        let _ = conn.execute("ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'", []);
         Ok(())
     }
 
@@ -223,6 +224,52 @@ CREATE TABLE IF NOT EXISTS audit_events (
         Ok(())
     }
 
+    pub fn publish_namespace(&self, namespace: &str) -> Result<usize> {
+        let vis = Visibility {
+            published: true,
+            ..Default::default()
+        };
+        let conn = self.conn.lock().unwrap();
+        let n = conn.execute(
+            "UPDATE apps SET visibility_json = ?1, updated_at = ?2
+             WHERE namespace = ?3
+               AND json_extract(visibility_json, '$.hidden') = 0
+               AND json_extract(visibility_json, '$.published') = 0",
+            params![serde_json::to_string(&vis)?, Utc::now().to_rfc3339(), namespace],
+        )?;
+        Ok(n)
+    }
+
+    pub fn catalog_stats(&self) -> Result<crate::CatalogStats> {
+        let apps = self.list_catalog()?;
+        let mut env_counts = std::collections::BTreeMap::new();
+        let mut cat_counts = std::collections::BTreeMap::new();
+        let mut src_counts = std::collections::BTreeMap::new();
+        let mut published = 0usize;
+        let mut recommended = 0usize;
+        for app in &apps {
+            if app.visibility.published {
+                published += 1;
+            }
+            if app.meta.recommended {
+                recommended += 1;
+            }
+            if !app.meta.environment.is_empty() {
+                *env_counts.entry(app.meta.environment.clone()).or_insert(0) += 1;
+            }
+            *cat_counts.entry(app.category.clone()).or_insert(0) += 1;
+            *src_counts.entry(app.source.clone()).or_insert(0) += 1;
+        }
+        Ok(crate::CatalogStats {
+            total: apps.len(),
+            published,
+            environments: counts_to_vec(env_counts),
+            categories: counts_to_vec(cat_counts),
+            sources: counts_to_vec(src_counts),
+            recommended,
+        })
+    }
+
     pub fn hide_app(&self, id: &str) -> Result<()> {
         if let Some((ns, name)) = id.split_once('/') {
             let conn = self.conn.lock().unwrap();
@@ -269,6 +316,12 @@ CREATE TABLE IF NOT EXISTS audit_events (
                     score += 30;
                 }
                 if app.id.to_lowercase().contains(&q) {
+                    score += 20;
+                }
+                if app.meta.owner.to_lowercase().contains(&q) {
+                    score += 25;
+                }
+                if app.meta.environment.to_lowercase().contains(&q) {
                     score += 20;
                 }
                 if app.backend.name.to_lowercase().contains(&q) {
@@ -402,6 +455,7 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
     let backend_json: String = row.get(8)?;
     let visibility_json: String = row.get(16)?;
     let rewrite_json: String = row.get(17)?;
+    let meta_json: String = row.get(20)?;
     Ok(App {
         id: row.get(0)?,
         slug: row.get(1)?,
@@ -429,5 +483,12 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
         rewrite: serde_json::from_str(&rewrite_json).unwrap_or_default(),
         ready_endpoints: row.get(18)?,
         updated_at: row.get(19)?,
+        meta: serde_json::from_str(&meta_json).unwrap_or_default(),
     })
+}
+
+fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::LabelCount> {
+    map.into_iter()
+        .map(|(label, count)| crate::LabelCount { label, count })
+        .collect()
 }

@@ -40,7 +40,11 @@ const (
 	annoAuth      = annoPrefix + "auth"
 	annoFavorite  = annoPrefix + "favorite"
 	annoPublished = annoPrefix + "published"
-	annoSlug      = annoPrefix + "slug"
+	annoSlug        = annoPrefix + "slug"
+	annoEnvironment = annoPrefix + "environment"
+	annoOwner       = annoPrefix + "owner"
+	annoDependsOn   = annoPrefix + "depends-on"
+	annoRecommended = annoPrefix + "recommended"
 )
 
 type Config struct {
@@ -381,6 +385,14 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		publicURL = strings.TrimRight(w.cfg.PublicBaseURL, "/") + "/apps/" + canonicalSlug
 	}
 
+	meta := enrichMeta(metaFromAnnotations(ann), svc.Namespace)
+	if sig != nil && len(sig.DependsOn) > 0 && len(meta.DependsOn) == 0 {
+		meta.DependsOn = append([]string(nil), sig.DependsOn...)
+	}
+	if sig != nil && sig.Recommended {
+		meta.Recommended = true
+	}
+
 	return model.App{
 		ID:            id,
 		Slug:          slug,
@@ -404,6 +416,7 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		Score:      score,
 		Visibility: model.Visibility{Published: published},
 		Rewrite:    model.Rewrite{StripPrefix: routePath},
+		Meta:       meta,
 	}, true
 }
 

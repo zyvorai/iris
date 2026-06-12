@@ -6,41 +6,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { HermesApp } from '../types'
-import { appLaunchPath, appPublicUrl, hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
+import AppIcon from './AppIcon'
+import { appLaunchPath, appPublicUrl, environmentLabel, hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
 
 interface AppCardProps {
   app: HermesApp
   favorite?: boolean
   onPublish?: () => void
   onHide?: () => void
-}
-
-function iconLetter(icon: string, name: string) {
-  const map: Record<string, string> = {
-    grafana: 'Gr',
-    prometheus: 'Pr',
-    zeus: 'Z',
-    argocd: 'Ar',
-    jenkins: 'Jk',
-    gitlab: 'Gl',
-    backstage: 'Bs',
-    loki: 'Lk',
-    keycloak: 'Kc',
-    vault: 'Vt',
-    rancher: 'Rn',
-    minio: 'Mn',
-    opensearch: 'Os',
-    kibana: 'Kb',
-    dashboard: 'Kd',
-    jupyter: 'Jp',
-    openwebui: 'Ow',
-    vscode: 'Vs',
-    ui: 'Ui',
-    api: 'Ap',
-  }
-  if (map[icon]) return map[icon]
-  if (icon && icon !== 'app') return icon.slice(0, 2).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
 }
 
 export default function AppCard({ app, favorite = false, onPublish, onHide }: AppCardProps) {
@@ -58,10 +31,11 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
   return (
     <article className={`app-card zeus-card ${statusTone(app.status)}`}>
       <div className="app-card-top">
-        <div className={`app-icon icon-${app.icon}`}>{iconLetter(app.icon, app.displayName)}</div>
+        <AppIcon icon={app.icon} name={app.displayName} />
         <div className="app-card-badges">
           <span className={`status-chip ${statusTone(app.status)}`}>{statusLabel(app.status)}</span>
           {!app.visibility.published ? <span className="chip chip-warn">Unpublished</span> : null}
+          {app.meta?.recommended ? <span className="chip chip-accent">Recommended</span> : null}
         </div>
       </div>
       <h3>
@@ -73,6 +47,9 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
       <div className="app-meta-row">
         <span className="chip chip-muted">{app.namespace}</span>
         <span className="chip chip-muted">{sourceLabel(app.source)}</span>
+        {app.meta?.environment ? (
+          <span className="chip chip-env">{environmentLabel(app.meta.environment)}</span>
+        ) : null}
         {app.canonicalSlug ? <span className="chip chip-accent">/{app.canonicalSlug}</span> : null}
       </div>
       <div className="app-actions">
