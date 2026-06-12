@@ -18,18 +18,24 @@ pub struct ClusterInfo {
     pub url: String,
     #[serde(default = "default_cluster_status")]
     pub status: String,
+    #[serde(default)]
+    pub write_enabled: bool,
 }
 
 fn default_cluster_status() -> String {
     "online".into()
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct FederatedClusterConfig {
     pub id: String,
     pub name: String,
     pub url: String,
+    #[serde(default)]
+    pub write_enabled: bool,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub api_key: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -76,6 +82,7 @@ pub fn local_cluster(apps: &[App]) -> ClusterInfo {
         is_local: true,
         url: String::new(),
         status: "online".into(),
+        write_enabled: false,
     }
 }
 
@@ -93,6 +100,7 @@ pub fn offline_remote_cluster(cfg: &FederatedClusterConfig) -> ClusterInfo {
         is_local: false,
         url: cfg.url.clone(),
         status: "offline".into(),
+        write_enabled: cfg.write_enabled,
     }
 }
 
@@ -106,6 +114,7 @@ fn remote_cluster_from_summary(cfg: &FederatedClusterConfig, summary: &RemoteClu
         is_local: false,
         url: cfg.url.clone(),
         status: "online".into(),
+        write_enabled: cfg.write_enabled,
     }
 }
 

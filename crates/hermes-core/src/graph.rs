@@ -17,6 +17,8 @@ pub struct GraphNode {
     pub owner: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub icon: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mesh_routes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -65,6 +67,7 @@ pub fn build_graph(apps: &[App]) -> AppGraph {
             namespace: app.namespace.clone(),
             owner: app.meta.owner.clone(),
             icon: app.icon.clone(),
+            mesh_routes: app.meta.mesh_routes.clone(),
         });
     }
 

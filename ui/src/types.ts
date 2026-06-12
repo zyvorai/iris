@@ -54,6 +54,7 @@ export interface ClusterInfo {
   isLocal: boolean
   url?: string
   status?: string
+  writeEnabled?: boolean
 }
 
 export interface CreateShareRequest {
@@ -75,6 +76,14 @@ export interface GraphNode {
   namespace: string
   owner?: string
   icon?: string
+  meshRoutes?: string[]
+}
+
+export interface FederationActionResult {
+  clusterId: string
+  clusterName: string
+  ok: boolean
+  detail?: string
 }
 
 export interface GraphEdge {

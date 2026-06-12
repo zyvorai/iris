@@ -353,10 +353,13 @@ Honest checklist of what ships now:
 - [x] LLM search API with rule-based fallback (`/api/v1/search/llm`, Spotlight `ai:` prefix)
 - [x] Gateway SSE streaming and gRPC content-type pass-through
 - [x] Enterprise role rules (`HERMES_ROLE_RULES`) and optional K8s SAR RBAC
+- [x] Multi-cluster write federation (`POST /api/v1/federation/publish/*`, remote recommend)
+- [x] Service mesh policy UI (Istio/Linkerd route panel + graph mesh filter)
+- [x] Native gRPC/HTTP2 backend connection pools in gateway
 
 **Not yet (roadmap):**
 
-Full multi-cluster write federation · deep Istio/Linkerd policy UI · native gRPC/HTTP2 backend pools
+Advanced Istio/Linkerd policy editing · cross-cluster RBAC sync
 
 ---
 

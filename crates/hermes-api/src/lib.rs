@@ -13,10 +13,10 @@ use axum::{
 use hermes_core::store::Store;
 use hermes_core::{
     allowed_namespaces_for_groups, build_diagnosis, build_federated_catalog, build_graph,
-    build_team_owners, build_workspaces, can_perform_action, filter_apps_by_workspace,
-    list_clusters_with_federation, resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis,
-    AppGraph, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp,
-    HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace,
+    build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
+    list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_set_recommended,
+    resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats,
+    ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp, FederationActionResult, HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace,
     WorkspaceRule,
 };
 use serde::Deserialize;
@@ -38,6 +38,15 @@ pub fn routes(state: ApiState) -> Router {
         .route("/apps/{*id}", get(get_app_or_diagnosis))
         .route("/catalog", get(list_catalog))
         .route("/catalog/federated", get(list_federated_catalog))
+        .route("/federation/publish/{cluster_id}/{*id}", post(federation_publish))
+        .route(
+            "/federation/publish-namespace/{cluster_id}/{*namespace}",
+            post(federation_publish_namespace),
+        )
+        .route(
+            "/federation/recommended/{cluster_id}/{*id}",
+            put(federation_set_recommended),
+        )
         .route("/catalog/export", get(export_catalog))
         .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
@@ -228,6 +237,76 @@ async fn list_federated_catalog(
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(build_federated_catalog(&apps).await))
+}
+
+async fn federation_publish(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path((cluster_id, id)): Path<(String, String)>,
+) -> Result<Json<FederationActionResult>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "publish")?;
+    let cfg = federation_cluster(&cluster_id).ok_or(AppError::NotFound)?;
+    let id = id.trim_start_matches('/').to_string();
+    let result = remote_publish(&cfg, &id, &uid).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "federation_publish",
+        &id,
+        &format!("cluster={} ok={} {}", cluster_id, result.ok, result.detail),
+    );
+    Ok(Json(result))
+}
+
+async fn federation_publish_namespace(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path((cluster_id, namespace)): Path<(String, String)>,
+) -> Result<Json<FederationActionResult>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "publish")?;
+    let cfg = federation_cluster(&cluster_id).ok_or(AppError::NotFound)?;
+    let namespace = namespace.trim_start_matches('/').to_string();
+    let result = remote_publish_namespace(&cfg, &namespace, &uid).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "federation_publish_namespace",
+        &namespace,
+        &format!("cluster={} ok={} {}", cluster_id, result.ok, result.detail),
+    );
+    Ok(Json(result))
+}
+
+#[derive(Deserialize)]
+struct RecommendBody {
+    recommended: bool,
+}
+
+async fn federation_set_recommended(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path((cluster_id, id)): Path<(String, String)>,
+    Json(body): Json<RecommendBody>,
+) -> Result<Json<FederationActionResult>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    require_action(&st, &uid, &groups, "publish")?;
+    let cfg = federation_cluster(&cluster_id).ok_or(AppError::NotFound)?;
+    let id = id.trim_start_matches('/').to_string();
+    let result = remote_set_recommended(&cfg, &id, body.recommended, &uid).await;
+    let _ = st.store.record_audit(
+        &uid,
+        if body.recommended {
+            "federation_recommend"
+        } else {
+            "federation_unrecommend"
+        },
+        &id,
+        &format!("cluster={} ok={}", cluster_id, result.ok),
+    );
+    Ok(Json(result))
 }
 
 async fn search_llm(

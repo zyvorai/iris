@@ -15,11 +15,13 @@ function filterGraph(
   ownerFilter: string,
   statusFilter: string,
   brokenOnly: boolean,
+  meshOnly: boolean,
 ): AppGraph {
   let nodes = graph.nodes
   if (nsFilter) nodes = nodes.filter((n) => n.namespace === nsFilter)
   if (ownerFilter) nodes = nodes.filter((n) => (n.owner ?? '') === ownerFilter)
   if (statusFilter) nodes = nodes.filter((n) => n.status === statusFilter)
+  if (meshOnly) nodes = nodes.filter((n) => (n.meshRoutes?.length ?? 0) > 0)
 
   const ids = new Set(nodes.map((n) => n.id))
   let edges = graph.edges.filter((e) => ids.has(e.from) && ids.has(e.to))
@@ -41,6 +43,7 @@ export default function GraphPage() {
   const [ownerFilter, setOwnerFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [brokenOnly, setBrokenOnly] = useState(false)
+  const [meshOnly, setMeshOnly] = useState(false)
 
   const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 15000 })
 
@@ -58,8 +61,11 @@ export default function GraphPage() {
   }, [graph.data])
 
   const filtered = useMemo(
-    () => (graph.data ? filterGraph(graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly) : null),
-    [graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly],
+    () =>
+      graph.data
+        ? filterGraph(graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly, meshOnly)
+        : null,
+    [graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly, meshOnly],
   )
 
   const brokenDeps = (graph.data?.edges ?? []).filter((e) => !e.resolved).length
@@ -111,6 +117,10 @@ export default function GraphPage() {
           <label className="graph-broken-toggle">
             <input type="checkbox" checked={brokenOnly} onChange={(e) => setBrokenOnly(e.target.checked)} />
             Broken deps only
+          </label>
+          <label className="graph-broken-toggle">
+            <input type="checkbox" checked={meshOnly} onChange={(e) => setMeshOnly(e.target.checked)} />
+            Mesh routes only
           </label>
         </div>
 

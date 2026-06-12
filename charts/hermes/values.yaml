@@ -69,6 +69,13 @@ server:
 cluster:
   id: local
   name: Local cluster
+  # Federated peers (JSON array). Set writeEnabled + apiKey to proxy publish/recommend.
+  # federated:
+  #   - id: staging
+  #     name: Staging cluster
+  #     url: https://hermes.staging.example
+  #     writeEnabled: true
+  #     apiKey: ""
   federated: []
 
 service:

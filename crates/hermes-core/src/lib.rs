@@ -167,7 +167,10 @@ pub use workspace_acl::{
 };
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
-pub use federation::{build_federated_catalog, FederatedApp};
+pub use federation::{
+    build_federated_catalog, federation_cluster, remote_publish, remote_publish_namespace,
+    remote_set_recommended, FederatedApp, FederationActionResult,
+};
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
 pub use llm::{llm_config_from_env, resolve_search_with_llm, LlmConfig};

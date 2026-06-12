@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use axum::{
     body::Body,
@@ -234,6 +234,47 @@ fn wants_streaming(headers: &HeaderMap) -> bool {
         .unwrap_or(false)
 }
 
+fn wants_grpc(headers: &HeaderMap) -> bool {
+    let is_grpc_ct = |v: &str| v.starts_with("application/grpc");
+    if headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .map(is_grpc_ct)
+        .unwrap_or(false)
+    {
+        return true;
+    }
+    headers
+        .get(header::ACCEPT)
+        .and_then(|v| v.to_str().ok())
+        .map(is_grpc_ct)
+        .unwrap_or(false)
+}
+
+static HTTP1_CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+static HTTP2_CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+
+fn proxy_client(headers: &HeaderMap) -> &'static reqwest::Client {
+    if wants_grpc(headers) {
+        HTTP2_CLIENT.get_or_init(|| {
+            reqwest::Client::builder()
+                .redirect(reqwest::redirect::Policy::none())
+                .http2_prior_knowledge()
+                .pool_max_idle_per_host(8)
+                .build()
+                .unwrap_or_else(|_| reqwest::Client::new())
+        })
+    } else {
+        HTTP1_CLIENT.get_or_init(|| {
+            reqwest::Client::builder()
+                .redirect(reqwest::redirect::Policy::none())
+                .pool_max_idle_per_host(16)
+                .build()
+                .unwrap_or_else(|_| reqwest::Client::new())
+        })
+    }
+}
+
 async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
     let backend_path = build_backend_path(&app, &rest);
     let target = format!(
@@ -249,10 +290,7 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
     let mut headers = filter_request_headers(req.headers());
     inject_hermes_headers(&mut headers, &app);
 
-    let client = reqwest::Client::builder()
-        .redirect(reqwest::redirect::Policy::none())
-        .build()
-        .unwrap();
+    let client = proxy_client(&headers);
 
     let body_bytes = match axum::body::to_bytes(req.into_body(), 16 * 1024 * 1024).await {
         Ok(b) => b,

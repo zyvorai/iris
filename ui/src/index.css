@@ -1487,6 +1487,90 @@ button {
   padding-left: 1.1rem;
 }
 
+.mesh-policy-panel .mesh-route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mesh-route-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mesh-route-kind {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.mesh-istio .mesh-route-kind {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.mesh-linkerd .mesh-route-kind {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+.mesh-generic .mesh-route-kind {
+  background: rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+.federated-cluster-block {
+  margin-top: 1.25rem;
+}
+
+.federated-cluster-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.federated-cluster-head h3 {
+  margin: 0;
+}
+
+.federated-app-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.federated-publish-btn {
+  align-self: flex-start;
+}
+
+.federated-action-error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #fca5a5;
+}
+
+.federated-action-ok {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #86efac;
+}
+
+.chip-ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
 .diagnose-action-list a {
   color: #fdba74;
 }

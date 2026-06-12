@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import DiagnosePanel from '../components/DiagnosePanel'
 import ShareLinksPanel from '../components/ShareLinksPanel'
+import MeshPolicyPanel from '../components/MeshPolicyPanel'
 import { AppGraphPanel } from '../pages/GraphPage'
 import {
   appDetailPath,
@@ -151,18 +152,10 @@ export default function AppDetailPage() {
               </span>
             </div>
           ) : null}
-          {a.meta?.meshRoutes?.length ? (
-            <div className="detail-row">
-              <span>Mesh routes</span>
-              <span className="ingress-host-list">
-                {a.meta.meshRoutes.map((route) => (
-                  <code key={route}>{route}</code>
-                ))}
-              </span>
-            </div>
-          ) : null}
         </div>
       </section>
+
+      {a.meta?.meshRoutes?.length ? <MeshPolicyPanel routes={a.meta.meshRoutes} /> : null}
 
       <section className="glass-section">
         <button type="button" className="tech-toggle" onClick={() => setTechOpen((v) => !v)}>

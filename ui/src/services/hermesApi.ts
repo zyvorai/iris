@@ -13,6 +13,7 @@ import type {
   HermesApp,
   SearchHit,
   FederatedApp,
+  FederationActionResult,
   SearchIntent,
   ShareLink,
   TeamOwner,
@@ -38,6 +39,15 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
+function federationPath(clusterId: string, suffix: string) {
+  return `/federation/${suffix}/${encodeURIComponent(clusterId)}`
+}
+
+function federationAppPath(clusterId: string, id: string, action: string) {
+  const encodedId = id.split('/').map(encodeURIComponent).join('/')
+  return `/federation/${action}/${encodeURIComponent(clusterId)}/${encodedId}`
+}
+
 export const hermesApi = {
   listApps: () => req<HermesApp[]>('/apps'),
   listCatalog: () => req<HermesApp[]>('/catalog'),
@@ -46,6 +56,18 @@ export const hermesApi = {
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
   listClusters: () => req<ClusterInfo[]>('/clusters'),
+  federationPublish: (clusterId: string, id: string) =>
+    req<FederationActionResult>(federationAppPath(clusterId, id, 'publish'), { method: 'POST' }),
+  federationPublishNamespace: (clusterId: string, namespace: string) =>
+    req<FederationActionResult>(
+      `${federationPath(clusterId, 'publish-namespace')}/${encodeURIComponent(namespace)}`,
+      { method: 'POST' },
+    ),
+  federationSetRecommended: (clusterId: string, id: string, recommended: boolean) =>
+    req<FederationActionResult>(federationAppPath(clusterId, id, 'recommended'), {
+      method: 'PUT',
+      body: JSON.stringify({ recommended }),
+    }),
   getGraph: () => req<AppGraph>('/graph'),
   listWorkspaces: () => req<Workspace[]>('/workspaces'),
   listOwners: () => req<TeamOwner[]>('/owners'),
