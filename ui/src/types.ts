@@ -20,6 +20,7 @@ export interface AppMeta {
   owner?: string
   dependsOn?: string[]
   recommended?: boolean
+  ingressHosts?: string[]
 }
 
 export interface ShareLink {
@@ -45,6 +46,8 @@ export interface ClusterInfo {
   published: number
   healthy: number
   isLocal: boolean
+  url?: string
+  status?: string
 }
 
 export interface CreateShareRequest {

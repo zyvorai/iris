@@ -39,6 +39,7 @@ async fn main() -> anyhow::Result<()> {
     let allowed_namespaces = auth::split_csv(&env::var("HERMES_ALLOWED_NAMESPACES").unwrap_or_default());
     let admin_users = auth::split_csv(&env::var("HERMES_ADMIN_USERS").unwrap_or_default());
     let admin_groups = auth::split_csv(&env::var("HERMES_ADMIN_GROUPS").unwrap_or_default());
+    let workspace_rules = hermes_core::workspace_acl::workspace_rules_from_env();
     let auth_cfg = auth::AuthConfig::from_env(default_user.clone())?;
 
     let store = Arc::new(Store::open(&db_path).context("open store")?);
@@ -54,6 +55,7 @@ async fn main() -> anyhow::Result<()> {
         allowed_namespaces,
         admin_users,
         admin_groups,
+        workspace_rules,
     };
 
     let gateway_state = GatewayState {

@@ -122,6 +122,22 @@ pub fn build_diagnosis(app: &App) -> AppDiagnosis {
         href: format!("/k8s/workloads?ns={ns}"),
     });
 
+    if !app.meta.ingress_hosts.is_empty() {
+        let host = app.meta.ingress_hosts[0].clone();
+        let href = if host.starts_with("http") {
+            host.clone()
+        } else {
+            format!("https://{host}")
+        };
+        suggested_actions.insert(
+            0,
+            SuggestedAction {
+                label: format!("Open ingress: {host}"),
+                href,
+            },
+        );
+    }
+
     AppDiagnosis {
         app_id: app.id.clone(),
         route_path: app.route_path.clone(),

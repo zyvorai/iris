@@ -91,6 +91,10 @@ struct AuthMe {
     authenticated: bool,
     user_id: String,
     mode: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    groups: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    allowed_workspaces: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -328,10 +332,19 @@ async fn logout(State(_auth): State<AuthConfig>) -> Response {
 async fn me(State(auth): State<AuthConfig>, headers: HeaderMap) -> Json<AuthMe> {
     let jar = jar_from_headers(&headers);
     let user = user_from_session(&auth, &jar);
+    let groups = groups_from_session(&auth, &jar)
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    let rules = hermes_core::workspace_acl::workspace_rules_from_env();
     Json(AuthMe {
         authenticated: user.is_some(),
         user_id: user.unwrap_or_else(|| auth.fallback_user.clone()),
         mode: auth.mode.clone(),
+        groups: groups.clone(),
+        allowed_workspaces: hermes_core::workspace_acl::allowed_workspaces(&groups, &rules),
     })
 }
 

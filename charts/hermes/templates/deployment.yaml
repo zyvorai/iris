@@ -105,6 +105,14 @@ spec:
               value: {{ .Values.cluster.id | quote }}
             - name: HERMES_CLUSTER_NAME
               value: {{ .Values.cluster.name | quote }}
+            {{- if .Values.cluster.federated }}
+            - name: HERMES_FEDERATED_CLUSTERS
+              value: {{ .Values.cluster.federated | toJson | quote }}
+            {{- end }}
+            {{- if .Values.server.workspaceRules }}
+            - name: HERMES_WORKSPACE_RULES
+              value: {{ .Values.server.workspaceRules | quote }}
+            {{- end }}
             - name: HERMES_UI_DIR
               value: /app/ui
           livenessProbe:

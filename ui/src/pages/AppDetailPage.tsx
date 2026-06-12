@@ -141,6 +141,16 @@ export default function AppDetailPage() {
             <span>Public URL</span>
             <code>{appPublicUrl(a)}</code>
           </div>
+          {a.meta?.ingressHosts?.length ? (
+            <div className="detail-row">
+              <span>Ingress hosts</span>
+              <span className="ingress-host-list">
+                {a.meta.ingressHosts.map((host) => (
+                  <code key={host}>{host}</code>
+                ))}
+              </span>
+            </div>
+          ) : null}
         </div>
       </section>
 

@@ -57,10 +57,12 @@ server:
   allowedNamespaces: []
   adminUsers: []
   adminGroups: []
+  workspaceRules: ""
 
 cluster:
   id: local
   name: Local cluster
+  federated: []
 
 service:
   type: NodePort

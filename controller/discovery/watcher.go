@@ -404,6 +404,9 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 	if sig != nil && sig.Recommended {
 		meta.Recommended = true
 	}
+	if hosts, ok := w.ingressHosts[svcKey]; ok && len(hosts) > 0 {
+		meta.IngressHosts = append([]string(nil), hosts...)
+	}
 
 	return model.App{
 		ID:            id,

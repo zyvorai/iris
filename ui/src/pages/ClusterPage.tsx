@@ -107,6 +107,27 @@ export default function ClusterPage() {
             {workspaceId ? ` Workspace: ${workspaceId}.` : ''}
           </p>
         </div>
+        {clusters.data && clusters.data.length > 1 ? (
+          <div className="cluster-federation-row">
+            {clusters.data.map((cluster) => (
+              <div
+                key={cluster.id}
+                className={`metric-tile cluster-tile ${cluster.status === 'offline' ? 'cluster-offline' : ''}`}
+              >
+                <span className="metric-value">{cluster.isLocal ? cluster.appCount : cluster.healthy}</span>
+                <span className="metric-label">
+                  {cluster.name}
+                  {!cluster.isLocal ? ` · ${cluster.status ?? 'unknown'}` : ''}
+                </span>
+                {!cluster.isLocal && cluster.url ? (
+                  <a href={cluster.url} target="_blank" rel="noreferrer" className="section-link">
+                    Open remote
+                  </a>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="hero-metrics">
           <div className="metric-tile">
             <span className="metric-value">{summary.data?.total ?? '—'}</span>
@@ -125,6 +146,7 @@ export default function ClusterPage() {
             <span className="metric-label">Unpublished</span>
           </div>
         </div>
+        )}
       </section>
 
       <div className="filter-bar cluster-filters">

@@ -44,6 +44,8 @@ pub struct AppMeta {
     pub depends_on: Vec<String>,
     #[serde(default)]
     pub recommended: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ingress_hosts: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -148,8 +150,15 @@ pub mod intent;
 pub mod share;
 pub mod store;
 pub mod workspace;
+pub mod workspace_acl;
 
-pub use cluster::{list_clusters, local_cluster, ClusterInfo};
+pub use cluster::{
+    federated_cluster_configs, list_clusters, list_clusters_with_federation, ClusterInfo,
+    FederatedClusterConfig,
+};
+pub use workspace_acl::{
+    allowed_workspaces, filter_apps_by_workspace, workspace_rules_from_env, WorkspaceRule,
+};
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use intent::{resolve_search_intent, SearchIntent};

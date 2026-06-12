@@ -345,10 +345,13 @@ Honest checklist of what ships now:
 - [x] Rule-based search intent API (`/api/v1/search/intent`)
 - [x] Cluster registry API (single-cluster MVP) and diagnosis actions
 - [x] OIDC admin groups (`HERMES_ADMIN_GROUPS`) and share admin (`HERMES_ADMIN_USERS`)
+- [x] Federated cluster registry (`HERMES_FEDERATED_CLUSTERS`) with remote health
+- [x] Workspace permissions via OIDC groups (`HERMES_WORKSPACE_RULES`)
+- [x] Ingress host metadata on discovered apps
 
 **Not yet (roadmap):**
 
-Multi-cluster federation · service mesh route discovery · per-app SSO passthrough · LLM search · enterprise K8s RBAC · gRPC/SSE gateway · permissioned team workspaces
+Service mesh route discovery · LLM search · enterprise K8s RBAC · gRPC/SSE gateway · full multi-cluster write federation
 
 ---
 

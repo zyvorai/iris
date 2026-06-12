@@ -40,10 +40,11 @@ type Rewrite struct {
 }
 
 type AppMeta struct {
-	Environment string   `json:"environment,omitempty"`
-	Owner       string   `json:"owner,omitempty"`
-	DependsOn   []string `json:"dependsOn,omitempty"`
-	Recommended bool     `json:"recommended,omitempty"`
+	Environment  string   `json:"environment,omitempty"`
+	Owner        string   `json:"owner,omitempty"`
+	DependsOn    []string `json:"dependsOn,omitempty"`
+	Recommended  bool     `json:"recommended,omitempty"`
+	IngressHosts []string `json:"ingressHosts,omitempty"`
 }
 
 type App struct {

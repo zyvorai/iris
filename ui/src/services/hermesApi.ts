@@ -80,7 +80,13 @@ export const hermesApi = {
   authMe: async () => {
     const res = await fetch('/auth/me')
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-    return res.json() as Promise<{ authenticated: boolean; userId: string; mode: string }>
+    return res.json() as Promise<{
+      authenticated: boolean
+      userId: string
+      mode: string
+      groups?: string[]
+      allowedWorkspaces?: string[]
+    }>
   },
 }
 

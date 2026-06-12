@@ -12,10 +12,10 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, build_graph, build_team_owners, build_workspaces, list_clusters,
-    resolve_search_intent, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats, ClusterInfo,
-    ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, SearchIntent, ShareLink,
-    ShareLinkResponse, TeamOwner, Workspace,
+    build_diagnosis, build_graph, build_team_owners, build_workspaces, filter_apps_by_workspace,
+    list_clusters_with_federation, resolve_search_intent, App, AppDiagnosis, AppGraph, AuditEvent,
+    CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, SearchIntent,
+    ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -26,6 +26,7 @@ pub struct ApiState {
     pub allowed_namespaces: Vec<String>,
     pub admin_users: Vec<String>,
     pub admin_groups: Vec<String>,
+    pub workspace_rules: Vec<WorkspaceRule>,
 }
 
 pub fn routes(state: ApiState) -> Router {
@@ -95,12 +96,27 @@ fn normalize_id(id: axum::extract::Path<String>) -> String {
 }
 
 fn filter_apps(st: &ApiState, apps: Vec<App>) -> Vec<App> {
-    if st.allowed_namespaces.is_empty() {
+    let apps = if st.allowed_namespaces.is_empty() {
+        apps
+    } else {
+        apps.into_iter()
+            .filter(|a| st.allowed_namespaces.iter().any(|ns| ns == &a.namespace))
+            .collect()
+    };
+    apps
+}
+
+fn filter_apps_for_user(
+    st: &ApiState,
+    user: &str,
+    groups: &[String],
+    apps: Vec<App>,
+) -> Vec<App> {
+    let apps = filter_apps(st, apps);
+    if is_admin(st, user, groups) || st.workspace_rules.is_empty() {
         return apps;
     }
-    apps.into_iter()
-        .filter(|a| st.allowed_namespaces.iter().any(|ns| ns == &a.namespace))
-        .collect()
+    filter_apps_by_workspace(&apps, groups, &st.workspace_rules)
 }
 
 fn app_allowed(st: &ApiState, app: &App) -> bool {
@@ -135,8 +151,18 @@ fn user_groups(headers: &HeaderMap) -> Vec<String> {
         .unwrap_or_default()
 }
 
-async fn list_apps(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
-    Ok(Json(filter_apps(&st, st.store.list_apps(true)?)))
+async fn list_apps(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<App>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    Ok(Json(filter_apps_for_user(
+        &st,
+        &uid,
+        &groups,
+        st.store.list_apps(true)?,
+    )))
 }
 
 async fn get_app_or_diagnosis(
@@ -174,12 +200,27 @@ fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppErr
     Ok(build_diagnosis(&app))
 }
 
-async fn list_catalog(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
-    Ok(Json(filter_apps(&st, st.store.list_catalog()?)))
+async fn list_catalog(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<App>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    Ok(Json(filter_apps_for_user(
+        &st,
+        &uid,
+        &groups,
+        st.store.list_catalog()?,
+    )))
 }
 
-async fn export_catalog(State(st): State<ApiState>) -> Result<Response, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+async fn export_catalog(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Response, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     let body = serde_json::to_string_pretty(&apps)?;
     Ok((
         [(axum::http::header::CONTENT_TYPE, "application/json")],
@@ -188,19 +229,27 @@ async fn export_catalog(State(st): State<ApiState>) -> Result<Response, AppError
         .into_response())
 }
 
-async fn catalog_stats(State(st): State<ApiState>) -> Result<Json<CatalogStats>, AppError> {
+async fn catalog_stats(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<CatalogStats>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
     let mut stats = st.store.catalog_stats()?;
-    if !st.allowed_namespaces.is_empty() {
-        let apps = filter_apps(&st, st.store.list_catalog()?);
-        stats.total = apps.len();
-        stats.published = apps.iter().filter(|a| a.visibility.published).count();
-        stats.recommended = apps.iter().filter(|a| a.meta.recommended).count();
-    }
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    stats.total = apps.len();
+    stats.published = apps.iter().filter(|a| a.visibility.published).count();
+    stats.recommended = apps.iter().filter(|a| a.meta.recommended).count();
     Ok(Json(stats))
 }
 
-async fn cluster_summary(State(st): State<ApiState>) -> Result<Json<ClusterSummary>, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+async fn cluster_summary(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<ClusterSummary>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     let mut namespaces = std::collections::HashSet::new();
     let mut published = 0usize;
     let mut discovery = 0usize;
@@ -232,18 +281,33 @@ async fn cluster_summary(State(st): State<ApiState>) -> Result<Json<ClusterSumma
     }))
 }
 
-async fn app_graph(State(st): State<ApiState>) -> Result<Json<AppGraph>, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+async fn app_graph(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<AppGraph>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(build_graph(&apps)))
 }
 
-async fn list_workspaces(State(st): State<ApiState>) -> Result<Json<Vec<Workspace>>, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+async fn list_workspaces(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<Workspace>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(build_workspaces(&apps)))
 }
 
-async fn list_owners(State(st): State<ApiState>) -> Result<Json<Vec<TeamOwner>>, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+async fn list_owners(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<TeamOwner>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(build_team_owners(&apps)))
 }
 
@@ -333,7 +397,8 @@ async fn search_intent(
     Query(q): Query<SearchQuery>,
 ) -> Result<Json<SearchIntent>, AppError> {
     let uid = user_id(&headers, &st.default_user);
-    let apps = filter_apps(&st, st.store.list_catalog()?);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     let intent = resolve_search_intent(&apps, &q.q);
     let _ = st.store.record_audit(
         &uid,
@@ -346,9 +411,12 @@ async fn search_intent(
 
 async fn list_clusters_route(
     State(st): State<ApiState>,
+    headers: HeaderMap,
 ) -> Result<Json<Vec<ClusterInfo>>, AppError> {
-    let apps = filter_apps(&st, st.store.list_catalog()?);
-    Ok(Json(list_clusters(&apps)))
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    Ok(Json(list_clusters_with_federation(&apps).await))
 }
 
 async fn list_favorites(
@@ -431,8 +499,13 @@ async fn record_recent(
     Ok(StatusCode::NO_CONTENT)
 }
 
-async fn health_apps(State(st): State<ApiState>) -> Result<Json<HealthSummary>, AppError> {
-    let apps = filter_apps(&st, st.store.list_apps(true)?);
+async fn health_apps(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<HealthSummary>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_apps(true)?);
     let total = apps.len();
     let mut healthy = 0;
     let mut degraded = 0;
@@ -465,8 +538,13 @@ async fn list_audit(
     Ok(Json(st.store.list_audit(q.limit)?))
 }
 
-async fn list_recommended(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
-    let apps = filter_apps(&st, st.store.list_apps(true)?);
+async fn list_recommended(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<App>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_apps(true)?);
     Ok(Json(
         apps.into_iter()
             .filter(|a| a.meta.recommended)
