@@ -58,7 +58,11 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
         <div className="zeus-topbar-right">
           <span className="zeus-status-chip">{total} discovered</span>
           <span className="zeus-status-chip">{published} published</span>
-          {issueCount > 0 ? <span className="zeus-status-chip warn">{issueCount} issues</span> : null}
+          {issueCount > 0 ? (
+            <a href="#attention-queue" className="zeus-status-chip warn">
+              {issueCount} issues
+            </a>
+          ) : null}
           <button type="button" className="hermes-search-btn zeus-spotlight-btn" onClick={onPaletteOpen}>
             <Search size={16} />
             <span>Spotlight</span>

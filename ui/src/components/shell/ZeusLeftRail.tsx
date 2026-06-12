@@ -13,8 +13,7 @@ import {
   Home,
   Layers,
   Server,
-  Settings,
-  Shield,
+  Users,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { loadRailExpanded, saveRailExpanded, SHELL_PREFS_EVENT } from '../../utils/hermesShellPreferences'
@@ -22,18 +21,17 @@ import { loadRailExpanded, saveRailExpanded, SHELL_PREFS_EVENT } from '../../uti
 const ZEUS_CONSOLE_URL = import.meta.env.VITE_ZEUS_CONSOLE_URL as string | undefined
 
 const navItems = [
-  { to: '/', label: 'Overview', icon: Home, shortcut: '⌘1' },
-  { to: '/apps', label: 'Catalog', icon: Grid3X3, shortcut: '⌘2' },
+  { to: '/', label: 'Overview', icon: Home, end: true },
+  { to: '/apps', label: 'Catalog', icon: Grid3X3 },
   { to: '/spaces', label: 'Spaces', icon: Layers },
-  { to: '/cluster', label: 'Routes', icon: Server },
-  { to: '/cluster', label: 'Namespaces', icon: Compass, hash: '#namespaces' },
-  { to: '/spaces/monitoring', label: 'Monitoring', icon: Activity },
-  { to: '/spaces/security', label: 'Security', icon: Shield },
+  { to: '/cluster', label: 'Cluster', icon: Server },
+  { to: '/discovery', label: 'Discovery', icon: Compass },
   { to: '/health', label: 'Health', icon: HeartPulse },
-  { to: '/activity', label: 'Activity', icon: Activity },
   { to: '/graph', label: 'Graph', icon: GitBranch },
   { to: '/federated', label: 'Federated', icon: Globe },
-  { to: '/help', label: 'Settings', icon: Settings },
+  { to: '/teams', label: 'Teams', icon: Users },
+  { to: '/activity', label: 'Activity', icon: Activity },
+  { to: '/help', label: 'Help', icon: HelpCircle },
 ]
 
 export default function ZeusLeftRail() {
@@ -61,26 +59,22 @@ export default function ZeusLeftRail() {
       <nav className="zeus-rail-nav" aria-label="Primary navigation">
         {navItems.map((item) => (
           <NavLink
-            key={`${item.to}-${item.label}`}
-            to={item.hash ? `${item.to}${item.hash}` : item.to}
-            end={item.to === '/'}
+            key={item.to}
+            to={item.to}
+            end={item.end}
             className={({ isActive }) => `zeus-rail-item${isActive ? ' active' : ''}`}
-            title={`${item.label}${item.shortcut ? ` · ${item.shortcut}` : ''}`}
+            title={item.label}
           >
             <item.icon size={18} aria-hidden />
             <span className="zeus-rail-label">{item.label}</span>
-            {item.shortcut ? <kbd className="zeus-rail-kbd">{item.shortcut}</kbd> : null}
           </NavLink>
         ))}
         {ZEUS_CONSOLE_URL ? (
           <>
+            <div className="zeus-rail-divider" aria-hidden />
             <a className="zeus-rail-item" href={`${ZEUS_CONSOLE_URL}/consoles`} target="_blank" rel="noreferrer">
               <Server size={18} aria-hidden />
-              <span className="zeus-rail-label">VM Consoles</span>
-            </a>
-            <a className="zeus-rail-item" href={`${ZEUS_CONSOLE_URL}/marketplace`} target="_blank" rel="noreferrer">
-              <HelpCircle size={18} aria-hidden />
-              <span className="zeus-rail-label">Marketplace</span>
+              <span className="zeus-rail-label">Zeus Consoles</span>
             </a>
           </>
         ) : null}

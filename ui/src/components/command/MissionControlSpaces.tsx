@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { LayoutGrid } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import ServiceTile from './ServiceTile'
-import { hermesApi } from '../../services/hermesApi'
+import { hermesApi, actionLabel } from '../../services/hermesApi'
 import { HERMES_SPACES, groupAppsBySpace } from '../../utils/spaces'
 import type { HermesApp } from '../../types'
 
@@ -69,7 +69,7 @@ export default function MissionControlSpaces({ apps, onInspect }: MissionControl
           <ul className="mission-recent-list">
             {recents.data?.map((evt) => (
               <li key={evt.id}>
-                <strong>{evt.action}</strong>
+                <strong>{actionLabel(evt.action)}</strong>
                 <span>{evt.detail || evt.appId || 'cluster'}</span>
                 <time>{new Date(evt.createdAt).toLocaleString()}</time>
               </li>

@@ -441,7 +441,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
                 <div>
                   <strong>{row.app.displayName}</strong>
                   <div className="app-meta">
-                    {row.app.namespace} · {statusLabel(row.app.status)} ·{' '}
+                    {row.app.namespace} · {statusLabel(row.app.status)}
+                    {!row.app.visibility.published ? ' · unpublished' : ''} ·{' '}
                     {row.action === 'inspect' ? 'Inspect route' : 'Open app'}
                   </div>
                 </div>

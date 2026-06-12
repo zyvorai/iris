@@ -36,6 +36,25 @@ body {
   background-attachment: fixed;
 }
 
+.hermes-page-mesh {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(at 27% 37%, rgba(249, 115, 22, 0.12) 0, transparent 50%),
+    radial-gradient(at 72% 18%, rgba(245, 158, 11, 0.1) 0, transparent 45%),
+    radial-gradient(at 85% 78%, rgba(139, 92, 246, 0.08) 0, transparent 48%);
+  filter: blur(48px);
+}
+
+.command-surface-body,
+.hermes-dock {
+  position: relative;
+  z-index: 1;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -1999,6 +2018,14 @@ button {
 .zeus-health-chip[data-tone='warn'] { color: rgb(253 230 138); border-color: rgba(251, 191, 36, 0.35); }
 .zeus-health-chip[data-tone='bad'] { color: rgb(252 165 165); border-color: rgba(239, 68, 68, 0.35); }
 .zeus-status-chip.warn { color: var(--z-red); }
+a.zeus-status-chip {
+  text-decoration: none;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+a.zeus-status-chip:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+}
 
 .zeus-status-strip {
   display: flex;
@@ -2078,7 +2105,13 @@ button {
 .zeus-rail-item:hover,
 .zeus-rail-item.active {
   color: var(--z-text);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.zeus-rail-divider {
+  height: 1px;
+  margin: 0.35rem 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .zeus-rail-item.active::before {
@@ -2315,7 +2348,88 @@ button {
   grid-template-columns: 1fr auto;
   gap: var(--space-6);
   padding: var(--space-8);
+  margin-bottom: var(--space-4);
+  position: relative;
+  overflow: hidden;
+}
+
+.platform-pulse-hero .zeus-glass-hero-glow {
+  position: absolute;
+  inset: -40% -20% auto;
+  height: 80%;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(16, 185, 129, 0.28), transparent 70%);
+}
+
+.platform-pulse-hero.zeus-glass-hero-warn .zeus-glass-hero-glow {
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(245, 158, 11, 0.26), transparent 70%);
+}
+
+.platform-pulse-hero.zeus-glass-hero-critical .zeus-glass-hero-glow {
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(239, 68, 68, 0.26), transparent 70%);
+}
+
+.platform-pulse-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.home-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
   margin-bottom: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .home-metrics-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.home-metric-tile {
+  display: block;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.home-metric-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(249, 115, 22, 0.28);
+  box-shadow: 0 12px 32px -16px rgba(249, 115, 22, 0.2);
+}
+
+.home-metric-tile-warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(160deg, rgba(245, 158, 11, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.home-metric-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--zeus-text-faint);
+}
+
+.home-metric-value {
+  margin: 0.45rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--zeus-text);
+}
+
+.home-metric-sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  color: var(--zeus-text-muted);
 }
 
 .platform-pulse-hero.zeus-glass-hero {
@@ -2357,24 +2471,53 @@ button {
 
 .cluster-health-orb {
   position: relative;
-  min-width: 160px;
-  padding: 1rem 1.1rem;
-  border-radius: 1.15rem;
+  width: 168px;
+  height: 168px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(15, 23, 42, 0.55);
 }
 
-.cluster-health-orb.tone-ok { border-color: rgba(16, 185, 129, 0.35); }
-.cluster-health-orb.tone-warn { border-color: rgba(245, 158, 11, 0.35); }
-.cluster-health-orb.tone-bad { border-color: rgba(239, 68, 68, 0.35); }
-
 .cluster-health-orb-ring {
-  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
 }
+
+.cluster-health-orb-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
+}
+
+.cluster-health-orb-progress {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s var(--ease-spring);
+}
+
+.cluster-health-orb.tone-ok .cluster-health-orb-progress { stroke: rgb(52, 211, 153); }
+.cluster-health-orb.tone-warn .cluster-health-orb-progress { stroke: rgb(251, 191, 36); }
+.cluster-health-orb.tone-bad .cluster-health-orb-progress { stroke: rgb(239, 68, 68); }
+
+.cluster-health-orb-core {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.cluster-health-orb.tone-ok { border-color: rgba(16, 185, 129, 0.35); box-shadow: 0 0 32px -12px rgba(16, 185, 129, 0.35); }
+.cluster-health-orb.tone-warn { border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 0 32px -12px rgba(245, 158, 11, 0.28); }
+.cluster-health-orb.tone-bad { border-color: rgba(239, 68, 68, 0.35); box-shadow: 0 0 32px -12px rgba(239, 68, 68, 0.28); }
 
 .cluster-health-orb-core strong {
   display: block;
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
@@ -2436,6 +2579,13 @@ button {
   background: rgba(255, 255, 255, 0.03);
   color: inherit;
   text-align: left;
+  transition: transform var(--duration-fast), border-color var(--duration-fast), background var(--duration-fast);
+}
+
+.service-tile:hover:not(.service-tile-disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(249, 115, 22, 0.25);
+  background: rgba(249, 115, 22, 0.06);
 }
 
 .service-tile.compact {
@@ -2506,8 +2656,35 @@ button {
   gap: var(--space-3);
 }
 
+.attention-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: var(--space-4);
+}
+
+.attention-filters button {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--z-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--zeus-text-muted);
+  font-size: 0.75rem;
+}
+
+.attention-filters button.active {
+  color: #fdba74;
+  border-color: rgba(249, 115, 22, 0.35);
+  background: rgba(249, 115, 22, 0.12);
+}
+
 .attention-card {
   padding: var(--space-4);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.attention-card:hover {
+  border-color: rgba(249, 115, 22, 0.22);
 }
 
 .attention-card-head {

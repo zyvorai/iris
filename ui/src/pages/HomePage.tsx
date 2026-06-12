@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
+import HomeMetricsStrip from '../components/command/HomeMetricsStrip'
 import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import PlatformPulseHero from '../components/command/PlatformPulseHero'
 import ServiceGalaxy from '../components/command/ServiceGalaxy'
@@ -55,6 +56,8 @@ export default function HomePage() {
     [catalogApps],
   )
 
+  const issueCount = degraded + broken
+
   const pinnedAndRecent = useMemo(() => {
     const seen = new Set<string>()
     const merged: HermesApp[] = []
@@ -84,6 +87,14 @@ export default function HomePage() {
         degraded={degraded}
         broken={broken}
         onResolveIssues={onResolveIssues}
+      />
+
+      <HomeMetricsStrip
+        serviceCount={serviceCount}
+        publishedCount={publishedCount}
+        namespaceCount={namespaceCount}
+        issueCount={issueCount}
+        brokenCount={broken}
       />
 
       <MissionControlSpaces apps={catalogApps} onInspect={onInspect} />

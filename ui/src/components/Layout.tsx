@@ -54,6 +54,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
 
   return (
     <div className="hermes-shell command-surface-shell" data-shell-density="calm">
+      <div className="hermes-page-mesh" aria-hidden />
       <div className="command-surface-body">
         <ZeusLeftRail />
         <div className="command-surface-main">

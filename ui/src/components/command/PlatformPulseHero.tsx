@@ -49,6 +49,7 @@ export default function PlatformPulseHero({
 
   return (
     <section className={`platform-pulse-hero ${heroClass}`} data-testid="platform-pulse-hero">
+      <div className="zeus-glass-hero-glow" aria-hidden />
       <div className="platform-pulse-copy">
         <p className="hero-kicker">{greeting}</p>
         <h2 className="hero-title">
@@ -75,7 +76,7 @@ export default function PlatformPulseHero({
           ) : null}
         </div>
       </div>
-      <ClusterHealthOrb healthy={healthy} total={serviceCount} />
+      <ClusterHealthOrb healthy={healthy} total={serviceCount} degraded={degraded} broken={broken} />
     </section>
   )
 }

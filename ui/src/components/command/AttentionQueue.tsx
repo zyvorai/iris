@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ExternalLink, Stethoscope } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -82,20 +82,44 @@ function AttentionCard({ app, onInspect }: { app: HermesApp; onInspect: (app: He
 }
 
 export default function AttentionQueue({ apps, onInspect }: AttentionQueueProps) {
-  const visible = apps.slice(0, 12)
+  const [filter, setFilter] = useState<'all' | 'broken' | 'degraded'>('all')
+  const filtered = useMemo(() => {
+    if (filter === 'broken') return apps.filter((a) => a.status === 'broken')
+    if (filter === 'degraded') return apps.filter((a) => a.status === 'degraded')
+    return apps
+  }, [apps, filter])
+  const visible = filtered.slice(0, 12)
+  const brokenCount = apps.filter((a) => a.status === 'broken').length
+  const degradedCount = apps.filter((a) => a.status === 'degraded').length
+
   if (!apps.length) return null
 
   return (
     <section className="glass-section attention-queue" id="attention-queue" data-testid="attention-queue">
       <div className="section-head">
-        <h2>Attention Queue</h2>
+        <div>
+          <h2>Attention Queue</h2>
+          <p className="hero-sub">Discovered services that failed probes or have degraded endpoints</p>
+        </div>
         <span className="chip chip-warn">{apps.length}</span>
         {apps.length > visible.length ? (
-          <Link to="/cluster" className="section-link">
-            View all in cluster
+          <Link to="/health" className="section-link">
+            View all in health
           </Link>
         ) : null}
       </div>
+      <div className="attention-filters" role="tablist" aria-label="Filter attention queue">
+        <button type="button" role="tab" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
+          All ({apps.length})
+        </button>
+        <button type="button" role="tab" className={filter === 'broken' ? 'active' : ''} onClick={() => setFilter('broken')}>
+          Broken ({brokenCount})
+        </button>
+        <button type="button" role="tab" className={filter === 'degraded' ? 'active' : ''} onClick={() => setFilter('degraded')}>
+          Degraded ({degradedCount})
+        </button>
+      </div>
+      {!filtered.length ? <div className="empty">No {filter === 'all' ? '' : filter} services in this filter.</div> : null}
       <div className="attention-list">
         {visible.map((app) => (
           <AttentionCard key={app.id} app={app} onInspect={onInspect} />
