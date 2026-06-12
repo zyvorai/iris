@@ -1,0 +1,94 @@
+// Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
+// https://zyvor.dev · info@zyvor.dev
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Backend {
+    pub kind: String,
+    pub name: String,
+    pub port: i32,
+    pub scheme: String,
+    pub path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Visibility {
+    #[serde(default)]
+    pub published: bool,
+    #[serde(default)]
+    pub hidden: bool,
+    #[serde(default)]
+    pub favorite: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Rewrite {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub strip_prefix: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub add_prefix: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct App {
+    pub id: String,
+    pub slug: String,
+    pub display_name: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    pub namespace: String,
+    pub category: String,
+    pub icon: String,
+    pub backend: Backend,
+    pub route_path: String,
+    pub public_url: String,
+    pub status: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub status_message: String,
+    pub source: String,
+    pub auth_mode: String,
+    #[serde(default)]
+    pub score: i32,
+    pub visibility: Visibility,
+    #[serde(default)]
+    pub rewrite: Rewrite,
+    #[serde(default)]
+    pub ready_endpoints: i32,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchHit {
+    pub app: App,
+    pub score: i32,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthSummary {
+    pub total: usize,
+    pub healthy: usize,
+    pub degraded: usize,
+    pub broken: usize,
+    pub apps: Vec<App>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClusterSummary {
+    pub total: usize,
+    pub published: usize,
+    pub discovery: usize,
+    pub namespaces: usize,
+    pub healthy: usize,
+    pub degraded: usize,
+    pub broken: usize,
+}
+
+pub mod store;

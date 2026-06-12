@@ -1,0 +1,26 @@
+[package]
+name = "hermes-server"
+version = "0.1.0"
+description = "Hermes API server, gateway, and embedded UI"
+license.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "hermes-server"
+path = "src/main.rs"
+
+[dependencies]
+hermes-core = { path = "../hermes-core" }
+hermes-api = { path = "../hermes-api" }
+hermes-gateway = { path = "../hermes-gateway" }
+axum = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+anyhow = { workspace = true }
+futures-util = { workspace = true }

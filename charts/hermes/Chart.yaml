@@ -1,0 +1,13 @@
+apiVersion: v2
+name: hermes
+description: Hermes — Kubernetes Service Launchpad for Zeus OS
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - gateway
+  - service-catalog
+maintainers:
+  - name: ZyvorAI Labs Private Limited
+home: https://zyvor.dev

@@ -1,0 +1,300 @@
+// Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
+// https://zyvor.dev · info@zyvor.dev
+
+use std::sync::Arc;
+
+use axum::{
+    body::Body,
+    extract::{FromRequestParts, Path, State, WebSocketUpgrade},
+    http::{header, HeaderMap, HeaderName, HeaderValue, Request, StatusCode},
+    response::{IntoResponse, Response},
+    routing::any,
+    Router,
+};
+use futures_util::{SinkExt, StreamExt};
+use hermes_core::store::Store;
+
+#[derive(Clone)]
+pub struct GatewayState {
+    pub store: Arc<Store>,
+}
+
+pub fn routes(state: GatewayState) -> Router {
+    Router::new()
+        .route("/a/{namespace}/{slug}", any(proxy_root))
+        .route("/a/{namespace}/{slug}/{*rest}", any(proxy_path))
+        .with_state(state)
+}
+
+async fn proxy_root(
+    State(st): State<GatewayState>,
+    Path((namespace, slug)): Path<(String, String)>,
+    req: Request<Body>,
+) -> Response {
+    proxy_impl(st, namespace, slug, String::new(), req).await
+}
+
+async fn proxy_path(
+    State(st): State<GatewayState>,
+    Path((namespace, slug, rest)): Path<(String, String, String)>,
+    req: Request<Body>,
+) -> Response {
+    proxy_impl(st, namespace, slug, rest, req).await
+}
+
+async fn proxy_impl(
+    st: GatewayState,
+    namespace: String,
+    slug: String,
+    rest: String,
+    req: Request<Body>,
+) -> Response {
+    let app = match st.store.get_app_by_route(&namespace, &slug) {
+        Ok(Some(a)) => a,
+        Ok(None) => return (StatusCode::NOT_FOUND, "app not found").into_response(),
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response();
+        }
+    };
+
+    if !app.visibility.published {
+        return (StatusCode::FORBIDDEN, "app not published").into_response();
+    }
+
+    if app.ready_endpoints == 0 || app.status == "broken" {
+        return (
+            StatusCode::BAD_GATEWAY,
+            format!("backend unavailable: {}", app.status_message),
+        )
+            .into_response();
+    }
+
+    if is_websocket_upgrade(req.headers()) {
+        let (mut parts, _body) = req.into_parts();
+        match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+            Ok(ws) => {
+                let backend_path = build_backend_path(&app, &rest);
+                let ws_url = format!(
+                    "ws://{}.{}.svc.cluster.local:{}{}",
+                    app.backend.name, app.namespace, app.backend.port, backend_path
+                );
+                return ws.on_upgrade(move |client_ws| async move {
+                    if let Err(e) = tunnel_websocket(client_ws, &ws_url).await {
+                        tracing::warn!("ws tunnel: {e:#}");
+                    }
+                })
+                .into_response();
+            }
+            Err(e) => return e.into_response(),
+        }
+    }
+
+    http_proxy(app, rest, req).await
+}
+
+fn is_websocket_upgrade(headers: &HeaderMap) -> bool {
+    headers
+        .get(header::UPGRADE)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.eq_ignore_ascii_case("websocket"))
+        .unwrap_or(false)
+}
+
+async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
+    let backend_path = build_backend_path(&app, &rest);
+    let target = format!(
+        "{}://{}.{}.svc.cluster.local:{}{}",
+        app.backend.scheme,
+        app.backend.name,
+        app.namespace,
+        app.backend.port,
+        backend_path
+    );
+
+    let method = req.method().clone();
+    let mut headers = filter_request_headers(req.headers());
+    inject_hermes_headers(&mut headers, &app);
+
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .unwrap();
+
+    let body_bytes = match axum::body::to_bytes(req.into_body(), 16 * 1024 * 1024).await {
+        Ok(b) => b,
+        Err(_) => return (StatusCode::BAD_REQUEST, "body read error").into_response(),
+    };
+
+    let mut rb = client.request(method, &target).headers(to_reqwest_headers(&headers));
+    if !body_bytes.is_empty() {
+        rb = rb.body(body_bytes.to_vec());
+    }
+
+    match rb.send().await {
+        Ok(resp) => {
+            let status =
+                StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
+            let mut out_headers = HeaderMap::new();
+            for (k, v) in resp.headers() {
+                if should_forward_response_header(k) {
+                    if let Ok(val) = HeaderValue::from_bytes(v.as_bytes()) {
+                        out_headers.insert(k.clone(), val);
+                    }
+                }
+            }
+            let body = resp.bytes().await.unwrap_or_default();
+            (status, out_headers, body).into_response()
+        }
+        Err(e) => (StatusCode::BAD_GATEWAY, format!("proxy error: {e}")).into_response(),
+    }
+}
+
+async fn tunnel_websocket(
+    client_ws: axum::extract::ws::WebSocket,
+    upstream_url: &str,
+) -> anyhow::Result<()> {
+    use tokio_tungstenite::tungstenite::client::IntoClientRequest;
+    use tokio_tungstenite::connect_async;
+
+    let request = upstream_url.into_client_request()?;
+    let (upstream, _) = connect_async(request).await?;
+    let (mut client_sink, mut client_stream) = client_ws.split();
+    let (mut upstream_sink, mut upstream_stream) = upstream.split();
+
+    let client_to_upstream = async {
+        while let Some(msg) = client_stream.next().await {
+            match msg {
+                Ok(axum::extract::ws::Message::Text(t)) => {
+                    upstream_sink
+                        .send(tokio_tungstenite::tungstenite::Message::Text(t.to_string().into()))
+                        .await?;
+                }
+                Ok(axum::extract::ws::Message::Binary(b)) => {
+                    upstream_sink
+                        .send(tokio_tungstenite::tungstenite::Message::Binary(b.into()))
+                        .await?;
+                }
+                Ok(axum::extract::ws::Message::Ping(p)) => {
+                    upstream_sink
+                        .send(tokio_tungstenite::tungstenite::Message::Ping(p.into()))
+                        .await?;
+                }
+                Ok(axum::extract::ws::Message::Pong(p)) => {
+                    upstream_sink
+                        .send(tokio_tungstenite::tungstenite::Message::Pong(p.into()))
+                        .await?;
+                }
+                Ok(axum::extract::ws::Message::Close(_)) => break,
+                Err(_) => break,
+            }
+        }
+        Ok::<(), anyhow::Error>(())
+    };
+
+    let upstream_to_client = async {
+        while let Some(msg) = upstream_stream.next().await {
+            match msg {
+                Ok(tokio_tungstenite::tungstenite::Message::Text(t)) => {
+                    client_sink
+                        .send(axum::extract::ws::Message::Text(t.to_string().into()))
+                        .await?;
+                }
+                Ok(tokio_tungstenite::tungstenite::Message::Binary(b)) => {
+                    client_sink
+                        .send(axum::extract::ws::Message::Binary(b.into()))
+                        .await?;
+                }
+                Ok(tokio_tungstenite::tungstenite::Message::Ping(p)) => {
+                    client_sink
+                        .send(axum::extract::ws::Message::Ping(p.into()))
+                        .await?;
+                }
+                Ok(tokio_tungstenite::tungstenite::Message::Pong(p)) => {
+                    client_sink
+                        .send(axum::extract::ws::Message::Pong(p.into()))
+                        .await?;
+                }
+                Ok(tokio_tungstenite::tungstenite::Message::Close(_)) => break,
+                Err(_) => break,
+                _ => {}
+            }
+        }
+        Ok::<(), anyhow::Error>(())
+    };
+
+    tokio::select! {
+        r = client_to_upstream => r?,
+        r = upstream_to_client => r?,
+    }
+    Ok(())
+}
+
+fn build_backend_path(app: &hermes_core::App, rest: &str) -> String {
+    let mut path = app.backend.path.clone();
+    if !path.ends_with('/') && !rest.is_empty() && !rest.starts_with('/') {
+        path.push('/');
+    }
+    if !rest.is_empty() {
+        if rest.starts_with('/') {
+            path = format!("{}{}", app.backend.path.trim_end_matches('/'), rest);
+        } else {
+            path.push_str(rest);
+        }
+    }
+    if !path.starts_with('/') {
+        path.insert(0, '/');
+    }
+    path
+}
+
+fn filter_request_headers(in_headers: &HeaderMap) -> HeaderMap {
+    let mut out = HeaderMap::new();
+    for (k, v) in in_headers {
+        let name = k.as_str();
+        if name.eq_ignore_ascii_case("host")
+            || name.eq_ignore_ascii_case("connection")
+            || name.eq_ignore_ascii_case("upgrade")
+            || name.starts_with("sec-websocket")
+        {
+            continue;
+        }
+        out.insert(k.clone(), v.clone());
+    }
+    out
+}
+
+fn to_reqwest_headers(headers: &HeaderMap) -> reqwest::header::HeaderMap {
+    let mut hm = reqwest::header::HeaderMap::new();
+    for (k, v) in headers {
+        if let (Ok(name), Ok(val)) = (
+            reqwest::header::HeaderName::from_bytes(k.as_str().as_bytes()),
+            reqwest::header::HeaderValue::from_bytes(v.as_bytes()),
+        ) {
+            hm.insert(name, val);
+        }
+    }
+    hm
+}
+
+fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App) {
+    headers.insert(
+        HeaderName::from_static("x-hermes-app"),
+        HeaderValue::from_str(&app.slug).unwrap_or(HeaderValue::from_static("unknown")),
+    );
+    headers.insert(
+        HeaderName::from_static("x-hermes-namespace"),
+        HeaderValue::from_str(&app.namespace).unwrap_or(HeaderValue::from_static("unknown")),
+    );
+    headers.insert(
+        HeaderName::from_static("x-forwarded-proto"),
+        HeaderValue::from_static("https"),
+    );
+}
+
+fn should_forward_response_header(name: &header::HeaderName) -> bool {
+    !matches!(
+        name.as_str(),
+        "connection" | "keep-alive" | "transfer-encoding" | "upgrade"
+    )
+}

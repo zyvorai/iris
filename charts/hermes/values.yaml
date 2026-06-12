@@ -1,0 +1,80 @@
+global:
+  domain: zeus.local
+
+replicaCount: 1
+
+image:
+  controller:
+    repository: ghcr.io/ssahani/hermes-controller
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  server:
+    repository: ghcr.io/ssahani/hermes-server
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: hermes
+
+rbac:
+  create: true
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""
+
+database:
+  path: /data/hermes/hermes.db
+
+controller:
+  enabled: true
+  watchNamespaces: []
+  autoPublish: false
+  autoSuggest: true
+  discoverAll: true
+  publicBaseUrl: ""
+  healthIntervalSeconds: 30
+
+server:
+  bind: "0.0.0.0:8080"
+  auth:
+    mode: none
+  defaultUser: local
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30880
+
+ingress:
+  enabled: false
+  className: ""
+  host: hermes.zeus.local
+  tls:
+    enabled: false
+    secretName: ""
+
+resources:
+  controller:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  server:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+gateway:
+  websocket:
+    enabled: true
+
+demoApps:
+  enabled: true

@@ -1,0 +1,128 @@
+// Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
+// https://zyvor.dev · info@zyvor.dev
+
+import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
+import AppCard from '../components/AppCard'
+import { hermesApi } from '../services/hermesApi'
+
+function greeting() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
+export default function HomePage() {
+  const apps = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
+  const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
+
+  const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
+  const unhealthy = health.data?.apps ?? []
+
+  return (
+    <>
+      <section className="glass-hero home-hero">
+        <div className="hero-copy">
+          <div className="hero-kicker">{greeting()}</div>
+          <h2 className="hero-title">Your cluster at a glance</h2>
+          <p className="hero-sub">
+            Hermes discovers every service across the cluster — Zeus OS, monitoring stacks, and custom workloads.
+            Open anything through one gateway.
+          </p>
+          <Link to="/cluster" className="btn btn-primary hero-cta">
+            Browse cluster <ChevronRight size={14} />
+          </Link>
+        </div>
+        <div className="hero-metrics">
+          <div className="metric-tile">
+            <span className="metric-value">{cluster.data?.total ?? catalog.data?.length ?? '—'}</span>
+            <span className="metric-label">Cluster services</span>
+          </div>
+          <div className="metric-tile">
+            <span className="metric-value">{cluster.data?.namespaces ?? '—'}</span>
+            <span className="metric-label">Namespaces</span>
+          </div>
+          <div className="metric-tile metric-ok">
+            <span className="metric-value">{health.data?.healthy ?? '—'}</span>
+            <span className="metric-label">Healthy</span>
+          </div>
+          <div className="metric-tile metric-warn">
+            <span className="metric-value">{unhealthy.length}</span>
+            <span className="metric-label">Need attention</span>
+          </div>
+        </div>
+      </section>
+
+      {unhealthy.length > 0 ? (
+        <section className="glass-section">
+          <div className="section-head">
+            <h2>Needs attention</h2>
+            <span className="chip chip-warn">{unhealthy.length}</span>
+          </div>
+          <div className="app-grid">
+            {unhealthy.slice(0, 4).map((app) => (
+              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="glass-section">
+        <div className="section-head">
+          <h2>Favorites</h2>
+          <span className="chip chip-muted">{favorites.data?.length ?? 0}</span>
+        </div>
+        {favorites.isLoading ? (
+          <div className="empty">Loading…</div>
+        ) : favorites.data?.length ? (
+          <div className="app-grid">
+            {favorites.data.map((app) => (
+              <AppCard key={app.id} app={app} favorite />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">Pin apps from Cluster or Apps to see them here.</div>
+        )}
+      </section>
+
+      <section className="glass-section">
+        <div className="section-head">
+          <h2>Recently opened</h2>
+        </div>
+        {recents.data?.length ? (
+          <div className="app-grid">
+            {recents.data.map((app) => (
+              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">Open a service to populate recents.</div>
+        )}
+      </section>
+
+      <section className="glass-section">
+        <div className="section-head">
+          <h2>Published apps</h2>
+          <Link to="/apps" className="section-link">
+            View all <ChevronRight size={14} />
+          </Link>
+        </div>
+        {apps.isLoading ? (
+          <div className="empty">Loading…</div>
+        ) : (
+          <div className="app-grid">
+            {(apps.data ?? []).slice(0, 8).map((app) => (
+              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+            ))}
+          </div>
+        )}
+      </section>
+    </>
+  )
+}

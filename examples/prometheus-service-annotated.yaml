@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  annotations:
+    hermes.zyvor.dev/enabled: "true"
+    hermes.zyvor.dev/name: "Prometheus"
+    hermes.zyvor.dev/description: "Metrics and alerting"
+    hermes.zyvor.dev/icon: "prometheus"
+    hermes.zyvor.dev/category: "Monitoring"
+    hermes.zyvor.dev/port: "9090"
+    hermes.zyvor.dev/scheme: "http"
+    hermes.zyvor.dev/path: "/"
+    hermes.zyvor.dev/auth: "none"
+    hermes.zyvor.dev/published: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090

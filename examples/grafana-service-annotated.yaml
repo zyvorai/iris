@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  annotations:
+    hermes.zyvor.dev/enabled: "true"
+    hermes.zyvor.dev/name: "Grafana"
+    hermes.zyvor.dev/description: "Observability dashboard"
+    hermes.zyvor.dev/icon: "grafana"
+    hermes.zyvor.dev/category: "Monitoring"
+    hermes.zyvor.dev/port: "80"
+    hermes.zyvor.dev/scheme: "http"
+    hermes.zyvor.dev/path: "/"
+    hermes.zyvor.dev/auth: "none"
+    hermes.zyvor.dev/published: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000

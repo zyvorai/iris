@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-known-apps
+  labels:
+    app.kubernetes.io/name: hermes
+data:
+  README: |
+    Known app signatures are compiled into hermes-controller.
+    Future versions may load additional rules from this ConfigMap.

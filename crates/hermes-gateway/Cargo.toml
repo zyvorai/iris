@@ -1,0 +1,22 @@
+[package]
+name = "hermes-gateway"
+version = "0.1.0"
+description = "Hermes reverse proxy and WebSocket gateway"
+license.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+hermes-core = { path = "../hermes-core" }
+axum = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+hyper = { workspace = true }
+hyper-util = { workspace = true }
+http-body-util = { workspace = true }
+futures-util = { workspace = true }
+reqwest = { workspace = true }
+tokio-tungstenite = "0.29"

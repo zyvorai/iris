@@ -1,0 +1,99 @@
+{{- if .Values.demoApps.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hermes-demo
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: hermes
+  annotations:
+    meta.helm.sh/release-name: hermes
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-demo
+  namespace: hermes-demo
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.3.0
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: hermes-demo
+  annotations:
+    hermes.zyvor.dev/enabled: "true"
+    hermes.zyvor.dev/name: "Grafana"
+    hermes.zyvor.dev/category: "Monitoring"
+    hermes.zyvor.dev/icon: "grafana"
+    hermes.zyvor.dev/port: "80"
+    hermes.zyvor.dev/published: "true"
+spec:
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-demo
+  namespace: hermes-demo
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          args: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-lifecycle"]
+          ports:
+            - containerPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: hermes-demo
+  annotations:
+    hermes.zyvor.dev/enabled: "true"
+    hermes.zyvor.dev/name: "Prometheus"
+    hermes.zyvor.dev/category: "Monitoring"
+    hermes.zyvor.dev/icon: "prometheus"
+    hermes.zyvor.dev/port: "9090"
+    hermes.zyvor.dev/published: "true"
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+{{- end }}

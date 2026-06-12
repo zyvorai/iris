@@ -1,0 +1,87 @@
+{{- $publicBase := .Values.controller.publicBaseUrl -}}
+{{- if not $publicBase -}}
+{{- if eq .Values.service.type "NodePort" -}}
+{{- $publicBase = printf "http://%s:%v" .Values.global.domain (.Values.service.nodePort | default 30880) -}}
+{{- else -}}
+{{- $publicBase = printf "https://%s" .Values.ingress.host -}}
+{{- end -}}
+{{- end -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes
+  labels:
+    app.kubernetes.io/name: hermes
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hermes
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: controller
+          image: "{{ .Values.image.controller.repository }}:{{ .Values.image.controller.tag }}"
+          imagePullPolicy: {{ .Values.image.controller.pullPolicy }}
+          env:
+            - name: HERMES_DB_PATH
+              value: {{ .Values.database.path | quote }}
+            - name: HERMES_PUBLIC_BASE_URL
+              value: {{ $publicBase | quote }}
+            - name: HERMES_AUTO_PUBLISH
+              value: {{ .Values.controller.autoPublish | quote }}
+            - name: HERMES_AUTO_SUGGEST
+              value: {{ .Values.controller.autoSuggest | quote }}
+            - name: HERMES_DISCOVER_ALL
+              value: {{ .Values.controller.discoverAll | quote }}
+            {{- if .Values.controller.watchNamespaces }}
+            - name: HERMES_WATCH_NAMESPACES
+              value: {{ join "," .Values.controller.watchNamespaces | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data/hermes
+          resources:
+            {{- toYaml .Values.resources.controller | nindent 12 }}
+        - name: server
+          image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag }}"
+          imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: HERMES_BIND
+              value: {{ .Values.server.bind | quote }}
+            - name: HERMES_DB_PATH
+              value: {{ .Values.database.path | quote }}
+            - name: HERMES_DEFAULT_USER
+              value: {{ .Values.server.defaultUser | quote }}
+            - name: HERMES_UI_DIR
+              value: /app/ui
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 8
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 4
+          volumeMounts:
+            - name: data
+              mountPath: /data/hermes
+          resources:
+            {{- toYaml .Values.resources.server | nindent 12 }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: hermes-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

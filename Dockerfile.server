@@ -1,0 +1,22 @@
+# Build stage — Rust server + UI
+FROM node:22-alpine AS ui-builder
+WORKDIR /ui
+COPY ui/package.json ui/package-lock.json ./
+RUN npm ci
+COPY ui/ ./
+RUN npm run build
+
+FROM rust:1.86-bookworm AS rust-builder
+WORKDIR /src
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+RUN cargo build --release -p hermes-server
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=rust-builder /src/target/release/hermes-server /usr/local/bin/hermes-server
+COPY --from=ui-builder /ui/dist /app/ui
+ENV HERMES_UI_DIR=/app/ui
+EXPOSE 8080
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/hermes-server"]
