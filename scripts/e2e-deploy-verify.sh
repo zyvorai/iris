@@ -25,7 +25,7 @@ check_gateway() {
     local ok=false
     for _ in $(seq 1 30); do
         code="$(curl -s -o /dev/null -w '%{http_code}' "${url}" 2>/dev/null || true)"
-        if echo "${code}" | grep -qE '^(200|302|307|308)$'; then
+        if echo "${code}" | grep -qE '^(200|301|302|307|308)$'; then
             ok=true
             break
         fi
