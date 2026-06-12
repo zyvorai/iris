@@ -110,7 +110,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
       </header>
       <main className="hermes-main hermes-scroll-body">{children}</main>
       <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
-      <footer className="hermes-dock mac-dock" aria-label="App dock">
+      <nav className="hermes-dock mac-dock" aria-label="App dock">
         <NavLink to="/" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Home">
           <Home size={20} />
         </NavLink>
@@ -155,7 +155,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         <button type="button" className="dock-item dock-spotlight" title="Spotlight" onClick={onPaletteOpen}>
           <Search size={20} />
         </button>
-      </footer>
+      </nav>
       {paletteOpen ? <CommandPalette onClose={onPaletteClose} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
     </div>

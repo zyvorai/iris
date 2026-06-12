@@ -18,5 +18,5 @@ test('graph page renders', async ({ page }) => {
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /^help$/i })).toBeVisible()
-  await expect(page.getByRole('contentinfo')).toContainText('zyvor.dev')
+  await expect(page.locator('.zyvor-footer')).toContainText('zyvor.dev')
 })
