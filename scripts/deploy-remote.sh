@@ -323,6 +323,21 @@ REMOTE
     ok "Helm release applied"
 }
 
+restart_hermes_pods() {
+    [ "$SKIP_BUILD" = true ] && return 0
+    info "Restarting Hermes pods to pick up rebuilt images..."
+    _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE' || fail "Pod restart failed"
+set -euo pipefail
+if [ -f /etc/rancher/k3s/k3s.yaml ]; then
+    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+fi
+kubectl -n "${HELM_NS}" rollout restart deploy/hermes
+kubectl -n "${HELM_NS}" rollout status deploy/hermes --timeout=5m
+REMOTE
+    ok "Pods restarted with fresh images"
+}
+
 require_hermes_ready() {
     info "Waiting for Hermes pods..."
     _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE' || fail "Hermes did not become ready"
@@ -419,6 +434,7 @@ main() {
         build_images_remote
     fi
     deploy_helm
+    restart_hermes_pods
     require_hermes_ready
     [ "$SKIP_VERIFY" != true ] && verify_remote
     run_e2e

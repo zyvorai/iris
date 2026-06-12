@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import MissionControlStrip from '../components/MissionControlStrip'
 import SpaceGrid from '../components/SpaceGrid'
 import { hermesApi } from '../services/hermesApi'
 
@@ -62,6 +63,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <MissionControlStrip apps={apps.data ?? []} />
 
       {unhealthy.length > 0 ? (
         <section className="glass-section">

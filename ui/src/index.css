@@ -1206,3 +1206,84 @@ button {
 .dep-links a:hover {
   text-decoration: underline;
 }
+
+.mission-control-strip h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.mission-control-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.mission-control-space {
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--hermes-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mission-control-space-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.mission-control-space-head h3 {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--hermes-muted);
+}
+
+.mission-control-space-head a {
+  font-size: 0.72rem;
+  color: #fdba74;
+  text-decoration: none;
+}
+
+.mission-control-space-head a:hover {
+  text-decoration: underline;
+}
+
+.mission-control-apps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mission-control-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 4.25rem;
+  padding: 0.35rem 0.25rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--hermes-text);
+  font-size: 0.62rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.mission-control-app span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mission-control-app:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
