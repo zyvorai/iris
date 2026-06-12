@@ -326,17 +326,20 @@ Honest checklist of what ships now:
 
 - [x] Cluster-wide service discovery (`HERMES_DISCOVER_ALL=true`, default in Helm)
 - [x] Signature recognition for popular platform tools
-- [x] Optional annotation enrichment (`hermes.zyvor.dev/*`)
-- [x] Hermes Dock — Home, Apps, Cluster, Discovery, Health
-- [x] Universal gateway at `/a/{namespace}/{slug}` with WebSocket support
-- [x] Favorites, recents, cluster-wide search
+- [x] Ingress and Gateway API (`HTTPRoute`) route discovery
+- [x] Optional annotation enrichment (`hermes.zyvor.dev/*`) including canonical slugs
+- [x] Hermes Dock — Home, Apps, Cluster, Discovery, Health, Activity
+- [x] Universal gateway at `/a/{namespace}/{slug}` and `/apps/{slug}` with WebSocket support
+- [x] Favorites, recents, cluster-wide search, audit log
+- [x] API key and OIDC authentication (optional)
+- [x] Namespace-scoped API filter (`HERMES_ALLOWED_NAMESPACES`)
 - [x] Real-time health polling and status in UI
 - [x] Helm chart and remote K3s deploy tooling
 - [x] Demo apps (Grafana + Prometheus) for quick validation
 
 **Not yet (roadmap):**
 
-Ingress / Gateway API / service mesh discovery · multi-cluster federation · SSO / RBAC / audit logs · pretty slug URLs (`/grafana` vs `/a/monitoring/grafana`) · application graph · AI search · team workspaces
+Multi-cluster federation · service mesh route discovery · per-app SSO passthrough · application graph · AI search · team workspaces · enterprise RBAC (K8s-native)
 
 ---
 
@@ -448,8 +451,8 @@ Hermes is how humans enter the software universe that Zeus runs.
 
 | Version | Focus |
 |---------|-------|
-| **v0.1 (now)** | Discovery, dock, gateway, search, favorites, health, cluster catalog |
-| **v1** | Ingress and mesh sources, SSO, RBAC, canonical slug URLs |
+| **v0.1** | Discovery, dock, gateway, search, favorites, health, cluster catalog |
+| **v1 (now)** | Canonical slugs, ingress/Gateway API, audit log, API key + OIDC auth, Activity page |
 | **v2** | Multi-cluster federation, AI search, team workspaces |
 | **v3** | Application graph, dependency mapping, ownership tracking |
 | **v4** | Enterprise application intelligence — every app, dependency, owner, route, and cluster |

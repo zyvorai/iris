@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import type { ClusterSummary, HealthSummary, HermesApp, SearchHit } from '../types'
+import type { AuditEvent, ClusterSummary, HealthSummary, HermesApp, SearchHit } from '../types'
 
 const base = '/api/v1'
 
@@ -32,11 +32,27 @@ export const hermesApi = {
   listRecents: () => req<HermesApp[]>('/recents'),
   recordRecent: (id: string) => req<void>(`/recents/${encodeURIComponent(id)}`, { method: 'POST' }),
   healthSummary: () => req<HealthSummary>('/health/apps'),
+  listAudit: (limit = 50) => req<AuditEvent[]>(`/audit?limit=${limit}`),
+  authMe: async () => {
+    const res = await fetch('/auth/me')
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+    return res.json() as Promise<{ authenticated: boolean; userId: string; mode: string }>
+  },
+}
+
+export function appLaunchPath(app: HermesApp): string {
+  if (app.canonicalSlug) return `/apps/${app.canonicalSlug}`
+  return app.routePath
+}
+
+export function appPublicUrl(app: HermesApp): string {
+  if (app.publicUrl) return app.publicUrl
+  return window.location.origin + appLaunchPath(app)
 }
 
 export function openApp(app: HermesApp) {
   void hermesApi.recordRecent(app.id)
-  window.open(app.routePath, '_blank', 'noopener,noreferrer')
+  window.open(appLaunchPath(app), '_blank', 'noopener,noreferrer')
 }
 
 export function statusTone(status: string): string {
@@ -59,7 +75,7 @@ export function statusLabel(status: string): string {
     case 'degraded':
       return 'Degraded'
     case 'broken':
-      return 'Broken'
+      return 'Offline'
     default:
       return 'Unknown'
   }
@@ -71,9 +87,34 @@ export function sourceLabel(source: string): string {
       return 'Annotated'
     case 'signature':
       return 'Known app'
+    case 'ingress':
+      return 'Ingress'
+    case 'gateway':
+      return 'Gateway API'
     case 'service':
       return 'Cluster service'
     default:
       return source
+  }
+}
+
+export function actionLabel(action: string): string {
+  switch (action) {
+    case 'launch':
+      return 'Launched'
+    case 'publish':
+      return 'Published'
+    case 'hide':
+      return 'Hidden'
+    case 'search':
+      return 'Search'
+    case 'favorite':
+      return 'Pinned'
+    case 'unfavorite':
+      return 'Unpinned'
+    case 'recent':
+      return 'Opened'
+    default:
+      return action
   }
 }

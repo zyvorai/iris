@@ -45,4 +45,14 @@ Open http://localhost:8080
 | `HERMES_AUTO_PUBLISH` | controller | Auto-publish annotated services |
 | `HERMES_AUTO_SUGGEST` | controller | Suggest known apps without annotation |
 | `HERMES_DISCOVER_ALL` | controller | Index all eligible cluster services (default `true`) |
+| `HERMES_DISCOVER_INGRESS` | controller | Discover apps from Ingress hosts (default `true`) |
 | `HERMES_BIND` | server | Listen address (default `0.0.0.0:8080`) |
+| `HERMES_AUTH_MODE` | server | `none`, `api_key`, or `oidc` |
+| `HERMES_API_KEY` | server | API key when auth mode is `api_key` |
+| `HERMES_OIDC_ISSUER` | server | OIDC issuer URL (e.g. Keycloak realm) |
+| `HERMES_OIDC_CLIENT_ID` | server | OIDC client id |
+| `HERMES_OIDC_CLIENT_SECRET` | server | OIDC client secret (optional for public clients) |
+| `HERMES_OIDC_REDIRECT_URL` | server | Callback URL (e.g. `https://hermes.company.com/auth/callback`) |
+| `HERMES_SESSION_SECRET` | server | HMAC secret for session cookies |
+| `HERMES_DISCOVER_GATEWAY_API` | controller | Discover apps from Gateway API HTTPRoutes (default `true`) |
+| `HERMES_ALLOWED_NAMESPACES` | server | Comma-separated namespace filter for API/gateway (optional) |

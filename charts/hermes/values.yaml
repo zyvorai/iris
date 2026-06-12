@@ -34,6 +34,8 @@ controller:
   autoPublish: false
   autoSuggest: true
   discoverAll: true
+  discoverIngress: true
+  discoverGatewayAPI: true
   publicBaseUrl: ""
   healthIntervalSeconds: 30
 
@@ -41,7 +43,15 @@ server:
   bind: "0.0.0.0:8080"
   auth:
     mode: none
+    apiKey: ""
+  oidc:
+    issuer: ""
+    clientId: ""
+    clientSecret: ""
+    redirectUrl: ""
+  sessionSecret: ""
   defaultUser: local
+  allowedNamespaces: []
 
 service:
   type: NodePort

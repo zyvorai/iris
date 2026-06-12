@@ -4,7 +4,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
-import { hermesApi, openApp, statusTone } from '../services/hermesApi'
+import { appLaunchPath, appPublicUrl, hermesApi, openApp, statusTone } from '../services/hermesApi'
 
 export default function AppDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -33,7 +33,17 @@ export default function AppDetailPage() {
         </div>
         <div className="detail-row">
           <span>Route</span>
-          <span>{a.routePath}</span>
+          <span>{appLaunchPath(a)}</span>
+        </div>
+        {a.canonicalSlug ? (
+          <div className="detail-row">
+            <span>Canonical slug</span>
+            <span>{a.canonicalSlug}</span>
+          </div>
+        ) : null}
+        <div className="detail-row">
+          <span>Public URL</span>
+          <span>{appPublicUrl(a)}</span>
         </div>
         <div className="detail-row">
           <span>Backend</span>

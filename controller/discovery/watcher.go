@@ -14,6 +14,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -22,6 +23,8 @@ import (
 	"github.com/ssahani/hermes/controller/model"
 	"github.com/ssahani/hermes/controller/signatures"
 	"github.com/ssahani/hermes/controller/store"
+	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
+	gwexternalversions "sigs.k8s.io/gateway-api/pkg/client/informers/externalversions"
 )
 
 const (
@@ -37,29 +40,36 @@ const (
 	annoAuth      = annoPrefix + "auth"
 	annoFavorite  = annoPrefix + "favorite"
 	annoPublished = annoPrefix + "published"
+	annoSlug      = annoPrefix + "slug"
 )
 
 type Config struct {
-	PublicBaseURL string
-	AutoPublish   bool
-	AutoSuggest   bool
-	DiscoverAll   bool
-	WatchNS       []string
+	PublicBaseURL   string
+	AutoPublish     bool
+	AutoSuggest     bool
+	DiscoverAll     bool
+	DiscoverIngress    bool
+	DiscoverGatewayAPI bool
+	WatchNS            []string
 }
 
 type Watcher struct {
-	client    kubernetes.Interface
-	store     *store.Store
-	cfg       Config
-	endpoints map[string]int // key: ns/name -> ready count
+	client       kubernetes.Interface
+	gwClient     gwclientset.Interface
+	store        *store.Store
+	cfg          Config
+	endpoints    map[string]int // key: ns/name -> ready count
+	ingressHosts map[string][]string
 }
 
-func NewWatcher(client kubernetes.Interface, st *store.Store, cfg Config) *Watcher {
+func NewWatcher(client kubernetes.Interface, gwClient gwclientset.Interface, st *store.Store, cfg Config) *Watcher {
 	return &Watcher{
-		client:    client,
-		store:     st,
-		cfg:       cfg,
-		endpoints: make(map[string]int),
+		client:       client,
+		gwClient:     gwClient,
+		store:        st,
+		cfg:          cfg,
+		endpoints:    make(map[string]int),
+		ingressHosts: make(map[string][]string),
 	}
 }
 
@@ -86,6 +96,29 @@ func (w *Watcher) Run(ctx context.Context) error {
 		UpdateFunc: func(_, newObj interface{}) { w.onEndpointSlice(newObj) },
 		DeleteFunc: func(obj interface{}) { w.onEndpointSlice(obj) },
 	})
+
+	if w.cfg.DiscoverIngress {
+		ingInf := factory.Networking().V1().Ingresses().Informer()
+		ingInf.AddEventHandler(cache.ResourceEventHandlerFuncs{
+			AddFunc:    func(obj interface{}) { w.onIngress(obj) },
+			UpdateFunc: func(_, newObj interface{}) { w.onIngress(newObj) },
+			DeleteFunc: func(obj interface{}) { w.onIngressDelete(obj) },
+		})
+	}
+
+	if w.cfg.DiscoverGatewayAPI && w.gwClient != nil {
+		gwFactory := gwexternalversions.NewSharedInformerFactoryWithOptions(w.gwClient, 30*time.Second,
+			gwexternalversions.WithNamespace(ns),
+		)
+		hrInf := gwFactory.Gateway().V1().HTTPRoutes().Informer()
+		hrInf.AddEventHandler(cache.ResourceEventHandlerFuncs{
+			AddFunc:    func(obj interface{}) { w.onHTTPRoute(obj) },
+			UpdateFunc: func(_, newObj interface{}) { w.onHTTPRoute(newObj) },
+			DeleteFunc: func(obj interface{}) { w.onHTTPRouteDelete(obj) },
+		})
+		gwFactory.Start(ctx.Done())
+		gwFactory.WaitForCacheSync(ctx.Done())
+	}
 
 	factory.Start(ctx.Done())
 	factory.WaitForCacheSync(ctx.Done())
@@ -118,6 +151,70 @@ func (w *Watcher) onEndpointSlice(obj interface{}) {
 	key := ns + "/" + svcName
 	w.endpoints[key] = ready
 	w.refreshServiceByName(ns, svcName)
+}
+
+func (w *Watcher) onIngress(obj interface{}) {
+	ing, ok := obj.(*networkingv1.Ingress)
+	if !ok || ing == nil {
+		return
+	}
+	w.indexIngress(ing)
+}
+
+func (w *Watcher) onIngressDelete(obj interface{}) {
+	ing, ok := obj.(*networkingv1.Ingress)
+	if !ok {
+		if t, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+			ing, ok = t.Obj.(*networkingv1.Ingress)
+		}
+	}
+	if ing == nil {
+		return
+	}
+	for _, rule := range ing.Spec.Rules {
+		if rule.HTTP == nil {
+			continue
+		}
+		for _, p := range rule.HTTP.Paths {
+			if p.Backend.Service == nil {
+				continue
+			}
+			key := ing.Namespace + "/" + p.Backend.Service.Name
+			delete(w.ingressHosts, key)
+			w.refreshServiceByName(ing.Namespace, p.Backend.Service.Name)
+		}
+	}
+}
+
+func (w *Watcher) indexIngress(ing *networkingv1.Ingress) {
+	for _, rule := range ing.Spec.Rules {
+		host := rule.Host
+		if rule.HTTP == nil {
+			continue
+		}
+		for _, p := range rule.HTTP.Paths {
+			if p.Backend.Service == nil {
+				continue
+			}
+			svcName := p.Backend.Service.Name
+			key := ing.Namespace + "/" + svcName
+			entry := host
+			if p.Path != "" {
+				entry = strings.TrimRight(host, "/") + p.Path
+			}
+			w.ingressHosts[key] = appendUnique(w.ingressHosts[key], entry)
+			w.refreshServiceByName(ing.Namespace, svcName)
+		}
+	}
+}
+
+func appendUnique(list []string, v string) []string {
+	for _, x := range list {
+		if x == v {
+			return list
+		}
+	}
+	return append(list, v)
 }
 
 func (w *Watcher) refreshServiceByName(ns, name string) {
@@ -210,6 +307,7 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 	source := model.SourceService
 	score := sigScore
 	published := w.cfg.AutoPublish
+	canonicalSlug := ""
 
 	if enabled {
 		source = model.SourceAnnotation
@@ -241,6 +339,9 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		if ann[annoPublished] == "true" || ann[annoFavorite] == "true" {
 			published = true
 		}
+		if v := ann[annoSlug]; v != "" {
+			canonicalSlug = v
+		}
 	} else if sig != nil {
 		source = model.SourceSignature
 		displayName = sig.DisplayName
@@ -248,6 +349,7 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		icon = sig.Icon
 		port = sig.Port
 		score = sig.Score
+		canonicalSlug = sig.CanonicalSlug
 		if !w.cfg.AutoSuggest {
 			return model.App{}, false
 		}
@@ -262,13 +364,28 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		published = w.cfg.AutoPublish
 	}
 
+	svcKey := svc.Namespace + "/" + svc.Name
+	if hosts, ok := w.ingressHosts[svcKey]; ok && len(hosts) > 0 {
+		score += 15
+		if source == model.SourceService {
+			source = model.SourceIngress
+		}
+		if desc == "" {
+			desc = "Route: " + strings.Join(hosts, ", ")
+		}
+	}
+
 	routePath := fmt.Sprintf("/a/%s/%s", svc.Namespace, slug)
 	publicURL := strings.TrimRight(w.cfg.PublicBaseURL, "/") + routePath
+	if canonicalSlug != "" {
+		publicURL = strings.TrimRight(w.cfg.PublicBaseURL, "/") + "/apps/" + canonicalSlug
+	}
 
 	return model.App{
-		ID:          id,
-		Slug:        slug,
-		DisplayName: displayName,
+		ID:            id,
+		Slug:          slug,
+		CanonicalSlug: canonicalSlug,
+		DisplayName:   displayName,
 		Description: desc,
 		Namespace:   svc.Namespace,
 		Category:    category,
@@ -367,6 +484,22 @@ func (w *Watcher) ResyncAll(ctx context.Context) error {
 	if err == nil {
 		for i := range epsList.Items {
 			w.onEndpointSlice(&epsList.Items[i])
+		}
+	}
+	if w.cfg.DiscoverIngress {
+		ingList, e := w.client.NetworkingV1().Ingresses("").List(ctx, metav1.ListOptions{})
+		if e == nil {
+			for i := range ingList.Items {
+				w.indexIngress(&ingList.Items[i])
+			}
+		}
+	}
+	if w.cfg.DiscoverGatewayAPI && w.gwClient != nil {
+		hrList, e := w.gwClient.GatewayV1().HTTPRoutes("").List(ctx, metav1.ListOptions{})
+		if e == nil {
+			for i := range hrList.Items {
+				w.indexHTTPRoute(&hrList.Items[i])
+			}
 		}
 	}
 	return nil

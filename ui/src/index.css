@@ -723,3 +723,111 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--hermes-text);
 }
+
+.app-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-title-link:hover {
+  color: #fdba74;
+}
+
+.chip-accent {
+  color: #fdba74;
+  border-color: rgba(253, 186, 116, 0.35);
+}
+
+.app-menu-wrap {
+  position: relative;
+}
+
+.app-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  min-width: 10rem;
+  padding: 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--hermes-border);
+  background: rgba(12, 14, 22, 0.96);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  z-index: 20;
+}
+
+.app-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--hermes-text);
+  font-size: 0.78rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-menu-danger {
+  color: #fca5a5;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 1.75rem;
+  background: var(--hermes-border);
+  margin: 0 0.15rem;
+}
+
+.dock-fav {
+  min-width: 2.25rem;
+}
+
+.dock-fav-icon {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.audit-table-wrap {
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.audit-table th,
+.audit-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--hermes-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.audit-table th {
+  color: var(--hermes-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--hermes-muted);
+}
+
+.auth-login {
+  text-decoration: none;
+}

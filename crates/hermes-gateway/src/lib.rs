@@ -17,13 +17,46 @@ use hermes_core::store::Store;
 #[derive(Clone)]
 pub struct GatewayState {
     pub store: Arc<Store>,
+    pub default_user: String,
 }
 
 pub fn routes(state: GatewayState) -> Router {
     Router::new()
+        .route("/apps/{slug}", any(proxy_canonical_root))
+        .route("/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/a/{namespace}/{slug}", any(proxy_root))
         .route("/a/{namespace}/{slug}/{*rest}", any(proxy_path))
         .with_state(state)
+}
+
+async fn proxy_canonical_root(
+    State(st): State<GatewayState>,
+    Path(slug): Path<String>,
+    req: Request<Body>,
+) -> Response {
+    match st.store.get_app_by_canonical_slug(&slug) {
+        Ok(Some(app)) => proxy_app(st, app, String::new(), req).await,
+        Ok(None) => (StatusCode::NOT_FOUND, "app not found").into_response(),
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response()
+        }
+    }
+}
+
+async fn proxy_canonical_path(
+    State(st): State<GatewayState>,
+    Path((slug, rest)): Path<(String, String)>,
+    req: Request<Body>,
+) -> Response {
+    match st.store.get_app_by_canonical_slug(&slug) {
+        Ok(Some(app)) => proxy_app(st, app, rest, req).await,
+        Ok(None) => (StatusCode::NOT_FOUND, "app not found").into_response(),
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response()
+        }
+    }
 }
 
 async fn proxy_root(
@@ -31,7 +64,14 @@ async fn proxy_root(
     Path((namespace, slug)): Path<(String, String)>,
     req: Request<Body>,
 ) -> Response {
-    proxy_impl(st, namespace, slug, String::new(), req).await
+    match st.store.get_app_by_route(&namespace, &slug) {
+        Ok(Some(app)) => proxy_app(st, app, String::new(), req).await,
+        Ok(None) => (StatusCode::NOT_FOUND, "app not found").into_response(),
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response()
+        }
+    }
 }
 
 async fn proxy_path(
@@ -39,25 +79,17 @@ async fn proxy_path(
     Path((namespace, slug, rest)): Path<(String, String, String)>,
     req: Request<Body>,
 ) -> Response {
-    proxy_impl(st, namespace, slug, rest, req).await
-}
-
-async fn proxy_impl(
-    st: GatewayState,
-    namespace: String,
-    slug: String,
-    rest: String,
-    req: Request<Body>,
-) -> Response {
-    let app = match st.store.get_app_by_route(&namespace, &slug) {
-        Ok(Some(a)) => a,
-        Ok(None) => return (StatusCode::NOT_FOUND, "app not found").into_response(),
+    match st.store.get_app_by_route(&namespace, &slug) {
+        Ok(Some(app)) => proxy_app(st, app, rest, req).await,
+        Ok(None) => (StatusCode::NOT_FOUND, "app not found").into_response(),
         Err(e) => {
             tracing::error!("store error: {e:#}");
-            return (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response();
+            (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response()
         }
-    };
+    }
+}
 
+async fn proxy_app(st: GatewayState, app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
     if !app.visibility.published {
         return (StatusCode::FORBIDDEN, "app not published").into_response();
     }
@@ -69,6 +101,21 @@ async fn proxy_impl(
         )
             .into_response();
     }
+
+    let user = req
+        .headers()
+        .get("x-hermes-user")
+        .and_then(|v| v.to_str().ok())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .unwrap_or_else(|| st.default_user.clone());
+
+    let _ = st.store.record_audit(
+        &user,
+        "launch",
+        &app.id,
+        &app.route_path,
+    );
 
     if is_websocket_upgrade(req.headers()) {
         let (mut parts, _body) = req.into_parts();
@@ -231,21 +278,51 @@ async fn tunnel_websocket(
 }
 
 fn build_backend_path(app: &hermes_core::App, rest: &str) -> String {
-    let mut path = app.backend.path.clone();
-    if !path.ends_with('/') && !rest.is_empty() && !rest.starts_with('/') {
-        path.push('/');
-    }
-    if !rest.is_empty() {
-        if rest.starts_with('/') {
-            path = format!("{}{}", app.backend.path.trim_end_matches('/'), rest);
+    let base = if app.backend.path.is_empty() {
+        "/".to_string()
+    } else {
+        app.backend.path.clone()
+    };
+
+    let suffix = {
+        let s = rest.trim();
+        if s.is_empty() {
+            String::new()
+        } else if s.starts_with('/') {
+            s.to_string()
         } else {
-            path.push_str(rest);
+            format!("/{s}")
+        }
+    };
+
+    let mut suffix = suffix;
+    if !app.rewrite.strip_prefix.is_empty() && !suffix.is_empty() {
+        let strip = app.rewrite.strip_prefix.trim_end_matches('/');
+        if suffix.starts_with(strip) {
+            suffix = suffix.strip_prefix(strip).unwrap_or(&suffix).to_string();
         }
     }
-    if !path.starts_with('/') {
-        path.insert(0, '/');
+
+    if suffix.is_empty() || suffix == "/" {
+        return normalize_path(&base);
     }
-    path
+
+    if base.ends_with('/') {
+        normalize_path(&format!("{}{}", base.trim_end_matches('/'), suffix))
+    } else {
+        normalize_path(&format!("{}/{}", base.trim_end_matches('/'), suffix.trim_start_matches('/')))
+    }
+}
+
+fn normalize_path(path: &str) -> String {
+    if path.is_empty() || path == "/" {
+        return "/".to_string();
+    }
+    if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{path}")
+    }
 }
 
 fn filter_request_headers(in_headers: &HeaderMap) -> HeaderMap {

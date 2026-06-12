@@ -29,6 +29,7 @@ check "catalog API" "curl -sf '${BASE}/api/v1/catalog'"
 check "cluster summary" "curl -sf '${BASE}/api/v1/cluster/summary'"
 check "search API" "curl -sf '${BASE}/api/v1/search?q=gra'"
 check "health summary" "curl -sf '${BASE}/api/v1/health/apps'"
+check "audit API" "curl -sf '${BASE}/api/v1/audit?limit=5'"
 
 # Wait for demo apps (Grafana/Prometheus) to appear in catalog
 found_demo=false

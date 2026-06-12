@@ -38,6 +38,8 @@ pub struct Rewrite {
 pub struct App {
     pub id: String,
     pub slug: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub canonical_slug: String,
     pub display_name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
@@ -90,5 +92,20 @@ pub struct ClusterSummary {
     pub degraded: usize,
     pub broken: usize,
 }
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuditEvent {
+    pub id: i64,
+    pub user_id: String,
+    pub action: String,
+    pub app_id: String,
+    pub detail: String,
+    pub created_at: String,
+}
+
+/// Authenticated user id propagated from server auth middleware.
+#[derive(Clone, Debug)]
+pub struct CurrentUser(pub String);
 
 pub mod store;

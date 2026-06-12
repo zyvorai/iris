@@ -15,6 +15,7 @@ hermes-core = { path = "../hermes-core" }
 hermes-api = { path = "../hermes-api" }
 hermes-gateway = { path = "../hermes-gateway" }
 axum = { workspace = true }
+axum-extra = { version = "0.10", features = ["cookie"] }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -24,3 +25,8 @@ tower = { workspace = true }
 tower-http = { workspace = true }
 anyhow = { workspace = true }
 futures-util = { workspace = true }
+jsonwebtoken = "9"
+rand = "0.8"
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+time = "0.3"
+chrono = { workspace = true }

@@ -6,6 +6,7 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -77,7 +78,12 @@ CREATE TABLE IF NOT EXISTS hidden_services (
 );
 `
 	_, err := s.db.Exec(schema)
-	return err
+	if err != nil {
+		return err
+	}
+	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''`)
+	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)`)
+	return nil
 }
 
 func (s *Store) UpsertApp(app model.App) error {
@@ -85,12 +91,13 @@ func (s *Store) UpsertApp(app model.App) error {
 	app.UpdatedAt = now
 	_, err := s.db.Exec(`
 INSERT INTO apps (
-  id, slug, display_name, description, namespace, category, icon,
+  id, slug, canonical_slug, display_name, description, namespace, category, icon,
   backend_json, route_path, public_url, status, status_message, source,
   auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
   slug=excluded.slug,
+  canonical_slug=excluded.canonical_slug,
   display_name=excluded.display_name,
   description=excluded.description,
   namespace=excluded.namespace,
@@ -113,7 +120,7 @@ ON CONFLICT(id) DO UPDATE SET
   ready_endpoints=excluded.ready_endpoints,
   updated_at=excluded.updated_at
 `,
-		app.ID, app.Slug, app.DisplayName, app.Description, app.Namespace, app.Category, app.Icon,
+		app.ID, app.Slug, app.CanonicalSlug, app.DisplayName, app.Description, app.Namespace, app.Category, app.Icon,
 		app.BackendJSON(), app.RoutePath, app.PublicURL, app.Status, app.StatusMsg, app.Source,
 		app.AuthMode, app.Score, app.VisibilityJSON(), app.RewriteJSON(), app.ReadyCount, app.UpdatedAt,
 	)
@@ -122,7 +129,7 @@ ON CONFLICT(id) DO UPDATE SET
 
 func (s *Store) GetApp(id string) (*model.App, error) {
 	row := s.db.QueryRow(`
-SELECT id, slug, display_name, description, namespace, category, icon,
+SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
   backend_json, route_path, public_url, status, status_message, source,
   auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
 FROM apps WHERE id = ?`, id)
@@ -130,7 +137,7 @@ FROM apps WHERE id = ?`, id)
 }
 
 func (s *Store) ListApps(publishedOnly bool) ([]model.App, error) {
-	q := `SELECT id, slug, display_name, description, namespace, category, icon,
+	q := `SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
   backend_json, route_path, public_url, status, status_message, source,
   auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
 FROM apps`
@@ -156,7 +163,7 @@ FROM apps`
 
 func (s *Store) ListDiscovery() ([]model.App, error) {
 	rows, err := s.db.Query(`
-SELECT id, slug, display_name, description, namespace, category, icon,
+SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
   backend_json, route_path, public_url, status, status_message, source,
   auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
 FROM apps
@@ -191,6 +198,10 @@ func (s *Store) DeleteApp(id string) error {
 }
 
 func (s *Store) HideApp(id string) error {
+	parts := strings.SplitN(id, "/", 2)
+	if len(parts) == 2 {
+		_ = s.HideService(parts[0], parts[1])
+	}
 	vis := model.Visibility{Hidden: true}
 	_, err := s.db.Exec(`UPDATE apps SET visibility_json = ?, updated_at = ? WHERE id = ?`,
 		mustJSON(vis), time.Now().UTC().Format(time.RFC3339), id)
@@ -212,7 +223,7 @@ func scanApp(row *sql.Row) (*model.App, error) {
 	var app model.App
 	var backendJSON, visJSON, rewriteJSON string
 	err := row.Scan(
-		&app.ID, &app.Slug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
+		&app.ID, &app.Slug, &app.CanonicalSlug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
 		&backendJSON, &app.RoutePath, &app.PublicURL, &app.Status, &app.StatusMsg, &app.Source,
 		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt,
 	)
@@ -229,7 +240,7 @@ func scanAppRows(rows *sql.Rows) (*model.App, error) {
 	var app model.App
 	var backendJSON, visJSON, rewriteJSON string
 	err := rows.Scan(
-		&app.ID, &app.Slug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
+		&app.ID, &app.Slug, &app.CanonicalSlug, &app.DisplayName, &app.Description, &app.Namespace, &app.Category, &app.Icon,
 		&backendJSON, &app.RoutePath, &app.PublicURL, &app.Status, &app.StatusMsg, &app.Source,
 		&app.AuthMode, &app.Score, &visJSON, &rewriteJSON, &app.ReadyCount, &app.UpdatedAt,
 	)

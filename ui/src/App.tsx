@@ -9,6 +9,7 @@ import AppsPage from './pages/AppsPage'
 import ClusterPage from './pages/ClusterPage'
 import DiscoveryPage from './pages/DiscoveryPage'
 import AppDetailPage, { HealthPage } from './pages/AppDetailPage'
+import ActivityPage from './pages/ActivityPage'
 
 export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/apps/:id" element={<AppDetailPage />} />
         <Route path="/discovery" element={<DiscoveryPage />} />
         <Route path="/health" element={<HealthPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
       </Routes>
     </Layout>
   )

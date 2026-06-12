@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 
 	"github.com/ssahani/hermes/controller/discovery"
 	"github.com/ssahani/hermes/controller/store"
@@ -26,6 +27,8 @@ func main() {
 	autoPublish := env("HERMES_AUTO_PUBLISH", "false") == "true"
 	autoSuggest := env("HERMES_AUTO_SUGGEST", "true") != "false"
 	discoverAll := env("HERMES_DISCOVER_ALL", "true") != "false"
+	discoverIngress := env("HERMES_DISCOVER_INGRESS", "true") != "false"
+	discoverGatewayAPI := env("HERMES_DISCOVER_GATEWAY_API", "true") != "false"
 	watchNS := splitCSV(env("HERMES_WATCH_NAMESPACES", ""))
 	healthInterval := 30 * time.Second
 
@@ -35,19 +38,34 @@ func main() {
 	}
 	defer st.Close()
 
-	client, err := k8sClient()
+	restCfg, err := restConfig()
+	if err != nil {
+		log.Fatalf("k8s config: %v", err)
+	}
+	client, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
 		log.Fatalf("k8s client: %v", err)
 	}
 
-	cfg := discovery.Config{
-		PublicBaseURL: publicBase,
-		AutoPublish:   autoPublish,
-		AutoSuggest:   autoSuggest,
-		DiscoverAll:   discoverAll,
-		WatchNS:       watchNS,
+	var gwClient gwclientset.Interface
+	if discoverGatewayAPI {
+		gwClient, err = gwclientset.NewForConfig(restCfg)
+		if err != nil {
+			log.Printf("gateway-api client unavailable (install Gateway API CRDs to enable): %v", err)
+			discoverGatewayAPI = false
+		}
 	}
-	w := discovery.NewWatcher(client, st, cfg)
+
+	cfg := discovery.Config{
+		PublicBaseURL:      publicBase,
+		AutoPublish:        autoPublish,
+		AutoSuggest:        autoSuggest,
+		DiscoverAll:        discoverAll,
+		DiscoverIngress:    discoverIngress,
+		DiscoverGatewayAPI: discoverGatewayAPI,
+		WatchNS:            watchNS,
+	}
+	w := discovery.NewWatcher(client, gwClient, st, cfg)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -58,13 +76,14 @@ func main() {
 
 	go w.RefreshHealth(ctx, healthInterval)
 
-	log.Printf("hermes-controller watching services (autoPublish=%v autoSuggest=%v discoverAll=%v)", autoPublish, autoSuggest, discoverAll)
+	log.Printf("hermes-controller watching (autoPublish=%v autoSuggest=%v discoverAll=%v discoverIngress=%v discoverGatewayAPI=%v)",
+		autoPublish, autoSuggest, discoverAll, discoverIngress, discoverGatewayAPI)
 	if err := w.Run(ctx); err != nil {
 		log.Fatalf("watcher: %v", err)
 	}
 }
 
-func k8sClient() (kubernetes.Interface, error) {
+func restConfig() (*rest.Config, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
 		kubeconfig := os.Getenv("KUBECONFIG")
@@ -76,7 +95,7 @@ func k8sClient() (kubernetes.Interface, error) {
 			return nil, err
 		}
 	}
-	return kubernetes.NewForConfig(cfg)
+	return cfg, nil
 }
 
 func env(k, def string) string {

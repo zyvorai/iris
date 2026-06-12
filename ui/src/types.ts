@@ -18,6 +18,7 @@ export interface Visibility {
 export interface HermesApp {
   id: string
   slug: string
+  canonicalSlug?: string
   displayName: string
   description?: string
   namespace: string
@@ -57,4 +58,13 @@ export interface ClusterSummary {
   healthy: number
   degraded: number
   broken: number
+}
+
+export interface AuditEvent {
+  id: number
+  userId: string
+  action: string
+  appId: string
+  detail: string
+  createdAt: string
 }

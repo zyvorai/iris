@@ -1,9 +1,11 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Compass, Grid3X3, HeartPulse, Home, Search, Server } from 'lucide-react'
+import { Compass, Grid3X3, HeartPulse, History, Home, Search, Server } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import CommandPalette from './CommandPalette'
+import { hermesApi, openApp } from '../services/hermesApi'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -18,11 +20,19 @@ const titles: Record<string, string> = {
   '/cluster': 'Cluster',
   '/discovery': 'Discovery',
   '/health': 'Health',
+  '/activity': 'Activity',
+}
+
+function iconLetter(icon: string, name: string) {
+  if (icon && icon !== 'app') return icon.slice(0, 2).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
 }
 
 export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
   const location = useLocation()
   const pageTitle = titles[location.pathname] ?? 'Hermes Dock'
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
 
   return (
     <div className="hermes-shell" data-shell-density="calm">
@@ -31,7 +41,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
           <div className="hermes-brand-mark" aria-hidden />
           <div>
             <h1>Hermes</h1>
-            <p>Service Gateway</p>
+            <p>Application Operating Layer</p>
           </div>
         </div>
         <div className="menubar-title">{pageTitle}</div>
@@ -40,6 +50,20 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
           <span>Spotlight</span>
           <kbd>⌘K</kbd>
         </button>
+        {auth.data?.mode === 'oidc' ? (
+          auth.data.authenticated ? (
+            <div className="auth-chip" title={auth.data.userId}>
+              {auth.data.userId}
+              <button type="button" className="btn btn-ghost" onClick={() => { void fetch('/auth/logout', { method: 'POST' }).then(() => window.location.reload()) }}>
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <a href="/auth/login" className="btn btn-primary auth-login">
+              Sign in
+            </a>
+          )
+        ) : null}
       </header>
       <main className="hermes-main hermes-scroll-body">{children}</main>
       <footer className="hermes-dock mac-dock" aria-label="App dock">
@@ -58,6 +82,23 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         <NavLink to="/health" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Health">
           <HeartPulse size={20} />
         </NavLink>
+        <NavLink to="/activity" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Activity">
+          <History size={20} />
+        </NavLink>
+        {favorites.data?.length ? (
+          <div className="dock-divider" aria-hidden />
+        ) : null}
+        {favorites.data?.slice(0, 6).map((app) => (
+          <button
+            key={app.id}
+            type="button"
+            className="dock-item dock-fav"
+            title={app.displayName}
+            onClick={() => openApp(app)}
+          >
+            <span className="dock-fav-icon">{iconLetter(app.icon, app.displayName)}</span>
+          </button>
+        ))}
         <button type="button" className="dock-item dock-spotlight" title="Spotlight" onClick={onPaletteOpen}>
           <Search size={20} />
         </button>

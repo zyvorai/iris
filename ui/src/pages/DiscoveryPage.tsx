@@ -52,12 +52,12 @@ export default function DiscoveryPage() {
         ) : (
           <div className="app-grid">
             {discovery.data.map((app) => (
-              <div key={app.id} className="discovery-card-wrap">
-                <AppCard app={app} onPublish={() => publish.mutate(app.id)} />
-                <button type="button" className="btn discovery-hide" onClick={() => hide.mutate(app.id)}>
-                  Hide from discovery
-                </button>
-              </div>
+              <AppCard
+                key={app.id}
+                app={app}
+                onPublish={() => publish.mutate(app.id)}
+                onHide={() => hide.mutate(app.id)}
+              />
             ))}
           </div>
         )}

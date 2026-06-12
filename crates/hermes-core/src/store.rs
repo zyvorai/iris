@@ -8,7 +8,11 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use rusqlite::{params, Connection};
 
-use crate::{App, Backend, SearchHit, Visibility};
+use crate::{App, AuditEvent, Backend, SearchHit, Visibility};
+
+const APP_SELECT: &str = "SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
+              backend_json, route_path, public_url, status, status_message, source,
+              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at";
 
 pub struct Store {
     conn: Arc<Mutex<Connection>>,
@@ -74,28 +78,38 @@ CREATE TABLE IF NOT EXISTS hidden_services (
   service_name TEXT NOT NULL,
   PRIMARY KEY (namespace, service_name)
 );
+CREATE TABLE IF NOT EXISTS audit_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  app_id TEXT NOT NULL DEFAULT '',
+  detail TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
 "#,
         )?;
+        let _ = conn.execute("ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''", []);
+        let _ = conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)",
+            [],
+        );
         Ok(())
     }
 
     pub fn list_apps(&self, published_only: bool) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
         let sql = if published_only {
-            "SELECT id, slug, display_name, description, namespace, category, icon,
-              backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
+            format!(
+                "{APP_SELECT}
              FROM apps
              WHERE json_extract(visibility_json, '$.published') = 1
                AND json_extract(visibility_json, '$.hidden') = 0
              ORDER BY display_name"
+            )
         } else {
-            "SELECT id, slug, display_name, description, namespace, category, icon,
-              backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-             FROM apps ORDER BY display_name"
+            format!("{APP_SELECT} FROM apps ORDER BY display_name")
         };
-        let mut stmt = conn.prepare(sql)?;
+        let mut stmt = conn.prepare(&sql)?;
         let rows = stmt.query_map([], |row| row_to_app(row))?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
@@ -103,13 +117,13 @@ CREATE TABLE IF NOT EXISTS hidden_services (
     pub fn list_discovery(&self) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, slug, display_name, description, namespace, category, icon,
-              backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
+            &format!(
+                "{APP_SELECT}
              FROM apps
              WHERE json_extract(visibility_json, '$.published') = 0
                AND json_extract(visibility_json, '$.hidden') = 0
-             ORDER BY score DESC, display_name",
+             ORDER BY score DESC, display_name"
+            ),
         )?;
         let rows = stmt.query_map([], |row| row_to_app(row))?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -118,12 +132,12 @@ CREATE TABLE IF NOT EXISTS hidden_services (
     pub fn list_catalog(&self) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, slug, display_name, description, namespace, category, icon,
-              backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
+            &format!(
+                "{APP_SELECT}
              FROM apps
              WHERE json_extract(visibility_json, '$.hidden') = 0
-             ORDER BY namespace, display_name",
+             ORDER BY namespace, display_name"
+            ),
         )?;
         let rows = stmt.query_map([], |row| row_to_app(row))?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -164,12 +178,7 @@ CREATE TABLE IF NOT EXISTS hidden_services (
 
     pub fn get_app(&self, id: &str) -> Result<Option<App>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            "SELECT id, slug, display_name, description, namespace, category, icon,
-              backend_json, route_path, public_url, status, status_message, source,
-              auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at
-             FROM apps WHERE id = ?1",
-        )?;
+        let mut stmt = conn.prepare(&format!("{APP_SELECT} FROM apps WHERE id = ?1"))?;
         let mut rows = stmt.query([id])?;
         if let Some(row) = rows.next()? {
             return Ok(Some(row_to_app(&row)?));
@@ -180,6 +189,25 @@ CREATE TABLE IF NOT EXISTS hidden_services (
     pub fn get_app_by_route(&self, namespace: &str, slug: &str) -> Result<Option<App>> {
         let id = format!("{namespace}/{slug}");
         self.get_app(&id)
+    }
+
+    pub fn get_app_by_canonical_slug(&self, slug: &str) -> Result<Option<App>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            &format!(
+                "{APP_SELECT}
+             FROM apps
+             WHERE canonical_slug = ?1
+               AND json_extract(visibility_json, '$.hidden') = 0
+             ORDER BY json_extract(visibility_json, '$.published') DESC, score DESC
+             LIMIT 1"
+            ),
+        )?;
+        let mut rows = stmt.query([slug])?;
+        if let Some(row) = rows.next()? {
+            return Ok(Some(row_to_app(&row)?));
+        }
+        Ok(None)
     }
 
     pub fn publish_app(&self, id: &str) -> Result<()> {
@@ -196,6 +224,13 @@ CREATE TABLE IF NOT EXISTS hidden_services (
     }
 
     pub fn hide_app(&self, id: &str) -> Result<()> {
+        if let Some((ns, name)) = id.split_once('/') {
+            let conn = self.conn.lock().unwrap();
+            conn.execute(
+                "INSERT OR IGNORE INTO hidden_services (namespace, service_name) VALUES (?1, ?2)",
+                params![ns, name],
+            )?;
+        }
         let vis = Visibility {
             hidden: true,
             ..Default::default()
@@ -223,6 +258,9 @@ CREATE TABLE IF NOT EXISTS hidden_services (
                 }
                 if app.slug.to_lowercase().contains(&q) {
                     score += 80;
+                }
+                if app.canonical_slug.to_lowercase().contains(&q) {
+                    score += 90;
                 }
                 if app.namespace.to_lowercase().contains(&q) {
                     score += 40;
@@ -319,20 +357,60 @@ CREATE TABLE IF NOT EXISTS hidden_services (
                 .collect(),
         })
     }
+
+    pub fn record_audit(
+        &self,
+        user_id: &str,
+        action: &str,
+        app_id: &str,
+        detail: &str,
+    ) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT INTO audit_events (user_id, action, app_id, detail, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![
+                user_id,
+                action,
+                app_id,
+                detail,
+                Utc::now().to_rfc3339()
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn list_audit(&self, limit: usize) -> Result<Vec<AuditEvent>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT id, user_id, action, app_id, detail, created_at FROM audit_events ORDER BY id DESC LIMIT ?1",
+        )?;
+        let rows = stmt.query_map([limit as i64], |row| {
+            Ok(AuditEvent {
+                id: row.get(0)?,
+                user_id: row.get(1)?,
+                action: row.get(2)?,
+                app_id: row.get(3)?,
+                detail: row.get(4)?,
+                created_at: row.get(5)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
 }
 
 fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
-    let backend_json: String = row.get(7)?;
-    let visibility_json: String = row.get(15)?;
-    let rewrite_json: String = row.get(16)?;
+    let backend_json: String = row.get(8)?;
+    let visibility_json: String = row.get(16)?;
+    let rewrite_json: String = row.get(17)?;
     Ok(App {
         id: row.get(0)?,
         slug: row.get(1)?,
-        display_name: row.get(2)?,
-        description: row.get(3)?,
-        namespace: row.get(4)?,
-        category: row.get(5)?,
-        icon: row.get(6)?,
+        canonical_slug: row.get(2)?,
+        display_name: row.get(3)?,
+        description: row.get(4)?,
+        namespace: row.get(5)?,
+        category: row.get(6)?,
+        icon: row.get(7)?,
         backend: serde_json::from_str(&backend_json).unwrap_or(Backend {
             kind: "Service".into(),
             name: String::new(),
@@ -340,16 +418,16 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
             scheme: "http".into(),
             path: "/".into(),
         }),
-        route_path: row.get(8)?,
-        public_url: row.get(9)?,
-        status: row.get(10)?,
-        status_message: row.get(11)?,
-        source: row.get(12)?,
-        auth_mode: row.get(13)?,
-        score: row.get(14)?,
+        route_path: row.get(9)?,
+        public_url: row.get(10)?,
+        status: row.get(11)?,
+        status_message: row.get(12)?,
+        source: row.get(13)?,
+        auth_mode: row.get(14)?,
+        score: row.get(15)?,
         visibility: serde_json::from_str(&visibility_json).unwrap_or_default(),
         rewrite: serde_json::from_str(&rewrite_json).unwrap_or_default(),
-        ready_endpoints: row.get(17)?,
-        updated_at: row.get(18)?,
+        ready_endpoints: row.get(18)?,
+        updated_at: row.get(19)?,
     })
 }

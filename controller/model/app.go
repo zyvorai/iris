@@ -40,9 +40,10 @@ type Rewrite struct {
 }
 
 type App struct {
-	ID          string     `json:"id"`
-	Slug        string     `json:"slug"`
-	DisplayName string     `json:"displayName"`
+	ID            string     `json:"id"`
+	Slug          string     `json:"slug"`
+	CanonicalSlug string     `json:"canonicalSlug,omitempty"`
+	DisplayName   string     `json:"displayName"`
 	Description string     `json:"description,omitempty"`
 	Namespace   string     `json:"namespace"`
 	Category    string     `json:"category"`

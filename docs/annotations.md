@@ -6,6 +6,7 @@ Prefix: `hermes.zyvor.dev/`
 |------------|----------|-------------|
 | `enabled` | yes | `"true"` to register the service |
 | `name` | no | Display name (defaults to service name) |
+| `slug` | no | Canonical gateway slug (e.g. `grafana` → `/apps/grafana`) |
 | `description` | no | Card description |
 | `icon` | no | Icon key (`grafana`, `prometheus`, etc.) |
 | `category` | no | Catalog category |
@@ -15,6 +16,8 @@ Prefix: `hermes.zyvor.dev/`
 | `auth` | no | Auth mode hint (`none`, `sso`) |
 | `published` | no | `"true"` to publish immediately |
 
+When `slug` is set, Hermes exposes a stable public URL at `/apps/{slug}` in addition to the namespace-scoped route `/a/{namespace}/{service-slug}`.
+
 Example:
 
 ```yaml
@@ -22,6 +25,7 @@ metadata:
   annotations:
     hermes.zyvor.dev/enabled: "true"
     hermes.zyvor.dev/name: "Grafana"
+    hermes.zyvor.dev/slug: "grafana"
     hermes.zyvor.dev/category: "Monitoring"
     hermes.zyvor.dev/port: "80"
 ```
