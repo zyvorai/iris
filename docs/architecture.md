@@ -1,6 +1,6 @@
 # Hermes architecture
 
-Hermes v0.1 is a standalone Kubernetes Service Launchpad with three parts:
+Hermes v0.1 is the Application Operating Layer for Kubernetes — a standalone platform with three parts:
 
 1. **Hermes Controller** (Go) — watches Services and EndpointSlices, parses annotations, applies known-app signatures, polls health, writes catalog to SQLite.
 2. **Hermes Server** (Rust) — REST API, reverse proxy gateway, embedded React UI.

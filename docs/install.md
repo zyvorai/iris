@@ -1,5 +1,7 @@
 # Install Hermes
 
+Hermes indexes all cluster services by default (`controller.discoverAll: true`). Annotated and signature-matched applications receive richer metadata; everything else appears in the Cluster and Discovery views.
+
 ```bash
 helm install hermes ./charts/hermes \
   -n hermes-system \
@@ -42,4 +44,5 @@ Open http://localhost:8080
 | `HERMES_PUBLIC_BASE_URL` | controller | Public URL prefix for app links |
 | `HERMES_AUTO_PUBLISH` | controller | Auto-publish annotated services |
 | `HERMES_AUTO_SUGGEST` | controller | Suggest known apps without annotation |
+| `HERMES_DISCOVER_ALL` | controller | Index all eligible cluster services (default `true`) |
 | `HERMES_BIND` | server | Listen address (default `0.0.0.0:8080`) |
