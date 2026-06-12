@@ -69,6 +69,7 @@ type Watcher struct {
 	endpoints    map[string]int // key: ns/name -> ready count
 	ingressHosts map[string][]string
 	meshRoutes   map[string][]string
+	meshPolicies map[string][]model.MeshPolicy
 }
 
 func NewWatcher(client kubernetes.Interface, gwClient gwclientset.Interface, dynClient dynamic.Interface, st *store.Store, cfg Config) *Watcher {
@@ -81,6 +82,7 @@ func NewWatcher(client kubernetes.Interface, gwClient gwclientset.Interface, dyn
 		endpoints:    make(map[string]int),
 		ingressHosts: make(map[string][]string),
 		meshRoutes:   make(map[string][]string),
+		meshPolicies: make(map[string][]model.MeshPolicy),
 	}
 }
 
@@ -424,6 +426,9 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 	}
 	if mesh := w.meshRoutesForService(svc); len(mesh) > 0 {
 		meta.MeshRoutes = append([]string(nil), mesh...)
+	}
+	if policies := w.meshPoliciesForService(svc); len(policies) > 0 {
+		meta.MeshPolicies = append([]model.MeshPolicy(nil), policies...)
 	}
 
 	return model.App{

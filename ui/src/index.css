@@ -1529,6 +1529,44 @@ button {
   color: #cbd5e1;
 }
 
+.mesh-policy-body {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.mesh-policy-body strong {
+  font-size: 0.88rem;
+}
+
+.mesh-policy-ns {
+  font-size: 0.72rem;
+  color: var(--hermes-muted);
+}
+
+.mesh-policy-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  align-items: baseline;
+}
+
+.mesh-policy-row span:first-child {
+  color: var(--hermes-muted);
+  min-width: 4.5rem;
+}
+
+.mesh-policy-detail {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--hermes-muted);
+}
+
+.mesh-copy-btn {
+  justify-self: start;
+  margin-top: 0.15rem;
+}
+
 .federated-cluster-block {
   margin-top: 1.25rem;
 }

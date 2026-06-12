@@ -155,7 +155,9 @@ export default function AppDetailPage() {
         </div>
       </section>
 
-      {a.meta?.meshRoutes?.length ? <MeshPolicyPanel routes={a.meta.meshRoutes} /> : null}
+      {a.meta?.meshRoutes?.length || a.meta?.meshPolicies?.length ? (
+        <MeshPolicyPanel routes={a.meta.meshRoutes} policies={a.meta.meshPolicies} />
+      ) : null}
 
       <section className="glass-section">
         <button type="button" className="tech-toggle" onClick={() => setTechOpen((v) => !v)}>

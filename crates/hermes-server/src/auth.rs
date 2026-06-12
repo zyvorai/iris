@@ -166,6 +166,17 @@ pub async fn require_auth(
                 .map(|v| v == auth.api_key)
                 .unwrap_or(false);
         if authorized {
+            if federation_trust_headers() {
+                if req
+                    .headers()
+                    .get("x-hermes-user")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| !s.is_empty())
+                    .unwrap_or(false)
+                {
+                    return next.run(req).await;
+                }
+            }
             let _ = req.headers_mut().insert(
                 HeaderName::from_static("x-hermes-user"),
                 HeaderValue::from_static("api-key"),
@@ -340,15 +351,43 @@ async fn me(State(auth): State<AuthConfig>, headers: HeaderMap) -> Json<AuthMe> 
         .filter(|s| !s.is_empty())
         .map(str::to_string)
         .collect::<Vec<_>>();
+    let header_user = headers
+        .get("x-hermes-user")
+        .and_then(|v| v.to_str().ok())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
+    let header_groups = headers
+        .get("x-hermes-groups")
+        .and_then(|v| v.to_str().ok())
+        .map(|raw| {
+            raw
+                .split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let user_id = user
+        .clone()
+        .or(header_user.clone())
+        .unwrap_or_else(|| auth.fallback_user.clone());
+    let has_header_user = header_user.is_some();
+    let groups = if user.is_some() {
+        groups
+    } else if !header_groups.is_empty() {
+        header_groups
+    } else {
+        groups
+    };
     let rules = hermes_core::workspace_acl::workspace_rules_from_env();
     let role_rules = hermes_core::rbac::role_rules_from_env();
-    let user_id = user.clone().unwrap_or_else(|| auth.fallback_user.clone());
     let admin_users = split_csv(&std::env::var("HERMES_ADMIN_USERS").unwrap_or_default());
     let admin_groups = split_csv(&std::env::var("HERMES_ADMIN_GROUPS").unwrap_or_default());
     let is_admin = (!admin_users.is_empty() && admin_users.iter().any(|u| u == &user_id))
         || groups.iter().any(|g| admin_groups.iter().any(|ag| ag == g));
     Json(AuthMe {
-        authenticated: user.is_some(),
+        authenticated: user.is_some() || has_header_user,
         user_id,
         mode: auth.mode.clone(),
         groups: groups.clone(),
@@ -473,6 +512,12 @@ fn random_token() -> String {
 
 fn hex_encode(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+fn federation_trust_headers() -> bool {
+    std::env::var("HERMES_FEDERATION_TRUST_HEADERS")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
 }
 
 fn urlencoding(raw: &str) -> String {

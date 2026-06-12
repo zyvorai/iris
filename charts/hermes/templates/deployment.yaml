@@ -123,6 +123,10 @@ spec:
             - name: HERMES_K8S_RBAC
               value: "true"
             {{- end }}
+            {{- if .Values.server.federation.trustHeaders }}
+            - name: HERMES_FEDERATION_TRUST_HEADERS
+              value: "true"
+            {{- end }}
             {{- if .Values.server.llm.apiUrl }}
             - name: HERMES_LLM_API_URL
               value: {{ .Values.server.llm.apiUrl | quote }}

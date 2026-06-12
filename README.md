@@ -356,10 +356,12 @@ Honest checklist of what ships now:
 - [x] Multi-cluster write federation (`POST /api/v1/federation/publish/*`, remote recommend)
 - [x] Service mesh policy UI (Istio/Linkerd route panel + graph mesh filter)
 - [x] Native gRPC/HTTP2 backend connection pools in gateway
+- [x] Cross-cluster RBAC sync (forward groups + `HERMES_FEDERATION_TRUST_HEADERS`)
+- [x] Structured Istio/Linkerd mesh policies in discovery + UI panel
 
 **Not yet (roadmap):**
 
-Advanced Istio/Linkerd policy editing · cross-cluster RBAC sync
+In-cluster mesh policy editing · cross-cluster audit aggregation
 
 ---
 

@@ -144,6 +144,8 @@ ON CONFLICT(id) DO UPDATE SET
     WHEN length(coalesce(json_extract(apps.meta_json, '$.ingressHosts'), '')) > 0 THEN json_set(excluded.meta_json, '$.ingressHosts', json_extract(apps.meta_json, '$.ingressHosts'))
     WHEN length(coalesce(json_extract(excluded.meta_json, '$.meshRoutes'), '')) > 0 THEN excluded.meta_json
     WHEN length(coalesce(json_extract(apps.meta_json, '$.meshRoutes'), '')) > 0 THEN json_set(excluded.meta_json, '$.meshRoutes', json_extract(apps.meta_json, '$.meshRoutes'))
+    WHEN length(coalesce(json_extract(excluded.meta_json, '$.meshPolicies'), '')) > 0 THEN excluded.meta_json
+    WHEN length(coalesce(json_extract(apps.meta_json, '$.meshPolicies'), '')) > 0 THEN json_set(excluded.meta_json, '$.meshPolicies', json_extract(apps.meta_json, '$.meshPolicies'))
     ELSE excluded.meta_json
   END
 `,

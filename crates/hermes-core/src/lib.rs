@@ -35,6 +35,24 @@ pub struct Rewrite {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct MeshPolicy {
+    pub kind: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub name: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub namespace: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub hosts: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub destination: String,
+    #[serde(default)]
+    pub weight: i32,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub detail: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct AppMeta {
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub environment: String,
@@ -48,6 +66,8 @@ pub struct AppMeta {
     pub ingress_hosts: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub mesh_routes: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mesh_policies: Vec<MeshPolicy>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -169,7 +189,8 @@ pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, Suggested
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use federation::{
     build_federated_catalog, federation_cluster, remote_publish, remote_publish_namespace,
-    remote_set_recommended, FederatedApp, FederationActionResult,
+    remote_rbac_check, remote_set_recommended, FederatedApp, FederationActionResult,
+    FederationRbacStatus,
 };
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};

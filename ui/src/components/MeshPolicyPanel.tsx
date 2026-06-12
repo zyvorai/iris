@@ -1,7 +1,8 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Network } from 'lucide-react'
+import { Copy, Network } from 'lucide-react'
+import type { MeshPolicy } from '../types'
 
 function meshKind(route: string): { kind: string; label: string; tone: string } {
   if (route.startsWith('istio:')) {
@@ -13,10 +14,30 @@ function meshKind(route: string): { kind: string; label: string; tone: string } 
   return { kind: 'mesh', label: route, tone: 'mesh-generic' }
 }
 
-export default function MeshPolicyPanel({ routes }: { routes: string[] }) {
-  if (!routes.length) return null
+function policyKey(policy: MeshPolicy): string {
+  return `${policy.kind}|${policy.namespace}|${policy.name}|${policy.destination}|${policy.detail}`
+}
 
-  const kinds = new Set(routes.map((route) => meshKind(route).kind))
+function copyText(text: string) {
+  void navigator.clipboard.writeText(text)
+}
+
+export default function MeshPolicyPanel({
+  routes,
+  policies = [],
+}: {
+  routes?: string[]
+  policies?: MeshPolicy[]
+}) {
+  const structured = policies.length > 0
+  const routeList = routes ?? []
+  if (!structured && !routeList.length) return null
+
+  const kinds = new Set(
+    structured
+      ? policies.map((p) => p.kind)
+      : routeList.map((route) => meshKind(route).kind),
+  )
 
   return (
     <section className="glass-section mesh-policy-panel">
@@ -26,17 +47,71 @@ export default function MeshPolicyPanel({ routes }: { routes: string[] }) {
         </h3>
         <span className="chip chip-muted">{[...kinds].join(' · ')}</span>
       </div>
-      <ul className="mesh-route-list">
-        {routes.map((route) => {
-          const { kind, label, tone } = meshKind(route)
-          return (
-            <li key={route} className={`mesh-route-item ${tone}`}>
-              <span className="mesh-route-kind">{kind}</span>
-              <code>{label}</code>
+      {structured ? (
+        <ul className="mesh-route-list">
+          {policies.map((policy) => (
+            <li key={policyKey(policy)} className={`mesh-route-item mesh-${policy.kind}`}>
+              <span className="mesh-route-kind">{policy.kind}</span>
+              <div className="mesh-policy-body">
+                <strong>{policy.name || policy.destination || 'Policy'}</strong>
+                {policy.namespace ? <span className="mesh-policy-ns">{policy.namespace}</span> : null}
+                {policy.hosts?.length ? (
+                  <div className="mesh-policy-row">
+                    <span>Hosts</span>
+                    <code>{policy.hosts.join(', ')}</code>
+                  </div>
+                ) : null}
+                {policy.destination ? (
+                  <div className="mesh-policy-row">
+                    <span>Destination</span>
+                    <code>{policy.destination}</code>
+                  </div>
+                ) : null}
+                {policy.weight ? (
+                  <div className="mesh-policy-row">
+                    <span>Weight</span>
+                    <code>{policy.weight}</code>
+                  </div>
+                ) : null}
+                {policy.detail ? <p className="mesh-policy-detail">{policy.detail}</p> : null}
+                <button
+                  type="button"
+                  className="btn btn-sm mesh-copy-btn"
+                  onClick={() =>
+                    copyText(
+                      [
+                        policy.kind,
+                        policy.namespace,
+                        policy.name,
+                        policy.hosts?.join(','),
+                        policy.destination,
+                        policy.weight ? `weight=${policy.weight}` : '',
+                        policy.detail,
+                      ]
+                        .filter(Boolean)
+                        .join(' | '),
+                    )
+                  }
+                >
+                  <Copy size={12} /> Copy
+                </button>
+              </div>
             </li>
-          )
-        })}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <ul className="mesh-route-list">
+          {routeList.map((route) => {
+            const { kind, label, tone } = meshKind(route)
+            return (
+              <li key={route} className={`mesh-route-item ${tone}`}>
+                <span className="mesh-route-kind">{kind}</span>
+                <code>{label}</code>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </section>
   )
 }

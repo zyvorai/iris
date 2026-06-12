@@ -61,6 +61,8 @@ server:
   workspaceRules: ""
   roleRules: ""
   k8sRbac: false
+  federation:
+    trustHeaders: false
   llm:
     apiUrl: ""
     apiKey: ""

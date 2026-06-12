@@ -46,7 +46,18 @@ type AppMeta struct {
 	DependsOn    []string `json:"dependsOn,omitempty"`
 	Recommended  bool     `json:"recommended,omitempty"`
 	IngressHosts []string `json:"ingressHosts,omitempty"`
-	MeshRoutes   []string `json:"meshRoutes,omitempty"`
+	MeshRoutes   []string      `json:"meshRoutes,omitempty"`
+	MeshPolicies []MeshPolicy  `json:"meshPolicies,omitempty"`
+}
+
+type MeshPolicy struct {
+	Kind        string   `json:"kind"`
+	Name        string   `json:"name,omitempty"`
+	Namespace   string   `json:"namespace,omitempty"`
+	Hosts       []string `json:"hosts,omitempty"`
+	Destination string   `json:"destination,omitempty"`
+	Weight      int      `json:"weight,omitempty"`
+	Detail      string   `json:"detail,omitempty"`
 }
 
 type App struct {

@@ -14,6 +14,7 @@ import type {
   SearchHit,
   FederatedApp,
   FederationActionResult,
+  FederationRbacStatus,
   SearchIntent,
   ShareLink,
   TeamOwner,
@@ -68,6 +69,8 @@ export const hermesApi = {
       method: 'PUT',
       body: JSON.stringify({ recommended }),
     }),
+  federationRbacCheck: (clusterId: string) =>
+    req<FederationRbacStatus>(`/federation/rbac/${encodeURIComponent(clusterId)}`),
   getGraph: () => req<AppGraph>('/graph'),
   listWorkspaces: () => req<Workspace[]>('/workspaces'),
   listOwners: () => req<TeamOwner[]>('/owners'),

@@ -22,6 +22,17 @@ export interface AppMeta {
   recommended?: boolean
   ingressHosts?: string[]
   meshRoutes?: string[]
+  meshPolicies?: MeshPolicy[]
+}
+
+export interface MeshPolicy {
+  kind: string
+  name?: string
+  namespace?: string
+  hosts?: string[]
+  destination?: string
+  weight?: number
+  detail?: string
 }
 
 export interface ShareLink {
@@ -83,6 +94,15 @@ export interface FederationActionResult {
   clusterId: string
   clusterName: string
   ok: boolean
+  detail?: string
+}
+
+export interface FederationRbacStatus {
+  clusterId: string
+  clusterName: string
+  ok: boolean
+  userId: string
+  allowedActions?: string[]
   detail?: string
 }
 

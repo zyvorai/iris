@@ -3,7 +3,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Globe, Upload } from 'lucide-react'
+import { Globe, ShieldCheck, Upload } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import { hermesApi } from '../services/hermesApi'
 import type { FederatedApp } from '../types'
@@ -31,6 +31,10 @@ export default function FederatedPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['catalog-federated'] })
     },
+  })
+
+  const rbacCheck = useMutation({
+    mutationFn: (clusterId: string) => hermesApi.federationRbacCheck(clusterId),
   })
 
   const byCluster = new Map<string, FederatedApp[]>()
@@ -65,7 +69,26 @@ export default function FederatedPage() {
                 ) : (
                   <span className="chip chip-muted">Read-only</span>
                 )}
+                {canWrite ? (
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    disabled={rbacCheck.isPending}
+                    onClick={() => rbacCheck.mutate(clusterId)}
+                  >
+                    <ShieldCheck size={14} />
+                    Check RBAC
+                  </button>
+                ) : null}
               </div>
+              {rbacCheck.data && rbacCheck.variables === clusterId ? (
+                <p className={rbacCheck.data.ok ? 'federated-action-ok' : 'federated-action-error'}>
+                  {rbacCheck.data.detail ?? (rbacCheck.data.ok ? 'Publish allowed' : 'Publish denied')}
+                  {rbacCheck.data.allowedActions?.length
+                    ? ` · ${rbacCheck.data.allowedActions.join(', ')}`
+                    : ''}
+                </p>
+              ) : null}
               <div className="app-grid">
                 {entries.map((entry) => (
                   <div key={`${entry.clusterId}-${entry.id}`} className="federated-app-wrap">

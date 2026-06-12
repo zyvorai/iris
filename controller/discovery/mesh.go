@@ -5,12 +5,15 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/ssahani/hermes/controller/model"
 )
 
 var virtualServiceGVR = schema.GroupVersionResource{
@@ -24,6 +27,7 @@ func (w *Watcher) syncMeshRoutes(ctx context.Context) error {
 		return nil
 	}
 	w.meshRoutes = make(map[string][]string)
+	w.meshPolicies = make(map[string][]model.MeshPolicy)
 	list, err := w.dynClient.Resource(virtualServiceGVR).Namespace("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -65,6 +69,21 @@ func (w *Watcher) indexVirtualService(us *unstructured.Unstructured) {
 				label = host
 			}
 			w.meshRoutes[key] = appendUnique(w.meshRoutes[key], "istio:"+label)
+
+			weight := 100
+			if wv, ok := rm["weight"].(float64); ok && wv > 0 {
+				weight = int(wv)
+			}
+			policy := model.MeshPolicy{
+				Kind:        "istio",
+				Name:        us.GetName(),
+				Namespace:   us.GetNamespace(),
+				Hosts:       append([]string(nil), hosts...),
+				Destination: host,
+				Weight:      weight,
+				Detail:      fmt.Sprintf("VirtualService %s/%s", us.GetNamespace(), us.GetName()),
+			}
+			w.meshPolicies[key] = appendUniqueMeshPolicy(w.meshPolicies[key], policy)
 		}
 	}
 }
@@ -95,6 +114,30 @@ func linkerdRoutes(svc *corev1.Service) []string {
 	return routes
 }
 
+func linkerdPolicies(svc *corev1.Service) []model.MeshPolicy {
+	if svc.Annotations == nil {
+		return nil
+	}
+	var policies []model.MeshPolicy
+	if v := svc.Annotations["linkerd.io/inject"]; v == "enabled" || v == "inject" {
+		policies = append(policies, model.MeshPolicy{
+			Kind:      "linkerd",
+			Name:      svc.Name,
+			Namespace: svc.Namespace,
+			Detail:    "Sidecar injection enabled (" + v + ")",
+		})
+	}
+	if v := svc.Annotations["config.linkerd.io/opaque-ports"]; v != "" {
+		policies = append(policies, model.MeshPolicy{
+			Kind:      "linkerd",
+			Name:      svc.Name,
+			Namespace: svc.Namespace,
+			Detail:    "Opaque ports: " + v,
+		})
+	}
+	return policies
+}
+
 func (w *Watcher) meshRoutesForService(svc *corev1.Service) []string {
 	key := svc.Namespace + "/" + svc.Name
 	var routes []string
@@ -105,4 +148,27 @@ func (w *Watcher) meshRoutesForService(svc *corev1.Service) []string {
 		routes = appendUnique(routes, lr)
 	}
 	return routes
+}
+
+func (w *Watcher) meshPoliciesForService(svc *corev1.Service) []model.MeshPolicy {
+	key := svc.Namespace + "/" + svc.Name
+	var policies []model.MeshPolicy
+	if mesh, ok := w.meshPolicies[key]; ok {
+		policies = append(policies, mesh...)
+	}
+	for _, lp := range linkerdPolicies(svc) {
+		policies = appendUniqueMeshPolicy(policies, lp)
+	}
+	return policies
+}
+
+func appendUniqueMeshPolicy(list []model.MeshPolicy, policy model.MeshPolicy) []model.MeshPolicy {
+	key := policy.Kind + "|" + policy.Namespace + "|" + policy.Name + "|" + policy.Destination + "|" + policy.Detail
+	for _, existing := range list {
+		existingKey := existing.Kind + "|" + existing.Namespace + "|" + existing.Name + "|" + existing.Destination + "|" + existing.Detail
+		if existingKey == key {
+			return list
+		}
+	}
+	return append(list, policy)
 }

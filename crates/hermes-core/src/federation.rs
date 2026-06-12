@@ -16,6 +16,19 @@ pub struct FederationActionResult {
     pub detail: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FederationRbacStatus {
+    pub cluster_id: String,
+    pub cluster_name: String,
+    pub ok: bool,
+    pub user_id: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub allowed_actions: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub detail: String,
+}
+
 pub fn federation_cluster(cluster_id: &str) -> Option<FederatedClusterConfig> {
     federated_cluster_configs()
         .into_iter()
@@ -33,8 +46,12 @@ fn apply_federation_auth(
     req: reqwest::RequestBuilder,
     cfg: &FederatedClusterConfig,
     user: &str,
+    groups: &[String],
 ) -> reqwest::RequestBuilder {
     let mut rb = req.header("x-hermes-user", user);
+    if !groups.is_empty() {
+        rb = rb.header("x-hermes-groups", groups.join(","));
+    }
     if !cfg.api_key.is_empty() {
         rb = rb.header("x-hermes-key", cfg.api_key.as_str());
     }
@@ -69,6 +86,7 @@ pub async fn remote_publish(
     cfg: &FederatedClusterConfig,
     app_id: &str,
     user: &str,
+    groups: &[String],
 ) -> FederationActionResult {
     if !cfg.write_enabled {
         return FederationActionResult {
@@ -84,7 +102,7 @@ pub async fn remote_publish(
         encode_app_path(app_id)
     );
     let client = federation_client();
-    let req = apply_federation_auth(client.post(url), cfg, user);
+    let req = apply_federation_auth(client.post(url), cfg, user, groups);
     match req.send().await {
         Ok(resp) if resp.status().is_success() => FederationActionResult {
             cluster_id: cfg.id.clone(),
@@ -111,6 +129,7 @@ pub async fn remote_publish_namespace(
     cfg: &FederatedClusterConfig,
     namespace: &str,
     user: &str,
+    groups: &[String],
 ) -> FederationActionResult {
     if !cfg.write_enabled {
         return FederationActionResult {
@@ -126,7 +145,7 @@ pub async fn remote_publish_namespace(
         encode_path_segment(namespace)
     );
     let client = federation_client();
-    let req = apply_federation_auth(client.post(url), cfg, user);
+    let req = apply_federation_auth(client.post(url), cfg, user, groups);
     match req.send().await {
         Ok(resp) if resp.status().is_success() => {
             let detail = resp.text().await.unwrap_or_default();
@@ -157,6 +176,7 @@ pub async fn remote_set_recommended(
     app_id: &str,
     recommended: bool,
     user: &str,
+    groups: &[String],
 ) -> FederationActionResult {
     if !cfg.write_enabled {
         return FederationActionResult {
@@ -176,6 +196,7 @@ pub async fn remote_set_recommended(
         client.put(url).json(&serde_json::json!({ "recommended": recommended })),
         cfg,
         user,
+        groups,
     );
     match req.send().await {
         Ok(resp) if resp.status().is_success() => FederationActionResult {
@@ -194,6 +215,72 @@ pub async fn remote_set_recommended(
             cluster_id: cfg.id.clone(),
             cluster_name: cfg.name.clone(),
             ok: false,
+            detail: e.to_string(),
+        },
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct RemoteAuthMe {
+    #[serde(default)]
+    user_id: String,
+    #[serde(default)]
+    allowed_actions: Vec<String>,
+}
+
+pub async fn remote_rbac_check(
+    cfg: &FederatedClusterConfig,
+    user: &str,
+    groups: &[String],
+) -> FederationRbacStatus {
+    let url = format!("{}/auth/me", cfg.url.trim_end_matches('/'));
+    let client = federation_client();
+    let req = apply_federation_auth(client.get(url), cfg, user, groups);
+    match req.send().await {
+        Ok(resp) if resp.status().is_success() => {
+            if let Ok(body) = resp.json::<RemoteAuthMe>().await {
+                let ok = body.allowed_actions.iter().any(|a| a == "publish" || a == "admin" || a == "*");
+                return FederationRbacStatus {
+                    cluster_id: cfg.id.clone(),
+                    cluster_name: cfg.name.clone(),
+                    ok,
+                    user_id: if body.user_id.is_empty() {
+                        user.into()
+                    } else {
+                        body.user_id
+                    },
+                    allowed_actions: body.allowed_actions,
+                    detail: if ok {
+                        "publish allowed on remote".into()
+                    } else {
+                        "publish not allowed on remote".into()
+                    },
+                };
+            }
+            FederationRbacStatus {
+                cluster_id: cfg.id.clone(),
+                cluster_name: cfg.name.clone(),
+                ok: false,
+                user_id: user.into(),
+                allowed_actions: vec![],
+                detail: "invalid auth/me response".into(),
+            }
+        }
+        Ok(resp) => FederationRbacStatus {
+            cluster_id: cfg.id.clone(),
+            cluster_name: cfg.name.clone(),
+            ok: false,
+            user_id: user.into(),
+            allowed_actions: vec![],
+            detail: format!("remote status {}", resp.status()),
+        },
+        Err(e) => FederationRbacStatus {
+            cluster_id: cfg.id.clone(),
+            cluster_name: cfg.name.clone(),
+            ok: false,
+            user_id: user.into(),
+            allowed_actions: vec![],
             detail: e.to_string(),
         },
     }
