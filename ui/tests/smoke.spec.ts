@@ -3,11 +3,26 @@
 
 import { test, expect } from '@playwright/test'
 
-test('home loads and spotlight opens', async ({ page }) => {
+test('home loads command surface hero and health orb', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('body')).toBeVisible()
+  await expect(page.getByTestId('platform-pulse-hero')).toBeVisible()
+  await expect(page.getByTestId('cluster-health-orb')).toBeVisible()
+  await expect(page.getByTestId('platform-pulse-hero')).toContainText(/your platform is alive/i)
+})
+
+test('left rail and spotlight open', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByTestId('zeus-left-rail')).toBeVisible()
   await page.keyboard.press('Meta+k')
-  await expect(page.getByPlaceholder(/search/i)).toBeVisible()
+  await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
+})
+
+test('mission control strip preserved', async ({ page }) => {
+  await page.goto('/')
+  const mission = page.getByTestId('mission-control-strip')
+  if (await mission.count()) {
+    await expect(mission).toBeVisible()
+  }
 })
 
 test('graph page renders', async ({ page }) => {

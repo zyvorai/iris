@@ -67,9 +67,11 @@ function layoutNodes(nodes: GraphNode[], edges: GraphEdge[]) {
 interface AppGraphViewProps {
   graph: AppGraph
   focusId?: string
+  onNodeClick?: (appId: string) => void
+  compact?: boolean
 }
 
-export default function AppGraphView({ graph, focusId }: AppGraphViewProps) {
+export default function AppGraphView({ graph, focusId, onNodeClick, compact }: AppGraphViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
 
@@ -95,7 +97,7 @@ export default function AppGraphView({ graph, focusId }: AppGraphViewProps) {
   }
 
   return (
-    <div className="app-graph-wrap" ref={containerRef}>
+    <div className={`app-graph-wrap${compact ? ' app-graph-compact' : ''}`} ref={containerRef}>
       <svg className="app-graph-edges" width={width} height={height} aria-hidden>
         {graph.edges.map((edge) => {
           if (!edge.resolved) return null
@@ -126,19 +128,38 @@ export default function AppGraphView({ graph, focusId }: AppGraphViewProps) {
           const pos = positions.get(node.id)
           if (!pos) return null
           const dimmed = activeId && !related.has(node.id)
-          return (
-            <Link
-              key={node.id}
-              to={`/apps/${encodeURIComponent(node.id)}`}
-              className={`app-graph-node ${statusTone(node.status)} ${dimmed ? 'graph-node-dim' : ''} ${focusId === node.id ? 'graph-node-focus' : ''}`}
-              style={{ left: pos.x, top: pos.y, width: NODE_W, height: NODE_H }}
-              onMouseEnter={() => setHoverId(node.id)}
-              onMouseLeave={() => setHoverId(null)}
-            >
+          const broken = node.status !== 'healthy'
+          const className = `app-graph-node ${statusTone(node.status)} ${dimmed ? 'graph-node-dim' : ''} ${focusId === node.id ? 'graph-node-focus' : ''} ${broken ? 'graph-node-broken' : ''}`
+          const style = { left: pos.x, top: pos.y, width: NODE_W, height: NODE_H }
+          const hoverProps = {
+            onMouseEnter: () => setHoverId(node.id),
+            onMouseLeave: () => setHoverId(null),
+          }
+          const inner = (
+            <>
               <AppIcon icon={node.icon ?? 'app'} name={node.label} size="sm" />
               <strong>{node.label}</strong>
               <span className={`status-chip ${statusTone(node.status)}`}>{statusLabel(node.status)}</span>
               <span className="graph-node-ns">{node.namespace}</span>
+            </>
+          )
+          if (onNodeClick) {
+            return (
+              <button
+                key={node.id}
+                type="button"
+                className={className}
+                style={style}
+                {...hoverProps}
+                onClick={() => onNodeClick(node.id)}
+              >
+                {inner}
+              </button>
+            )
+          }
+          return (
+            <Link key={node.id} to={`/apps/${encodeURIComponent(node.id)}`} className={className} style={style} {...hoverProps}>
+              {inner}
             </Link>
           )
         })}

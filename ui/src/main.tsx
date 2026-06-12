@@ -7,7 +7,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { WorkspaceProvider } from './utils/workspaceContext'
+import { applyShellPreferencesOnBoot } from './utils/hermesShellPreferences'
 import './index.css'
+
+applyShellPreferencesOnBoot()
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 10_000, retry: 1 } },

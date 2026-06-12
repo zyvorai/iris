@@ -15,6 +15,7 @@ import GraphPage from './pages/GraphPage'
 import FederatedPage from './pages/FederatedPage'
 import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
+import { InspectorProvider } from './utils/inspectorContext'
 
 export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -32,26 +33,28 @@ export default function App() {
   }, [onKey])
 
   return (
-    <Layout
-      paletteOpen={paletteOpen}
-      onPaletteOpen={() => setPaletteOpen(true)}
-      onPaletteClose={() => setPaletteOpen(false)}
-    >
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/apps" element={<AppsPage />} />
-        <Route path="/cluster" element={<ClusterPage />} />
-        <Route path="/graph" element={<GraphPage />} />
-        <Route path="/federated" element={<FederatedPage />} />
-        <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/apps/:id" element={<AppDetailPage />} />
-        <Route path="/spaces" element={<SpacesPage />} />
-        <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />
-        <Route path="/discovery" element={<DiscoveryPage />} />
-        <Route path="/health" element={<HealthPage />} />
-        <Route path="/activity" element={<ActivityPage />} />
-        <Route path="/help" element={<HelpPage />} />
-      </Routes>
-    </Layout>
+    <InspectorProvider>
+      <Layout
+        paletteOpen={paletteOpen}
+        onPaletteOpen={() => setPaletteOpen(true)}
+        onPaletteClose={() => setPaletteOpen(false)}
+      >
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/apps" element={<AppsPage />} />
+          <Route path="/cluster" element={<ClusterPage />} />
+          <Route path="/graph" element={<GraphPage />} />
+          <Route path="/federated" element={<FederatedPage />} />
+          <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/apps/:id" element={<AppDetailPage />} />
+          <Route path="/spaces" element={<SpacesPage />} />
+          <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />
+          <Route path="/discovery" element={<DiscoveryPage />} />
+          <Route path="/health" element={<HealthPage />} />
+          <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/help" element={<HelpPage />} />
+        </Routes>
+      </Layout>
+    </InspectorProvider>
   )
 }

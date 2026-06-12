@@ -6,8 +6,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, Server, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
-import { appDetailPath, hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
+import { hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
+import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
 
@@ -49,6 +50,28 @@ function envMatch(query: string): string | null {
   return m?.[1]?.trim().toLowerCase() || null
 }
 
+function parseSpotlightCommand(raw: string): { type: string; arg?: string } | null {
+  const q = raw.trim().toLowerCase()
+  if (!q) return null
+  if (['attention', 'show unhealthy', 'unhealthy', 'show attention'].includes(q)) return { type: 'attention' }
+  if (['show routes', 'routes'].includes(q)) return { type: 'routes' }
+  const open = raw.trim().match(/^open\s+(.+)$/i)
+  if (open?.[1]) return { type: 'open', arg: open[1].trim() }
+  const diagnose = raw.trim().match(/^diagnose\s+(.+)$/i)
+  if (diagnose?.[1]) return { type: 'diagnose', arg: diagnose[1].trim() }
+  return null
+}
+
+function findAppByName(catalog: HermesApp[], name: string): HermesApp | undefined {
+  const needle = name.toLowerCase()
+  return catalog.find(
+    (a) =>
+      a.displayName.toLowerCase().includes(needle) ||
+      a.slug.toLowerCase().includes(needle) ||
+      (a.canonicalSlug ?? '').toLowerCase().includes(needle),
+  )
+}
+
 function appDependsOn(app: HermesApp, dep: string): boolean {
   const needle = dep.toLowerCase()
   return (app.meta?.dependsOn ?? []).some(
@@ -65,11 +88,14 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
+  const { openInspector } = useInspector()
 
   const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
   const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
 
+  const command = parseSpotlightCommand(q.trim())
+  const isCommandQuery = !!command
   const query = q.trim().toLowerCase()
   const depQuery = depMatch(q.trim())
   const ownerQuery = ownerMatch(q.trim())
@@ -97,6 +123,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     queryFn: () => hermesApi.search(q),
     enabled:
       q.trim().length > 0 &&
+      !isCommandQuery &&
       !depQuery &&
       !ownerQuery &&
       !envQuery &&
@@ -141,6 +168,31 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     | { kind: 'action'; label: string; meta: string; run: () => void }
 
   const rows: Row[] = useMemo(() => {
+    if (command?.type === 'attention') {
+      const unhealthy = (health.data?.apps ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a))
+      return unhealthy.slice(0, 8).flatMap((app) => [
+        { kind: 'app' as const, app, action: 'inspect' as const },
+        { kind: 'app' as const, app, action: 'open' as const },
+      ])
+    }
+
+    if (command?.type === 'routes') {
+      return [
+        { kind: 'nav', label: 'Cluster routes', path: '/cluster', icon: Server, meta: 'Ingress and mesh routes' },
+        { kind: 'nav', label: 'Service graph', path: '/graph', icon: GitBranch, meta: 'Topology view' },
+      ]
+    }
+
+    if (command?.type === 'open' && command.arg) {
+      const app = findAppByName(catalog.data ?? [], command.arg)
+      if (app) return [{ kind: 'app' as const, app, action: 'open' as const }]
+    }
+
+    if (command?.type === 'diagnose' && command.arg) {
+      const app = findAppByName(catalog.data ?? [], command.arg)
+      if (app) return [{ kind: 'app' as const, app, action: 'inspect' as const }]
+    }
+
     if (query === 'broken' || query === 'broken services') {
       const count = (health.data?.broken ?? 0) + (health.data?.degraded ?? 0)
       return [
@@ -233,7 +285,17 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         ])
     }
 
-    const list: Row[] = navItems.map((n) => ({ kind: 'nav', ...n }))
+    const list: Row[] = []
+    const topUnhealthy = (health.data?.apps ?? []).find((a) => a.status !== 'healthy' && matchesWorkspace(a))
+    if (topUnhealthy) {
+      list.push({
+        kind: 'action',
+        label: `Diagnose ${topUnhealthy.displayName}`,
+        meta: 'Suggested · unhealthy service',
+        run: () => openInspector(topUnhealthy.id),
+      })
+    }
+    list.push(...navItems.slice(0, 4).map((n) => ({ kind: 'nav' as const, ...n })))
     const apps = recentApps.length ? recentApps : defaultApps
     for (const app of apps.slice(0, 6)) {
       if (app) list.push({ kind: 'app', app, action: 'open' })
@@ -242,6 +304,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   }, [
     q,
     query,
+    command,
     hits,
     recentApps,
     defaultApps,
@@ -257,6 +320,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     intent.data,
     matchesWorkspace,
     setWorkspaceId,
+    openInspector,
   ])
 
   useEffect(() => {
@@ -279,7 +343,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       return
     }
     if (row.action === 'inspect') {
-      navigate(appDetailPath(row.app, true))
+      openInspector(row.app.id)
       onClose()
       return
     }
@@ -308,7 +372,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   }, [rows, selected, onClose, navigate])
 
   const sectionLabel = (() => {
-    if (!q.trim()) return 'Navigate & recent'
+    if (!q.trim()) return 'Suggested'
+    if (command?.type === 'attention') return 'Commands · Attention'
+    if (command?.type === 'routes') return 'Commands · Navigation'
+    if (command?.type === 'open' || command?.type === 'diagnose') return 'Commands · Services'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'
@@ -320,11 +387,11 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
 
   return (
     <div className="palette-backdrop" onClick={onClose} role="presentation">
-      <div className="palette command-palette-glass" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Spotlight">
+      <div className="palette command-palette-glass palette-wide" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Spotlight">
         <input
           ref={inputRef}
           className="palette-input"
-          placeholder="Search apps, team picks, owner:team, depends:prometheus, production…"
+          placeholder="open grafana · diagnose prometheus · attention · show routes · owner:team…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />

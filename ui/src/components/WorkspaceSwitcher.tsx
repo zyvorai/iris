@@ -9,17 +9,19 @@ import { useWorkspace } from '../utils/workspaceContext'
 export default function WorkspaceSwitcher() {
   const { workspaceId, setWorkspaceId } = useWorkspace()
   const workspaces = useQuery({ queryKey: ['workspaces'], queryFn: hermesApi.listWorkspaces })
+  const clusters = useQuery({ queryKey: ['clusters'], queryFn: hermesApi.listClusters })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe })
   const allowed = auth.data?.allowedWorkspaces ?? []
 
-  if (!workspaces.data?.length) return null
+  if (!workspaces.data?.length && !clusters.data?.length) return null
 
   const isRestricted = (env: string) =>
     allowed.length > 0 && !allowed.some((a) => a.toLowerCase() === env.toLowerCase())
 
   return (
-    <div className="workspace-switcher" data-testid="workspace-switcher">
+    <div className="workspace-switcher zeus-cluster-switcher" data-testid="workspace-switcher">
       <Layers size={14} aria-hidden />
+      <span className="zeus-switcher-label">Cluster</span>
       <button
         type="button"
         className={`workspace-chip ${workspaceId === '' ? 'active' : ''}`}
@@ -27,7 +29,7 @@ export default function WorkspaceSwitcher() {
       >
         All
       </button>
-      {workspaces.data.map((ws) => (
+      {workspaces.data?.map((ws) => (
         <button
           key={ws.id}
           type="button"
@@ -41,6 +43,19 @@ export default function WorkspaceSwitcher() {
           <span className="workspace-count">{ws.appCount}</span>
         </button>
       ))}
+      {clusters.data?.filter((c) => !c.isLocal).length ? (
+        <div className="zeus-federated-clusters">
+          {clusters.data
+            ?.filter((c) => !c.isLocal)
+            .map((cluster) => (
+              <span key={cluster.id} className="workspace-chip federated" title={`${cluster.appCount} apps · ${cluster.healthy} healthy`}>
+                {cluster.status === 'online' ? <span className="zeus-live-dot" aria-hidden /> : null}
+                {cluster.name}
+                <span className="workspace-count">{cluster.appCount}</span>
+              </span>
+            ))}
+        </div>
+      ) : null}
     </div>
   )
 }
