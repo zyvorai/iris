@@ -27,8 +27,7 @@ pub struct ApiState {
 pub fn routes(state: ApiState) -> Router {
     Router::new()
         .route("/apps", get(list_apps))
-        .route("/apps/{namespace}/{slug}/diagnosis", get(app_diagnosis))
-        .route("/apps/{*id}", get(get_app))
+        .route("/apps/{*id}", get(get_app_or_diagnosis))
         .route("/catalog", get(list_catalog))
         .route("/catalog/export", get(export_catalog))
         .route("/stats", get(catalog_stats))
@@ -102,38 +101,39 @@ async fn list_apps(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppErro
     Ok(Json(filter_apps(&st, st.store.list_apps(true)?)))
 }
 
-async fn get_app(
+async fn get_app_or_diagnosis(
     State(st): State<ApiState>,
     id: axum::extract::Path<String>,
-) -> Result<Json<App>, AppError> {
+) -> Result<Response, AppError> {
+    let raw = normalize_id(id);
+    if let Some(app_id) = raw.strip_suffix("/diagnosis") {
+        let app_id = app_id.trim_end_matches('/');
+        return Ok(Json(diagnosis_for_app(&st, app_id)?).into_response());
+    }
     let app = st
         .store
-        .get_app(&normalize_id(id))?
+        .get_app(&raw)?
         .ok_or(AppError::NotFound)?;
     if !app_allowed(&st, &app) {
         return Err(AppError::NotFound);
     }
-    Ok(Json(app))
+    Ok(Json(app).into_response())
 }
 
-async fn app_diagnosis(
-    State(st): State<ApiState>,
-    axum::extract::Path((namespace, slug)): axum::extract::Path<(String, String)>,
-) -> Result<Json<AppDiagnosis>, AppError> {
-    let app_id = format!("{namespace}/{slug}");
+fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppError> {
     let app = st
         .store
-        .get_app(&app_id)?
+        .get_app(app_id)?
         .ok_or(AppError::NotFound)?;
-    if !app_allowed(&st, &app) {
+    if !app_allowed(st, &app) {
         return Err(AppError::NotFound);
     }
-    if let Some(raw) = st.store.get_diagnosis_json(&app_id)? {
+    if let Some(raw) = st.store.get_diagnosis_json(app_id)? {
         if let Ok(diag) = serde_json::from_str::<AppDiagnosis>(&raw) {
-            return Ok(Json(diag));
+            return Ok(diag);
         }
     }
-    Ok(Json(build_diagnosis(&app)))
+    Ok(build_diagnosis(&app))
 }
 
 async fn list_catalog(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
