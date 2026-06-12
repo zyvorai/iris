@@ -27,7 +27,7 @@ pub struct ApiState {
 pub fn routes(state: ApiState) -> Router {
     Router::new()
         .route("/apps", get(list_apps))
-        .route("/apps/{*id}/diagnosis", get(app_diagnosis))
+        .route("/apps/{namespace}/{slug}/diagnosis", get(app_diagnosis))
         .route("/apps/{*id}", get(get_app))
         .route("/catalog", get(list_catalog))
         .route("/catalog/export", get(export_catalog))
@@ -118,9 +118,9 @@ async fn get_app(
 
 async fn app_diagnosis(
     State(st): State<ApiState>,
-    id: axum::extract::Path<String>,
+    axum::extract::Path((namespace, slug)): axum::extract::Path<(String, String)>,
 ) -> Result<Json<AppDiagnosis>, AppError> {
-    let app_id = normalize_id(id);
+    let app_id = format!("{namespace}/{slug}");
     let app = st
         .store
         .get_app(&app_id)?
