@@ -23,13 +23,11 @@ export default function HomePage() {
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
   const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
+  const recommendedQ = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
 
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const unhealthy = health.data?.apps ?? []
-  const recommended = useMemo(
-    () => (catalog.data ?? []).filter((a) => a.meta?.recommended).slice(0, 6),
-    [catalog.data],
-  )
+  const recommended = useMemo(() => (recommendedQ.data ?? []).slice(0, 6), [recommendedQ.data])
 
   return (
     <>

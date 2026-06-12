@@ -27,17 +27,75 @@ pub fn routes(state: GatewayState) -> Router {
         .route("/launchpad/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/launchpad/a/{namespace}/{slug}", any(proxy_root))
         .route("/launchpad/a/{namespace}/{slug}/{*rest}", any(proxy_path))
-        .route("/launchpad/s/{token}", any(share_stub))
+        .route("/launchpad/s/{token}", any(share_proxy_root))
+        .route("/launchpad/s/{token}/{*rest}", any(share_proxy_path))
         // Legacy aliases
         .route("/apps/{slug}", any(proxy_canonical_root))
         .route("/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/a/{namespace}/{slug}", any(proxy_root))
         .route("/a/{namespace}/{slug}/{*rest}", any(proxy_path))
+        .route("/s/{token}", any(share_proxy_root))
+        .route("/s/{token}/{*rest}", any(share_proxy_path))
         .with_state(state)
 }
 
-async fn share_stub(Path(_token): Path<String>) -> Response {
-    (StatusCode::NOT_FOUND, "share link not found or expired").into_response()
+async fn share_proxy_root(
+    State(st): State<GatewayState>,
+    Path(token): Path<String>,
+    req: Request<Body>,
+) -> Response {
+    share_proxy(st, token, String::new(), req).await
+}
+
+async fn share_proxy_path(
+    State(st): State<GatewayState>,
+    Path((token, rest)): Path<(String, String)>,
+    req: Request<Body>,
+) -> Response {
+    share_proxy(st, token, rest, req).await
+}
+
+async fn share_proxy(st: GatewayState, token: String, rest: String, req: Request<Body>) -> Response {
+    let link = match st.store.get_share(&token) {
+        Ok(Some(link)) => link,
+        Ok(None) => {
+            return (StatusCode::NOT_FOUND, "share link not found or expired").into_response();
+        }
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response();
+        }
+    };
+
+    let app = match st.store.get_app(&link.app_id) {
+        Ok(Some(app)) => app,
+        Ok(None) => return (StatusCode::NOT_FOUND, "app not found").into_response(),
+        Err(e) => {
+            tracing::error!("store error: {e:#}");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "store error").into_response();
+        }
+    };
+
+    if !app.visibility.published {
+        return (StatusCode::FORBIDDEN, "app not published").into_response();
+    }
+
+    let user = req
+        .headers()
+        .get("x-hermes-user")
+        .and_then(|v| v.to_str().ok())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .unwrap_or_else(|| st.default_user.clone());
+
+    let _ = st.store.record_audit(
+        &user,
+        "share_access",
+        &app.id,
+        &format!("token={token}"),
+    );
+
+    proxy_app(st, app, rest, req).await
 }
 
 async fn proxy_canonical_root(

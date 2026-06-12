@@ -6,9 +6,11 @@ import type {
   AuditEvent,
   CatalogStats,
   ClusterSummary,
+  CreateShareRequest,
   HealthSummary,
   HermesApp,
   SearchHit,
+  ShareLink,
 } from '../types'
 
 const base = '/api/v1'
@@ -53,6 +55,16 @@ export const hermesApi = {
   listRecents: () => req<HermesApp[]>('/recents'),
   recordRecent: (id: string) => req<void>(`/recents/${encodeURIComponent(id)}`, { method: 'POST' }),
   healthSummary: () => req<HealthSummary>('/health/apps'),
+  listRecommended: () => req<HermesApp[]>('/recommended'),
+  setRecommended: (id: string, recommended: boolean) =>
+    req<HermesApp>(`/recommended/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ recommended }),
+    }),
+  listShares: () => req<ShareLink[]>('/shares'),
+  createShare: (body: CreateShareRequest) =>
+    req<ShareLink>('/shares', { method: 'POST', body: JSON.stringify(body) }),
+  revokeShare: (token: string) => req<void>(`/shares/${encodeURIComponent(token)}`, { method: 'DELETE' }),
   listAudit: (limit = 50) => req<AuditEvent[]>(`/audit?limit=${limit}`),
   authMe: async () => {
     const res = await fetch('/auth/me')
@@ -68,6 +80,14 @@ export function appDetailPath(app: HermesApp, diagnose = false): string {
 
 export function copyAppUrl(app: HermesApp) {
   return navigator.clipboard.writeText(appPublicUrl(app))
+}
+
+export function sharePublicUrl(sharePath: string): string {
+  return window.location.origin + sharePath
+}
+
+export function copyShareUrl(sharePath: string) {
+  return navigator.clipboard.writeText(sharePublicUrl(sharePath))
 }
 
 export function appLaunchPath(app: HermesApp): string {
@@ -151,6 +171,16 @@ export function actionLabel(action: string): string {
       return 'Unpinned'
     case 'recent':
       return 'Opened'
+    case 'recommend':
+      return 'Team pick'
+    case 'unrecommend':
+      return 'Removed pick'
+    case 'share_create':
+      return 'Share link'
+    case 'share_revoke':
+      return 'Revoked share'
+    case 'share_access':
+      return 'Share opened'
     default:
       return action
   }

@@ -85,6 +85,16 @@ CREATE TABLE IF NOT EXISTS hidden_services (
 	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)`)
 	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'`)
 	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN diagnosis_json TEXT DEFAULT ''`)
+	_, _ = s.db.Exec(`
+CREATE TABLE IF NOT EXISTS share_links (
+  token TEXT PRIMARY KEY,
+  app_id TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  label TEXT DEFAULT ''
+)`)
+	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id)`)
 	return nil
 }
 
@@ -125,7 +135,11 @@ ON CONFLICT(id) DO UPDATE SET
   rewrite_json=excluded.rewrite_json,
   ready_endpoints=excluded.ready_endpoints,
   updated_at=excluded.updated_at,
-  meta_json=excluded.meta_json
+  meta_json=CASE
+    WHEN json_extract(excluded.meta_json, '$.recommended') = 1 THEN excluded.meta_json
+    WHEN json_extract(apps.meta_json, '$.recommended') = 1 THEN json_set(excluded.meta_json, '$.recommended', json('true'))
+    ELSE excluded.meta_json
+  END
 `,
 		app.ID, app.Slug, app.CanonicalSlug, app.DisplayName, app.Description, app.Namespace, app.Category, app.Icon,
 		app.BackendJSON(), app.RoutePath, app.PublicURL, app.Status, app.StatusMsg, app.Source,

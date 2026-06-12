@@ -1,14 +1,16 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Copy, ExternalLink, Route, Star, Stethoscope } from 'lucide-react'
+import { Copy, ExternalLink, Route, Sparkles, Star, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import DiagnosePanel from '../components/DiagnosePanel'
+import ShareLinksPanel from '../components/ShareLinksPanel'
 import {
+  appDetailPath,
   appLaunchPath,
   appPublicUrl,
   copyAppUrl,
@@ -34,6 +36,7 @@ export default function AppDetailPage() {
   })
 
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
   const isFavorite = favorites.data?.some((f) => f.id === app.data?.id) ?? false
 
   const favMutation = useMutation({
@@ -41,6 +44,26 @@ export default function AppDetailPage() {
       isFavorite ? hermesApi.removeFavorite(app.data!.id) : hermesApi.addFavorite(app.data!.id),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['favorites'] }),
   })
+
+  const recommendMutation = useMutation({
+    mutationFn: (recommended: boolean) => hermesApi.setRecommended(app.data!.id, recommended),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['app', id] })
+      void qc.invalidateQueries({ queryKey: ['catalog'] })
+      void qc.invalidateQueries({ queryKey: ['recommended'] })
+    },
+  })
+
+  const dependencyLinks = useMemo(() => {
+    const deps = app.data?.meta?.dependsOn ?? []
+    const apps = catalog.data ?? []
+    return deps.map((dep) => {
+      const match =
+        apps.find((a) => a.id === dep || a.slug === dep || a.canonicalSlug === dep) ??
+        apps.find((a) => a.backend.name === dep)
+      return { dep, app: match }
+    })
+  }, [app.data?.meta?.dependsOn, catalog.data])
 
   useEffect(() => {
     setDiagnoseOpen(searchParams.get('diagnose') === '1')
@@ -84,6 +107,13 @@ export default function AppDetailPage() {
             </button>
             <button type="button" className="btn" onClick={() => void favMutation.mutate()}>
               <Star size={12} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Pin'}
+            </button>
+            <button
+              type="button"
+              className={`btn ${a.meta?.recommended ? 'btn-accent' : ''}`}
+              onClick={() => void recommendMutation.mutate(!a.meta?.recommended)}
+            >
+              <Sparkles size={12} /> {a.meta?.recommended ? 'Team pick' : 'Mark team pick'}
             </button>
             <button type="button" className="btn" onClick={() => void copyAppUrl(a)}>
               <Copy size={12} /> Copy URL
@@ -148,15 +178,27 @@ export default function AppDetailPage() {
                 <span>{a.meta.owner}</span>
               </div>
             ) : null}
-            {a.meta?.dependsOn?.length ? (
+            {dependencyLinks.length ? (
               <div className="detail-row">
                 <span>Depends on</span>
-                <span>{a.meta.dependsOn.join(', ')}</span>
+                <span className="dep-links">
+                  {dependencyLinks.map(({ dep, app: depApp }) =>
+                    depApp ? (
+                      <Link key={dep} to={appDetailPath(depApp)}>
+                        {depApp.displayName}
+                      </Link>
+                    ) : (
+                      <span key={dep}>{dep}</span>
+                    ),
+                  )}
+                </span>
               </div>
             ) : null}
           </div>
         ) : null}
       </section>
+
+      <ShareLinksPanel app={a} />
 
       <div className="app-actions" style={{ marginTop: '0.5rem' }}>
         <Link to="/apps" className="btn">

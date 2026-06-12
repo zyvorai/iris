@@ -4,16 +4,16 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
-    routing::{get, post, put},
+    routing::{delete, get, post, put},
     Json, Router,
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, App, AppDiagnosis, AuditEvent, CatalogStats, ClusterSummary, HealthSummary,
-    SearchHit,
+    build_diagnosis, App, AppDiagnosis, AuditEvent, CatalogStats, ClusterSummary, CreateShareRequest,
+    HealthSummary, SearchHit, ShareLink, ShareLinkResponse,
 };
 use serde::Deserialize;
 
@@ -42,6 +42,10 @@ pub fn routes(state: ApiState) -> Router {
         .route("/recents", get(list_recents))
         .route("/recents/{*id}", post(record_recent))
         .route("/health/apps", get(health_apps))
+        .route("/recommended", get(list_recommended))
+        .route("/recommended/{*id}", put(set_recommended))
+        .route("/shares", get(list_shares).post(create_share))
+        .route("/shares/{token}", delete(delete_share))
         .route("/audit", get(list_audit))
         .with_state(state)
 }
@@ -388,9 +392,135 @@ async fn list_audit(
     Ok(Json(st.store.list_audit(q.limit)?))
 }
 
+async fn list_recommended(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
+    let apps = filter_apps(&st, st.store.list_apps(true)?);
+    Ok(Json(
+        apps.into_iter()
+            .filter(|a| a.meta.recommended)
+            .collect(),
+    ))
+}
+
+#[derive(Deserialize)]
+struct RecommendedBody {
+    recommended: bool,
+}
+
+async fn set_recommended(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    id: axum::extract::Path<String>,
+    Json(body): Json<RecommendedBody>,
+) -> Result<Json<App>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let id = normalize_id(id);
+    let app = st
+        .store
+        .get_app(&id)?
+        .ok_or(AppError::NotFound)?;
+    if !app_allowed(&st, &app) {
+        return Err(AppError::NotFound);
+    }
+    st.store.set_app_recommended(&id, body.recommended)?;
+    let _ = st.store.record_audit(
+        &uid,
+        if body.recommended {
+            "recommend"
+        } else {
+            "unrecommend"
+        },
+        &id,
+        "team pick updated from dock",
+    );
+    let mut updated = st
+        .store
+        .get_app(&id)?
+        .ok_or(AppError::NotFound)?;
+    updated.meta.recommended = body.recommended;
+    Ok(Json(updated))
+}
+
+async fn list_shares(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<ShareLinkResponse>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let links = st.store.list_shares(&uid)?;
+    Ok(Json(
+        links
+            .into_iter()
+            .map(|link| share_response(&link))
+            .collect(),
+    ))
+}
+
+async fn create_share(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Json(body): Json<CreateShareRequest>,
+) -> Result<Json<ShareLinkResponse>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    if body.app_id.trim().is_empty() {
+        return Err(AppError::BadRequest);
+    }
+    let app = st
+        .store
+        .get_app(&body.app_id)?
+        .ok_or(AppError::NotFound)?;
+    if !app_allowed(&st, &app) {
+        return Err(AppError::NotFound);
+    }
+    if !app.visibility.published {
+        return Err(AppError::BadRequest);
+    }
+    let link = st.store.create_share(
+        &body.app_id,
+        &uid,
+        body.ttl_minutes,
+        &body.label,
+    )?;
+    let _ = st.store.record_audit(
+        &uid,
+        "share_create",
+        &body.app_id,
+        &format!("token={} ttl={}m", link.token, body.ttl_minutes),
+    );
+    Ok(Json(share_response(&link)))
+}
+
+async fn delete_share(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path(share_token): Path<String>,
+) -> Result<StatusCode, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    if !st.store.delete_share(&share_token, &uid)? {
+        return Err(AppError::NotFound);
+    }
+    let _ = st.store.record_audit(
+        &uid,
+        "share_revoke",
+        "",
+        &format!("token={share_token}"),
+    );
+    Ok(StatusCode::NO_CONTENT)
+}
+
+fn share_response(link: &ShareLink) -> ShareLinkResponse {
+    ShareLinkResponse {
+        token: link.token.clone(),
+        app_id: link.app_id.clone(),
+        share_path: format!("/launchpad/s/{}", link.token),
+        expires_at: link.expires_at.clone(),
+        created_at: link.created_at.clone(),
+        label: link.label.clone(),
+    }
+}
+
 #[derive(Debug)]
 pub enum AppError {
     NotFound,
+    BadRequest,
     Internal(anyhow::Error),
 }
 
@@ -410,6 +540,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
         match self {
             AppError::NotFound => (StatusCode::NOT_FOUND, "not found").into_response(),
+            AppError::BadRequest => (StatusCode::BAD_REQUEST, "bad request").into_response(),
             AppError::Internal(e) => {
                 tracing::error!("api error: {e:#}");
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()

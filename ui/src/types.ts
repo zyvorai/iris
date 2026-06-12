@@ -22,6 +22,21 @@ export interface AppMeta {
   recommended?: boolean
 }
 
+export interface ShareLink {
+  token: string
+  appId: string
+  sharePath: string
+  expiresAt: string
+  createdAt: string
+  label?: string
+}
+
+export interface CreateShareRequest {
+  appId: string
+  ttlMinutes?: number
+  label?: string
+}
+
 export interface HermesApp {
   id: string
   slug: string

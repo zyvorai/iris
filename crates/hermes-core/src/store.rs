@@ -8,7 +8,7 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use rusqlite::{params, Connection};
 
-use crate::{App, AuditEvent, Backend, SearchHit, Visibility};
+use crate::{App, AuditEvent, Backend, SearchHit, ShareLink, Visibility};
 
 const APP_SELECT: &str = "SELECT id, slug, canonical_slug, display_name, description, namespace, category, icon,
               backend_json, route_path, public_url, status, status_message, source,
@@ -98,6 +98,19 @@ CREATE TABLE IF NOT EXISTS audit_events (
             "ALTER TABLE apps ADD COLUMN diagnosis_json TEXT DEFAULT ''",
             [],
         );
+        conn.execute_batch(
+            r#"
+CREATE TABLE IF NOT EXISTS share_links (
+  token TEXT PRIMARY KEY,
+  app_id TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  label TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
+"#,
+        )?;
         Ok(())
     }
 
@@ -459,6 +472,116 @@ CREATE TABLE IF NOT EXISTS audit_events (
         Ok(())
     }
 
+    pub fn set_app_recommended(&self, id: &str, recommended: bool) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT meta_json FROM apps WHERE id = ?1")?;
+        let mut rows = stmt.query([id])?;
+        let Some(row) = rows.next()? else {
+            return Ok(());
+        };
+        let meta_json: String = row.get(0)?;
+        let mut meta: crate::AppMeta = serde_json::from_str(&meta_json).unwrap_or_default();
+        meta.recommended = recommended;
+        let updated = serde_json::to_string(&meta)?;
+        conn.execute(
+            "UPDATE apps SET meta_json = ?1, updated_at = ?2 WHERE id = ?3",
+            params![updated, Utc::now().to_rfc3339(), id],
+        )?;
+        Ok(())
+    }
+
+    pub fn create_share(
+        &self,
+        app_id: &str,
+        created_by: &str,
+        ttl_minutes: i64,
+        label: &str,
+    ) -> Result<ShareLink> {
+        let ttl = ttl_minutes.clamp(5, 7 * 24 * 60);
+        let now = Utc::now();
+        let expires = now + chrono::Duration::minutes(ttl);
+        let token = uuid::Uuid::new_v4().simple().to_string();
+        let link = ShareLink {
+            token: token.clone(),
+            app_id: app_id.to_string(),
+            created_by: created_by.to_string(),
+            expires_at: expires.to_rfc3339(),
+            created_at: now.to_rfc3339(),
+            label: label.to_string(),
+        };
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT INTO share_links (token, app_id, created_by, expires_at, created_at, label) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![
+                link.token,
+                link.app_id,
+                link.created_by,
+                link.expires_at,
+                link.created_at,
+                link.label
+            ],
+        )?;
+        Ok(link)
+    }
+
+    pub fn get_share(&self, token: &str) -> Result<Option<ShareLink>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT token, app_id, created_by, expires_at, created_at, label FROM share_links WHERE token = ?1",
+        )?;
+        let mut rows = stmt.query([token])?;
+        if let Some(row) = rows.next()? {
+            let link = ShareLink {
+                token: row.get(0)?,
+                app_id: row.get(1)?,
+                created_by: row.get(2)?,
+                expires_at: row.get(3)?,
+                created_at: row.get(4)?,
+                label: row.get(5)?,
+            };
+            if is_expired(&link.expires_at) {
+                let _ = conn.execute("DELETE FROM share_links WHERE token = ?1", [token]);
+                return Ok(None);
+            }
+            return Ok(Some(link));
+        }
+        Ok(None)
+    }
+
+    pub fn list_shares(&self, user_id: &str) -> Result<Vec<ShareLink>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT token, app_id, created_by, expires_at, created_at, label FROM share_links WHERE created_by = ?1 ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map([user_id], |row| {
+            Ok(ShareLink {
+                token: row.get(0)?,
+                app_id: row.get(1)?,
+                created_by: row.get(2)?,
+                expires_at: row.get(3)?,
+                created_at: row.get(4)?,
+                label: row.get(5)?,
+            })
+        })?;
+        let mut links = Vec::new();
+        for row in rows {
+            let link = row?;
+            if !is_expired(&link.expires_at) {
+                links.push(link);
+            }
+        }
+        Ok(links)
+    }
+
+    pub fn delete_share(&self, token: &str, user_id: &str) -> Result<bool> {
+        let conn = self.conn.lock().unwrap();
+        let n = conn.execute(
+            "DELETE FROM share_links WHERE token = ?1 AND created_by = ?2",
+            params![token, user_id],
+        )?;
+        Ok(n > 0)
+    }
+
     pub fn list_audit(&self, limit: usize) -> Result<Vec<AuditEvent>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
@@ -518,4 +641,11 @@ fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::L
     map.into_iter()
         .map(|(label, count)| crate::LabelCount { label, count })
         .collect()
+}
+
+fn is_expired(expires_at: &str) -> bool {
+    chrono::DateTime::parse_from_rfc3339(expires_at)
+        .ok()
+        .map(|t| t.with_timezone(&Utc) < Utc::now())
+        .unwrap_or(true)
 }
