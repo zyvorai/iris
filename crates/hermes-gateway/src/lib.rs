@@ -436,6 +436,23 @@ fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App) {
         HeaderName::from_static("x-forwarded-proto"),
         HeaderValue::from_static("https"),
     );
+    if app.auth_mode != "none" {
+        if let Some(user) = headers
+            .get("x-hermes-user")
+            .and_then(|v| v.to_str().ok())
+            .filter(|s| !s.is_empty())
+            .map(str::to_string)
+        {
+            let _ = headers.insert(
+                HeaderName::from_static("x-forwarded-user"),
+                HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("unknown")),
+            );
+            let _ = headers.insert(
+                HeaderName::from_static("remote-user"),
+                HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("unknown")),
+            );
+        }
+    }
 }
 
 fn should_forward_response_header(name: &header::HeaderName) -> bool {

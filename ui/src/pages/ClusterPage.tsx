@@ -1,11 +1,13 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Copy, ExternalLink, Server, Star } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import { hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
+import { useWorkspace } from '../utils/workspaceContext'
 
 export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
@@ -13,9 +15,17 @@ export default function ClusterPage() {
   const [view, setView] = useState<'grid' | 'namespace'>('namespace')
   const [envFilter, setEnvFilter] = useState('')
   const qc = useQueryClient()
+  const { workspaceId, setWorkspaceId } = useWorkspace()
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const ns = searchParams.get('ns')
+    if (ns) setNsFilter(ns)
+  }, [searchParams])
 
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
   const summary = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
+  const clusters = useQuery({ queryKey: ['clusters'], queryFn: hermesApi.listClusters, refetchInterval: 15000 })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
 
@@ -60,12 +70,17 @@ export default function ClusterPage() {
 
   const filtered = useMemo(() => {
     return (catalog.data ?? []).filter((a) => {
+      if (workspaceId && a.meta?.environment !== workspaceId) return false
       if (nsFilter && a.namespace !== nsFilter) return false
       if (statusFilter && a.status !== statusFilter) return false
       if (envFilter && a.meta?.environment !== envFilter) return false
       return true
     })
-  }, [catalog.data, nsFilter, statusFilter, envFilter])
+  }, [catalog.data, nsFilter, statusFilter, envFilter, workspaceId])
+
+  useEffect(() => {
+    if (envFilter) setWorkspaceId(envFilter)
+  }, [envFilter, setWorkspaceId])
 
   const byNamespace = useMemo(() => {
     const map = new Map<string, typeof filtered>()
@@ -88,6 +103,8 @@ export default function ClusterPage() {
           <p className="hero-sub">
             Hermes watches all Kubernetes services cluster-wide — including Zeus OS, monitoring, and everything else.
             Publish to pin services in your dock.
+            {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
+            {workspaceId ? ` Workspace: ${workspaceId}.` : ''}
           </p>
         </div>
         <div className="hero-metrics">

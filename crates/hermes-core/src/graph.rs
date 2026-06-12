@@ -14,6 +14,8 @@ pub struct GraphNode {
     pub status: String,
     pub namespace: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub owner: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub icon: String,
 }
 
@@ -61,6 +63,7 @@ pub fn build_graph(apps: &[App]) -> AppGraph {
             category: app.category.clone(),
             status: app.status.clone(),
             namespace: app.namespace.clone(),
+            owner: app.meta.owner.clone(),
             icon: app.icon.clone(),
         });
     }

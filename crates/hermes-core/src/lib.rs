@@ -141,13 +141,17 @@ pub struct AuditEvent {
 #[derive(Clone, Debug)]
 pub struct CurrentUser(pub String);
 
+pub mod cluster;
 pub mod diagnosis;
 pub mod graph;
+pub mod intent;
 pub mod share;
 pub mod store;
 pub mod workspace;
 
+pub use cluster::{list_clusters, local_cluster, ClusterInfo};
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
+pub use intent::{resolve_search_intent, SearchIntent};
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
 pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};

@@ -98,10 +98,29 @@ pub fn build_diagnosis(app: &App) -> AppDiagnosis {
     }
 
     let ns = app.namespace.replace(' ', "%20");
-    let suggested_actions = vec![SuggestedAction {
+    let mut suggested_actions = vec![
+        SuggestedAction {
+            label: "View in cluster catalog".into(),
+            href: format!("/cluster?ns={ns}"),
+        },
+        SuggestedAction {
+            label: "Open dependency graph".into(),
+            href: "/graph".into(),
+        },
+    ];
+    if app.ready_endpoints == 0 || app.status != "healthy" {
+        suggested_actions.push(SuggestedAction {
+            label: "Copy kubectl pod check".into(),
+            href: format!(
+                "#copy:kubectl get pods -n {} -l app.kubernetes.io/name={}",
+                app.namespace, app.backend.name
+            ),
+        });
+    }
+    suggested_actions.push(SuggestedAction {
         label: "Open Kubernetes workloads".into(),
         href: format!("/k8s/workloads?ns={ns}"),
-    }];
+    });
 
     AppDiagnosis {
         app_id: app.id.clone(),

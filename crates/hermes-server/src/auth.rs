@@ -56,6 +56,8 @@ impl AuthConfig {
 struct SessionClaims {
     sub: String,
     email: Option<String>,
+    #[serde(default)]
+    groups: Vec<String>,
     exp: usize,
 }
 
@@ -79,6 +81,8 @@ struct OidcUserInfo {
     sub: String,
     email: Option<String>,
     preferred_username: Option<String>,
+    #[serde(default)]
+    groups: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -124,10 +128,17 @@ pub async fn require_auth(
 
     let jar = jar_from_headers(req.headers());
     if let Some(user) = user_from_session(&auth, &jar) {
+        let groups = groups_from_session(&auth, &jar);
         let _ = req.headers_mut().insert(
             HeaderName::from_static("x-hermes-user"),
             HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("local")),
         );
+        if !groups.is_empty() {
+            let _ = req.headers_mut().insert(
+                HeaderName::from_static("x-hermes-groups"),
+                HeaderValue::from_str(&groups).unwrap_or(HeaderValue::from_static("")),
+            );
+        }
         return next.run(req).await;
     }
 
@@ -186,6 +197,20 @@ fn jar_from_headers(headers: &HeaderMap) -> CookieJar {
         }
     }
     jar
+}
+
+fn groups_from_session(auth: &AuthConfig, jar: &CookieJar) -> String {
+    if auth.mode != "oidc" {
+        return String::new();
+    }
+    let token = match jar.get(SESSION_COOKIE) {
+        Some(c) => c.value(),
+        None => return String::new(),
+    };
+    decode_session(token, &auth.session_secret)
+        .ok()
+        .map(|claims| claims.groups.join(","))
+        .unwrap_or_default()
 }
 
 fn user_from_session(auth: &AuthConfig, jar: &CookieJar) -> Option<String> {
@@ -260,6 +285,7 @@ async fn callback(
     let claims = SessionClaims {
         sub: user.sub.clone(),
         email: user.email.or(user.preferred_username),
+        groups: user.groups,
         exp: (SystemTime::now() + Duration::from_secs(86400))
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -413,6 +439,7 @@ async fn fetch_userinfo(discovery: &OidcDiscovery, access_token: &str) -> Result
         sub: random_token(),
         email: None,
         preferred_username: Some("oidc-user".into()),
+        groups: vec![],
     })
 }
 

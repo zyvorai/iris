@@ -340,9 +340,15 @@ Honest checklist of what ships now:
 - [x] Helm chart and remote K3s deploy tooling
 - [x] Demo apps (Grafana + Prometheus) for quick validation
 
+- [x] Application dependency graph, workspaces, teams, and smart Spotlight
+- [x] Share links with admin revoke, activity timeline, and CSV export
+- [x] Rule-based search intent API (`/api/v1/search/intent`)
+- [x] Cluster registry API (single-cluster MVP) and diagnosis actions
+- [x] OIDC admin groups (`HERMES_ADMIN_GROUPS`) and share admin (`HERMES_ADMIN_USERS`)
+
 **Not yet (roadmap):**
 
-Multi-cluster federation · service mesh route discovery · per-app SSO passthrough · application graph · AI search · team workspaces · enterprise RBAC (K8s-native)
+Multi-cluster federation · service mesh route discovery · per-app SSO passthrough · LLM search · enterprise K8s RBAC · gRPC/SSE gateway · permissioned team workspaces
 
 ---
 

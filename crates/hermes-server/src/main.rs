@@ -37,14 +37,23 @@ async fn main() -> anyhow::Result<()> {
     let ui_dir = env::var("HERMES_UI_DIR").unwrap_or_else(|_| "./ui/dist".into());
     let default_user = env::var("HERMES_DEFAULT_USER").unwrap_or_else(|_| "local".into());
     let allowed_namespaces = auth::split_csv(&env::var("HERMES_ALLOWED_NAMESPACES").unwrap_or_default());
+    let admin_users = auth::split_csv(&env::var("HERMES_ADMIN_USERS").unwrap_or_default());
+    let admin_groups = auth::split_csv(&env::var("HERMES_ADMIN_GROUPS").unwrap_or_default());
     let auth_cfg = auth::AuthConfig::from_env(default_user.clone())?;
 
     let store = Arc::new(Store::open(&db_path).context("open store")?);
+    if let Ok(purged) = store.purge_expired_shares() {
+        if purged > 0 {
+            tracing::info!("purged {purged} expired share links");
+        }
+    }
 
     let api_state = ApiState {
         store: store.clone(),
         default_user: default_user.clone(),
         allowed_namespaces,
+        admin_users,
+        admin_groups,
     };
 
     let gateway_state = GatewayState {

@@ -93,6 +93,18 @@ spec:
             - name: HERMES_ALLOWED_NAMESPACES
               value: {{ join "," .Values.server.allowedNamespaces | quote }}
             {{- end }}
+            {{- if .Values.server.adminUsers }}
+            - name: HERMES_ADMIN_USERS
+              value: {{ join "," .Values.server.adminUsers | quote }}
+            {{- end }}
+            {{- if .Values.server.adminGroups }}
+            - name: HERMES_ADMIN_GROUPS
+              value: {{ join "," .Values.server.adminGroups | quote }}
+            {{- end }}
+            - name: HERMES_CLUSTER_ID
+              value: {{ .Values.cluster.id | quote }}
+            - name: HERMES_CLUSTER_NAME
+              value: {{ .Values.cluster.name | quote }}
             - name: HERMES_UI_DIR
               value: /app/ui
           livenessProbe:

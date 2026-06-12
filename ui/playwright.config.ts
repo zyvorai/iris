@@ -1,0 +1,20 @@
+// Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
+// https://zyvor.dev · info@zyvor.dev
+
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests',
+  timeout: 60_000,
+  use: {
+    baseURL: process.env.HERMES_E2E_BASE ?? 'http://127.0.0.1:31847',
+    trace: 'on-first-retry',
+  },
+  webServer: process.env.HERMES_E2E_BASE
+    ? undefined
+    : {
+        command: 'npm run preview -- --host 127.0.0.1 --port 4173',
+        port: 4173,
+        reuseExistingServer: true,
+      },
+})

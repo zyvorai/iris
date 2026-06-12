@@ -73,11 +73,37 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const ownerQuery = ownerMatch(q.trim())
   const envQuery = envMatch(q.trim())
   const isTeamQuery = ['team', 'team picks', 'picks', 'recommended'].includes(query)
+  const isIntentQuery =
+    q.trim().length > 2 &&
+    !depQuery &&
+    !ownerQuery &&
+    !envQuery &&
+    !isTeamQuery &&
+    query !== 'broken' &&
+    (query.includes('depend') ||
+      query.includes('unhealthy') ||
+      query.startsWith('which ') ||
+      query.startsWith('owned ') ||
+      query.includes('production') ||
+      query.includes('staging'))
 
   const { data: hits = [] } = useQuery({
     queryKey: ['search', q],
     queryFn: () => hermesApi.search(q),
-    enabled: q.trim().length > 0 && !depQuery && !ownerQuery && !envQuery && !isTeamQuery && query !== 'broken',
+    enabled:
+      q.trim().length > 0 &&
+      !depQuery &&
+      !ownerQuery &&
+      !envQuery &&
+      !isTeamQuery &&
+      !isIntentQuery &&
+      query !== 'broken',
+  })
+
+  const intent = useQuery({
+    queryKey: ['search-intent', q],
+    queryFn: () => hermesApi.searchIntent(q),
+    enabled: isIntentQuery,
   })
 
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
@@ -154,6 +180,24 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       return apps.slice(0, 8).flatMap((app) => [{ kind: 'app' as const, app, action: 'open' as const }])
     }
 
+    if (intent.data?.apps.length) {
+      return [
+        {
+          kind: 'action' as const,
+          label: intent.data.answer,
+          meta: `${intent.data.apps.length} apps · ${intent.data.intent}`,
+          run: () => {},
+        },
+        ...intent.data.apps
+          .filter(matchesWorkspace)
+          .slice(0, 8)
+          .flatMap((app) => [
+            { kind: 'app' as const, app, action: 'open' as const },
+            { kind: 'app' as const, app, action: 'inspect' as const },
+          ]),
+      ]
+    }
+
     if (q.trim()) {
       return hits
         .filter((h) => matchesWorkspace(h.app))
@@ -182,6 +226,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     ownerQuery,
     envQuery,
     isTeamQuery,
+    intent.data,
     matchesWorkspace,
     setWorkspaceId,
   ])

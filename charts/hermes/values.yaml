@@ -55,6 +55,12 @@ server:
   sessionSecret: ""
   defaultUser: local
   allowedNamespaces: []
+  adminUsers: []
+  adminGroups: []
+
+cluster:
+  id: local
+  name: Local cluster
 
 service:
   type: NodePort

@@ -138,6 +138,8 @@ ON CONFLICT(id) DO UPDATE SET
   meta_json=CASE
     WHEN json_extract(excluded.meta_json, '$.recommended') = 1 THEN excluded.meta_json
     WHEN json_extract(apps.meta_json, '$.recommended') = 1 THEN json_set(excluded.meta_json, '$.recommended', json('true'))
+    WHEN length(coalesce(json_extract(excluded.meta_json, '$.owner'), '')) > 0 THEN excluded.meta_json
+    WHEN length(coalesce(json_extract(apps.meta_json, '$.owner'), '')) > 0 THEN json_set(excluded.meta_json, '$.owner', json_extract(apps.meta_json, '$.owner'))
     ELSE excluded.meta_json
   END
 `,

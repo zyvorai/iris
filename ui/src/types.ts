@@ -29,6 +29,22 @@ export interface ShareLink {
   expiresAt: string
   createdAt: string
   label?: string
+  createdBy?: string
+}
+
+export interface SearchIntent {
+  intent: string
+  answer: string
+  apps: HermesApp[]
+}
+
+export interface ClusterInfo {
+  id: string
+  name: string
+  appCount: number
+  published: number
+  healthy: number
+  isLocal: boolean
 }
 
 export interface CreateShareRequest {
@@ -48,6 +64,7 @@ export interface GraphNode {
   category: string
   status: string
   namespace: string
+  owner?: string
   icon?: string
 }
 

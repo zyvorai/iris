@@ -3,14 +3,34 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { Copy, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import RouteLens from './RouteLens'
 import { copyAppUrl, hermesApi } from '../services/hermesApi'
-import type { HermesApp } from '../types'
+import type { HermesApp, SuggestedAction } from '../types'
 
 interface DiagnosePanelProps {
   app: HermesApp
   open: boolean
   onClose: () => void
+}
+
+function ActionLink({ action }: { action: SuggestedAction }) {
+  if (action.href.startsWith('#copy:')) {
+    const cmd = action.href.slice('#copy:'.length)
+    return (
+      <button type="button" className="btn" onClick={() => void navigator.clipboard.writeText(cmd)}>
+        <Copy size={12} /> {action.label}
+      </button>
+    )
+  }
+  if (action.href.startsWith('/') && !action.href.startsWith('//')) {
+    return <Link to={action.href}>{action.label}</Link>
+  }
+  return (
+    <a href={action.href} target="_blank" rel="noreferrer">
+      {action.label}
+    </a>
+  )
 }
 
 export default function DiagnosePanel({ app, open, onClose }: DiagnosePanelProps) {
@@ -59,9 +79,7 @@ export default function DiagnosePanel({ app, open, onClose }: DiagnosePanelProps
                 <ul className="diagnose-action-list">
                   {diagnosis.data.suggestedActions.map((action) => (
                     <li key={action.href}>
-                      <a href={action.href} target="_blank" rel="noreferrer">
-                        {action.label}
-                      </a>
+                      <ActionLink action={action} />
                     </li>
                   ))}
                 </ul>

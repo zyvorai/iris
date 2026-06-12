@@ -14,7 +14,7 @@ DEPLOY_LOG="${HERMES_DEPLOY_LOG:-${HOME}/.hermes/deploy-$(date +%Y%m%d-%H%M%S).l
 
 HERMES_NAMESPACE="${HERMES_NAMESPACE:-hermes-system}"
 HERMES_NODE_PORT="${HERMES_NODE_PORT:-31847}"
-HERMES_TAG="${HERMES_TAG:-0.1.0}"
+HERMES_TAG="${HERMES_TAG:-$(git -C "${PROJECT_DIR}" rev-parse --short HEAD 2>/dev/null || echo 0.1.0)}"
 
 K3S_MODE=true
 SKIP_CLUSTER_SETUP=false
@@ -242,7 +242,8 @@ build_images_remote() {
     info "Building Hermes images on remote..."
     _ssh env REMOTE_DIR="${REMOTE_DIR}" HERMES_TAG="${HERMES_TAG}" bash <<'REMOTE' || fail "Remote image build failed"
 set -e
-cd "${REMOTE_DIR}"
+mkdir -p "${REMOTE_DIR}"
+cd "${REMOTE_DIR}" || { echo "REMOTE_DIR missing: ${REMOTE_DIR}"; exit 1; }
 SUDO=""
 [ "$(id -u)" -ne 0 ] && SUDO="sudo"
 
@@ -274,19 +275,22 @@ command -v docker >/dev/null && docker info >/dev/null 2>&1 && DOCKER_BIN=docker
 [ -n "$DOCKER_BIN" ] || { echo "Install podman or docker"; exit 1; }
 
 echo "Building UI..."
-(cd ui && npm ci && npm run build)
+(cd "${REMOTE_DIR}/ui" && npm ci && npm run build)
 
 echo "Building Rust server..."
 (cd "${REMOTE_DIR}" && cargo build --release -p hermes-server)
 
 echo "Building Go controller..."
-(cd cmd/hermes-controller && go build -o /tmp/hermes-controller .)
+(cd "${REMOTE_DIR}/cmd/hermes-controller" && go build -o /tmp/hermes-controller .)
 
 TAG="${HERMES_TAG}"
+mkdir -p "${REMOTE_DIR}"
 if ! (cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.server -t "hermes-server:${TAG}" .) 2>&1; then
     echo "Full server image build failed — using runtime Dockerfile with local artifacts"
+    mkdir -p "${REMOTE_DIR}"
     (cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.server.runtime -t "hermes-server:${TAG}" .)
 fi
+mkdir -p "${REMOTE_DIR}"
 (cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.controller -t "hermes-controller:${TAG}" .)
 
 if [ -f "${REMOTE_DIR}/scripts/lib/k3s-image-import.sh" ]; then

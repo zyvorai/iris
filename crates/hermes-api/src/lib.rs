@@ -12,9 +12,10 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, build_graph, build_team_owners, build_workspaces, App, AppDiagnosis, AppGraph,
-    AuditEvent, CatalogStats, ClusterSummary, CreateShareRequest, HealthSummary, SearchHit,
-    ShareLink, ShareLinkResponse, TeamOwner, Workspace,
+    build_diagnosis, build_graph, build_team_owners, build_workspaces, list_clusters,
+    resolve_search_intent, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats, ClusterInfo,
+    ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, SearchIntent, ShareLink,
+    ShareLinkResponse, TeamOwner, Workspace,
 };
 use serde::Deserialize;
 
@@ -23,6 +24,8 @@ pub struct ApiState {
     pub store: Arc<Store>,
     pub default_user: String,
     pub allowed_namespaces: Vec<String>,
+    pub admin_users: Vec<String>,
+    pub admin_groups: Vec<String>,
 }
 
 pub fn routes(state: ApiState) -> Router {
@@ -33,6 +36,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/catalog/export", get(export_catalog))
         .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
+        .route("/clusters", get(list_clusters_route))
         .route("/graph", get(app_graph))
         .route("/workspaces", get(list_workspaces))
         .route("/owners", get(list_owners))
@@ -41,6 +45,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/discovery/publish-namespace/{*namespace}", post(publish_namespace))
         .route("/discovery/hide/{*id}", post(hide_app))
         .route("/search", get(search))
+        .route("/search/intent", get(search_intent))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -49,6 +54,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/recommended", get(list_recommended))
         .route("/recommended/{*id}", put(set_recommended))
         .route("/shares", get(list_shares).post(create_share))
+        .route("/shares/all", get(list_all_shares))
         .route("/shares/{token}", delete(delete_share))
         .route("/audit", get(list_audit))
         .with_state(state)
@@ -103,6 +109,30 @@ fn app_allowed(st: &ApiState, app: &App) -> bool {
             .allowed_namespaces
             .iter()
             .any(|ns| ns == &app.namespace)
+}
+
+fn is_admin(st: &ApiState, user: &str, groups: &[String]) -> bool {
+    if !st.admin_users.is_empty() && st.admin_users.iter().any(|u| u == user) {
+        return true;
+    }
+    if !st.admin_groups.is_empty() {
+        return groups.iter().any(|g| st.admin_groups.iter().any(|ag| ag == g));
+    }
+    st.admin_users.is_empty() && st.admin_groups.is_empty() && user == st.default_user
+}
+
+fn user_groups(headers: &HeaderMap) -> Vec<String> {
+    headers
+        .get("x-hermes-groups")
+        .and_then(|v| v.to_str().ok())
+        .map(|raw| {
+            raw.split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(str::to_string)
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 async fn list_apps(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {
@@ -295,6 +325,30 @@ async fn search(
         &format!("q={}", q.q.trim()),
     );
     Ok(Json(filtered))
+}
+
+async fn search_intent(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<SearchQuery>,
+) -> Result<Json<SearchIntent>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    let intent = resolve_search_intent(&apps, &q.q);
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("intent={} q={}", intent.intent, q.q.trim()),
+    );
+    Ok(Json(intent))
+}
+
+async fn list_clusters_route(
+    State(st): State<ApiState>,
+) -> Result<Json<Vec<ClusterInfo>>, AppError> {
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    Ok(Json(list_clusters(&apps)))
 }
 
 async fn list_favorites(
@@ -507,13 +561,31 @@ async fn create_share(
     Ok(Json(share_response(&link)))
 }
 
+async fn list_all_shares(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<ShareLink>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    if !is_admin(&st, &uid, &groups) {
+        return Err(AppError::Forbidden);
+    }
+    Ok(Json(st.store.list_all_shares()?))
+}
+
 async fn delete_share(
     State(st): State<ApiState>,
     headers: HeaderMap,
     Path(share_token): Path<String>,
 ) -> Result<StatusCode, AppError> {
     let uid = user_id(&headers, &st.default_user);
-    if !st.store.delete_share(&share_token, &uid)? {
+    let groups = user_groups(&headers);
+    let deleted = if is_admin(&st, &uid, &groups) {
+        st.store.delete_share_admin(&share_token)?
+    } else {
+        st.store.delete_share(&share_token, &uid)?
+    };
+    if !deleted {
         return Err(AppError::NotFound);
     }
     let _ = st.store.record_audit(
@@ -540,6 +612,7 @@ fn share_response(link: &ShareLink) -> ShareLinkResponse {
 pub enum AppError {
     NotFound,
     BadRequest,
+    Forbidden,
     Internal(anyhow::Error),
 }
 
@@ -560,6 +633,7 @@ impl IntoResponse for AppError {
         match self {
             AppError::NotFound => (StatusCode::NOT_FOUND, "not found").into_response(),
             AppError::BadRequest => (StatusCode::BAD_REQUEST, "bad request").into_response(),
+            AppError::Forbidden => (StatusCode::FORBIDDEN, "forbidden").into_response(),
             AppError::Internal(e) => {
                 tracing::error!("api error: {e:#}");
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()

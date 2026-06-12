@@ -582,6 +582,53 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
         Ok(n > 0)
     }
 
+    pub fn delete_share_admin(&self, token: &str) -> Result<bool> {
+        let conn = self.conn.lock().unwrap();
+        let n = conn.execute("DELETE FROM share_links WHERE token = ?1", [token])?;
+        Ok(n > 0)
+    }
+
+    pub fn list_all_shares(&self) -> Result<Vec<ShareLink>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT token, app_id, created_by, expires_at, created_at, label FROM share_links ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map([], |row| {
+            Ok(ShareLink {
+                token: row.get(0)?,
+                app_id: row.get(1)?,
+                created_by: row.get(2)?,
+                expires_at: row.get(3)?,
+                created_at: row.get(4)?,
+                label: row.get(5)?,
+            })
+        })?;
+        let mut links = Vec::new();
+        for row in rows {
+            let link = row?;
+            if !is_expired(&link.expires_at) {
+                links.push(link);
+            }
+        }
+        Ok(links)
+    }
+
+    pub fn purge_expired_shares(&self) -> Result<usize> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT token, expires_at FROM share_links")?;
+        let rows = stmt.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?;
+        let mut purged = 0usize;
+        for row in rows {
+            let (token, expires_at) = row?;
+            if is_expired(&expires_at) {
+                purged += conn.execute("DELETE FROM share_links WHERE token = ?1", [token])?;
+            }
+        }
+        Ok(purged)
+    }
+
     pub fn list_audit(&self, limit: usize) -> Result<Vec<AuditEvent>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
