@@ -48,8 +48,9 @@ const (
 )
 
 type Config struct {
-	PublicBaseURL   string
-	AutoPublish     bool
+	PublicBaseURL    string
+	PublicPathPrefix string
+	AutoPublish      bool
 	AutoSuggest     bool
 	DiscoverAll     bool
 	DiscoverIngress    bool
@@ -379,10 +380,21 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		}
 	}
 
-	routePath := fmt.Sprintf("/a/%s/%s", svc.Namespace, slug)
-	publicURL := strings.TrimRight(w.cfg.PublicBaseURL, "/") + routePath
-	if canonicalSlug != "" {
-		publicURL = strings.TrimRight(w.cfg.PublicBaseURL, "/") + "/apps/" + canonicalSlug
+	base := strings.TrimRight(w.cfg.PublicBaseURL, "/")
+	pathPrefix := strings.Trim(w.cfg.PublicPathPrefix, "/")
+	var routePath, publicURL string
+	if pathPrefix != "" {
+		routePath = fmt.Sprintf("/%s/a/%s/%s", pathPrefix, svc.Namespace, slug)
+		publicURL = base + routePath
+		if canonicalSlug != "" {
+			publicURL = fmt.Sprintf("%s/%s/apps/%s", base, pathPrefix, canonicalSlug)
+		}
+	} else {
+		routePath = fmt.Sprintf("/a/%s/%s", svc.Namespace, slug)
+		publicURL = base + routePath
+		if canonicalSlug != "" {
+			publicURL = base + "/apps/" + canonicalSlug
+		}
 	}
 
 	meta := enrichMeta(metaFromAnnotations(ann), svc.Namespace)

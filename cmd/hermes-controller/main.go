@@ -24,6 +24,7 @@ import (
 func main() {
 	dbPath := env("HERMES_DB_PATH", "/data/hermes/hermes.db")
 	publicBase := env("HERMES_PUBLIC_BASE_URL", "http://localhost:31847")
+	publicPathPrefix := env("HERMES_PUBLIC_PATH_PREFIX", "")
 	autoPublish := env("HERMES_AUTO_PUBLISH", "false") == "true"
 	autoSuggest := env("HERMES_AUTO_SUGGEST", "true") != "false"
 	discoverAll := env("HERMES_DISCOVER_ALL", "true") != "false"
@@ -58,6 +59,7 @@ func main() {
 
 	cfg := discovery.Config{
 		PublicBaseURL:      publicBase,
+		PublicPathPrefix:   publicPathPrefix,
 		AutoPublish:        autoPublish,
 		AutoSuggest:        autoSuggest,
 		DiscoverAll:        discoverAll,

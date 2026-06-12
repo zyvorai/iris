@@ -22,11 +22,22 @@ pub struct GatewayState {
 
 pub fn routes(state: GatewayState) -> Router {
     Router::new()
+        // Zeus Launchpad public URLs
+        .route("/launchpad/apps/{slug}", any(proxy_canonical_root))
+        .route("/launchpad/apps/{slug}/{*rest}", any(proxy_canonical_path))
+        .route("/launchpad/a/{namespace}/{slug}", any(proxy_root))
+        .route("/launchpad/a/{namespace}/{slug}/{*rest}", any(proxy_path))
+        .route("/launchpad/s/{token}", any(share_stub))
+        // Legacy aliases
         .route("/apps/{slug}", any(proxy_canonical_root))
         .route("/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/a/{namespace}/{slug}", any(proxy_root))
         .route("/a/{namespace}/{slug}/{*rest}", any(proxy_path))
         .with_state(state)
+}
+
+async fn share_stub(Path(_token): Path<String>) -> Response {
+    (StatusCode::NOT_FOUND, "share link not found or expired").into_response()
 }
 
 async fn proxy_canonical_root(

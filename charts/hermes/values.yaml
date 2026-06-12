@@ -1,6 +1,7 @@
 global:
   domain: zeus.local
   hermesPort: 31847
+  publicPathPrefix: /launchpad
 
 replicaCount: 1
 
@@ -38,6 +39,7 @@ controller:
   discoverIngress: true
   discoverGatewayAPI: true
   publicBaseUrl: ""
+  publicPathPrefix: ""
   healthIntervalSeconds: 30
 
 server:

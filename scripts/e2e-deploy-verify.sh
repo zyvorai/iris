@@ -32,6 +32,8 @@ check "health summary" "curl -sf '${BASE}/api/v1/health/apps'"
 check "audit API" "curl -sf '${BASE}/api/v1/audit?limit=5'"
 check "stats API" "curl -sf '${BASE}/api/v1/stats'"
 check "metrics" "curl -sf '${BASE}/metrics' | grep -q hermes_apps_total"
+check "launchpad gateway alias" "curl -sf -o /dev/null -w '%{http_code}' '${BASE}/launchpad/apps/grafana' | grep -qE '^(200|302|307|308)$'"
+check "legacy gateway alias" "curl -sf -o /dev/null -w '%{http_code}' '${BASE}/apps/grafana' | grep -qE '^(200|302|307|308)$'"
 
 # Wait for demo apps (Grafana/Prometheus) to appear in catalog
 found_demo=false

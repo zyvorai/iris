@@ -32,6 +32,11 @@ spec:
               value: {{ .Values.database.path | quote }}
             - name: HERMES_PUBLIC_BASE_URL
               value: {{ $publicBase | quote }}
+            {{- $pathPrefix := .Values.controller.publicPathPrefix | default .Values.global.publicPathPrefix -}}
+            {{- if $pathPrefix }}
+            - name: HERMES_PUBLIC_PATH_PREFIX
+              value: {{ $pathPrefix | quote }}
+            {{- end }}
             - name: HERMES_AUTO_PUBLISH
               value: {{ .Values.controller.autoPublish | quote }}
             - name: HERMES_AUTO_SUGGEST
