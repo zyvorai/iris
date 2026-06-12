@@ -274,27 +274,26 @@ command -v docker >/dev/null && docker info >/dev/null 2>&1 && DOCKER_BIN=docker
 [ -n "$DOCKER_BIN" ] || { echo "Install podman or docker"; exit 1; }
 
 echo "Building UI..."
-cd ui && npm ci && npm run build && cd ..
+(cd ui && npm ci && npm run build)
 
 echo "Building Rust server..."
-cargo build --release -p hermes-server
+(cd "${REMOTE_DIR}" && cargo build --release -p hermes-server)
 
 echo "Building Go controller..."
-cd cmd/hermes-controller && go build -o /tmp/hermes-controller . && cd ../..
+(cd cmd/hermes-controller && go build -o /tmp/hermes-controller .)
 
 TAG="${HERMES_TAG}"
-if ! $DOCKER_BIN build -f Dockerfile.server -t "hermes-server:${TAG}" . 2>&1; then
+if ! (cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.server -t "hermes-server:${TAG}" .) 2>&1; then
     echo "Full server image build failed — using runtime Dockerfile with local artifacts"
-    $DOCKER_BIN build -f Dockerfile.server.runtime -t "hermes-server:${TAG}" .
+    (cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.server.runtime -t "hermes-server:${TAG}" .)
 fi
-$DOCKER_BIN build -f Dockerfile.controller -t "hermes-controller:${TAG}" .
+(cd "${REMOTE_DIR}" && $DOCKER_BIN build -f Dockerfile.controller -t "hermes-controller:${TAG}" .)
 
-if [ -f scripts/lib/k3s-image-import.sh ]; then
-    source scripts/lib/k3s-image-import.sh
+if [ -f "${REMOTE_DIR}/scripts/lib/k3s-image-import.sh" ]; then
+    source "${REMOTE_DIR}/scripts/lib/k3s-image-import.sh"
     k3s_import_oci_image "hermes-controller:${TAG}" "$DOCKER_BIN"
     k3s_import_oci_image "hermes-server:${TAG}" "$DOCKER_BIN"
 fi
-cd /
 echo "Images: hermes-controller:${TAG} hermes-server:${TAG}"
 REMOTE
     ok "Images built and imported"

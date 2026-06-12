@@ -22,7 +22,7 @@ k3s_ctr() {
 
 k3s_image_present() {
     local ref="$1"
-    k3s_ctr images ls 2>/dev/null | awk '{print $1}' | grep -qxF "${ref}"
+    k3s_ctr images ls -q 2>/dev/null | grep -Fx "${ref}" >/dev/null
 }
 
 k3s_import_oci_image() {
@@ -30,6 +30,8 @@ k3s_import_oci_image() {
     local docker_bin="${2:-}"
     local source_ref="${ref}"
     local library_ref="${ref}"
+    local base="${ref%%:*}"
+    local tag_part="${ref#*:}"
 
     if [ -z "${docker_bin}" ]; then
         if command -v podman >/dev/null 2>&1; then
@@ -67,13 +69,21 @@ k3s_import_oci_image() {
         return 1
     fi
 
-    # Podman imports as localhost/<name with space> or localhost/<ref>
+    # Podman may import hyphenated names with spaces (hermes-controller → hermes controller)
+    local spaced="${base//-/\ }"
     local imported_ref=""
-    if k3s_image_present "localhost/${ref}"; then
-        imported_ref="localhost/${ref}"
-    else
-        # podman sometimes splits name on hyphen in import output
-        imported_ref="$(k3s_ctr images ls 2>/dev/null | awk '{print $1}' | grep -E "^localhost/.*${ref%%:*}" | head -1 || true)"
+    while IFS= read -r candidate; do
+        [ -z "${candidate}" ] && continue
+        case "${candidate}" in
+            "localhost/${ref}"|"localhost/${spaced}:${tag_part}"|localhost/*"${base}"*:*"${tag_part}"*)
+                imported_ref="${candidate}"
+                break
+                ;;
+        esac
+    done < <(k3s_ctr images ls -q 2>/dev/null | grep "^localhost/" || true)
+
+    if [ -z "${imported_ref}" ]; then
+        imported_ref="$(k3s_ctr images ls -q 2>/dev/null | grep "^localhost/" | grep -i "${base//-/}" | head -1 || true)"
     fi
 
     if [ -n "${imported_ref}" ]; then
@@ -83,11 +93,12 @@ k3s_import_oci_image() {
         fi
     fi
 
-    if k3s_image_present "${ref}" || k3s_image_present "${library_ref}" || k3s_image_present "localhost/${ref}"; then
+    if k3s_image_present "${ref}" || k3s_image_present "${library_ref}"; then
         echo "k3s import: ok ${ref}"
         return 0
     fi
 
     echo "k3s import: ${ref} not visible after import" >&2
+    k3s_ctr images ls 2>/dev/null | grep -i hermes || true
     return 1
 }
