@@ -142,8 +142,10 @@ pub struct AuditEvent {
 pub struct CurrentUser(pub String);
 
 pub mod diagnosis;
+pub mod graph;
 pub mod share;
 pub mod store;
 
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
+pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};

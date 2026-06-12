@@ -37,6 +37,27 @@ export interface CreateShareRequest {
   label?: string
 }
 
+export interface AppGraph {
+  nodes: GraphNode[]
+  edges: GraphEdge[]
+}
+
+export interface GraphNode {
+  id: string
+  label: string
+  category: string
+  status: string
+  namespace: string
+  icon?: string
+}
+
+export interface GraphEdge {
+  from: string
+  to: string
+  label?: string
+  resolved: boolean
+}
+
 export interface HermesApp {
   id: string
   slug: string

@@ -3,6 +3,7 @@
 
 import type {
   AppDiagnosis,
+  AppGraph,
   AuditEvent,
   CatalogStats,
   ClusterSummary,
@@ -38,6 +39,7 @@ export const hermesApi = {
   exportCatalog: () => fetch('/api/v1/catalog/export').then((r) => r.blob()),
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
+  getGraph: () => req<AppGraph>('/graph'),
   getApp: (id: string) => req<HermesApp>(appPath(id)),
   getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
   listDiscovery: () => req<HermesApp[]>('/discovery'),

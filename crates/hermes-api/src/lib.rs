@@ -12,8 +12,8 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, App, AppDiagnosis, AuditEvent, CatalogStats, ClusterSummary, CreateShareRequest,
-    HealthSummary, SearchHit, ShareLink, ShareLinkResponse,
+    build_diagnosis, build_graph, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats,
+    ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, ShareLink, ShareLinkResponse,
 };
 use serde::Deserialize;
 
@@ -32,6 +32,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/catalog/export", get(export_catalog))
         .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
+        .route("/graph", get(app_graph))
         .route("/discovery", get(list_discovery))
         .route("/discovery/publish/{*id}", post(publish_app))
         .route("/discovery/publish-namespace/{*namespace}", post(publish_namespace))
@@ -196,6 +197,11 @@ async fn cluster_summary(State(st): State<ApiState>) -> Result<Json<ClusterSumma
         degraded,
         broken,
     }))
+}
+
+async fn app_graph(State(st): State<ApiState>) -> Result<Json<AppGraph>, AppError> {
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    Ok(Json(build_graph(&apps)))
 }
 
 async fn list_discovery(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {

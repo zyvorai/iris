@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Compass, Grid3X3, HeartPulse, History, Home, Layers, Search, Server } from 'lucide-react'
+import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, Search, Server } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import CommandPalette from './CommandPalette'
@@ -20,6 +20,7 @@ const titles: Record<string, string> = {
   '/apps': 'Apps',
   '/spaces': 'Spaces',
   '/cluster': 'Cluster',
+  '/graph': 'Graph',
   '/discovery': 'Discovery',
   '/health': 'Health',
   '/activity': 'Activity',
@@ -75,6 +76,9 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         </NavLink>
         <NavLink to="/cluster" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Cluster">
           <Server size={20} />
+        </NavLink>
+        <NavLink to="/graph" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Graph">
+          <GitBranch size={20} />
         </NavLink>
         <NavLink to="/discovery" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Discovery">
           <Compass size={20} />

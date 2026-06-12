@@ -1,4 +1,5 @@
 {{- if .Values.demoApps.enabled }}
+{{- $publicBase := .Values.controller.publicBaseUrl | default (printf "http://%s:%v" .Values.global.domain .Values.service.nodePort) }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -32,6 +33,35 @@ spec:
           image: grafana/grafana:11.3.0
           ports:
             - containerPort: 3000
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: "{{ $publicBase }}/launchpad/a/hermes-demo/grafana/"
+            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Viewer
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
@@ -45,6 +75,8 @@ metadata:
     hermes.zyvor.dev/icon: "grafana"
     hermes.zyvor.dev/port: "80"
     hermes.zyvor.dev/published: "true"
+    hermes.zyvor.dev/recommended: "true"
+    hermes.zyvor.dev/depends-on: "prometheus"
 spec:
   selector:
     app: grafana
@@ -76,6 +108,26 @@ spec:
           args: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-lifecycle"]
           ports:
             - containerPort: 9090
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
@@ -89,6 +141,7 @@ metadata:
     hermes.zyvor.dev/icon: "prometheus"
     hermes.zyvor.dev/port: "9090"
     hermes.zyvor.dev/published: "true"
+    hermes.zyvor.dev/recommended: "true"
 spec:
   selector:
     app: prometheus

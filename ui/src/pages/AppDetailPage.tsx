@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import DiagnosePanel from '../components/DiagnosePanel'
 import ShareLinksPanel from '../components/ShareLinksPanel'
+import { AppGraphPanel } from '../pages/GraphPage'
 import {
   appDetailPath,
   appLaunchPath,
@@ -199,6 +200,8 @@ export default function AppDetailPage() {
       </section>
 
       <ShareLinksPanel app={a} />
+
+      <AppGraphPanel appId={a.id} />
 
       <div className="app-actions" style={{ marginTop: '0.5rem' }}>
         <Link to="/apps" className="btn">

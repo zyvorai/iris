@@ -1287,3 +1287,90 @@ button {
   background: rgba(255, 255, 255, 0.06);
   transform: translateY(-1px);
 }
+
+.app-graph-wrap {
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.app-graph-edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.graph-edge-path {
+  fill: none;
+  stroke: rgba(249, 115, 22, 0.45);
+  stroke-width: 1.5;
+}
+
+.graph-edge-label {
+  fill: var(--hermes-muted);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.graph-edge-dim .graph-edge-path {
+  stroke: rgba(148, 163, 184, 0.25);
+}
+
+.app-graph-nodes {
+  position: relative;
+}
+
+.app-graph-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.55rem 0.45rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--hermes-border);
+  background: rgba(12, 14, 22, 0.92);
+  color: var(--hermes-text);
+  text-decoration: none;
+  transition: border-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+
+.app-graph-node strong {
+  font-size: 0.72rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.app-graph-node:hover {
+  border-color: rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
+}
+
+.graph-node-dim {
+  opacity: 0.35;
+}
+
+.graph-node-focus {
+  border-color: rgba(249, 115, 22, 0.65);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25);
+}
+
+.graph-node-ns {
+  font-size: 0.62rem;
+  color: var(--hermes-muted);
+}
+
+.graph-unresolved {
+  margin-top: 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  border: 1px dashed rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.06);
+  font-size: 0.82rem;
+}
+
+.graph-unresolved ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--hermes-muted);
+}
