@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS hidden_services (
 	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''`)
 	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)`)
 	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'`)
+	_, _ = s.db.Exec(`ALTER TABLE apps ADD COLUMN diagnosis_json TEXT DEFAULT ''`)
 	return nil
 }
 
@@ -229,6 +230,16 @@ func (s *Store) IsServiceHidden(ns, name string) (bool, error) {
 
 func (s *Store) HideService(ns, name string) error {
 	_, err := s.db.Exec(`INSERT OR IGNORE INTO hidden_services (namespace, service_name) VALUES (?, ?)`, ns, name)
+	return err
+}
+
+func (s *Store) UpdateDiagnosis(id string, diag model.AppDiagnosis) error {
+	raw, err := json.Marshal(diag)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`UPDATE apps SET diagnosis_json = ?, updated_at = ? WHERE id = ?`,
+		string(raw), time.Now().UTC().Format(time.RFC3339), id)
 	return err
 }
 

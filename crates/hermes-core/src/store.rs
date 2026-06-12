@@ -94,6 +94,33 @@ CREATE TABLE IF NOT EXISTS audit_events (
             [],
         );
         let _ = conn.execute("ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'", []);
+        let _ = conn.execute(
+            "ALTER TABLE apps ADD COLUMN diagnosis_json TEXT DEFAULT ''",
+            [],
+        );
+        Ok(())
+    }
+
+    pub fn get_diagnosis_json(&self, id: &str) -> Result<Option<String>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT diagnosis_json FROM apps WHERE id = ?1")?;
+        let mut rows = stmt.query([id])?;
+        if let Some(row) = rows.next()? {
+            let raw: String = row.get(0)?;
+            if raw.trim().is_empty() {
+                return Ok(None);
+            }
+            return Ok(Some(raw));
+        }
+        Ok(None)
+    }
+
+    pub fn update_diagnosis_json(&self, id: &str, json: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE apps SET diagnosis_json = ?1, updated_at = ?2 WHERE id = ?3",
+            params![json, Utc::now().to_rfc3339(), id],
+        )?;
         Ok(())
     }
 

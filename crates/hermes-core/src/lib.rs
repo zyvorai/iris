@@ -141,4 +141,7 @@ pub struct AuditEvent {
 #[derive(Clone, Debug)]
 pub struct CurrentUser(pub String);
 
+pub mod diagnosis;
 pub mod store;
+
+pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};

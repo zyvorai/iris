@@ -11,7 +11,10 @@ use axum::{
     Json, Router,
 };
 use hermes_core::store::Store;
-use hermes_core::{App, AuditEvent, CatalogStats, ClusterSummary, HealthSummary, SearchHit};
+use hermes_core::{
+    build_diagnosis, App, AppDiagnosis, AuditEvent, CatalogStats, ClusterSummary, HealthSummary,
+    SearchHit,
+};
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -24,6 +27,7 @@ pub struct ApiState {
 pub fn routes(state: ApiState) -> Router {
     Router::new()
         .route("/apps", get(list_apps))
+        .route("/apps/{*id}/diagnosis", get(app_diagnosis))
         .route("/apps/{*id}", get(get_app))
         .route("/catalog", get(list_catalog))
         .route("/catalog/export", get(export_catalog))
@@ -110,6 +114,26 @@ async fn get_app(
         return Err(AppError::NotFound);
     }
     Ok(Json(app))
+}
+
+async fn app_diagnosis(
+    State(st): State<ApiState>,
+    id: axum::extract::Path<String>,
+) -> Result<Json<AppDiagnosis>, AppError> {
+    let app_id = normalize_id(id);
+    let app = st
+        .store
+        .get_app(&app_id)?
+        .ok_or(AppError::NotFound)?;
+    if !app_allowed(&st, &app) {
+        return Err(AppError::NotFound);
+    }
+    if let Some(raw) = st.store.get_diagnosis_json(&app_id)? {
+        if let Ok(diag) = serde_json::from_str::<AppDiagnosis>(&raw) {
+            return Ok(Json(diag));
+        }
+    }
+    Ok(Json(build_diagnosis(&app)))
 }
 
 async fn list_catalog(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {

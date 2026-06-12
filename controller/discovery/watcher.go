@@ -475,6 +475,7 @@ func (w *Watcher) RefreshHealth(ctx context.Context, interval time.Duration) {
 				}
 				app.Status, app.StatusMsg = w.healthStatus(app)
 				_ = w.store.UpsertApp(app)
+				_ = w.store.UpdateDiagnosis(app.ID, w.Diagnose(ctx, app))
 			}
 		}
 	}
