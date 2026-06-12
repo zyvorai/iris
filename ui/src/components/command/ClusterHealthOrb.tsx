@@ -12,10 +12,12 @@ export default function ClusterHealthOrb({ healthy, total }: ClusterHealthOrbPro
 
   return (
     <div className={`cluster-health-orb tone-${tone}`} data-testid="cluster-health-orb" aria-label={`Cluster health ${pct} percent`}>
-      <div className="cluster-health-orb-ring" aria-hidden />
       <div className="cluster-health-orb-core">
         <strong>{pct}%</strong>
         <span>CLUSTER HEALTH</span>
+        <small className="cluster-health-orb-sub">
+          {healthy}/{total} healthy
+        </small>
       </div>
     </div>
   )

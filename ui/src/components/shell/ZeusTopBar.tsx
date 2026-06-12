@@ -3,7 +3,8 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Bell, ChevronRight, Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import WorkspaceSwitcher from '../WorkspaceSwitcher'
 import HelpPopover from './HelpPopover'
 import { hermesApi } from '../../services/hermesApi'
@@ -22,11 +23,13 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
 
   const total = cluster.data?.total ?? catalog.data?.length ?? 0
+  const published = cluster.data?.published ?? 0
   const healthy = cluster.data?.healthy ?? 0
   const degraded = cluster.data?.degraded ?? 0
   const broken = cluster.data?.broken ?? 0
   const healthPct = total > 0 ? Math.round((healthy / total) * 100) : 100
   const issueCount = broken + degraded
+  const statusTone = broken > 0 ? 'bad' : degraded > 0 || healthPct < 80 ? 'warn' : 'ok'
   const lastSync = useMemo(() => {
     const times = (catalog.data ?? [])
       .map((a) => Date.parse(a.updatedAt))
@@ -38,7 +41,7 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
 
   return (
     <header className="zeus-topbar-shell" data-testid="zeus-topbar">
-      <div className="zeus-topbar zeus-glass">
+      <div className="zeus-topbar">
         <div className="zeus-topbar-left">
           <div className="hermes-brand-mark zeus-pulse-dot" aria-hidden />
           <div>
@@ -53,16 +56,13 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
           </span>
         </div>
         <div className="zeus-topbar-right">
-          <span className="zeus-status-chip">{total} services</span>
-          <span className="zeus-status-chip">{cluster.data?.namespaces ?? '—'} ns</span>
+          <span className="zeus-status-chip">{total} discovered</span>
+          <span className="zeus-status-chip">{published} published</span>
           {issueCount > 0 ? <span className="zeus-status-chip warn">{issueCount} issues</span> : null}
           <button type="button" className="hermes-search-btn zeus-spotlight-btn" onClick={onPaletteOpen}>
             <Search size={16} />
             <span>Spotlight</span>
             <kbd>⌘K</kbd>
-          </button>
-          <button type="button" className="zeus-icon-btn" aria-label="Notifications" title="Notifications">
-            <Bell size={16} />
           </button>
           <HelpPopover onOpenShortcuts={onOpenShortcuts} />
           {auth.data?.mode === 'oidc' ? (
@@ -88,10 +88,13 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
         </div>
       </div>
       <div className="zeus-status-strip">
-        <span className="zeus-live-dot" aria-hidden />
-        Live discovery
-        {lastSync ? ` · Last sync ${lastSync.toLocaleTimeString()}` : ''} · {total} discovered ·{' '}
-        {cluster.data?.namespaces ?? '—'} namespaces · {cluster.data?.published ?? 0} published
+        <span className="zeus-live-dot" data-tone={statusTone} aria-hidden />
+        Discovery
+        {lastSync ? ` · controller sync ${lastSync.toLocaleTimeString()}` : ' · awaiting sync'}
+        {' · '}
+        {cluster.data?.namespaces ?? '—'} namespaces
+        {' · '}
+        <Link to="/cluster">Publish apps on Cluster</Link>
       </div>
       <nav className="zeus-breadcrumb" aria-label="Breadcrumb">
         Hermes <ChevronRight size={12} /> {workspaceLabel} <ChevronRight size={12} /> {pageTitle}

@@ -19,16 +19,20 @@ function routeCount(app: HermesApp): number {
   return ingress + mesh
 }
 
-export default function ServiceTile({ app, variant = 'detail', onInspect }: ServiceTileProps) {
+function endpointLabel(app: HermesApp): string {
   const routes = routeCount(app)
+  if (routes > 0) return `${routes} routes`
+  return `:${app.backend.port}`
+}
+
+export default function ServiceTile({ app, variant = 'detail', onInspect }: ServiceTileProps) {
   const updated = app.updatedAt ? new Date(app.updatedAt).toLocaleString() : '—'
+  const canOpen = app.status !== 'broken' && app.readyEndpoints > 0
 
   const onClick = () => {
     if (onInspect) onInspect(app)
-    else if (canOpen) openApp(app)
+    else if (canOpen) void openApp(app)
   }
-
-  const canOpen = app.status !== 'broken' && app.readyEndpoints > 0
 
   if (variant === 'compact') {
     return (
@@ -67,7 +71,7 @@ export default function ServiceTile({ app, variant = 'detail', onInspect }: Serv
       </div>
       <span className={`status-dot ${statusTone(app.status)}`} aria-label={statusLabel(app.status)} />
       <span className="service-tile-routes">
-        {app.readyEndpoints} ready · {routes} routes
+        {app.readyEndpoints} ready · {endpointLabel(app)}
         {!app.visibility.published ? ' · unpublished' : ''}
       </span>
       <span className="service-tile-updated">{updated}</span>

@@ -60,6 +60,7 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
 
   if (!appId) return null
 
+  const canOpen = app.data ? app.data.status !== 'broken' && app.data.readyEndpoints > 0 : false
   const isFavorite = favorites.data?.some((f) => f.id === app.data?.id) ?? false
 
   const toggleFavorite = async () => {
@@ -110,8 +111,14 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
                   Publish to launchpad
                 </button>
               ) : null}
-              <button type="button" className="btn btn-primary" onClick={() => void openApp(app.data!)}>
-                <ExternalLink size={14} /> Open
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!canOpen}
+                title={canOpen ? undefined : 'No ready endpoints or service is broken'}
+                onClick={() => void openApp(app.data!)}
+              >
+                <ExternalLink size={14} /> {canOpen ? 'Open' : 'Cannot open'}
               </button>
               <button type="button" className="btn" onClick={() => void toggleFavorite()}>
                 <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Favorite'}

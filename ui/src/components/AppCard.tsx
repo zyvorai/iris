@@ -38,6 +38,7 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
 
   const launchPath = appLaunchPath(app)
   const broken = app.status === 'broken' || app.status === 'degraded'
+  const canOpen = app.status !== 'broken' && app.readyEndpoints > 0
 
   return (
     <article className={`app-card zeus-card ${statusTone(app.status)}${broken ? ' app-card-broken' : ''}`}>
@@ -65,12 +66,12 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
         {app.canonicalSlug ? <span className="chip chip-accent">/{app.canonicalSlug}</span> : null}
       </div>
       <div className="app-actions">
-        {broken ? (
+        {broken || !canOpen ? (
           <Link to={appDetailPath(app, true)} className="btn btn-primary">
             <Stethoscope size={12} /> Diagnose
           </Link>
         ) : (
-          <button type="button" className="btn btn-primary" onClick={() => openApp(app)}>
+          <button type="button" className="btn btn-primary" onClick={() => void openApp(app)}>
             <ExternalLink size={12} /> Open
           </button>
         )}

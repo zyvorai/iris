@@ -2,10 +2,11 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ExternalLink, Stethoscope } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AppIcon from '../AppIcon'
-import { appDetailPath, openApp, statusLabel, statusTone } from '../../services/hermesApi'
+import { appDetailPath, hermesApi, openApp, statusLabel, statusTone } from '../../services/hermesApi'
 import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
 import type { HermesApp } from '../../types'
 
@@ -16,7 +17,17 @@ interface AttentionQueueProps {
 
 function AttentionCard({ app, onInspect }: { app: HermesApp; onInspect: (app: HermesApp) => void }) {
   const [expanded, setExpanded] = useState(false)
+  const qc = useQueryClient()
   const insight = useZeusAiInsight(app.id, app.displayName, expanded)
+  const publish = useMutation({
+    mutationFn: () => hermesApi.publish(app.id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['catalog'] })
+      void qc.invalidateQueries({ queryKey: ['apps'] })
+      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+    },
+  })
+  const canOpen = app.readyEndpoints > 0 && app.status !== 'broken'
 
   return (
     <article className="attention-card zeus-glass">
@@ -33,11 +44,16 @@ function AttentionCard({ app, onInspect }: { app: HermesApp; onInspect: (app: He
         <span className={`status-chip ${statusTone(app.status)}`}>{statusLabel(app.status)}</span>
       </div>
       <div className="attention-actions">
+        {!app.visibility.published ? (
+          <button type="button" className="btn btn-primary" disabled={publish.isPending} onClick={() => void publish.mutate()}>
+            Publish
+          </button>
+        ) : null}
         <button type="button" className="btn btn-primary" onClick={() => onInspect(app)}>
           <Stethoscope size={14} /> Diagnose
         </button>
-        <button type="button" className="btn" onClick={() => openApp(app)} disabled={app.status === 'broken' || app.readyEndpoints === 0}>
-          <ExternalLink size={14} /> {app.readyEndpoints === 0 ? 'No endpoints' : 'Open'}
+        <button type="button" className="btn" onClick={() => void openApp(app)} disabled={!canOpen}>
+          <ExternalLink size={14} /> {canOpen ? 'Open' : 'No endpoints'}
         </button>
         <a className="btn" href={appDetailPath(app)}>
           Check Route

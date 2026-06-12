@@ -148,6 +148,17 @@ export function appPublicUrl(app: HermesApp): string {
   return window.location.origin + appLaunchPath(app)
 }
 
+export function routePathPublicUrl(routePath: string): string {
+  if (!routePath) return ''
+  if (routePath.startsWith('http://') || routePath.startsWith('https://')) return routePath
+  const path = routePath.startsWith('/launchpad/')
+    ? routePath
+    : routePath.startsWith('/a/')
+      ? `/launchpad${routePath}`
+      : routePath
+  return window.location.origin + path
+}
+
 export async function openApp(app: HermesApp) {
   if (app.status === 'broken' || app.readyEndpoints === 0) {
     window.location.href = appDetailPath(app, true)

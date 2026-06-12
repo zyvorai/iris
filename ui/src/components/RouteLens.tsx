@@ -2,7 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import type { AppDiagnosis } from '../types'
-import { statusLabel, statusTone } from '../services/hermesApi'
+import { routePathPublicUrl, statusLabel, statusTone } from '../services/hermesApi'
 
 interface RouteLensProps {
   diagnosis: AppDiagnosis
@@ -41,7 +41,7 @@ export default function RouteLens({ diagnosis }: RouteLensProps) {
       </ol>
       <div className="route-lens-url">
         <span className="route-lens-url-label">Stable URL</span>
-        <code>{diagnosis.publicUrl || diagnosis.routePath}</code>
+        <code>{routePathPublicUrl(diagnosis.routePath) || diagnosis.routePath}</code>
       </div>
     </div>
   )

@@ -7,7 +7,7 @@ test('home loads command surface hero and health orb', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('platform-pulse-hero')).toBeVisible()
   await expect(page.getByTestId('cluster-health-orb')).toBeVisible()
-  await expect(page.getByTestId('platform-pulse-hero')).toContainText(/your platform (is alive|needs attention|is degraded|is partially healthy)/i)
+  await expect(page.getByTestId('platform-pulse-hero')).toContainText(/your platform (is healthy|needs attention|is degraded|is partially healthy)/i)
 })
 
 test('left rail and spotlight open', async ({ page }) => {

@@ -8,6 +8,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { WorkspaceProvider } from './utils/workspaceContext'
 import { applyShellPreferencesOnBoot } from './utils/hermesShellPreferences'
+import './styles/zeus-v9s-tokens.css'
 import './index.css'
 
 applyShellPreferencesOnBoot()

@@ -86,6 +86,7 @@ export default function AppDetailPage() {
 
   const a = app.data
   const broken = a.status === 'broken' || a.status === 'degraded'
+  const canOpen = a.status !== 'broken' && a.readyEndpoints > 0
 
   return (
     <>
@@ -104,8 +105,14 @@ export default function AppDetailPage() {
             {broken && a.statusMessage ? <p className="app-problem">{a.statusMessage}</p> : null}
           </div>
           <div className="app-actions app-detail-actions">
-            <button type="button" className="btn btn-primary" onClick={() => openApp(a)}>
-              <ExternalLink size={12} /> Open
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!canOpen}
+              title={canOpen ? undefined : 'Publish and ensure endpoints are ready before opening'}
+              onClick={() => void openApp(a)}
+            >
+              <ExternalLink size={12} /> {canOpen ? 'Open' : 'Cannot open'}
             </button>
             <button type="button" className="btn" onClick={() => void favMutation.mutate()}>
               <Star size={12} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Pin'}
@@ -141,6 +148,11 @@ export default function AppDetailPage() {
           <div className="detail-row">
             <span>Public URL</span>
             <code>{appPublicUrl(a)}</code>
+          </div>
+          <div className="detail-row">
+            <span>Cluster service port</span>
+            <code>:{a.backend.port}</code>
+            <span className="detail-hint">In-cluster only — not a browser URL</span>
           </div>
           {a.meta?.ingressHosts?.length ? (
             <div className="detail-row">
@@ -230,29 +242,73 @@ export default function AppDetailPage() {
 }
 
 export function HealthPage() {
-  const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
+  const publishedHealth = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary, refetchInterval: 15000 })
+
+  const unhealthy = useMemo(() => {
+    const rank = (s: string) => (s === 'broken' ? 0 : s === 'degraded' ? 1 : 2)
+    return [...(catalog.data ?? [])]
+      .filter((a) => a.status !== 'healthy')
+      .sort((a, b) => rank(a.status) - rank(b.status) || a.displayName.localeCompare(b.displayName))
+  }, [catalog.data])
+
+  const serviceCount = cluster.data?.total ?? catalog.data?.length ?? 0
+  const healthy = cluster.data?.healthy ?? catalog.data?.filter((a) => a.status === 'healthy').length ?? 0
+  const degraded = cluster.data?.degraded ?? catalog.data?.filter((a) => a.status === 'degraded').length ?? 0
+  const broken = cluster.data?.broken ?? catalog.data?.filter((a) => a.status === 'broken').length ?? 0
 
   return (
     <>
-      <div className="hero-stats">
-        <div className="stat-pill">
-          <strong>{health.data?.total ?? '—'}</strong> total
-        </div>
-        <div className="stat-pill">
-          <strong>{health.data?.healthy ?? '—'}</strong> healthy
-        </div>
-        <div className="stat-pill">
-          <strong>{health.data?.degraded ?? '—'}</strong> degraded
-        </div>
-        <div className="stat-pill">
-          <strong>{health.data?.broken ?? '—'}</strong> broken
-        </div>
-      </div>
       <section className="glass-section">
-        <h2>Unhealthy apps</h2>
-        {health.data?.apps.length ? (
+        <h2>Discovered services</h2>
+        <p className="hero-sub">Full cluster catalog health — not limited to launchpad-published apps.</p>
+        <div className="hero-stats">
+          <div className="stat-pill">
+            <strong>{serviceCount}</strong> discovered
+          </div>
+          <div className="stat-pill">
+            <strong>{healthy}</strong> healthy
+          </div>
+          <div className="stat-pill">
+            <strong>{degraded}</strong> degraded
+          </div>
+          <div className="stat-pill">
+            <strong>{broken}</strong> broken
+          </div>
+        </div>
+      </section>
+      <section className="glass-section">
+        <h2>Needs attention ({unhealthy.length})</h2>
+        {unhealthy.length ? (
           <div className="app-grid">
-            {health.data.apps.map((app) => (
+            {unhealthy.map((app) => (
+              <AppCard key={app.id} app={app} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">All discovered services are healthy.</div>
+        )}
+      </section>
+      <section className="glass-section">
+        <h2>Published launchpad health</h2>
+        <p className="hero-sub">
+          Gateway probes only apps published to the launchpad ({publishedHealth.data?.total ?? 0} published).
+        </p>
+        <div className="hero-stats">
+          <div className="stat-pill">
+            <strong>{publishedHealth.data?.healthy ?? '—'}</strong> healthy
+          </div>
+          <div className="stat-pill">
+            <strong>{publishedHealth.data?.degraded ?? '—'}</strong> degraded
+          </div>
+          <div className="stat-pill">
+            <strong>{publishedHealth.data?.broken ?? '—'}</strong> broken
+          </div>
+        </div>
+        {publishedHealth.data?.apps.length ? (
+          <div className="app-grid">
+            {publishedHealth.data.apps.map((app) => (
               <AppCard key={app.id} app={app} />
             ))}
           </div>

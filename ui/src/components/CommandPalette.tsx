@@ -90,9 +90,13 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
   const { openInspector } = useInspector()
 
-  const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
   const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+
+  const catalogUnhealthy = useMemo(
+    () => (catalog.data ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a)),
+    [catalog.data, matchesWorkspace],
+  )
 
   const command = parseSpotlightCommand(q.trim())
   const isCommandQuery = !!command
@@ -169,8 +173,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
 
   const rows: Row[] = useMemo(() => {
     if (command?.type === 'attention') {
-      const unhealthy = (health.data?.apps ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a))
-      return unhealthy.slice(0, 8).flatMap((app) => [
+      return catalogUnhealthy.slice(0, 8).flatMap((app) => [
         { kind: 'app' as const, app, action: 'inspect' as const },
         { kind: 'app' as const, app, action: 'open' as const },
       ])
@@ -194,14 +197,14 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     }
 
     if (query === 'broken' || query === 'broken services') {
-      const count = (health.data?.broken ?? 0) + (health.data?.degraded ?? 0)
+      const count = catalogUnhealthy.length
       return [
         {
           kind: 'nav',
           label: 'Apps need attention',
           path: '/health',
           icon: HeartPulse,
-          meta: count > 0 ? `${count} unhealthy apps` : 'View health dashboard',
+          meta: count > 0 ? `${count} discovered services need attention` : 'View health dashboard',
         },
       ]
     }
@@ -286,12 +289,12 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     }
 
     const list: Row[] = []
-    const topUnhealthy = (health.data?.apps ?? []).find((a) => a.status !== 'healthy' && matchesWorkspace(a))
+    const topUnhealthy = catalogUnhealthy[0]
     if (topUnhealthy) {
       list.push({
         kind: 'action',
         label: `Diagnose ${topUnhealthy.displayName}`,
-        meta: 'Suggested · unhealthy service',
+        meta: 'Suggested · discovered service needs attention',
         run: () => openInspector(topUnhealthy.id),
       })
     }
@@ -308,7 +311,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     hits,
     recentApps,
     defaultApps,
-    health.data,
+    catalogUnhealthy,
     recommended.data,
     catalog.data,
     depQuery,

@@ -1,0 +1,58 @@
+/*
+ * Zeus OS / v9s visual tokens — Hermes command surface
+ * Source palette: v9s/ui/src/index.css (:root + Liquid Glass)
+ */
+:root {
+  --zeus-bg-base: #030712;
+  --zeus-bg-slate: #0f172a;
+  --zeus-primary: #f97316;
+  --zeus-primary-soft: rgba(249, 115, 22, 0.18);
+  --zeus-primary-border: rgba(249, 115, 22, 0.35);
+  --zeus-success: #34d399;
+  --zeus-warning: #fbbf24;
+  --zeus-danger: #ef4444;
+  --zeus-info: #38bdf8;
+  --zeus-violet: #a855f7;
+  --zeus-text: #f8fafc;
+  --zeus-text-muted: rgba(248, 250, 252, 0.72);
+  --zeus-text-faint: rgba(248, 250, 252, 0.45);
+  --zeus-border: rgba(255, 255, 255, 0.09);
+  --zeus-border-strong: rgba(255, 255, 255, 0.14);
+  --zeus-glass-blur: 40px;
+  --zeus-glass-chrome-blur: 24px;
+  --zeus-glass-card-blur: 40px;
+  --zeus-glass-popover-blur: 20px;
+  --zeus-glass-chrome-bg: rgba(12, 18, 32, 0.72);
+  --zeus-radius-panel: 1.25rem;
+  --zeus-radius-window: 1.75rem;
+
+  /* Hermes aliases → v9s */
+  --z-bg: var(--zeus-bg-base);
+  --z-orange: var(--zeus-primary);
+  --z-orange-soft: var(--zeus-primary-soft);
+  --z-green: var(--zeus-success);
+  --z-yellow: var(--zeus-warning);
+  --z-red: var(--zeus-danger);
+  --z-blue: var(--zeus-info);
+  --z-purple: var(--zeus-violet);
+  --z-text: var(--zeus-text);
+  --z-text-muted: var(--zeus-text-muted);
+  --z-text-faint: var(--zeus-text-faint);
+  --z-border: var(--zeus-border);
+  --z-border-strong: var(--zeus-border-strong);
+  --hermes-bg: var(--zeus-bg-base);
+  --hermes-surface: rgba(15, 23, 42, 0.72);
+  --hermes-glass-blur: var(--zeus-glass-blur);
+  --hermes-glass-chrome-blur: var(--zeus-glass-chrome-blur);
+  --hermes-glass-card-blur: var(--zeus-glass-card-blur);
+  --hermes-glass-popover-blur: var(--zeus-glass-popover-blur);
+  --hermes-glass-chrome-bg: var(--zeus-glass-chrome-bg);
+  --hermes-accent: var(--zeus-primary);
+  --hermes-accent-soft: var(--zeus-primary-soft);
+  --hermes-text: var(--zeus-text);
+  --hermes-muted: var(--zeus-text-muted);
+  --hermes-border: var(--zeus-border);
+  --hermes-green: var(--zeus-success);
+  --hermes-amber: var(--zeus-warning);
+  --hermes-red: var(--zeus-danger);
+}

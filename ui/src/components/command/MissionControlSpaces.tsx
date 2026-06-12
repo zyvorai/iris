@@ -31,7 +31,7 @@ export default function MissionControlSpaces({ apps, onInspect }: MissionControl
           <h2>
             <LayoutGrid size={16} /> Mission Control
           </h2>
-          <p className="hero-sub">Dense launch surfaces by infrastructure space</p>
+          <p className="hero-sub">Discovered services by space · click to inspect · Open publishes to launchpad when needed</p>
         </div>
         <Link to="/spaces" className="section-link">
           All spaces

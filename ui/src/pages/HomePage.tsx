@@ -45,6 +45,7 @@ export default function HomePage() {
   const healthy = cluster.data?.healthy ?? catalogApps.filter((a) => a.status === 'healthy').length
   const degraded = cluster.data?.degraded ?? catalogApps.filter((a) => a.status === 'degraded').length
   const broken = cluster.data?.broken ?? catalogApps.filter((a) => a.status === 'broken').length
+  const publishedCount = cluster.data?.published ?? catalogApps.filter((a) => a.visibility.published).length
 
   const unhealthy = useMemo(
     () =>
@@ -78,6 +79,7 @@ export default function HomePage() {
         userId={auth.data?.userId}
         serviceCount={serviceCount}
         namespaceCount={namespaceCount}
+        publishedCount={publishedCount}
         healthy={healthy}
         degraded={degraded}
         broken={broken}
@@ -97,7 +99,7 @@ export default function HomePage() {
 
       <AttentionQueue apps={unhealthy} onInspect={onInspect} />
 
-      <ServiceGalaxy onNodeClick={(id) => openInspector(id)} />
+      <ServiceGalaxy onNodeClick={(id) => openInspector(id)} publishedCount={publishedCount} />
 
       {pinnedAndRecent.length > 0 ? (
         <section className="glass-section">
