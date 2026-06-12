@@ -5,10 +5,11 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import { environmentLabel, hermesApi } from '../services/hermesApi'
+import { useWorkspace } from '../utils/workspaceContext'
 
 export default function AppsPage() {
   const [filter, setFilter] = useState('')
-  const [environment, setEnvironment] = useState('')
+  const { workspaceId, matchesWorkspace } = useWorkspace()
   const apps = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
@@ -24,7 +25,7 @@ export default function AppsPage() {
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase()
     return (apps.data ?? []).filter((a) => {
-      if (environment && a.meta?.environment !== environment) return false
+      if (!matchesWorkspace(a)) return false
       if (!q) return true
       return (
         a.displayName.toLowerCase().includes(q) ||
@@ -33,7 +34,7 @@ export default function AppsPage() {
         (a.meta?.environment ?? '').toLowerCase().includes(q)
       )
     })
-  }, [apps.data, filter, environment])
+  }, [apps.data, filter, matchesWorkspace])
 
   const categories = useMemo(() => {
     const set = new Set((apps.data ?? []).map((a) => a.category))
@@ -54,14 +55,9 @@ export default function AppsPage() {
           </button>
         ))}
         {environments.map((env) => (
-          <button
-            key={env}
-            type="button"
-            className={`btn ${environment === env ? 'btn-accent' : ''}`}
-            onClick={() => setEnvironment((cur) => (cur === env ? '' : env))}
-          >
+          <span key={env} className={`chip ${workspaceId === env ? 'chip-accent' : 'chip-muted'}`}>
             {environmentLabel(env)}
-          </button>
+          </span>
         ))}
       </div>
       <section className="glass-section">

@@ -10,6 +10,7 @@ import ClusterPage from './pages/ClusterPage'
 import DiscoveryPage from './pages/DiscoveryPage'
 import AppDetailPage, { HealthPage } from './pages/AppDetailPage'
 import ActivityPage from './pages/ActivityPage'
+import TeamsPage from './pages/TeamsPage'
 import GraphPage from './pages/GraphPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/apps" element={<AppsPage />} />
         <Route path="/cluster" element={<ClusterPage />} />
         <Route path="/graph" element={<GraphPage />} />
+        <Route path="/teams" element={<TeamsPage />} />
         <Route path="/apps/:id" element={<AppDetailPage />} />
         <Route path="/spaces" element={<SpacesPage />} />
         <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />

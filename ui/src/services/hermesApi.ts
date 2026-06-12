@@ -12,6 +12,8 @@ import type {
   HermesApp,
   SearchHit,
   ShareLink,
+  TeamOwner,
+  Workspace,
 } from '../types'
 
 const base = '/api/v1'
@@ -40,6 +42,8 @@ export const hermesApi = {
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
   getGraph: () => req<AppGraph>('/graph'),
+  listWorkspaces: () => req<Workspace[]>('/workspaces'),
+  listOwners: () => req<TeamOwner[]>('/owners'),
   getApp: (id: string) => req<HermesApp>(appPath(id)),
   getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
   listDiscovery: () => req<HermesApp[]>('/discovery'),

@@ -1,11 +1,12 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, Search, Server } from 'lucide-react'
+import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, Search, Server, Users } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import CommandPalette from './CommandPalette'
 import AppIcon from './AppIcon'
+import WorkspaceSwitcher from './WorkspaceSwitcher'
 import { hermesApi, openApp } from '../services/hermesApi'
 
 interface LayoutProps {
@@ -21,6 +22,7 @@ const titles: Record<string, string> = {
   '/spaces': 'Spaces',
   '/cluster': 'Cluster',
   '/graph': 'Graph',
+  '/teams': 'Teams',
   '/discovery': 'Discovery',
   '/health': 'Health',
   '/activity': 'Activity',
@@ -43,6 +45,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
           </div>
         </div>
         <div className="menubar-title">{pageTitle}</div>
+        <WorkspaceSwitcher />
         <button type="button" className="hermes-search-btn" onClick={onPaletteOpen}>
           <Search size={16} />
           <span>Spotlight</span>
@@ -79,6 +82,9 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         </NavLink>
         <NavLink to="/graph" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Graph">
           <GitBranch size={20} />
+        </NavLink>
+        <NavLink to="/teams" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Teams">
+          <Users size={20} />
         </NavLink>
         <NavLink to="/discovery" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Discovery">
           <Compass size={20} />

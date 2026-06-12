@@ -145,7 +145,9 @@ pub mod diagnosis;
 pub mod graph;
 pub mod share;
 pub mod store;
+pub mod workspace;
 
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
+pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};

@@ -9,6 +9,7 @@ import AppCard from '../components/AppCard'
 import MissionControlStrip from '../components/MissionControlStrip'
 import SpaceGrid from '../components/SpaceGrid'
 import { hermesApi } from '../services/hermesApi'
+import { useWorkspace } from '../utils/workspaceContext'
 
 function greeting() {
   const h = new Date().getHours()
@@ -25,10 +26,20 @@ export default function HomePage() {
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
   const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
   const recommendedQ = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
+  const { matchesWorkspace, workspaceId } = useWorkspace()
 
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
-  const unhealthy = health.data?.apps ?? []
-  const recommended = useMemo(() => (recommendedQ.data ?? []).slice(0, 6), [recommendedQ.data])
+  const filterWs = (list: typeof apps.data) => (list ?? []).filter(matchesWorkspace)
+  const unhealthy = filterWs(health.data?.apps)
+  const recommended = useMemo(
+    () => filterWs(recommendedQ.data).slice(0, 6),
+    [recommendedQ.data, matchesWorkspace],
+  )
+  const publishedApps = useMemo(() => filterWs(apps.data).slice(0, 8), [apps.data, matchesWorkspace])
+  const spaceApps = useMemo(
+    () => filterWs(catalog.data?.filter((a) => a.visibility.published)),
+    [catalog.data, matchesWorkspace],
+  )
 
   return (
     <>
@@ -64,7 +75,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <MissionControlStrip apps={apps.data ?? []} />
+      <MissionControlStrip apps={filterWs(apps.data)} />
+
+      {workspaceId ? (
+        <section className="glass-section workspace-banner">
+          <p className="hero-sub">
+            Showing <strong>{workspaceId}</strong> workspace apps only. Clear the workspace chip in the header to see
+            everything.
+          </p>
+        </section>
+      ) : null}
 
       {unhealthy.length > 0 ? (
         <section className="glass-section">
@@ -101,7 +121,7 @@ export default function HomePage() {
             View all <ChevronRight size={14} />
           </Link>
         </div>
-        <SpaceGrid apps={catalog.data?.filter((a) => a.visibility.published) ?? []} />
+        <SpaceGrid apps={spaceApps} />
       </section>
 
       <section className="glass-section">
@@ -148,7 +168,7 @@ export default function HomePage() {
           <div className="empty">Loading…</div>
         ) : (
           <div className="app-grid">
-            {(apps.data ?? []).slice(0, 8).map((app) => (
+            {(publishedApps).map((app) => (
               <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
             ))}
           </div>

@@ -58,6 +58,24 @@ export interface GraphEdge {
   resolved: boolean
 }
 
+export interface Workspace {
+  id: string
+  label: string
+  appCount: number
+  published: number
+  healthy: number
+  degraded: number
+  broken: number
+}
+
+export interface TeamOwner {
+  id: string
+  label: string
+  appCount: number
+  recommended: number
+  unhealthy: number
+}
+
 export interface HermesApp {
   id: string
   slug: string

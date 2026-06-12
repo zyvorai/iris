@@ -2,9 +2,9 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useQuery } from '@tanstack/react-query'
-import { X } from 'lucide-react'
+import { Copy, X } from 'lucide-react'
 import RouteLens from './RouteLens'
-import { hermesApi } from '../services/hermesApi'
+import { copyAppUrl, hermesApi } from '../services/hermesApi'
 import type { HermesApp } from '../types'
 
 interface DiagnosePanelProps {
@@ -56,13 +56,22 @@ export default function DiagnosePanel({ app, open, onClose }: DiagnosePanelProps
             {diagnosis.data.suggestedActions?.length ? (
               <div className="diagnose-actions">
                 <h3>Suggested actions</h3>
-                <ul>
+                <ul className="diagnose-action-list">
                   {diagnosis.data.suggestedActions.map((action) => (
-                    <li key={action.href}>{action.label}</li>
+                    <li key={action.href}>
+                      <a href={action.href} target="_blank" rel="noreferrer">
+                        {action.label}
+                      </a>
+                    </li>
                   ))}
                 </ul>
               </div>
             ) : null}
+            <div className="app-actions diagnose-copy-row">
+              <button type="button" className="btn" onClick={() => void copyAppUrl(app)}>
+                <Copy size={12} /> Copy public URL
+              </button>
+            </div>
           </div>
         ) : null}
       </aside>

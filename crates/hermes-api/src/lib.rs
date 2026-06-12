@@ -12,8 +12,9 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    build_diagnosis, build_graph, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats,
-    ClusterSummary, CreateShareRequest, HealthSummary, SearchHit, ShareLink, ShareLinkResponse,
+    build_diagnosis, build_graph, build_team_owners, build_workspaces, App, AppDiagnosis, AppGraph,
+    AuditEvent, CatalogStats, ClusterSummary, CreateShareRequest, HealthSummary, SearchHit,
+    ShareLink, ShareLinkResponse, TeamOwner, Workspace,
 };
 use serde::Deserialize;
 
@@ -33,6 +34,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/stats", get(catalog_stats))
         .route("/cluster/summary", get(cluster_summary))
         .route("/graph", get(app_graph))
+        .route("/workspaces", get(list_workspaces))
+        .route("/owners", get(list_owners))
         .route("/discovery", get(list_discovery))
         .route("/discovery/publish/{*id}", post(publish_app))
         .route("/discovery/publish-namespace/{*namespace}", post(publish_namespace))
@@ -202,6 +205,16 @@ async fn cluster_summary(State(st): State<ApiState>) -> Result<Json<ClusterSumma
 async fn app_graph(State(st): State<ApiState>) -> Result<Json<AppGraph>, AppError> {
     let apps = filter_apps(&st, st.store.list_catalog()?);
     Ok(Json(build_graph(&apps)))
+}
+
+async fn list_workspaces(State(st): State<ApiState>) -> Result<Json<Vec<Workspace>>, AppError> {
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    Ok(Json(build_workspaces(&apps)))
+}
+
+async fn list_owners(State(st): State<ApiState>) -> Result<Json<Vec<TeamOwner>>, AppError> {
+    let apps = filter_apps(&st, st.store.list_catalog()?);
+    Ok(Json(build_team_owners(&apps)))
 }
 
 async fn list_discovery(State(st): State<ApiState>) -> Result<Json<Vec<App>>, AppError> {

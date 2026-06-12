@@ -77,6 +77,8 @@ metadata:
     hermes.zyvor.dev/published: "true"
     hermes.zyvor.dev/recommended: "true"
     hermes.zyvor.dev/depends-on: "prometheus"
+    hermes.zyvor.dev/owner: "platform-team"
+    hermes.zyvor.dev/environment: "production"
 spec:
   selector:
     app: grafana
@@ -142,6 +144,8 @@ metadata:
     hermes.zyvor.dev/port: "9090"
     hermes.zyvor.dev/published: "true"
     hermes.zyvor.dev/recommended: "true"
+    hermes.zyvor.dev/owner: "platform-team"
+    hermes.zyvor.dev/environment: "production"
 spec:
   selector:
     app: prometheus
