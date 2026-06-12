@@ -3,10 +3,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Compass, Grid3X3, HeartPulse, History, Home, Server } from 'lucide-react'
+import { Compass, Grid3X3, HeartPulse, History, Home, Layers, Server } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
-import { hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
+import { appDetailPath, hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
 
 interface CommandPaletteProps {
@@ -16,6 +16,7 @@ interface CommandPaletteProps {
 const navItems = [
   { label: 'Home', path: '/', icon: Home },
   { label: 'Apps catalog', path: '/apps', icon: Grid3X3 },
+  { label: 'Spaces', path: '/spaces', icon: Layers },
   { label: 'Cluster services', path: '/cluster', icon: Server },
   { label: 'Discovery', path: '/discovery', icon: Compass },
   { label: 'Health', path: '/health', icon: HeartPulse },
@@ -28,10 +29,12 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
+  const health = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary })
+
   const { data: hits = [] } = useQuery({
     queryKey: ['search', q],
     queryFn: () => hermesApi.search(q),
-    enabled: q.trim().length > 0,
+    enabled: q.trim().length > 0 && q.trim().toLowerCase() !== 'broken',
   })
 
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
@@ -50,20 +53,38 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const defaultApps = useMemo(() => (catalog.data ?? []).slice(0, 6), [catalog.data])
 
   type Row =
-    | { kind: 'nav'; label: string; path: string; icon: typeof Home }
-    | { kind: 'app'; app: NonNullable<(typeof recentApps)[number]> }
+    | { kind: 'nav'; label: string; path: string; icon: typeof Home; meta?: string }
+    | { kind: 'app'; app: NonNullable<(typeof recentApps)[number]>; action: 'open' | 'inspect' }
 
   const rows: Row[] = useMemo(() => {
+    const query = q.trim().toLowerCase()
+    if (query === 'broken' || query === 'broken services') {
+      const count = (health.data?.broken ?? 0) + (health.data?.degraded ?? 0)
+      return [
+        {
+          kind: 'nav',
+          label: 'Apps need attention',
+          path: '/health',
+          icon: HeartPulse,
+          meta: count > 0 ? `${count} unhealthy apps` : 'View health dashboard',
+        },
+      ]
+    }
     if (q.trim()) {
-      return hits.map((h) => ({ kind: 'app' as const, app: h.app }))
+      const list: Row[] = []
+      for (const h of hits) {
+        list.push({ kind: 'app', app: h.app, action: 'open' })
+        list.push({ kind: 'app', app: h.app, action: 'inspect' })
+      }
+      return list
     }
     const list: Row[] = navItems.map((n) => ({ kind: 'nav', ...n }))
     const apps = recentApps.length ? recentApps : defaultApps
     for (const app of apps.slice(0, 6)) {
-      if (app) list.push({ kind: 'app', app })
+      if (app) list.push({ kind: 'app', app, action: 'open' })
     }
     return list
-  }, [q, hits, recentApps, defaultApps])
+  }, [q, hits, recentApps, defaultApps, health.data])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -72,6 +93,22 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   useEffect(() => {
     setSelected(0)
   }, [q, rows.length])
+
+  const activate = (row: Row) => {
+    if (row.kind === 'nav') {
+      navigate(row.path)
+      onClose()
+      return
+    }
+    if (row.action === 'inspect') {
+      navigate(appDetailPath(row.app, true))
+      onClose()
+      return
+    }
+    pushSpotlightRecent(row.app.id)
+    openApp(row.app)
+    onClose()
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -85,15 +122,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         setSelected((s) => Math.max(s - 1, 0))
       }
       if (e.key === 'Enter' && rows[selected]) {
-        const row = rows[selected]
-        if (row.kind === 'nav') {
-          navigate(row.path)
-          onClose()
-        } else {
-          pushSpotlightRecent(row.app.id)
-          openApp(row.app)
-          onClose()
-        }
+        activate(rows[selected])
       }
     }
     window.addEventListener('keydown', onKey)
@@ -106,55 +135,49 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         <input
           ref={inputRef}
           className="palette-input"
-          placeholder="Search cluster services, namespaces, pages…"
+          placeholder="Search apps, namespaces, or type broken…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
         <div className="palette-results">
           {q.trim() === '' ? (
             <div className="palette-section-label">Navigate &amp; recent</div>
+          ) : q.trim().toLowerCase() === 'broken' ? (
+            <div className="palette-section-label">Health</div>
           ) : hits.length === 0 ? (
             <div className="empty palette-empty">No matches in cluster catalog</div>
           ) : (
-            <div className="palette-section-label">Services · {hits.length}</div>
+            <div className="palette-section-label">Services · Open or inspect</div>
           )}
           {rows.map((row, i) =>
             row.kind === 'nav' ? (
               <button
-                key={row.path}
+                key={`${row.path}-${row.label}`}
                 type="button"
                 className={`palette-item ${i === selected ? 'selected' : ''}`}
-                onClick={() => {
-                  navigate(row.path)
-                  onClose()
-                }}
+                onClick={() => activate(row)}
               >
                 <row.icon size={16} />
                 <div>
                   <strong>{row.label}</strong>
-                  <div className="app-meta">Navigate</div>
+                  <div className="app-meta">{row.meta ?? 'Navigate'}</div>
                 </div>
               </button>
             ) : (
               <button
-                key={row.app.id}
+                key={`${row.app.id}-${row.action}`}
                 type="button"
                 className={`palette-item ${i === selected ? 'selected' : ''} ${statusTone(row.app.status)}`}
-                onClick={() => {
-                  pushSpotlightRecent(row.app.id)
-                  openApp(row.app)
-                  onClose()
-                }}
+                onClick={() => activate(row)}
               >
                 <AppIcon icon={row.app.icon} name={row.app.displayName} size="sm" />
                 <div>
                   <strong>{row.app.displayName}</strong>
                   <div className="app-meta">
-                    {row.app.namespace} · {sourceLabel(row.app.source)} · {statusLabel(row.app.status)}
-                    {!row.app.visibility.published ? ' · unpublished' : ''}
+                    {row.app.namespace} · {statusLabel(row.app.status)} ·{' '}
+                    {row.action === 'inspect' ? 'Inspect route' : 'Open app'}
                   </div>
                 </div>
-                <span className="app-meta">{row.app.routePath}</span>
               </button>
             ),
           )}

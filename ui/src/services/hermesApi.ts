@@ -1,9 +1,22 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import type { AuditEvent, CatalogStats, ClusterSummary, HealthSummary, HermesApp, SearchHit } from '../types'
+import type {
+  AppDiagnosis,
+  AuditEvent,
+  CatalogStats,
+  ClusterSummary,
+  HealthSummary,
+  HermesApp,
+  SearchHit,
+} from '../types'
 
 const base = '/api/v1'
+
+function appPath(id: string, suffix = '') {
+  const encoded = id.split('/').map(encodeURIComponent).join('/')
+  return `/apps/${encoded}${suffix}`
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${base}${path}`, {
@@ -23,7 +36,8 @@ export const hermesApi = {
   exportCatalog: () => fetch('/api/v1/catalog/export').then((r) => r.blob()),
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
-  getApp: (id: string) => req<HermesApp>(`/apps/${encodeURIComponent(id)}`),
+  getApp: (id: string) => req<HermesApp>(appPath(id)),
+  getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
   listDiscovery: () => req<HermesApp[]>('/discovery'),
   publish: (id: string) => req<void>(`/discovery/publish/${encodeURIComponent(id)}`, { method: 'POST' }),
   publishNamespace: (namespace: string) =>
@@ -45,6 +59,15 @@ export const hermesApi = {
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
     return res.json() as Promise<{ authenticated: boolean; userId: string; mode: string }>
   },
+}
+
+export function appDetailPath(app: HermesApp, diagnose = false): string {
+  const base = `/apps/${encodeURIComponent(app.id)}`
+  return diagnose ? `${base}?diagnose=1` : base
+}
+
+export function copyAppUrl(app: HermesApp) {
+  return navigator.clipboard.writeText(appPublicUrl(app))
 }
 
 export function appLaunchPath(app: HermesApp): string {

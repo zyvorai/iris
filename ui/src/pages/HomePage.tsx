@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import SpaceGrid from '../components/SpaceGrid'
 import { hermesApi } from '../services/hermesApi'
 
 function greeting() {
@@ -91,6 +92,16 @@ export default function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <section className="glass-section">
+        <div className="section-head">
+          <h2>Spaces</h2>
+          <Link to="/spaces" className="section-link">
+            View all <ChevronRight size={14} />
+          </Link>
+        </div>
+        <SpaceGrid apps={catalog.data?.filter((a) => a.visibility.published) ?? []} />
+      </section>
 
       <section className="glass-section">
         <div className="section-head">

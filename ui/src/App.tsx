@@ -10,6 +10,7 @@ import ClusterPage from './pages/ClusterPage'
 import DiscoveryPage from './pages/DiscoveryPage'
 import AppDetailPage, { HealthPage } from './pages/AppDetailPage'
 import ActivityPage from './pages/ActivityPage'
+import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 
 export default function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -37,6 +38,8 @@ export default function App() {
         <Route path="/apps" element={<AppsPage />} />
         <Route path="/cluster" element={<ClusterPage />} />
         <Route path="/apps/:id" element={<AppDetailPage />} />
+        <Route path="/spaces" element={<SpacesPage />} />
+        <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />
         <Route path="/discovery" element={<DiscoveryPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/activity" element={<ActivityPage />} />

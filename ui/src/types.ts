@@ -85,3 +85,25 @@ export interface AuditEvent {
   detail: string
   createdAt: string
 }
+
+export interface DiagnosisChainNode {
+  id: string
+  label: string
+  status?: string
+}
+
+export interface SuggestedAction {
+  label: string
+  href: string
+}
+
+export interface AppDiagnosis {
+  appId: string
+  routePath: string
+  publicUrl: string
+  backend: Backend
+  problem?: string
+  cause?: string
+  chain: DiagnosisChainNode[]
+  suggestedActions: SuggestedAction[]
+}

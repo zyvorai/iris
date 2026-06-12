@@ -1,13 +1,23 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Copy, ExternalLink, Info, MoreHorizontal, Star } from 'lucide-react'
+import { Copy, ExternalLink, Info, MoreHorizontal, Route, Star, Stethoscope } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { HermesApp } from '../types'
 import AppIcon from './AppIcon'
-import { appLaunchPath, appPublicUrl, environmentLabel, hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
+import {
+  appDetailPath,
+  appLaunchPath,
+  appPublicUrl,
+  environmentLabel,
+  hermesApi,
+  openApp,
+  sourceLabel,
+  statusLabel,
+  statusTone,
+} from '../services/hermesApi'
 
 interface AppCardProps {
   app: HermesApp
@@ -27,9 +37,10 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
   })
 
   const launchPath = appLaunchPath(app)
+  const broken = app.status === 'broken' || app.status === 'degraded'
 
   return (
-    <article className={`app-card zeus-card ${statusTone(app.status)}`}>
+    <article className={`app-card zeus-card ${statusTone(app.status)}${broken ? ' app-card-broken' : ''}`}>
       <div className="app-card-top">
         <AppIcon icon={app.icon} name={app.displayName} />
         <div className="app-card-badges">
@@ -39,11 +50,12 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
         </div>
       </div>
       <h3>
-        <Link to={`/apps/${encodeURIComponent(app.id)}`} className="app-title-link">
+        <Link to={appDetailPath(app)} className="app-title-link">
           {app.displayName}
         </Link>
       </h3>
-      <p className="app-desc">{app.description || `${app.backend.name}:${app.backend.port}`}</p>
+      <p className="app-desc">{app.description || app.category}</p>
+      {broken && app.statusMessage ? <p className="app-problem">{app.statusMessage}</p> : null}
       <div className="app-meta-row">
         <span className="chip chip-muted">{app.namespace}</span>
         <span className="chip chip-muted">{sourceLabel(app.source)}</span>
@@ -53,10 +65,15 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
         {app.canonicalSlug ? <span className="chip chip-accent">/{app.canonicalSlug}</span> : null}
       </div>
       <div className="app-actions">
-        <button type="button" className="btn btn-primary" onClick={() => openApp(app)}>
-          <ExternalLink size={12} />
-          Open
-        </button>
+        {broken ? (
+          <Link to={appDetailPath(app, true)} className="btn btn-primary">
+            <Stethoscope size={12} /> Diagnose
+          </Link>
+        ) : (
+          <button type="button" className="btn btn-primary" onClick={() => openApp(app)}>
+            <ExternalLink size={12} /> Open
+          </button>
+        )}
         {onPublish ? (
           <button type="button" className="btn" onClick={onPublish}>
             Publish
@@ -84,8 +101,11 @@ export default function AppCard({ app, favorite = false, onPublish, onHide }: Ap
           </button>
           {menuOpen ? (
             <div className="app-menu" role="menu">
-              <Link to={`/apps/${encodeURIComponent(app.id)}`} className="app-menu-item" onClick={() => setMenuOpen(false)}>
+              <Link to={appDetailPath(app)} className="app-menu-item" onClick={() => setMenuOpen(false)}>
                 <Info size={12} /> Details
+              </Link>
+              <Link to={appDetailPath(app, true)} className="app-menu-item" onClick={() => setMenuOpen(false)}>
+                <Route size={12} /> Inspect route
               </Link>
               <button
                 type="button"
