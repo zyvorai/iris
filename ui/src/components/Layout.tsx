@@ -1,12 +1,15 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, Search, Server, Users } from 'lucide-react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Compass, GitBranch, Grid3X3, HeartPulse, History, Home, Layers, HelpCircle, Search, Server, Users } from 'lucide-react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import CommandPalette from './CommandPalette'
 import AppIcon from './AppIcon'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
+import HermesPageFooter from './HermesPageFooter'
+import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import { hermesApi, openApp } from '../services/hermesApi'
 
 interface LayoutProps {
@@ -26,13 +29,30 @@ const titles: Record<string, string> = {
   '/discovery': 'Discovery',
   '/health': 'Health',
   '/activity': 'Activity',
+  '/help': 'Help',
+  '/federated': 'Federated',
 }
 
 export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
   const location = useLocation()
   const pageTitle = titles[location.pathname] ?? 'Hermes Dock'
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = e.target as HTMLElement | null
+        if (target?.closest('input, textarea, select')) return
+        e.preventDefault()
+        setShortcutsOpen(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className="hermes-shell" data-shell-density="calm">
@@ -51,6 +71,28 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
           <span>Spotlight</span>
           <kbd>⌘K</kbd>
         </button>
+        <div className="hermes-help-menu">
+          <button type="button" className="hermes-help-menu-btn" onClick={() => setHelpOpen((v) => !v)}>
+            <HelpCircle size={16} />
+            Help
+          </button>
+          {helpOpen ? (
+            <div className="hermes-help-dropdown" role="menu">
+              <Link to="/help" role="menuitem" onClick={() => setHelpOpen(false)}>
+                Help center
+              </Link>
+              <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); setShortcutsOpen(true) }}>
+                Keyboard shortcuts
+              </button>
+              <a href="/api/v1/catalog" role="menuitem" onClick={() => setHelpOpen(false)}>
+                Catalog API
+              </a>
+              <a href="https://github.com/ssahani/hermes" target="_blank" rel="noopener noreferrer" role="menuitem">
+                Documentation
+              </a>
+            </div>
+          ) : null}
+        </div>
         {auth.data?.mode === 'oidc' ? (
           auth.data.authenticated ? (
             <div className="auth-chip" title={auth.data.userId}>
@@ -67,6 +109,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         ) : null}
       </header>
       <main className="hermes-main hermes-scroll-body">{children}</main>
+      <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       <footer className="hermes-dock mac-dock" aria-label="App dock">
         <NavLink to="/" className={({ isActive }) => `dock-item${isActive ? ' active' : ''}`} title="Home">
           <Home size={20} />
@@ -114,6 +157,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
         </button>
       </footer>
       {paletteOpen ? <CommandPalette onClose={onPaletteClose} /> : null}
+      {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
     </div>
   )
 }

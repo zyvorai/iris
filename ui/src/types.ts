@@ -97,6 +97,11 @@ export interface FederationActionResult {
   detail?: string
 }
 
+export interface FederatedAuditEvent extends AuditEvent {
+  clusterId: string
+  clusterName: string
+}
+
 export interface FederationRbacStatus {
   clusterId: string
   clusterName: string

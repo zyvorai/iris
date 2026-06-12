@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Compass,
   Download,
+  Globe,
   Link2,
   Rocket,
   Search,
@@ -16,7 +17,7 @@ import {
   Users,
 } from 'lucide-react'
 import { actionLabel, hermesApi } from '../services/hermesApi'
-import type { AuditEvent } from '../types'
+import type { AuditEvent, FederatedAuditEvent } from '../types'
 
 const actionIcons: Record<string, typeof Rocket> = {
   launch: Rocket,
@@ -32,6 +33,7 @@ const actionIcons: Record<string, typeof Rocket> = {
   share_create: Link2,
   share_revoke: Trash2,
   share_access: Link2,
+  cluster_offline: Globe,
 }
 
 type ActionFilter = 'all' | 'launch' | 'share' | 'discovery' | 'personal'
@@ -44,10 +46,10 @@ const filterActions: Record<ActionFilter, Set<string> | null> = {
   personal: new Set(['favorite', 'unfavorite', 'recommend', 'unrecommend']),
 }
 
-function exportAuditCsv(events: AuditEvent[]) {
-  const header = ['id', 'userId', 'action', 'appId', 'detail', 'createdAt']
+function exportAuditCsv(events: Array<AuditEvent & { clusterId?: string; clusterName?: string }>) {
+  const header = ['id', 'clusterId', 'clusterName', 'userId', 'action', 'appId', 'detail', 'createdAt']
   const rows = events.map((e) =>
-    [e.id, e.userId, e.action, e.appId, e.detail, e.createdAt]
+    [e.id, e.clusterId ?? 'local', e.clusterName ?? 'Local', e.userId, e.action, e.appId, e.detail, e.createdAt]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(','),
   )
@@ -63,11 +65,12 @@ function exportAuditCsv(events: AuditEvent[]) {
 export default function ActivityPage() {
   const [filter, setFilter] = useState<ActionFilter>('all')
   const [search, setSearch] = useState('')
+  const [federated, setFederated] = useState(false)
   const qc = useQueryClient()
 
   const audit = useQuery({
-    queryKey: ['audit'],
-    queryFn: () => hermesApi.listAudit(200),
+    queryKey: ['audit', federated],
+    queryFn: () => (federated ? hermesApi.listFederatedAudit(200) : hermesApi.listAudit(200)),
     refetchInterval: 10000,
   })
 
@@ -106,6 +109,10 @@ export default function ActivityPage() {
         <div className="section-head">
           <h2>Activity</h2>
           <span className="chip chip-muted">{events.length} events</span>
+          <label className="graph-broken-toggle">
+            <input type="checkbox" checked={federated} onChange={(e) => setFederated(e.target.checked)} />
+            Federated audit
+          </label>
           <button type="button" className="btn" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
             <Download size={12} /> Export CSV
           </button>
@@ -146,15 +153,17 @@ export default function ActivityPage() {
           <ol className="activity-timeline">
             {events.map((event) => {
               const Icon = actionIcons[event.action] ?? Users
+              const cluster = (event as FederatedAuditEvent).clusterName
               return (
-                <li key={event.id} className="activity-item">
+                <li key={`${(event as FederatedAuditEvent).clusterId ?? 'local'}-${event.id}-${event.createdAt}`} className="activity-item">
                   <span className="activity-icon" aria-hidden>
                     <Icon size={14} />
                   </span>
                   <div className="activity-body">
                     <div className="activity-head">
                       <strong>{actionLabel(event.action)}</strong>
-                      <time dateTime={event.createdAt}>{new Date(event.createdAt).toLocaleString()}</time>
+                      {federated && cluster ? <span className="chip chip-muted">{cluster}</span> : null}
+                      <time dateTime={event.createdAt}>{event.createdAt ? new Date(event.createdAt).toLocaleString() : '—'}</time>
                     </div>
                     <p className="activity-meta">
                       <span>{event.userId}</span>

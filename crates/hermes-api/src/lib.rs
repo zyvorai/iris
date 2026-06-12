@@ -12,14 +12,13 @@ use axum::{
 };
 use hermes_core::store::Store;
 use hermes_core::{
-    allowed_namespaces_for_groups, build_diagnosis, build_federated_catalog, build_graph,
+    allowed_namespaces_for_groups, build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
     build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
-    remote_set_recommended,
-    resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis, AppGraph, AuditEvent, CatalogStats,
-    ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp, FederationActionResult,
-    FederationRbacStatus, HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace,
-    WorkspaceRule,
+    remote_set_recommended, resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis, AppGraph,
+    AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp, FederatedAuditEvent,
+    FederationActionResult, FederationRbacStatus, HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink,
+    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -75,6 +74,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/shares/all", get(list_all_shares))
         .route("/shares/{token}", delete(delete_share))
         .route("/audit", get(list_audit))
+        .route("/audit/federated", get(list_federated_audit))
         .with_state(state)
 }
 
@@ -693,6 +693,14 @@ async fn list_audit(
     Query(q): Query<AuditQuery>,
 ) -> Result<Json<Vec<AuditEvent>>, AppError> {
     Ok(Json(st.store.list_audit(q.limit)?))
+}
+
+async fn list_federated_audit(
+    State(st): State<ApiState>,
+    Query(q): Query<AuditQuery>,
+) -> Result<Json<Vec<FederatedAuditEvent>>, AppError> {
+    let local = st.store.list_audit(q.limit)?;
+    Ok(Json(build_federated_audit(local, q.limit).await))
 }
 
 async fn list_recommended(

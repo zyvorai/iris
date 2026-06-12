@@ -15,7 +15,8 @@ test('graph page renders', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /application graph/i })).toBeVisible()
 })
 
-test('activity page renders', async ({ page }) => {
-  await page.goto('/activity')
-  await expect(page.getByRole('heading', { name: /^activity$/i })).toBeVisible()
+test('help page renders zyvor footer', async ({ page }) => {
+  await page.goto('/help')
+  await expect(page.getByRole('heading', { name: /^help$/i })).toBeVisible()
+  await expect(page.getByRole('contentinfo')).toContainText('zyvor.dev')
 })

@@ -150,7 +150,7 @@ pub struct LabelCount {
     pub count: usize,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuditEvent {
     pub id: i64,
@@ -188,8 +188,8 @@ pub use workspace_acl::{
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use federation::{
-    build_federated_catalog, federation_cluster, remote_publish, remote_publish_namespace,
-    remote_rbac_check, remote_set_recommended, FederatedApp, FederationActionResult,
+    build_federated_audit, build_federated_catalog, federation_cluster, remote_publish, remote_publish_namespace,
+    remote_rbac_check, remote_set_recommended, FederatedApp, FederatedAuditEvent, FederationActionResult,
     FederationRbacStatus,
 };
 pub use intent::{resolve_search_intent, SearchIntent};

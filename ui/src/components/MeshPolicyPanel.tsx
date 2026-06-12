@@ -74,6 +74,11 @@ export default function MeshPolicyPanel({
                   </div>
                 ) : null}
                 {policy.detail ? <p className="mesh-policy-detail">{policy.detail}</p> : null}
+                {policy.kind === 'istio' && policy.name && policy.namespace ? (
+                  <code className="mesh-kubectl">
+                    kubectl get virtualservice {policy.name} -n {policy.namespace}
+                  </code>
+                ) : null}
                 <button
                   type="button"
                   className="btn btn-sm mesh-copy-btn"

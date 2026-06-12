@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::cluster::{federated_cluster_configs, local_cluster, FederatedClusterConfig};
-use crate::{App, Backend, Visibility};
+use crate::{App, AuditEvent, Backend, Visibility};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -338,6 +338,91 @@ pub async fn build_federated_catalog(local_apps: &[App]) -> Vec<FederatedApp> {
             }
         }
     }
+    out
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FederatedAuditEvent {
+    pub id: i64,
+    pub user_id: String,
+    pub action: String,
+    pub app_id: String,
+    pub detail: String,
+    pub created_at: String,
+    pub cluster_id: String,
+    pub cluster_name: String,
+}
+
+pub async fn build_federated_audit(local_events: Vec<AuditEvent>, limit: usize) -> Vec<FederatedAuditEvent> {
+    let local_id = std::env::var("HERMES_CLUSTER_ID").unwrap_or_else(|_| "local".into());
+    let local_name = std::env::var("HERMES_CLUSTER_NAME").unwrap_or_else(|_| "Local cluster".into());
+    let per_cluster = limit.max(20).min(500);
+    let mut out: Vec<FederatedAuditEvent> = local_events
+        .into_iter()
+        .take(per_cluster)
+        .map(|event| FederatedAuditEvent {
+            id: event.id,
+            user_id: event.user_id,
+            action: event.action,
+            app_id: event.app_id,
+            detail: event.detail,
+            created_at: event.created_at,
+            cluster_id: local_id.clone(),
+            cluster_name: local_name.clone(),
+        })
+        .collect();
+
+    let remotes = federated_cluster_configs();
+    if remotes.is_empty() {
+        out.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        out.truncate(limit);
+        return out;
+    }
+
+    let client = federation_client();
+
+    for cfg in remotes {
+        let url = format!(
+            "{}/api/v1/audit?limit={}",
+            cfg.url.trim_end_matches('/'),
+            per_cluster
+        );
+        let req = apply_federation_auth(client.get(url), &cfg, "federation-audit", &[]);
+        match req.send().await {
+            Ok(resp) if resp.status().is_success() => {
+                if let Ok(events) = resp.json::<Vec<AuditEvent>>().await {
+                    for (idx, event) in events.into_iter().enumerate() {
+                        out.push(FederatedAuditEvent {
+                            id: -(idx as i64 + 1),
+                            user_id: event.user_id,
+                            action: event.action,
+                            app_id: event.app_id,
+                            detail: event.detail,
+                            created_at: event.created_at,
+                            cluster_id: cfg.id.clone(),
+                            cluster_name: cfg.name.clone(),
+                        });
+                    }
+                }
+            }
+            _ => {
+                out.push(FederatedAuditEvent {
+                    id: -9_000,
+                    user_id: String::new(),
+                    action: "cluster_offline".into(),
+                    app_id: String::new(),
+                    detail: format!("Could not fetch audit from {}", cfg.url),
+                    created_at: String::new(),
+                    cluster_id: cfg.id.clone(),
+                    cluster_name: cfg.name.clone(),
+                });
+            }
+        }
+    }
+
+    out.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    out.truncate(limit);
     out
 }
 

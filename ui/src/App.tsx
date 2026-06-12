@@ -13,6 +13,7 @@ import ActivityPage from './pages/ActivityPage'
 import TeamsPage from './pages/TeamsPage'
 import GraphPage from './pages/GraphPage'
 import FederatedPage from './pages/FederatedPage'
+import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 
 export default function App() {
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/discovery" element={<DiscoveryPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/help" element={<HelpPage />} />
       </Routes>
     </Layout>
   )

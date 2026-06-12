@@ -13,6 +13,7 @@ import type {
   HermesApp,
   SearchHit,
   FederatedApp,
+  FederatedAuditEvent,
   FederationActionResult,
   FederationRbacStatus,
   SearchIntent,
@@ -105,6 +106,7 @@ export const hermesApi = {
     req<ShareLink>('/shares', { method: 'POST', body: JSON.stringify(body) }),
   revokeShare: (token: string) => req<void>(`/shares/${encodeURIComponent(token)}`, { method: 'DELETE' }),
   listAudit: (limit = 50) => req<AuditEvent[]>(`/audit?limit=${limit}`),
+  listFederatedAudit: (limit = 100) => req<FederatedAuditEvent[]>(`/audit/federated?limit=${limit}`),
   authMe: async () => {
     const res = await fetch('/auth/me')
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
@@ -228,6 +230,18 @@ export function actionLabel(action: string): string {
       return 'Revoked share'
     case 'share_access':
       return 'Share opened'
+    case 'federation_publish':
+      return 'Remote publish'
+    case 'federation_publish_namespace':
+      return 'Remote bulk publish'
+    case 'federation_recommend':
+      return 'Remote team pick'
+    case 'federation_unrecommend':
+      return 'Remote unpick'
+    case 'federation_rbac_check':
+      return 'Federation RBAC check'
+    case 'cluster_offline':
+      return 'Cluster offline'
     default:
       return action
   }

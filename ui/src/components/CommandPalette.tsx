@@ -3,8 +3,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, History, Home, Layers, Server, Users } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, Server, Users } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import { appDetailPath, hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
@@ -26,6 +26,7 @@ const navItems = [
   { label: 'Discovery', path: '/discovery', icon: Compass },
   { label: 'Health', path: '/health', icon: HeartPulse },
   { label: 'Activity', path: '/activity', icon: History },
+  { label: 'Help', path: '/help', icon: HelpCircle },
 ]
 
 function depMatch(query: string): string | null {
@@ -377,6 +378,20 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
               </button>
             ),
           )}
+        </div>
+        <div className="palette-footer">
+          <span>
+            <kbd>↑</kbd> <kbd>↓</kbd> navigate
+          </span>
+          <span>
+            <kbd>Enter</kbd> open
+          </span>
+          <span>
+            <kbd>Esc</kbd> close
+          </span>
+          <Link to="/help" className="palette-footer-link" onClick={onClose}>
+            Help
+          </Link>
         </div>
       </div>
     </div>

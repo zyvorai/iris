@@ -358,10 +358,12 @@ Honest checklist of what ships now:
 - [x] Native gRPC/HTTP2 backend connection pools in gateway
 - [x] Cross-cluster RBAC sync (forward groups + `HERMES_FEDERATION_TRUST_HEADERS`)
 - [x] Structured Istio/Linkerd mesh policies in discovery + UI panel
+- [x] Cross-cluster audit aggregation (`GET /api/v1/audit/federated`)
+- [x] Zyvor footer, Help center, and keyboard shortcuts (v9s-style chrome)
 
 **Not yet (roadmap):**
 
-In-cluster mesh policy editing · cross-cluster audit aggregation
+In-cluster mesh policy editing · federated activity export webhooks
 
 ---
 

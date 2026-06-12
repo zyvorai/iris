@@ -1609,6 +1609,255 @@ button {
   color: #6ee7b7;
 }
 
+.zyvor-footer,
+.zyvor-inline {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--hermes-muted);
+}
+
+.zyvor-link,
+.zyvor-copy {
+  color: #f97316;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.zyvor-link:hover {
+  color: #fb923c;
+}
+
+.zyvor-sep {
+  color: var(--hermes-muted);
+}
+
+.hermes-page-footer {
+  margin-top: auto;
+  padding: 1rem 1.5rem 6.75rem;
+  text-align: center;
+}
+
+.hermes-help-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.hermes-help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--hermes-muted);
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+
+.hermes-help-link:hover {
+  color: var(--hermes-text);
+}
+
+.hermes-product-line {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--hermes-muted);
+  letter-spacing: 0.03em;
+}
+
+.hermes-help-menu {
+  position: relative;
+}
+
+.hermes-help-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--hermes-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--hermes-muted);
+  font-size: 0.82rem;
+}
+
+.hermes-help-menu-btn:hover {
+  color: var(--hermes-text);
+}
+
+.hermes-help-dropdown {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  min-width: 11rem;
+  padding: 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--hermes-border);
+  background: rgba(18, 18, 22, 0.96);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  z-index: 40;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.hermes-help-dropdown a,
+.hermes-help-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.65rem;
+  border: none;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--hermes-text);
+  font-size: 0.82rem;
+}
+
+.hermes-help-dropdown a:hover,
+.hermes-help-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.palette-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--hermes-border);
+  font-size: 0.72rem;
+  color: var(--hermes-muted);
+}
+
+.palette-footer kbd {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: inherit;
+  font-size: 0.68rem;
+}
+
+.palette-footer-link {
+  color: #fdba74;
+  text-decoration: none;
+}
+
+.palette-footer-link:hover {
+  text-decoration: underline;
+}
+
+.shortcuts-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+.shortcuts-panel {
+  width: min(480px, 92vw);
+  padding: 1rem 1.15rem;
+}
+
+.shortcuts-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.shortcuts-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.shortcuts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.shortcuts-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+}
+
+.shortcuts-list kbd {
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+.help-page .help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+
+.help-card {
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--hermes-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.help-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.92rem;
+}
+
+.help-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--hermes-muted);
+  line-height: 1.45;
+}
+
+.help-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.help-brand {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  color: var(--hermes-muted);
+}
+
+.mesh-kubectl {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: #93c5fd;
+}
+
 .diagnose-action-list a {
   color: #fdba74;
 }
