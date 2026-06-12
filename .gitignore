@@ -7,3 +7,4 @@
 .DS_Store
 bin/
 dist/
+cmd/hermes-controller/hermes-controller
