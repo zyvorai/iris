@@ -7,6 +7,7 @@ import { Keyboard, X } from 'lucide-react'
 const shortcuts = [
   { keys: '⌘K', label: 'Open Spotlight search' },
   { keys: '?', label: 'Show keyboard shortcuts' },
+  { keys: '⌘1–9', label: 'Jump to main pages (Overview, Catalog, Spaces…)' },
   { keys: 'Esc', label: 'Close Spotlight or this panel' },
   { keys: '↑ ↓', label: 'Navigate Spotlight results' },
   { keys: 'Enter', label: 'Open selected app or route' },

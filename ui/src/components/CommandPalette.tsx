@@ -2,11 +2,12 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, Server, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import { hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
+import { refreshHermesData } from '../utils/refreshCatalog'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
@@ -55,10 +56,18 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (!q) return null
   if (['attention', 'show unhealthy', 'unhealthy', 'show attention'].includes(q)) return { type: 'attention' }
   if (['show routes', 'routes'].includes(q)) return { type: 'routes' }
+  if (['refresh', 'sync', 'resync'].includes(q)) return { type: 'refresh' }
+  if (['export', 'export catalog'].includes(q)) return { type: 'export' }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
   const diagnose = raw.trim().match(/^diagnose\s+(.+)$/i)
   if (diagnose?.[1]) return { type: 'diagnose', arg: diagnose[1].trim() }
+  const publish = raw.trim().match(/^publish\s+(.+)$/i)
+  if (publish?.[1]) return { type: 'publish', arg: publish[1].trim() }
+  const pin = raw.trim().match(/^pin\s+(.+)$/i)
+  if (pin?.[1]) return { type: 'pin', arg: pin[1].trim() }
+  const ns = raw.trim().match(/^(?:namespace:|ns:)\s*(.+)$/i)
+  if (ns?.[1]) return { type: 'namespace', arg: ns[1].trim() }
   return null
 }
 
@@ -87,6 +96,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const [selected, setSelected] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  const qc = useQueryClient()
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
   const { openInspector } = useInspector()
 
@@ -194,6 +204,77 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     if (command?.type === 'diagnose' && command.arg) {
       const app = findAppByName(catalog.data ?? [], command.arg)
       if (app) return [{ kind: 'app' as const, app, action: 'inspect' as const }]
+    }
+
+    if (command?.type === 'publish' && command.arg) {
+      const app = findAppByName(catalog.data ?? [], command.arg)
+      if (app) {
+        return [
+          {
+            kind: 'action' as const,
+            label: `Publish ${app.displayName}`,
+            meta: `${app.namespace} · add to launchpad`,
+            run: () => void hermesApi.publish(app.id).then(() => refreshHermesData(qc)),
+          },
+        ]
+      }
+    }
+
+    if (command?.type === 'pin' && command.arg) {
+      const app = findAppByName(catalog.data ?? [], command.arg)
+      if (app) {
+        return [
+          {
+            kind: 'action' as const,
+            label: `Pin ${app.displayName}`,
+            meta: 'Add to favorites',
+            run: () => void hermesApi.addFavorite(app.id).then(() => qc.invalidateQueries({ queryKey: ['favorites'] })),
+          },
+        ]
+      }
+    }
+
+    if (command?.type === 'namespace' && command.arg) {
+      return [
+        {
+          kind: 'nav' as const,
+          label: `Cluster · ${command.arg}`,
+          path: `/cluster?ns=${encodeURIComponent(command.arg)}`,
+          icon: Server,
+          meta: 'Filter by namespace',
+        },
+      ]
+    }
+
+    if (command?.type === 'refresh') {
+      return [
+        {
+          kind: 'action' as const,
+          label: 'Refresh catalog',
+          meta: 'Re-fetch discovery and health',
+          run: () => void refreshHermesData(qc),
+        },
+      ]
+    }
+
+    if (command?.type === 'export') {
+      return [
+        {
+          kind: 'action' as const,
+          label: 'Export catalog JSON',
+          meta: 'Download full service catalog',
+          run: () => {
+            void hermesApi.exportCatalog().then((blob) => {
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `hermes-catalog-${new Date().toISOString().slice(0, 10)}.json`
+              a.click()
+              URL.revokeObjectURL(url)
+            })
+          },
+        },
+      ]
     }
 
     if (query === 'broken' || query === 'broken services') {
@@ -324,6 +405,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     matchesWorkspace,
     setWorkspaceId,
     openInspector,
+    qc,
   ])
 
   useEffect(() => {
@@ -394,7 +476,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         <input
           ref={inputRef}
           className="palette-input"
-          placeholder="open grafana · diagnose prometheus · attention · show routes · owner:team…"
+          placeholder="open grafana · publish prometheus · pin grafana · ns:hermes-system · refresh · export"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />

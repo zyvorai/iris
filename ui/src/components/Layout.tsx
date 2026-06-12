@@ -10,6 +10,7 @@ import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
 import ZeusDock from './shell/ZeusDock'
 import ZeusLeftRail from './shell/ZeusLeftRail'
 import ZeusTopBar from './shell/ZeusTopBar'
+import { useGlobalNavShortcuts } from '../hooks/useGlobalNavShortcuts'
 import { useInspector } from '../utils/inspectorContext'
 
 interface LayoutProps {
@@ -38,6 +39,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
   const pageTitle = titles[location.pathname] ?? 'Hermes'
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { appId, closeInspector } = useInspector()
+  useGlobalNavShortcuts()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

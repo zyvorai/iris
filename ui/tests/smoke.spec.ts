@@ -8,12 +8,16 @@ test('home loads command surface hero and health orb', async ({ page }) => {
   await expect(page.getByTestId('platform-pulse-hero')).toBeVisible()
   await expect(page.getByTestId('cluster-health-orb')).toBeVisible()
   await expect(page.getByTestId('home-metrics-strip')).toBeVisible()
+  await expect(page.getByTestId('zeus-left-rail').getByRole('navigation')).toBeVisible()
   await expect(page.getByTestId('platform-pulse-hero')).toContainText(/your platform (is healthy|needs attention|is degraded|is partially healthy)/i)
 })
 
 test('left rail and spotlight open', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('zeus-left-rail')).toBeVisible()
+  const rail = page.getByTestId('zeus-left-rail')
+  await expect(rail).toBeVisible()
+  await expect(rail.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+  await expect(rail.getByRole('link', { name: 'Overview' })).toBeVisible()
   await page.keyboard.press('Meta+k')
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
 })

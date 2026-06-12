@@ -2,8 +2,10 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Rocket } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import { hermesApi } from '../services/hermesApi'
+import { refreshHermesData } from '../utils/refreshCatalog'
 
 export default function DiscoveryPage() {
   const qc = useQueryClient()
@@ -12,21 +14,23 @@ export default function DiscoveryPage() {
 
   const publish = useMutation({
     mutationFn: hermesApi.publish,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['discovery'] })
-      void qc.invalidateQueries({ queryKey: ['apps'] })
-      void qc.invalidateQueries({ queryKey: ['catalog'] })
-      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+    onSuccess: () => void refreshHermesData(qc),
+  })
+
+  const publishAll = useMutation({
+    mutationFn: async () => {
+      const apps = discovery.data ?? []
+      for (const app of apps.slice(0, 25)) {
+        await hermesApi.publish(app.id)
+      }
+      return apps.length
     },
+    onSuccess: () => void refreshHermesData(qc),
   })
 
   const hide = useMutation({
     mutationFn: hermesApi.hide,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['discovery'] })
-      void qc.invalidateQueries({ queryKey: ['catalog'] })
-      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
-    },
+    onSuccess: () => void refreshHermesData(qc),
   })
 
   return (
@@ -38,6 +42,16 @@ export default function DiscoveryPage() {
             {cluster.data?.discovery ?? '—'} unpublished services across {cluster.data?.namespaces ?? '—'} namespaces.
             Publish to add them to your dock — or browse everything on Cluster.
           </p>
+          {discovery.data?.length ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={publishAll.isPending}
+              onClick={() => void publishAll.mutate()}
+            >
+              <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)} services
+            </button>
+          ) : null}
         </div>
       </section>
       <section className="glass-section">

@@ -7,6 +7,9 @@ import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
+import QuickLaunchBar from '../components/command/QuickLaunchBar'
+import TeamPicksSection from '../components/command/TeamPicksSection'
+import HomeActivityFeed from '../components/command/HomeActivityFeed'
 import HomeMetricsStrip from '../components/command/HomeMetricsStrip'
 import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import PlatformPulseHero from '../components/command/PlatformPulseHero'
@@ -34,6 +37,7 @@ export default function HomePage() {
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
+  const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
   const { matchesWorkspace, workspaceId } = useWorkspace()
   const { openInspector } = useInspector()
@@ -57,6 +61,20 @@ export default function HomePage() {
   )
 
   const issueCount = degraded + broken
+
+  const quickLaunchApps = useMemo(
+    () =>
+      catalogApps
+        .filter((a) => a.visibility.published && a.readyEndpoints > 0 && a.status !== 'broken')
+        .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        .slice(0, 12),
+    [catalogApps],
+  )
+
+  const teamPicks = useMemo(
+    () => (recommended.data ?? []).filter(matchesWorkspace).slice(0, 6),
+    [recommended.data, matchesWorkspace],
+  )
 
   const pinnedAndRecent = useMemo(() => {
     const seen = new Set<string>()
@@ -89,6 +107,8 @@ export default function HomePage() {
         onResolveIssues={onResolveIssues}
       />
 
+      <QuickLaunchBar apps={quickLaunchApps} />
+
       <HomeMetricsStrip
         serviceCount={serviceCount}
         publishedCount={publishedCount}
@@ -98,6 +118,10 @@ export default function HomePage() {
       />
 
       <MissionControlSpaces apps={catalogApps} onInspect={onInspect} />
+
+      <TeamPicksSection apps={teamPicks} favoriteIds={favIds} />
+
+      <HomeActivityFeed />
 
       {workspaceId ? (
         <section className="glass-section workspace-banner">

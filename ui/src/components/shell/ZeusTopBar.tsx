@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import WorkspaceSwitcher from '../WorkspaceSwitcher'
+import QuickActionsMenu from './QuickActionsMenu'
 import HelpPopover from './HelpPopover'
 import { hermesApi } from '../../services/hermesApi'
 import { useWorkspace } from '../../utils/workspaceContext'
@@ -68,6 +69,7 @@ export default function ZeusTopBar({ pageTitle, onPaletteOpen, onOpenShortcuts }
             <span>Spotlight</span>
             <kbd>⌘K</kbd>
           </button>
+          <QuickActionsMenu />
           <HelpPopover onOpenShortcuts={onOpenShortcuts} />
           {auth.data?.mode === 'oidc' ? (
             auth.data.authenticated ? (

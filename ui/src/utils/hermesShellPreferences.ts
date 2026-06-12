@@ -91,7 +91,7 @@ export function saveDockMagnify(enabled: boolean) {
 }
 
 export function loadRailExpanded(): boolean {
-  return readBool(RAIL_EXPANDED_KEY, false)
+  return readBool(RAIL_EXPANDED_KEY, true)
 }
 
 export function saveRailExpanded(expanded: boolean) {
