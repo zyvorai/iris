@@ -15,6 +15,7 @@ import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { useInspector } from '../utils/inspectorContext'
+import { useSpotlight } from '../utils/spotlightContext'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
 
@@ -55,6 +56,7 @@ export default function HomePage() {
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
   const { matchesWorkspace, workspaceId, setWorkspaceId } = useWorkspace()
   const { openDiagnose } = useInspector()
+  const { openSpotlight } = useSpotlight()
 
   const filterWs = (list: HermesApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
   const catalogApps = filterWs(catalog.data)
@@ -141,6 +143,7 @@ export default function HomePage() {
           broken={broken}
           aiHint={aiHint}
           onResolveIssues={onResolveIssues}
+          onAskZeus={() => openSpotlight(issueCount > 0 ? 'explain' : 'suggest publish')}
         />
 
         <HomeFleetSnapshot

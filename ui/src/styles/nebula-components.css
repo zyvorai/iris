@@ -1582,6 +1582,19 @@
   color: inherit;
 }
 
+.hermes-nb-utilities .zeus-ai-badge {
+  margin-left: -0.15rem;
+}
+
+.shortcuts-list-compact li {
+  grid-template-columns: 1fr;
+}
+
+.shortcuts-list-compact li span {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
 .app-card-desc {
   margin: 0;
   font-size: 0.78rem;

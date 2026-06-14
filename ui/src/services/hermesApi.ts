@@ -5,6 +5,7 @@ import type {
   AppDiagnosis,
   AppGraph,
   AppInsight,
+  AiStatus,
   AuditEvent,
   CatalogStats,
   ClusterSummary,
@@ -85,6 +86,7 @@ export const hermesApi = {
   getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
   getAppInsight: (id: string) => req<AppInsight>(`${appPath(id)}/insight`),
   getFleetInsight: () => req<FleetInsight>('/insights/fleet'),
+  getAiStatus: () => req<AiStatus>('/insights/status'),
   getDiscoveryInsight: () => req<DiscoveryInsight>('/insights/discovery'),
   getNamespaceInsight: (namespace: string) =>
     req<NamespaceInsight>(`/insights/namespace/${encodeURIComponent(namespace)}`),

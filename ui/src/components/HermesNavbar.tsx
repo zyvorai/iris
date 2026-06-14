@@ -30,7 +30,8 @@ import { NavLink, Link } from 'react-router-dom'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
 import { hermesApi } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useAiStatus } from '../hooks/useZeusAiInsight'
+import { ZeusAiBadge } from './nebula/ZeusAiPanel'
 
 interface HermesNavbarProps {
   onPaletteOpen: () => void
@@ -154,8 +155,7 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
   const degraded = cluster.data?.degraded ?? 0
   const total = cluster.data?.total ?? 0
   const healthPct = cluster.isLoading ? null : total > 0 ? Math.round((healthy / total) * 100) : 100
-  const attentionCount = broken + degraded
-  const fleetInsight = useFleetInsight(!cluster.isLoading && attentionCount > 0)
+  const aiStatus = useAiStatus()
   const statusTone = cluster.isLoading ? 'ok'
     : broken > 0 ? 'bad'
     : (degraded > 0 || (healthPct ?? 0) < 80) ? 'warn'
@@ -198,12 +198,19 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               to="/health"
               className="zeus-health-chip zeus-health-chip-compact"
               data-tone={statusTone}
-              title={fleetInsight.data?.summary ?? `${healthy} of ${total} services healthy`}
+              title={
+                aiStatus.data?.llmConfigured
+                  ? `Zeus AI (${aiStatus.data.model}) · ${healthy} of ${total} healthy`
+                  : `Rules engine · ${healthy} of ${total} healthy`
+              }
               data-testid="navbar-health-chip"
             >
               <span className="zeus-live-dot" data-tone={statusTone} aria-hidden />
               <span className="zeus-health-label">{healthPct != null ? `${healthPct}%` : '—'} healthy</span>
             </Link>
+            {aiStatus.data ? (
+              <ZeusAiBadge source={aiStatus.data.llmConfigured ? 'llm' : 'rules'} />
+            ) : null}
             <button type="button" className="hermes-nb-pill hermes-nb-search-pill" onClick={onPaletteOpen}>
               <Search size={15} />
               <span className="hermes-nb-pill-label">Spotlight</span>

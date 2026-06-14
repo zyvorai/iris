@@ -8,23 +8,24 @@ import HermesPageFooter from './HermesPageFooter'
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import DiagnosisDrawer from './nebula/DiagnosisDrawer'
 import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
-import { useGlobalNavShortcuts } from '../hooks/useGlobalNavShortcuts'
 import { useInspector } from '../utils/inspectorContext'
+import { useSpotlight } from '../utils/spotlightContext'
 
 interface LayoutProps {
   children: React.ReactNode
-  paletteOpen: boolean
-  onPaletteOpen: () => void
-  onPaletteClose: () => void
 }
 
-export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { appId, diagnoseAppId, inspectorTab, closeInspector, closeDiagnose } = useInspector()
-  useGlobalNavShortcuts()
+  const { open, seed, openSpotlight, closeSpotlight } = useSpotlight()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        openSpotlight()
+      }
       if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const target = e.target as HTMLElement | null
         if (target?.closest('input, textarea, select')) return
@@ -34,19 +35,19 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [openSpotlight])
 
   return (
     <div className="app-shell">
       <div className="hermes-page-mesh" aria-hidden />
       <div className="top-command-bar">
-        <HermesNavbar onPaletteOpen={onPaletteOpen} onOpenShortcuts={() => setShortcutsOpen(true)} />
+        <HermesNavbar onPaletteOpen={() => openSpotlight()} onOpenShortcuts={() => setShortcutsOpen(true)} />
       </div>
       <div className="main-scroll-area">
         {children}
         <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       </div>
-      {paletteOpen ? <CommandPalette onClose={onPaletteClose} /> : null}
+      {open ? <CommandPalette onClose={closeSpotlight} initialQuery={seed} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
       <DiagnosisDrawer appId={diagnoseAppId} onClose={closeDiagnose} />
       <ServiceInspectorDrawer appId={appId} initialTab={inspectorTab} onClose={closeInspector} />

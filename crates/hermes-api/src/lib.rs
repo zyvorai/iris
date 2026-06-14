@@ -17,7 +17,7 @@ use hermes_core::{
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
     remote_set_recommended, resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight,
     resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight, resolve_search_intent,
-    resolve_search_with_llm, App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats,
+    resolve_search_with_llm, ai_status, App, AppDiagnosis, AppGraph, AppInsight, AiStatus, AuditEvent, CatalogStats,
     ClusterInfo, ClusterSummary, CreateShareRequest, DiscoveryInsight, FederatedApp,
     FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
     HealthSummary, NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
@@ -67,6 +67,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/search/intent", get(search_intent))
         .route("/search/llm", get(search_llm))
         .route("/insights/fleet", get(fleet_insight))
+        .route("/insights/status", get(ai_status_route))
         .route("/insights/discovery", get(discovery_insight))
         .route("/insights/namespace/{namespace}", get(namespace_insight))
         .route("/insights/graph", get(graph_insight))
@@ -254,6 +255,10 @@ async fn insight_for_app(st: &ApiState, app_id: &str) -> Result<AppInsight, AppE
     }
     let diagnosis = diagnosis_for_app(st, app_id)?;
     Ok(resolve_app_insight(&app, &diagnosis).await)
+}
+
+async fn ai_status_route() -> Json<AiStatus> {
+    Json(ai_status())
 }
 
 async fn fleet_insight(

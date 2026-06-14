@@ -357,6 +357,7 @@ Honest checklist of what ships now:
 - [x] LLM search API with rule-based fallback (`/api/v1/search/llm`, Spotlight `ai:` prefix)
 - [x] Zeus AI insight APIs (`GET /api/v1/apps/{id}/insight`, `GET /api/v1/insights/fleet`) with LLM + rules fallback
 - [x] Discovery and namespace insight APIs with publish ranking and namespace rollups
+- [x] Graph topology and team owner insight APIs; AI status endpoint; Ask Zeus hero + navbar mode badge
 - [x] Fleet and per-app AI panels (Home, Health, Activity, Graph, Diagnose drawer, inspector AI tab)
 - [x] Spotlight `diagnose <app>` insight preview and `explain` fleet summary command
 - [x] Gateway SSE streaming and gRPC content-type pass-through

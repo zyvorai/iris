@@ -14,6 +14,16 @@ const shortcuts = [
   { keys: 'Enter', label: 'Open selected app or route' },
 ]
 
+const spotlightAi = [
+  'explain — fleet health summary',
+  'diagnose grafana / why grafana — app insight preview',
+  'suggest publish — ranked discovery queue',
+  'graph insight — topology / unresolved deps',
+  'ns insight <namespace> — namespace rollup',
+  'owner insight <team> — team ownership health',
+  'ai: <question> — natural-language catalog search',
+]
+
 interface KeyboardShortcutsHelpProps {
   onClose: () => void
 }
@@ -57,6 +67,16 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
             </li>
           ))}
         </ul>
+        <div className="shortcuts-ai-section">
+          <p className="section-label" style={{ marginTop: '1rem' }}>Spotlight · Zeus AI</p>
+          <ul className="shortcuts-list-nebula shortcuts-list-compact">
+            {spotlightAi.map((item) => (
+              <li key={item}>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
     </div>
   )

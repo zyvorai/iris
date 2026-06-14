@@ -1,7 +1,6 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useCallback, useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
@@ -16,45 +15,39 @@ import FederatedPage from './pages/FederatedPage'
 import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 import { InspectorProvider } from './utils/inspectorContext'
+import { SpotlightProvider } from './utils/spotlightContext'
+import { useGlobalNavShortcuts } from './hooks/useGlobalNavShortcuts'
 
-export default function App() {
-  const [paletteOpen, setPaletteOpen] = useState(false)
-
-  const onKey = useCallback((e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault()
-      setPaletteOpen(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onKey])
+function AppRoutes() {
+  useGlobalNavShortcuts()
 
   return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/apps" element={<AppsPage />} />
+      <Route path="/cluster" element={<ClusterPage />} />
+      <Route path="/graph" element={<GraphPage />} />
+      <Route path="/federated" element={<FederatedPage />} />
+      <Route path="/teams" element={<TeamsPage />} />
+      <Route path="/apps/:id" element={<AppDetailPage />} />
+      <Route path="/spaces" element={<SpacesPage />} />
+      <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />
+      <Route path="/discovery" element={<DiscoveryPage />} />
+      <Route path="/health" element={<HealthPage />} />
+      <Route path="/activity" element={<ActivityPage />} />
+      <Route path="/help" element={<HelpPage />} />
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
     <InspectorProvider>
-      <Layout
-        paletteOpen={paletteOpen}
-        onPaletteOpen={() => setPaletteOpen(true)}
-        onPaletteClose={() => setPaletteOpen(false)}
-      >
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/apps" element={<AppsPage />} />
-          <Route path="/cluster" element={<ClusterPage />} />
-          <Route path="/graph" element={<GraphPage />} />
-          <Route path="/federated" element={<FederatedPage />} />
-          <Route path="/teams" element={<TeamsPage />} />
-          <Route path="/apps/:id" element={<AppDetailPage />} />
-          <Route path="/spaces" element={<SpacesPage />} />
-          <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />
-          <Route path="/discovery" element={<DiscoveryPage />} />
-          <Route path="/health" element={<HealthPage />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/help" element={<HelpPage />} />
-        </Routes>
-      </Layout>
+      <SpotlightProvider>
+        <Layout>
+          <AppRoutes />
+        </Layout>
+      </SpotlightProvider>
     </InspectorProvider>
   )
 }

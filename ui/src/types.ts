@@ -107,6 +107,12 @@ export interface GraphInsight {
   focusAppIds?: string[]
 }
 
+export interface AiStatus {
+  llmConfigured: boolean
+  defaultSource: string
+  model?: string
+}
+
 export interface ClusterInfo {
   id: string
   name: string

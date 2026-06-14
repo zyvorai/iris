@@ -15,6 +15,7 @@ import type { HermesApp } from '../types'
 
 interface CommandPaletteProps {
   onClose: () => void
+  initialQuery?: string
 }
 
 const navItems = [
@@ -106,8 +107,8 @@ function appDependsOn(app: HermesApp, dep: string): boolean {
   )
 }
 
-export default function CommandPalette({ onClose }: CommandPaletteProps) {
-  const [q, setQ] = useState('')
+export default function CommandPalette({ onClose, initialQuery = '' }: CommandPaletteProps) {
+  const [q, setQ] = useState(initialQuery)
   const [selected, setSelected] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
@@ -666,6 +667,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  useEffect(() => {
+    if (initialQuery) setQ(initialQuery)
+  }, [initialQuery])
 
   useEffect(() => {
     setSelected(0)

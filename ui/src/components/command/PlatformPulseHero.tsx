@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { ChevronRight, GitBranch } from 'lucide-react'
+import { ChevronRight, GitBranch, Sparkles } from 'lucide-react'
 import GlassPanel from '../nebula/GlassPanel'
 import HealthRing, { healthTier } from '../nebula/HealthRing'
 import Button from '../nebula/Button'
@@ -17,6 +17,7 @@ interface PlatformPulseHeroProps {
   broken: number
   aiHint?: string
   onResolveIssues?: () => void
+  onAskZeus?: () => void
 }
 
 export default function PlatformPulseHero({
@@ -30,6 +31,7 @@ export default function PlatformPulseHero({
   broken,
   aiHint,
   onResolveIssues,
+  onAskZeus,
 }: PlatformPulseHeroProps) {
   const who = userId ? userId.split('@')[0] : 'operator'
   const attentionCount = broken + degraded
@@ -73,6 +75,11 @@ export default function PlatformPulseHero({
             {attentionCount > 0 ? (
               <Button variant="danger" onClick={onResolveIssues}>
                 Review {attentionCount} Issues
+              </Button>
+            ) : null}
+            {onAskZeus ? (
+              <Button variant="ai" onClick={onAskZeus} data-testid="ask-zeus-btn">
+                <Sparkles size={14} /> Ask Zeus
               </Button>
             ) : null}
           </div>

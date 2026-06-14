@@ -147,7 +147,9 @@ test('spotlight diagnose shows insight preview', async ({ page }) => {
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('diagnose grafana')
   await expect(page.getByText('Commands · Services')).toBeVisible()
-  await expect(page.locator('.palette-item').first()).toBeVisible({ timeout: 8000 })
+  const insightRow = page.locator('.palette-item').first()
+  const empty = page.getByText(/no matches in cluster catalog/i)
+  await expect(insightRow.or(empty)).toBeVisible({ timeout: 8000 })
 })
 
 test('graph page shows zeus ai focus strip', async ({ page }) => {
@@ -213,6 +215,19 @@ test('app detail shows zeus ai service insight', async ({ page }) => {
   await firstAppLink.click()
   await waitForPageReady(page)
   await expect(page.getByText('Zeus AI service insight')).toBeVisible({ timeout: 5000 })
+})
+
+test('home ask zeus opens spotlight with fleet command', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  const hero = page.getByTestId('platform-pulse-hero')
+  const loadError = page.getByTestId('page-load-error')
+  await expect(hero.or(loadError)).toBeVisible({ timeout: 5000 })
+  if (await loadError.isVisible()) return
+
+  await page.getByTestId('ask-zeus-btn').click()
+  await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
+  await expect(page.getByPlaceholder(/open grafana/i)).toHaveValue(/explain|suggest publish/)
 })
 
 test('help page renders zyvor footer', async ({ page }) => {

@@ -54,6 +54,7 @@ When unset, Hermes uses rule-based insight and intent search — no external API
 | `GET /api/v1/insights/namespace/{ns}` | Namespace health rollup and focus services |
 | `GET /api/v1/insights/graph` | Topology insight for unresolved dependency links |
 | `GET /api/v1/insights/owner/{owner}` | Team ownership health rollup |
+| `GET /api/v1/insights/status` | Whether live LLM is configured (Rules vs AI badge) |
 
 UI: Home and Health fleet panels with diagnose chips, per-app insight on app detail, Activity banner, Graph topology insight, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Teams/Spaces/Federated summaries, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, `ns insight`, `graph insight`, and `owner insight`.
 

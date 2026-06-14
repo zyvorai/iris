@@ -24,6 +24,30 @@ pub fn llm_config_from_env() -> Option<LlmConfig> {
     })
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct AiStatus {
+    pub llm_configured: bool,
+    pub default_source: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub model: String,
+}
+
+pub fn ai_status() -> AiStatus {
+    match llm_config_from_env() {
+        Some(cfg) => AiStatus {
+            llm_configured: true,
+            default_source: "llm".into(),
+            model: cfg.model,
+        },
+        None => AiStatus {
+            llm_configured: false,
+            default_source: "rules".into(),
+            model: String::new(),
+        },
+    }
+}
+
 #[derive(Debug, Deserialize)]
 struct ChatCompletionResponse {
     choices: Vec<ChatChoice>,

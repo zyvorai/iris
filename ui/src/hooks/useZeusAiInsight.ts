@@ -72,3 +72,11 @@ export function useOwnerInsight(owner: string | null, enabled = true) {
     staleTime: 45_000,
   })
 }
+
+export function useAiStatus() {
+  return useQuery({
+    queryKey: ['ai-status'],
+    queryFn: hermesApi.getAiStatus,
+    staleTime: 60_000,
+  })
+}

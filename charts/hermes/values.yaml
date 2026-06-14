@@ -67,6 +67,7 @@ server:
     apiUrl: ""
     apiKey: ""
     model: gpt-4o-mini
+    # Set apiUrl + apiKey to enable live Zeus AI (OpenAI-compatible). Without these, Hermes uses rules fallback.
 
 cluster:
   id: local
