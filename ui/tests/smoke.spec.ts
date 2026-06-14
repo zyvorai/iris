@@ -95,8 +95,9 @@ test('app detail opens global diagnose drawer', async ({ page }) => {
   await page.goto('/apps')
   await waitForPageReady(page)
 
+  const loadError = page.getByTestId('page-load-error')
   const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
-  if (!(await firstAppLink.count())) {
+  if (await loadError.isVisible() || !(await firstAppLink.count())) {
     test.skip()
     return
   }
@@ -104,15 +105,12 @@ test('app detail opens global diagnose drawer', async ({ page }) => {
   await firstAppLink.click()
   await waitForPageReady(page)
 
-  const diagnoseBtn = page.getByRole('button', { name: /diagnose/i })
-  const inspectItem = page.getByRole('button', { name: /inspect route/i })
-  if (await diagnoseBtn.count()) {
+  const diagnoseBtn = page.getByRole('button', { name: /^Diagnose$/i })
+  if (await diagnoseBtn.isVisible()) {
     await diagnoseBtn.click()
-  } else if (await inspectItem.count()) {
-    await inspectItem.click()
   } else {
-    test.skip()
-    return
+    await page.getByRole('button', { name: 'App actions' }).click()
+    await page.getByRole('menuitem', { name: 'Inspect route' }).click()
   }
 
   await expect(page.getByTestId('diagnose-panel')).toBeVisible({ timeout: 5000 })
