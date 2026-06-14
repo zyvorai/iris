@@ -166,6 +166,29 @@ test('activity page shows fleet insight banner', async ({ page }) => {
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
 })
 
+test('spotlight suggest publish shows discovery insight', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('suggest publish')
+  await expect(page.getByText('Zeus AI · Discovery')).toBeVisible({ timeout: 5000 })
+})
+
+test('discovery page shows publish suggestions or empty queue', async ({ page }) => {
+  await page.goto('/discovery')
+  await waitForPageReady(page)
+  const panel = page.getByTestId('zeus-ai-panel')
+  const empty = page.getByText('Queue is empty')
+  await expect(panel.or(empty)).toBeVisible({ timeout: 5000 })
+})
+
+test('navbar health chip links to health page', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.getByTestId('navbar-health-chip').click()
+  await expect(page).toHaveURL(/\/health/)
+})
+
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()

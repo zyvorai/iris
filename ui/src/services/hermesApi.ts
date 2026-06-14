@@ -10,6 +10,7 @@ import type {
   ClusterSummary,
   CreateShareRequest,
   ClusterInfo,
+  DiscoveryInsight,
   HealthSummary,
   HermesApp,
   SearchHit,
@@ -18,6 +19,7 @@ import type {
   FederationActionResult,
   FederationRbacStatus,
   FleetInsight,
+  NamespaceInsight,
   SearchIntent,
   ShareLink,
   TeamOwner,
@@ -81,6 +83,9 @@ export const hermesApi = {
   getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
   getAppInsight: (id: string) => req<AppInsight>(`${appPath(id)}/insight`),
   getFleetInsight: () => req<FleetInsight>('/insights/fleet'),
+  getDiscoveryInsight: () => req<DiscoveryInsight>('/insights/discovery'),
+  getNamespaceInsight: (namespace: string) =>
+    req<NamespaceInsight>(`/insights/namespace/${encodeURIComponent(namespace)}`),
   listDiscovery: () => req<HermesApp[]>('/discovery'),
   publish: (id: string) => req<void>(`/discovery/publish/${encodeURIComponent(id)}`, { method: 'POST' }),
   publishNamespace: (namespace: string) =>

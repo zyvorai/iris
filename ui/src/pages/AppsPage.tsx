@@ -10,8 +10,12 @@ import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
+import { useInspector } from '../utils/inspectorContext'
 import type { HermesApp } from '../types'
 
 type CatalogMode = 'published' | 'all'
@@ -34,6 +38,7 @@ export default function AppsPage() {
   const [sort, setSort] = useState<SortKey>('name')
   const [statusFilter, setStatusFilter] = useState('')
   const { matchesWorkspace } = useWorkspace()
+  const { openDiagnose } = useInspector()
   const published = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
@@ -85,6 +90,8 @@ export default function AppsPage() {
   const [showAllCategories, setShowAllCategories] = useState(false)
   const visibleCategories = showAllCategories ? categories : categories.slice(0, 8)
   const hiddenCategoryCount = Math.max(0, categories.length - visibleCategories.length)
+  const showFleetAi = Boolean(statusFilter && statusFilter !== 'healthy')
+  const fleetInsight = useFleetInsight(hasData && showFleetAi)
 
   return (
     <PageFrame
@@ -137,6 +144,25 @@ export default function AppsPage() {
       }
     >
       <div className="page-grid">
+        {showFleetAi && (fleetInsight.data || fleetInsight.isLoading) ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing filtered services…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+            compact
+            action={
+              <ZeusAiFocusChips
+                appIds={fleetInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>

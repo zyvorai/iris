@@ -11,6 +11,7 @@ import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import { useInspector } from '../utils/inspectorContext'
@@ -77,13 +78,6 @@ export default function GraphPage() {
         : null,
     [graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly, meshOnly],
   )
-
-  const focusApps = useMemo(() => {
-    const ids = fleetInsight.data?.focusAppIds ?? []
-    return ids
-      .map((id) => (catalog.data ?? []).find((app) => app.id === id))
-      .filter((app): app is NonNullable<typeof app> => !!app)
-  }, [fleetInsight.data, catalog.data])
 
   const brokenDeps = (graph.data?.edges ?? []).filter((e) => !e.resolved).length
   const loading = graph.isLoading && !graph.data
@@ -159,20 +153,11 @@ export default function GraphPage() {
               ) : (
                 <>
                   <p className="body-text zeus-ai-explanation">{fleetInsight.data?.summary}</p>
-                  {focusApps.length ? (
-                    <div className="graph-ai-focus-chips">
-                      {focusApps.map((app) => (
-                        <button
-                          key={app.id}
-                          type="button"
-                          className="filter-chip"
-                          onClick={() => openDiagnose(app.id)}
-                        >
-                          Diagnose {app.displayName}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
+                  <ZeusAiFocusChips
+                    appIds={fleetInsight.data?.focusAppIds ?? []}
+                    catalog={catalog.data ?? []}
+                    onSelect={openDiagnose}
+                  />
                 </>
               )}
             </div>

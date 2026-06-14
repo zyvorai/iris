@@ -193,7 +193,10 @@ pub use federation::{
     remote_rbac_check, remote_set_recommended, FederatedApp, FederatedAuditEvent, FederationActionResult,
     FederationRbacStatus,
 };
-pub use insight::{resolve_app_insight, resolve_fleet_insight, AppInsight, FleetInsight};
+pub use insight::{
+    resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight, resolve_namespace_insight,
+    AppInsight, DiscoveryInsight, FleetInsight, NamespaceInsight,
+};
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
 pub use llm::{llm_chat_json, llm_config_from_env, resolve_search_with_llm, LlmConfig};

@@ -1570,6 +1570,18 @@
   margin-top: 0.65rem;
 }
 
+.attention-queue-ai {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent-primary) 6%, var(--glass-bg));
+}
+
+.zeus-health-chip {
+  text-decoration: none;
+  color: inherit;
+}
+
 .app-card-desc {
   margin: 0;
   font-size: 0.78rem;

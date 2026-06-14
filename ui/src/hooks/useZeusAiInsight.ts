@@ -34,3 +34,22 @@ export function useFleetInsight(enabled = true) {
     refetchInterval: 60_000,
   })
 }
+
+export function useDiscoveryInsight(enabled = true) {
+  return useQuery({
+    queryKey: ['discovery-insight'],
+    queryFn: hermesApi.getDiscoveryInsight,
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  })
+}
+
+export function useNamespaceInsight(namespace: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ['namespace-insight', namespace],
+    queryFn: () => hermesApi.getNamespaceInsight(namespace!),
+    enabled: enabled && !!namespace,
+    staleTime: 45_000,
+  })
+}

@@ -30,7 +30,8 @@ export default function HelpPage() {
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: owner:, env:, depends:, ai:
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
-                Commands: <code>diagnose grafana</code> (AI insight preview), <code>explain</code> (fleet summary),
+                Commands: <code>diagnose grafana</code>, <code>why grafana</code>, <code>explain</code>,
+                <code>suggest publish</code>, <code>ns insight hermes-demo</code>,
                 <code>open</code>, <code>publish</code>, <code>pin</code>, <code>refresh</code>, <code>export</code>.
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
@@ -41,7 +42,7 @@ export default function HelpPage() {
               <Sparkles size={18} />
               <h3>Zeus AI insights</h3>
               <p>
-                Per-app insight and fleet summaries power Ask Zeus AI, Diagnose drawer, Home, Health, Activity, and Graph focus chips.
+                Per-app insight and fleet summaries power Ask Zeus AI, Diagnose drawer, Home, Health, Activity, Discovery, Cluster, Graph, and Federated views.
               </p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>

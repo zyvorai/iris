@@ -61,10 +61,17 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['explain', 'explain fleet', 'ai summary', 'fleet summary', 'why unhealthy', 'fleet insight'].includes(q)) {
     return { type: 'explain' }
   }
+  if (['suggest publish', 'publish suggest', 'what to publish', 'discovery insight'].includes(q)) {
+    return { type: 'suggest_publish' }
+  }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
+  const why = raw.trim().match(/^why\s+(?:is\s+)?(.+?)(?:\s+down|\s+unhealthy|\s+broken)?$/i)
+  if (why?.[1]) return { type: 'why', arg: why[1].trim() }
   const diagnose = raw.trim().match(/^diagnose\s+(.+)$/i)
   if (diagnose?.[1]) return { type: 'diagnose', arg: diagnose[1].trim() }
+  const nsInsight = raw.trim().match(/^(?:namespace insight|ns insight)\s+(.+)$/i)
+  if (nsInsight?.[1]) return { type: 'ns_insight', arg: nsInsight[1].trim() }
   const publish = raw.trim().match(/^publish\s+(.+)$/i)
   if (publish?.[1]) return { type: 'publish', arg: publish[1].trim() }
   const pin = raw.trim().match(/^pin\s+(.+)$/i)
@@ -114,7 +121,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const command = parseSpotlightCommand(q.trim())
   const isCommandQuery = !!command
   const diagnoseTarget = useMemo(() => {
-    if (command?.type === 'diagnose' && command.arg) {
+    if ((command?.type === 'diagnose' || command?.type === 'why') && command.arg) {
       return findAppByName(catalog.data ?? [], command.arg)
     }
     return undefined
@@ -131,6 +138,20 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     queryKey: ['fleet-insight'],
     queryFn: hermesApi.getFleetInsight,
     enabled: command?.type === 'explain',
+    staleTime: 45_000,
+  })
+
+  const discoveryInsight = useQuery({
+    queryKey: ['discovery-insight'],
+    queryFn: hermesApi.getDiscoveryInsight,
+    enabled: command?.type === 'suggest_publish',
+    staleTime: 45_000,
+  })
+
+  const namespaceInsight = useQuery({
+    queryKey: ['namespace-insight', command?.arg],
+    queryFn: () => hermesApi.getNamespaceInsight(command!.arg!),
+    enabled: command?.type === 'ns_insight' && !!command.arg,
     staleTime: 45_000,
   })
 
@@ -249,7 +270,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       if (app) return [{ kind: 'app' as const, app, action: 'open' as const }]
     }
 
-    if (command?.type === 'diagnose' && command.arg) {
+    if ((command?.type === 'diagnose' || command?.type === 'why') && command.arg) {
       const app = findAppByName(catalog.data ?? [], command.arg)
       if (app) {
         const rows: Row[] = []
@@ -264,6 +285,67 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         rows.push({ kind: 'app', app, action: 'inspect' })
         return rows
       }
+    }
+
+    if (command?.type === 'suggest_publish') {
+      if (discoveryInsight.data) {
+        const rows: Row[] = [
+          {
+            kind: 'action',
+            label: discoveryInsight.data.summary,
+            meta: discoveryInsight.data.explanation,
+            run: () => navigate('/discovery'),
+          },
+        ]
+        for (const id of discoveryInsight.data.suggestPublishIds ?? []) {
+          const app = (catalog.data ?? []).find((a) => a.id === id)
+          if (app) {
+            rows.push({
+              kind: 'action',
+              label: `Publish ${app.displayName}`,
+              meta: `${app.namespace} · Zeus AI suggested`,
+              run: () => void hermesApi.publish(app.id).then(() => refreshHermesData(qc)),
+            })
+          }
+        }
+        return rows.slice(0, 8)
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Discovery queue',
+          path: '/discovery',
+          icon: Compass,
+          meta: discoveryInsight.isLoading ? 'Loading Zeus AI publish suggestions…' : 'Review unpublished services',
+        },
+      ]
+    }
+
+    if (command?.type === 'ns_insight' && command.arg) {
+      if (namespaceInsight.data) {
+        const rows: Row[] = [
+          {
+            kind: 'action',
+            label: namespaceInsight.data.summary,
+            meta: namespaceInsight.data.explanation,
+            run: () => navigate(`/cluster?ns=${encodeURIComponent(command.arg!)}`),
+          },
+        ]
+        for (const id of namespaceInsight.data.focusAppIds ?? []) {
+          const app = (catalog.data ?? []).find((a) => a.id === id)
+          if (app) rows.push({ kind: 'app', app, action: 'inspect' })
+        }
+        return rows.slice(0, 8)
+      }
+      return [
+        {
+          kind: 'nav',
+          label: `Cluster · ${command.arg}`,
+          path: `/cluster?ns=${encodeURIComponent(command.arg)}`,
+          icon: Server,
+          meta: namespaceInsight.isLoading ? 'Loading Zeus AI namespace insight…' : 'View namespace services',
+        },
+      ]
     }
 
     if (command?.type === 'explain') {
@@ -494,6 +576,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     diagnoseInsight.data,
     fleetInsight.data,
     fleetInsight.isLoading,
+    discoveryInsight.data,
+    discoveryInsight.isLoading,
+    namespaceInsight.data,
+    namespaceInsight.isLoading,
     openDiagnose,
     openInspector,
     navigate,
@@ -552,8 +638,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     if (!q.trim()) return 'Suggested'
     if (command?.type === 'attention') return 'Commands · Attention'
     if (command?.type === 'routes') return 'Commands · Navigation'
-    if (command?.type === 'open' || command?.type === 'diagnose') return 'Commands · Services'
+    if (command?.type === 'open' || command?.type === 'diagnose' || command?.type === 'why') return 'Commands · Services'
     if (command?.type === 'explain') return 'Zeus AI · Fleet'
+    if (command?.type === 'suggest_publish') return 'Zeus AI · Discovery'
+    if (command?.type === 'ns_insight') return 'Zeus AI · Namespace'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'

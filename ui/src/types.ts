@@ -73,6 +73,23 @@ export interface FleetInsight {
   focusAppIds?: string[]
 }
 
+export interface DiscoveryInsight {
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  suggestPublishIds?: string[]
+}
+
+export interface NamespaceInsight {
+  namespace: string
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  focusAppIds?: string[]
+}
+
 export interface ClusterInfo {
   id: string
   name: string

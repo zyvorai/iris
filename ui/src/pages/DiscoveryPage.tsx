@@ -8,7 +8,10 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
+import { useDiscoveryInsight } from '../hooks/useZeusAiInsight'
 import { refreshHermesData } from '../utils/refreshCatalog'
 
 export default function DiscoveryPage() {
@@ -38,6 +41,7 @@ export default function DiscoveryPage() {
   })
 
   const loading = discovery.isLoading && !discovery.data
+  const discoveryInsight = useDiscoveryInsight(Boolean(discovery.data?.length))
 
   return (
     <PageFrame
@@ -64,6 +68,26 @@ export default function DiscoveryPage() {
             ) : null}
           </div>
         </GlassPanel>
+
+        {discovery.data?.length ? (
+          <ZeusAiPanel
+            title="Publish suggestions"
+            summary={discoveryInsight.data?.summary}
+            explanation={discoveryInsight.data?.explanation ?? 'Zeus AI is ranking unpublished services…'}
+            source={discoveryInsight.data?.source}
+            remediation={discoveryInsight.data?.highlights}
+            loading={discoveryInsight.isLoading}
+            compact
+            action={
+              <ZeusAiFocusChips
+                appIds={discoveryInsight.data?.suggestPublishIds ?? []}
+                catalog={discovery.data}
+                onSelect={(id) => publish.mutate(id)}
+                label="Publish"
+              />
+            }
+          />
+        ) : null}
 
         <GlassPanel className="glass-panel-section">
           <p className="section-label">Unpublished services</p>

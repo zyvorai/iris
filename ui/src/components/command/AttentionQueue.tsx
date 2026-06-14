@@ -3,10 +3,11 @@
 
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { HeartPulse } from 'lucide-react'
+import { HeartPulse, Sparkles } from 'lucide-react'
 import ServiceCard from '../nebula/ServiceCard'
 import GlassPanel from '../nebula/GlassPanel'
 import EmptyState from '../nebula/EmptyState'
+import { useFleetInsight } from '../../hooks/useZeusAiInsight'
 import type { HermesApp } from '../../types'
 
 interface AttentionQueueProps {
@@ -16,6 +17,7 @@ interface AttentionQueueProps {
 
 export default function AttentionQueue({ apps }: AttentionQueueProps) {
   const [filter, setFilter] = useState<'all' | 'broken' | 'degraded'>('all')
+  const fleetInsight = useFleetInsight(apps.length > 0)
   const filtered = useMemo(() => {
     if (filter === 'broken') return apps.filter((a) => a.status === 'broken')
     if (filter === 'degraded') return apps.filter((a) => a.status === 'degraded')
@@ -51,6 +53,12 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
           </Link>
         ) : null}
       </div>
+      {fleetInsight.data?.summary ? (
+        <p className="body-text zeus-ai-explanation attention-queue-ai" data-testid="attention-queue-ai">
+          <Sparkles size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+          {fleetInsight.data.summary}
+        </p>
+      ) : null}
       <div className="mission-control-filters" role="tablist" aria-label="Filter attention queue">
         <button type="button" role="tab" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
           All ({apps.length})

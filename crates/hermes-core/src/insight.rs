@@ -31,6 +31,31 @@ pub struct FleetInsight {
     pub focus_app_ids: Vec<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DiscoveryInsight {
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub suggest_publish_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct NamespaceInsight {
+    pub namespace: String,
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub focus_app_ids: Vec<String>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LlmAppInsight {
@@ -267,4 +292,257 @@ pub async fn resolve_fleet_insight(apps: &[App], summary: &ClusterSummary) -> Fl
         }
     }
     rule_fleet_insight(apps, summary)
+}
+
+fn publish_priority(app: &App) -> i32 {
+    let mut score = 0;
+    if app.status == "healthy" {
+        score += 100;
+    } else if app.status == "degraded" {
+        score += 40;
+    }
+    score += app.ready_endpoints.min(10) * 5;
+    let cat = app.category.to_lowercase();
+    if cat.contains("monitor") || cat.contains("observ") || cat.contains("grafana") || cat.contains("prometheus") {
+        score += 25;
+    }
+    if !app.meta.depends_on.is_empty() {
+        score += 10;
+    }
+    -score
+}
+
+pub fn rule_discovery_insight(discovery: &[App]) -> DiscoveryInsight {
+    if discovery.is_empty() {
+        return DiscoveryInsight {
+            summary: "Discovery queue is empty.".into(),
+            explanation: "All discovered services are published. Use Cluster to review the full inventory.".into(),
+            source: "rules".into(),
+            highlights: vec![],
+            suggest_publish_ids: vec![],
+        };
+    }
+
+    let mut sorted: Vec<&App> = discovery.iter().collect();
+    sorted.sort_by(|a, b| {
+        publish_priority(b)
+            .cmp(&publish_priority(a))
+            .then(a.display_name.cmp(&b.display_name))
+    });
+
+    let healthy = discovery.iter().filter(|a| a.status == "healthy").count();
+    let broken = discovery.iter().filter(|a| a.status == "broken").count();
+    let mut highlights = Vec::new();
+    if healthy > 0 {
+        highlights.push(format!("{healthy} unpublished service(s) are healthy and safe to publish"));
+    }
+    if broken > 0 {
+        highlights.push(format!("{broken} unpublished service(s) are broken — fix probes before publishing"));
+    }
+    let mut ns_counts = std::collections::BTreeMap::<String, usize>::new();
+    for app in discovery {
+        *ns_counts.entry(app.namespace.clone()).or_default() += 1;
+    }
+    if let Some((ns, count)) = ns_counts.iter().max_by_key(|(_, c)| *c) {
+        if *count >= 2 {
+            highlights.push(format!("Namespace {ns} has {count} waiting services"));
+        }
+    }
+
+    let suggest_publish_ids: Vec<String> = sorted
+        .iter()
+        .filter(|a| a.status != "broken")
+        .take(6)
+        .map(|a| a.id.clone())
+        .collect();
+
+    let summary = format!(
+        "{} unpublished service(s) — {} ready to publish first.",
+        discovery.len(),
+        suggest_publish_ids.len()
+    );
+    let explanation = if healthy > 0 {
+        "Hermes ranked unpublished services by health, readiness, and observability value. Start with healthy monitoring stacks, then platform dependencies.".into()
+    } else {
+        "Unpublished services need probe fixes before launchpad publish. Inspect broken apps in Discovery or Cluster.".into()
+    };
+
+    DiscoveryInsight {
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+        suggest_publish_ids,
+    }
+}
+
+async fn llm_discovery_insight(discovery: &[App], cfg: &LlmConfig) -> Option<DiscoveryInsight> {
+    let sample: Vec<_> = discovery
+        .iter()
+        .take(30)
+        .map(|a| {
+            serde_json::json!({
+                "id": a.id,
+                "name": a.display_name,
+                "namespace": a.namespace,
+                "status": a.status,
+                "category": a.category,
+                "readyEndpoints": a.ready_endpoints,
+                "dependsOn": a.meta.depends_on,
+            })
+        })
+        .collect();
+    let system = "You are Zeus AI for Hermes discovery queue. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"suggestPublishIds\":[\"app-id\"]}. Prefer healthy observability and platform services.";
+    let user = format!("Rank unpublished services to publish:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LlmDiscoveryInsight {
+        summary: String,
+        explanation: String,
+        #[serde(default)]
+        highlights: Vec<String>,
+        #[serde(default, alias = "suggestPublishIds")]
+        suggest_publish_ids: Vec<String>,
+    }
+    let llm: LlmDiscoveryInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(DiscoveryInsight {
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+        suggest_publish_ids: llm.suggest_publish_ids,
+    })
+}
+
+pub async fn resolve_discovery_insight(discovery: &[App]) -> DiscoveryInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_discovery_insight(discovery, &cfg).await {
+            return insight;
+        }
+    }
+    rule_discovery_insight(discovery)
+}
+
+pub fn rule_namespace_insight(namespace: &str, apps: &[App]) -> NamespaceInsight {
+    let in_ns: Vec<_> = apps.iter().filter(|a| a.namespace == namespace).collect();
+    if in_ns.is_empty() {
+        return NamespaceInsight {
+            namespace: namespace.into(),
+            summary: format!("No services found in namespace {namespace}."),
+            explanation: "Hermes has not discovered apps in this namespace yet, or your workspace filter excludes them.".into(),
+            source: "rules".into(),
+            highlights: vec![],
+            focus_app_ids: vec![],
+        };
+    }
+
+    let unhealthy: Vec<_> = in_ns.iter().filter(|a| a.status != "healthy").collect();
+    let broken = unhealthy.iter().filter(|a| a.status == "broken").count();
+    let degraded = unhealthy.iter().filter(|a| a.status == "degraded").count();
+    let published = in_ns.iter().filter(|a| a.visibility.published).count();
+    let mut highlights = Vec::new();
+    if broken > 0 {
+        highlights.push(format!("{broken} broken service(s) in {namespace}"));
+    }
+    if degraded > 0 {
+        highlights.push(format!("{degraded} degraded service(s) in {namespace}"));
+    }
+    if published < in_ns.len() {
+        highlights.push(format!("{} of {} services unpublished", in_ns.len() - published, in_ns.len()));
+    }
+
+    let focus_app_ids: Vec<String> = unhealthy
+        .iter()
+        .take(5)
+        .map(|a| a.id.clone())
+        .collect();
+
+    let summary = if unhealthy.is_empty() {
+        format!("Namespace {namespace} is healthy — {} service(s), {published} published.", in_ns.len())
+    } else {
+        format!(
+            "Namespace {namespace}: {} of {} services need attention ({} broken, {} degraded).",
+            unhealthy.len(),
+            in_ns.len(),
+            broken,
+            degraded
+        )
+    };
+
+    let explanation = if unhealthy.is_empty() {
+        format!("All {namespace} services passed latest probes. Use Mission Control or Graph to monitor drift.")
+    } else {
+        format!(
+            "Start with broken apps in {namespace}, then verify dependencies and unpublished services blocking downstream health."
+        )
+    };
+
+    NamespaceInsight {
+        namespace: namespace.into(),
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+        focus_app_ids,
+    }
+}
+
+async fn llm_namespace_insight(namespace: &str, apps: &[App], cfg: &LlmConfig) -> Option<NamespaceInsight> {
+    let in_ns: Vec<_> = apps
+        .iter()
+        .filter(|a| a.namespace == namespace)
+        .take(25)
+        .map(|a| {
+            serde_json::json!({
+                "id": a.id,
+                "name": a.display_name,
+                "status": a.status,
+                "statusMessage": a.status_message,
+                "published": a.visibility.published,
+                "dependsOn": a.meta.depends_on,
+            })
+        })
+        .collect();
+    if in_ns.is_empty() {
+        return None;
+    }
+    let system = "You are Zeus AI namespace analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}.";
+    let user = format!(
+        "Summarize namespace {namespace}:\n{}",
+        serde_json::to_string_pretty(&in_ns).ok()?
+    );
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LlmNamespaceInsight {
+        summary: String,
+        explanation: String,
+        #[serde(default)]
+        highlights: Vec<String>,
+        #[serde(default, alias = "focusAppIds")]
+        focus_app_ids: Vec<String>,
+    }
+    let llm: LlmNamespaceInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(NamespaceInsight {
+        namespace: namespace.into(),
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+        focus_app_ids: llm.focus_app_ids,
+    })
+}
+
+pub async fn resolve_namespace_insight(namespace: &str, apps: &[App]) -> NamespaceInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_namespace_insight(namespace, apps, &cfg).await {
+            return insight;
+        }
+    }
+    rule_namespace_insight(namespace, apps)
 }

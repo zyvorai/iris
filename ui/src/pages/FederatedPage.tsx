@@ -3,12 +3,14 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
 import { Globe, ShieldCheck, Upload } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { hermesApi } from '../services/hermesApi'
 import type { FederatedApp } from '../types'
 
@@ -57,6 +59,26 @@ export default function FederatedPage() {
     void clusters.refetch()
   }
 
+  const federatedInsight = useMemo(() => {
+    const entries = federated.data ?? []
+    const unhealthy = entries.filter((a) => a.status !== 'healthy')
+    if (!entries.length) return null
+    if (!unhealthy.length) {
+      return {
+        summary: `${entries.length} federated app(s) across ${byCluster.size} cluster(s) are healthy.`,
+        explanation: 'Remote catalogs merged successfully. Use write federation to publish across peers.',
+        source: 'rules',
+      }
+    }
+    const broken = unhealthy.filter((a) => a.status === 'broken').length
+    return {
+      summary: `${unhealthy.length} of ${entries.length} federated services need attention (${broken} broken).`,
+      explanation: 'Inspect unhealthy remote services locally or on their origin cluster before cross-cluster publish.',
+      source: 'rules',
+      highlights: [...new Set(unhealthy.map((a) => a.clusterName))].slice(0, 3).map((c) => `${c} has unhealthy apps`),
+    }
+  }, [federated.data, byCluster.size])
+
   return (
     <PageFrame
       loading={loading}
@@ -76,6 +98,17 @@ export default function FederatedPage() {
       }
     >
       <div className="page-grid">
+        {federatedInsight ? (
+          <ZeusAiPanel
+            title="Federated insight"
+            summary={federatedInsight.summary}
+            explanation={federatedInsight.explanation}
+            source={federatedInsight.source}
+            remediation={federatedInsight.highlights}
+            compact
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>

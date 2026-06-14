@@ -15,10 +15,11 @@ use hermes_core::{
     allowed_namespaces_for_groups, build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
     build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
-    remote_set_recommended, resolve_app_insight, resolve_fleet_insight, resolve_search_intent, resolve_search_with_llm,
-    App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest,
-    FederatedApp, FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, HealthSummary,
-    RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    remote_set_recommended, resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight,
+    resolve_namespace_insight, resolve_search_intent, resolve_search_with_llm,
+    App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary,
+    CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent, FederationActionResult,
+    FederationRbacStatus, FleetInsight, HealthSummary, NamespaceInsight, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -64,6 +65,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/search/intent", get(search_intent))
         .route("/search/llm", get(search_llm))
         .route("/insights/fleet", get(fleet_insight))
+        .route("/insights/discovery", get(discovery_insight))
+        .route("/insights/namespace/{namespace}", get(namespace_insight))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -263,6 +266,41 @@ async fn fleet_insight(
         "search",
         "",
         &format!("fleet_insight source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn discovery_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<DiscoveryInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let discovery = filter_apps_for_user(&st, &uid, &groups, st.store.list_discovery()?);
+    let insight = resolve_discovery_insight(&discovery).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("discovery_insight source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn namespace_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path(namespace): Path<String>,
+) -> Result<Json<NamespaceInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let insight = resolve_namespace_insight(&namespace, &apps).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("namespace_insight ns={namespace} source={}", insight.source),
     );
     Ok(Json(insight))
 }

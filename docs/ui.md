@@ -50,8 +50,10 @@ When unset, Hermes uses rule-based insight and intent search — no external API
 | `GET /api/v1/search/llm?q=` | Natural-language catalog search |
 | `GET /api/v1/apps/{id}/insight` | Per-app diagnosis + remediation narrative |
 | `GET /api/v1/insights/fleet` | Fleet-wide health summary and highlights |
+| `GET /api/v1/insights/discovery` | Ranked publish suggestions for the discovery queue |
+| `GET /api/v1/insights/namespace/{ns}` | Namespace health rollup and focus services |
 
-UI: Home and Health fleet panels, Activity banner, Graph focus chips, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:` prefix, `explain` fleet summary, and `diagnose <app>` insight preview.
+UI: Home and Health fleet panels, Activity banner, Graph focus chips, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Federated summary, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, and `ns insight`.
 
 ## Key pages
 
@@ -59,9 +61,9 @@ UI: Home and Health fleet panels, Activity banner, Graph focus chips, Diagnose d
 |-------|----------|
 | `/` | Command deck — hero, 3-metric fleet snapshot, Quick Launch (max 6), Mission Control accordions |
 | `/apps` | Published catalog with unified toolbar, category chip overflow, true-empty vs filter-empty states |
-| `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, export via action menu |
-| `/health` | Fleet health + attention queue |
-| `/discovery` | Unpublished services queue with publish actions |
+| `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, Zeus AI namespace/fleet insight |
+| `/health` | Fleet health + attention queue with AI summary |
+| `/discovery` | Unpublished services queue with Zeus AI publish suggestions |
 | `/graph` | Dependency graph with filters and Zeus AI focus chips |
 | `/federated` | Merged remote catalogs |
 | `/teams` | Owner metadata grouped by team |

@@ -14,8 +14,12 @@ import EmptyState from '../components/nebula/EmptyState'
 import MetricCard from '../components/nebula/MetricCard'
 import Button from '../components/nebula/Button'
 import ActionMenu from '../components/nebula/ActionMenu'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight, useNamespaceInsight } from '../hooks/useZeusAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
+import { useInspector } from '../utils/inspectorContext'
 import type { HermesApp } from '../types'
 
 function statusRank(status: string): number {
@@ -77,6 +81,7 @@ export default function ClusterPage() {
   const qc = useQueryClient()
   const { workspaceId, setWorkspaceId, matchesWorkspace } = useWorkspace()
   const [searchParams] = useSearchParams()
+  const { openDiagnose } = useInspector()
 
   useEffect(() => {
     const ns = searchParams.get('ns')
@@ -157,6 +162,9 @@ export default function ClusterPage() {
   const hasActiveFilters = Boolean(nsFilter || statusFilter)
   const isTrulyEmpty = hasData && catalogCount === 0
   const isFilterEmpty = hasData && catalogCount > 0 && !filtered.length
+  const issueCount = (catalog.data ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a)).length
+  const fleetInsight = useFleetInsight(hasData && issueCount > 0)
+  const namespaceInsight = useNamespaceInsight(nsFilter || null, hasData && Boolean(nsFilter))
 
   return (
     <PageFrame
@@ -229,6 +237,42 @@ export default function ClusterPage() {
             <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
           </div>
         </GlassPanel>
+
+        {nsFilter && (namespaceInsight.data || namespaceInsight.isLoading) ? (
+          <ZeusAiPanel
+            title={`Namespace · ${nsFilter}`}
+            summary={namespaceInsight.data?.summary}
+            explanation={namespaceInsight.data?.explanation ?? 'Zeus AI is analyzing this namespace…'}
+            source={namespaceInsight.data?.source}
+            remediation={namespaceInsight.data?.highlights}
+            loading={namespaceInsight.isLoading}
+            compact
+            action={
+              <ZeusAiFocusChips
+                appIds={namespaceInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing cluster health…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+            compact
+            action={
+              <ZeusAiFocusChips
+                appIds={fleetInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : null}
 
         <PageToolbar className="page-toolbar-sticky page-toolbar-stacked" data-testid="cluster-toolbar">
           <select className="page-toolbar-select" value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
