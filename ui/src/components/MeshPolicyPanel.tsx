@@ -2,6 +2,8 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { Copy, Network } from 'lucide-react'
+import GlassPanel from './nebula/GlassPanel'
+import Button from './nebula/Button'
 import type { MeshPolicy } from '../types'
 
 function meshKind(route: string): { kind: string; label: string; tone: string } {
@@ -34,18 +36,19 @@ export default function MeshPolicyPanel({
   if (!structured && !routeList.length) return null
 
   const kinds = new Set(
-    structured
-      ? policies.map((p) => p.kind)
-      : routeList.map((route) => meshKind(route).kind),
+    structured ? policies.map((p) => p.kind) : routeList.map((route) => meshKind(route).kind),
   )
 
   return (
-    <section className="glass-section mesh-policy-panel">
-      <div className="section-head">
-        <h3>
-          <Network size={16} /> Service mesh
-        </h3>
-        <span className="chip chip-muted">{[...kinds].join(' · ')}</span>
+    <GlassPanel className="glass-panel-section mesh-policy-panel-nebula">
+      <div className="section-head-nebula">
+        <div>
+          <p className="section-label">
+            <Network size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            Service mesh
+          </p>
+          <span className="nebula-status-badge status-unknown">{[...kinds].join(' · ')}</span>
+        </div>
       </div>
       {structured ? (
         <ul className="mesh-route-list">
@@ -79,9 +82,9 @@ export default function MeshPolicyPanel({
                     kubectl get virtualservice {policy.name} -n {policy.namespace}
                   </code>
                 ) : null}
-                <button
-                  type="button"
-                  className="btn btn-sm mesh-copy-btn"
+                <Button
+                  variant="ghost"
+                  className="nebula-btn-compact mesh-copy-btn"
                   onClick={() =>
                     copyText(
                       [
@@ -99,7 +102,7 @@ export default function MeshPolicyPanel({
                   }
                 >
                   <Copy size={12} /> Copy
-                </button>
+                </Button>
               </div>
             </li>
           ))}
@@ -117,6 +120,6 @@ export default function MeshPolicyPanel({
           })}
         </ul>
       )}
-    </section>
+    </GlassPanel>
   )
 }

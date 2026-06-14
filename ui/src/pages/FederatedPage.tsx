@@ -48,15 +48,32 @@ export default function FederatedPage() {
     byCluster.set(entry.clusterId, list)
   }
 
-  const loading = federated.isLoading && !federated.data
+  const loading =
+    (federated.isLoading && !federated.data) || (clusters.isLoading && !clusters.data)
+  const error = federated.isError || clusters.isError
+
+  const onRetry = () => {
+    void federated.refetch()
+    void clusters.refetch()
+  }
 
   return (
     <PageFrame
       loading={loading}
-      error={federated.isError}
-      hasData={Boolean(federated.data)}
-      onRetry={() => void federated.refetch()}
+      error={error}
+      hasData={Boolean(federated.data && clusters.data)}
+      onRetry={onRetry}
       errorTitle="Could not load federated catalog"
+      isEmpty={Boolean(federated.data && !byCluster.size)}
+      empty={
+        <GlassPanel className="glass-panel-section">
+          <EmptyState
+            icon={<Globe size={22} />}
+            title="No federated apps"
+            description="Configure HERMES_FEDERATED_CLUSTERS to merge remote catalogs."
+          />
+        </GlassPanel>
+      }
     >
       <div className="page-grid">
         <GlassPanel className="glass-panel-section">
@@ -70,9 +87,7 @@ export default function FederatedPage() {
             <Link to="/cluster" className="section-link-nebula">Clusters</Link>
           </div>
 
-          {!byCluster.size ? (
-            <EmptyState icon={<Globe size={22} />} title="No federated apps" description="Configure HERMES_FEDERATED_CLUSTERS to merge remote catalogs." />
-          ) : (
+          {!byCluster.size ? null : (
             [...byCluster.entries()].map(([clusterId, entries]) => {
               const canWrite = writeClusters.has(clusterId)
               return (

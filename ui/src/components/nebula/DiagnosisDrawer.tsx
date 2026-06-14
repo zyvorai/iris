@@ -3,7 +3,7 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Copy, Sparkles, Stethoscope, X } from 'lucide-react'
+import { AlertTriangle, Copy, Sparkles, Stethoscope, X } from 'lucide-react'
 import RouteLens from '../RouteLens'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
@@ -38,6 +38,16 @@ function extractCommands(actions: SuggestedAction[]): string[] {
   return actions
     .filter((a) => a.href.startsWith('#copy:'))
     .map((a) => a.href.slice('#copy:'.length))
+}
+
+function DiagnosisSkeleton() {
+  return (
+    <div className="diagnosis-drawer-skeleton page-loading-skeleton-compact" data-testid="diagnosis-loading">
+      <div className="skeleton-toolbar" />
+      <div className="skeleton-card" style={{ height: 72 }} />
+      <div className="skeleton-card" style={{ height: 96 }} />
+    </div>
+  )
 }
 
 export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps) {
@@ -78,8 +88,16 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
 
   if (!appId) return null
 
+  const loading = (app.isLoading && !app.data) || (diagnosis.isLoading && !diagnosis.data)
+  const error = app.isError || diagnosis.isError
+
   const copyCommands = () => {
     if (commands.length) void navigator.clipboard.writeText(commands.join('\n'))
+  }
+
+  const retry = () => {
+    void app.refetch()
+    void diagnosis.refetch()
   }
 
   return (
@@ -102,9 +120,19 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
         </header>
 
         <div className="diagnosis-drawer-body">
-          {app.isLoading || diagnosis.isLoading ? <p className="body-text">Loading diagnosis…</p> : null}
+          {loading ? <DiagnosisSkeleton /> : null}
 
-          {app.data ? (
+          {error && !loading ? (
+            <div className="diagnosis-drawer-error" data-testid="diagnosis-error">
+              <AlertTriangle size={22} aria-hidden />
+              <p className="body-text">Could not load diagnosis for this service.</p>
+              <Button variant="primary" onClick={retry}>
+                Retry
+              </Button>
+            </div>
+          ) : null}
+
+          {!loading && !error && app.data ? (
             <div className="diagnosis-drawer-facts">
               <div className="diagnosis-drawer-fact">
                 <span>Status</span>
@@ -121,19 +149,19 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
             </div>
           ) : null}
 
-          {diagnosis.data?.cause || diagnosis.data?.problem ? (
+          {!loading && !error && (diagnosis.data?.cause || diagnosis.data?.problem) ? (
             <div className="diagnosis-drawer-section">
               <h3>Likely cause</h3>
-              <p className="body-text">{diagnosis.data.cause || diagnosis.data.problem}</p>
+              <p className="body-text">{diagnosis.data?.cause || diagnosis.data?.problem}</p>
             </div>
-          ) : insight.explanation ? (
+          ) : !loading && !error && insight.explanation ? (
             <div className="diagnosis-drawer-section">
               <h3>Likely cause</h3>
               <p className="body-text">{insight.explanation}</p>
             </div>
           ) : null}
 
-          {diagnosis.data?.suggestedActions?.length ? (
+          {!loading && !error && diagnosis.data?.suggestedActions?.length ? (
             <div className="diagnosis-drawer-section">
               <h3>Suggested fixes</h3>
               <ol>
@@ -144,16 +172,16 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
             </div>
           ) : null}
 
-          {commands.length ? (
+          {!loading && !error && commands.length ? (
             <div className="diagnosis-drawer-section">
               <h3>Commands</h3>
               <pre className="diagnosis-drawer-commands">{commands.join('\n')}</pre>
             </div>
           ) : null}
 
-          {diagnosis.data ? <RouteLens diagnosis={diagnosis.data} /> : null}
+          {!loading && !error && diagnosis.data ? <RouteLens diagnosis={diagnosis.data} /> : null}
 
-          {timeline.length ? (
+          {!loading && !error && timeline.length ? (
             <div className="diagnosis-drawer-section">
               <h3>Service timeline</h3>
               <ul className="diagnosis-drawer-timeline">
@@ -167,22 +195,24 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
             </div>
           ) : null}
 
-          <div className="diagnosis-drawer-actions">
-            {commands.length ? (
-              <Button variant="secondary" onClick={copyCommands}>
-                <Copy size={14} /> Copy commands
+          {!loading && !error ? (
+            <div className="diagnosis-drawer-actions">
+              {commands.length ? (
+                <Button variant="secondary" onClick={copyCommands}>
+                  <Copy size={14} /> Copy commands
+                </Button>
+              ) : null}
+              <Button variant="primary" onClick={() => { openInspector(appId); onClose() }}>
+                <Stethoscope size={14} /> Run check
               </Button>
-            ) : null}
-            <Button variant="primary" onClick={() => { openInspector(appId); onClose() }}>
-              <Stethoscope size={14} /> Run check
-            </Button>
-            <Button variant="ai" onClick={() => { openInspector(appId); onClose() }}>
-              <Sparkles size={14} /> Ask Zeus AI
-            </Button>
-            <Button variant="ghost" onClick={() => markKnownIssue(appId)}>
-              Mark as known issue
-            </Button>
-          </div>
+              <Button variant="ai" onClick={() => { openInspector(appId); onClose() }}>
+                <Sparkles size={14} /> Ask Zeus AI
+              </Button>
+              <Button variant="ghost" onClick={() => markKnownIssue(appId)}>
+                Mark as known issue
+              </Button>
+            </div>
+          ) : null}
         </div>
       </aside>
     </div>

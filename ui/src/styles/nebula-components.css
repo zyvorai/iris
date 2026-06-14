@@ -1609,3 +1609,106 @@
 .activity-filters-toolbar {
   margin-top: 1rem;
 }
+
+/* Diagnosis drawer — error + skeleton */
+.diagnosis-drawer-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.diagnosis-drawer-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Mobile toolbars */
+.page-toolbar-stacked {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .page-toolbar-stacked {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-toolbar-stacked .page-toolbar-search,
+  .page-toolbar-stacked .page-toolbar-select,
+  .page-toolbar-stacked .view-toggle {
+    width: 100%;
+    max-width: none;
+  }
+
+  .page-toolbar-stacked .filter-count {
+    width: 100%;
+  }
+}
+
+.toolbar-scroll-shell {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem 0.15rem;
+}
+
+.toolbar-scroll-shell .mission-control-filters {
+  flex-wrap: nowrap;
+  min-width: min-content;
+}
+
+.glass-toolbar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.glass-toolbar .page-toolbar-search {
+  min-width: min(100%, 220px);
+  flex: 1 1 220px;
+}
+
+.context-banner-muted {
+  border-color: rgba(251, 191, 36, 0.22);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+/* Command palette pending */
+.palette-item-pending {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.palette-pending-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  border-top-color: #60a5fa;
+  animation: palette-spin 0.8s linear infinite;
+}
+
+@keyframes palette-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Migrated panels */
+.share-panel-nebula,
+.mesh-policy-panel-nebula,
+.shortcuts-panel-nebula {
+  margin-top: 0.75rem;
+}
+
+.inspector-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}

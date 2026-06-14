@@ -10,6 +10,7 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
+import PageLoading from '../components/nebula/PageLoading'
 import { hermesApi } from '../services/hermesApi'
 import type { AppGraph } from '../types'
 
@@ -104,7 +105,7 @@ export default function GraphPage() {
             </Link>
           </div>
 
-          <PageToolbar className="graph-filters-toolbar">
+          <PageToolbar className="graph-filters-toolbar glass-toolbar">
             <select className="page-toolbar-select" value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
               <option value="">All namespaces</option>
               {namespaces.map((ns) => (
@@ -150,6 +151,15 @@ export default function GraphPage() {
 
 export function AppGraphPanel({ appId }: { appId: string }) {
   const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph })
+
+  if (graph.isLoading && !graph.data) {
+    return (
+      <GlassPanel className="glass-panel-section">
+        <PageLoading rows={2} />
+      </GlassPanel>
+    )
+  }
+
   if (!graph.data) return null
   const related = graph.data.edges.some(
     (e) => (e.resolved && (e.from === appId || e.to === appId)) || (!e.resolved && e.to === appId),

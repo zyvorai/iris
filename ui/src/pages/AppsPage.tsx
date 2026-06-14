@@ -78,6 +78,14 @@ export default function AppsPage() {
     setStatusFilter('')
   }
 
+  const catalogCount = source?.length ?? 0
+  const hasActiveFilters = Boolean(filter.trim() || categoryFilter || statusFilter)
+  const isTrulyEmpty = hasData && catalogCount === 0
+  const isFilterEmpty = hasData && catalogCount > 0 && !filtered.length
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const visibleCategories = showAllCategories ? categories : categories.slice(0, 8)
+  const hiddenCategoryCount = Math.max(0, categories.length - visibleCategories.length)
+
   return (
     <PageFrame
       loading={loading}
@@ -85,24 +93,46 @@ export default function AppsPage() {
       hasData={hasData}
       onRetry={onRetry}
       errorTitle="Could not load catalog"
-      isEmpty={hasData && !filtered.length}
+      isEmpty={isTrulyEmpty || isFilterEmpty}
       empty={
         <GlassPanel className="glass-panel-section">
-          <EmptyState
-            icon={<Grid3X3 size={22} />}
-            title="No apps match your filters"
-            description="Try clearing filters or browse the full cluster inventory."
-            action={
-              <>
-                <Button variant="secondary" onClick={clearFilters}>
-                  Clear filters
-                </Button>
-                <Button variant="primary" to="/cluster">
-                  Browse cluster
-                </Button>
-              </>
-            }
-          />
+          {isTrulyEmpty ? (
+            <EmptyState
+              icon={<Grid3X3 size={22} />}
+              title={mode === 'published' ? 'No published apps yet' : 'No services discovered yet'}
+              description={
+                mode === 'published'
+                  ? 'Publish services from the cluster catalog or discovery queue to populate the launchpad.'
+                  : 'Hermes will populate this view once the controller finishes scanning your cluster.'
+              }
+              action={
+                <>
+                  <Button variant="primary" to="/cluster">
+                    Browse cluster
+                  </Button>
+                  <Button variant="secondary" to="/discovery">
+                    Open discovery
+                  </Button>
+                </>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={<Grid3X3 size={22} />}
+              title="No apps match your filters"
+              description="Try clearing filters or browse the full cluster inventory."
+              action={
+                <>
+                  <Button variant="secondary" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
+                  <Button variant="primary" to="/cluster">
+                    Browse cluster
+                  </Button>
+                </>
+              }
+            />
+          )}
         </GlassPanel>
       }
     >
@@ -117,7 +147,7 @@ export default function AppsPage() {
             </div>
           </div>
 
-          <PageToolbar data-testid="catalog-toolbar">
+          <PageToolbar className="page-toolbar-stacked" data-testid="catalog-toolbar">
             <div className="view-toggle" role="tablist">
               <button type="button" className={mode === 'published' ? 'active' : ''} onClick={() => setMode('published')}>
                 Published ({published.data?.length ?? 0})
@@ -148,25 +178,33 @@ export default function AppsPage() {
           </PageToolbar>
 
           {categories.length ? (
-            <div className="mission-control-filters" style={{ marginTop: '0.75rem' }}>
-              <button type="button" className={`filter-chip ${!categoryFilter ? 'active' : ''}`} onClick={() => setCategoryFilter('')}>
-                All categories
-              </button>
-              {categories.slice(0, 8).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`filter-chip ${categoryFilter === c ? 'active' : ''}`}
-                  onClick={() => setCategoryFilter(categoryFilter === c ? '' : c)}
-                >
-                  {c}
+            <div className="toolbar-scroll-shell" style={{ marginTop: '0.75rem' }}>
+              <div className="mission-control-filters">
+                <button type="button" className={`filter-chip ${!categoryFilter ? 'active' : ''}`} onClick={() => setCategoryFilter('')}>
+                  All categories
                 </button>
-              ))}
+                {visibleCategories.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`filter-chip ${categoryFilter === c ? 'active' : ''}`}
+                    onClick={() => setCategoryFilter(categoryFilter === c ? '' : c)}
+                  >
+                    {c}
+                  </button>
+                ))}
+                {hiddenCategoryCount ? (
+                  <button type="button" className="filter-chip" onClick={() => setShowAllCategories(true)}>
+                    More categories (+{hiddenCategoryCount})
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
 
           <p className="body-text" style={{ marginTop: '1rem' }}>
             {mode === 'published' ? 'Launchpad catalog' : 'Full cluster catalog'} · {filtered.length} apps
+            {hasActiveFilters && catalogCount > 0 ? ` · ${catalogCount} total` : ''}
           </p>
 
           <div className="app-grid" style={{ marginTop: '1rem' }}>

@@ -8,7 +8,7 @@ Hermes ships a single-page React application aligned with the Aether Liquid Glas
 |-------|------|------|
 | Tokens | `ui/src/styles/nebula-tokens.css` | Colors, radii, typography, Zeus/Hermes CSS variable bridge |
 | Layout | `ui/src/styles/nebula-layout.css` | App shell, scroll areas, page grid |
-| Components | `ui/src/styles/nebula-components.css` | Glass panels, cards, toolbars, skeletons, empty states |
+| Components | `ui/src/styles/nebula-components.css` | Glass panels, cards, toolbars, skeletons, empty states, drawers |
 | Legacy bridge | `ui/src/styles/aether-bridge.css` | Maps remaining legacy classes to Nebula surfaces |
 | Legacy | `ui/src/index.css` | Older Hermes styles (being retired incrementally) |
 
@@ -30,16 +30,35 @@ Shared building blocks under `ui/src/components/nebula/`:
 | `Button` / `ActionMenu` | Actions (max two visible on service cards) |
 | `RouteDisplay` | Launchpad path and public URL with copy |
 | `ServiceStatusMessage` | Human-readable health probe summaries |
+| `DiagnosisDrawer` | Global diagnose flow (route lens, AI insight, retry) |
 
 ## Key pages
 
 | Route | Behavior |
 |-------|----------|
 | `/` | Command deck — hero, 3-metric fleet snapshot, Quick Launch (max 6), Mission Control accordions |
-| `/apps` | Published catalog with unified toolbar and category filters |
-| `/cluster` | Full cluster catalog — metrics row, sticky filters, collapsible namespace groups (auto-expand when unhealthy) |
+| `/apps` | Published catalog with unified toolbar, category chip overflow, true-empty vs filter-empty states |
+| `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, export via action menu |
 | `/health` | Fleet health + attention queue |
+| `/discovery` | Unpublished services queue with publish actions |
 | `/graph` | Dependency graph with filters |
+| `/federated` | Merged remote catalogs |
+| `/teams` | Owner metadata grouped by team |
+| `/activity` | Audit log with optional share-admin panel |
+| `/help` | Static guide wrapped in `PageFrame` |
+| `/apps/:id` | App detail — Nebula panels, share links, mesh policies; diagnose opens global drawer |
+
+## Diagnose flow
+
+All **Diagnose** and **Inspect route** actions call `openDiagnose(appId)` from `inspectorContext.tsx`. The global `DiagnosisDrawer` in `Layout.tsx` is the single diagnose surface — there is no inline diagnose panel on app detail.
+
+The drawer shows loading skeletons, error + retry, route lens, suggested kubectl commands, and Zeus AI insight.
+
+## Mobile toolbars
+
+Below **768px**, pages with `page-toolbar-stacked` stack search and selects full-width. Category chips on `/apps` scroll horizontally inside `.toolbar-scroll-shell` with a **More categories** overflow. Cluster export lives in an `ActionMenu` rather than a standalone toolbar button.
+
+The workspace switcher uses a compact dropdown below **900px**; the full chip row is desktop-only.
 
 ## Status messages
 
@@ -55,7 +74,7 @@ Raw probe errors from the controller (e.g. `Get "http://svc.ns.svc.cluster.local
 
 - **Desktop (>900px):** workspace chips (All, Production, …) in the top bar
 - **Tablet/mobile:** compact environment dropdown; health chip shows dot only
-- Spotlight: `⌘K` / `Ctrl+K`
+- Spotlight: `⌘K` / `Ctrl+K` — shows a pending row while search / AI / intent queries are in flight
 
 ## Development
 
@@ -78,7 +97,8 @@ HERMES_E2E_BASE=http://your-host:31847 npm run test:e2e
 The UI is baked into the `hermes-server` image. After UI changes:
 
 ```bash
-./scripts/deploy-remote.sh <host> <user>
+cd ui && npm run build
+# rebuild/push hermes-server image and roll the deployment
 ```
 
-Or skip image rebuild if only Helm values changed: `--skip-build`.
+See the repository root `Makefile` and `scripts/deploy-remote.sh` for cluster deploy helpers.

@@ -28,14 +28,20 @@ export default function TeamsPage() {
     return map
   }, [catalog.data])
 
-  const loading = owners.isLoading && !owners.data
+  const loading = (owners.isLoading && !owners.data) || (catalog.isLoading && !catalog.data)
+  const error = owners.isError || catalog.isError
+
+  const onRetry = () => {
+    void owners.refetch()
+    void catalog.refetch()
+  }
 
   return (
     <PageFrame
       loading={loading}
-      error={owners.isError}
-      hasData={Boolean(owners.data)}
-      onRetry={() => void owners.refetch()}
+      error={error}
+      hasData={Boolean(owners.data && catalog.data)}
+      onRetry={onRetry}
       errorTitle="Could not load teams"
     >
       <div className="page-grid">

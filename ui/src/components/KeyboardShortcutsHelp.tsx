@@ -3,6 +3,7 @@
 
 import { useEffect } from 'react'
 import { Keyboard, X } from 'lucide-react'
+import Button from './nebula/Button'
 
 const shortcuts = [
   { keys: '⌘K', label: 'Open Spotlight search' },
@@ -28,7 +29,7 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
 
   return (
     <div
-      className="shortcuts-backdrop"
+      className="diagnosis-drawer-backdrop shortcuts-backdrop-nebula"
       role="dialog"
       aria-modal="true"
       aria-labelledby="shortcuts-title"
@@ -36,19 +37,19 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="shortcuts-panel glass-section">
-        <div className="shortcuts-head">
+      <aside className="shortcuts-panel-nebula" onClick={(e) => e.stopPropagation()}>
+        <header className="diagnosis-drawer-header">
           <div>
             <h2 id="shortcuts-title">
               <Keyboard size={16} /> Keyboard shortcuts
             </h2>
-            <p className="hero-sub">Hermes Dock navigation</p>
+            <p className="body-text">Hermes navigation</p>
           </div>
-          <button type="button" className="btn btn-ghost" onClick={onClose} aria-label="Close">
+          <Button variant="ghost" onClick={onClose} aria-label="Close">
             <X size={16} />
-          </button>
-        </div>
-        <ul className="shortcuts-list">
+          </Button>
+        </header>
+        <ul className="shortcuts-list-nebula">
           {shortcuts.map((item) => (
             <li key={item.keys}>
               <kbd>{item.keys}</kbd>
@@ -56,7 +57,7 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
             </li>
           ))}
         </ul>
-      </div>
+      </aside>
     </div>
   )
 }

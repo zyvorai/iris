@@ -132,7 +132,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       query.includes('production') ||
       query.includes('staging'))
 
-  const { data: hits = [] } = useQuery({
+  const { data: hits = [], isFetching: searchFetching } = useQuery({
     queryKey: ['search', q],
     queryFn: () => hermesApi.search(q),
     enabled:
@@ -147,6 +147,18 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       query !== 'broken',
   })
 
+  const isSearchPending =
+    q.trim().length > 0 &&
+    searchFetching &&
+    !isCommandQuery &&
+    !depQuery &&
+    !ownerQuery &&
+    !envQuery &&
+    !isTeamQuery &&
+    !isIntentQuery &&
+    !isLlmQuery &&
+    query !== 'broken'
+
   const llm = useQuery({
     queryKey: ['search-llm', llmQuery],
     queryFn: () => hermesApi.searchLlm(llmQuery),
@@ -160,6 +172,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   })
 
   const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
+
+  const isQueryPending = isSearchPending || (isLlmQuery && llm.isFetching) || (isIntentQuery && intent.isFetching)
 
   const recentApps = useMemo(() => {
     const ids = loadSpotlightRecents()
@@ -492,7 +506,16 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         />
         <div className="palette-results">
           {sectionLabel ? <div className="palette-section-label">{sectionLabel}</div> : null}
-          {q.trim() && rows.length === 0 ? (
+          {isQueryPending ? (
+            <div className="palette-item palette-item-pending" aria-live="polite">
+              <div className="palette-pending-spinner" aria-hidden />
+              <div>
+                <strong>Searching catalog…</strong>
+                <div className="app-meta">Matching services and routes</div>
+              </div>
+            </div>
+          ) : null}
+          {q.trim() && !isQueryPending && rows.length === 0 ? (
             <div className="empty palette-empty">No matches in cluster catalog</div>
           ) : null}
           {rows.map((row, i) =>

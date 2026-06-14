@@ -31,8 +31,9 @@ test('home mission control accordion present', async ({ page }) => {
   await page.goto('/')
   await waitForPageReady(page)
   const mission = page.getByTestId('mission-control-strip')
-  if (await mission.count()) {
-    await expect(mission).toBeVisible()
+  const loadError = page.getByTestId('page-load-error')
+  await expect(mission.or(loadError)).toBeVisible({ timeout: 5000 })
+  if (await mission.isVisible()) {
     const groups = mission.locator('.mission-control-group-head')
     if (await groups.count()) {
       await expect(groups.first()).toBeVisible()
@@ -74,6 +75,49 @@ test('cluster page renders toolbar', async ({ page }) => {
   await expect(toolbar.or(loadError)).toBeVisible({ timeout: 5000 })
 })
 
+test('health page loads attention queue', async ({ page }) => {
+  await page.goto('/health')
+  await waitForPageReady(page)
+  const queue = page.getByTestId('attention-queue')
+  const loadError = page.getByTestId('page-load-error')
+  await expect(queue.or(loadError)).toBeVisible({ timeout: 5000 })
+})
+
+test('discovery page renders toolbar or empty state', async ({ page }) => {
+  await page.goto('/discovery')
+  await waitForPageReady(page)
+  const loadError = page.getByTestId('page-load-error')
+  const discoveryTitle = page.getByRole('heading', { name: 'Discovery queue', exact: true })
+  await expect(loadError.or(discoveryTitle)).toBeVisible({ timeout: 5000 })
+})
+
+test('app detail opens global diagnose drawer', async ({ page }) => {
+  await page.goto('/apps')
+  await waitForPageReady(page)
+
+  const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
+  if (!(await firstAppLink.count())) {
+    test.skip()
+    return
+  }
+
+  await firstAppLink.click()
+  await waitForPageReady(page)
+
+  const diagnoseBtn = page.getByRole('button', { name: /diagnose/i })
+  const inspectItem = page.getByRole('button', { name: /inspect route/i })
+  if (await diagnoseBtn.count()) {
+    await diagnoseBtn.click()
+  } else if (await inspectItem.count()) {
+    await inspectItem.click()
+  } else {
+    test.skip()
+    return
+  }
+
+  await expect(page.getByTestId('diagnose-panel')).toBeVisible({ timeout: 5000 })
+})
+
 test('graph page renders', async ({ page }) => {
   await page.goto('/graph')
   await waitForPageReady(page)
@@ -101,4 +145,18 @@ test('mobile viewport shows compact workspace switcher', async ({ page }) => {
   await page.goto('/')
   await waitForPageReady(page)
   await expect(page.locator('.workspace-switcher-compact')).toBeVisible()
+})
+
+test('mobile catalog toolbar fits viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/apps')
+  await waitForPageReady(page)
+
+  const toolbar = page.getByTestId('catalog-toolbar')
+  const loadError = page.getByTestId('page-load-error')
+  if (await loadError.isVisible()) return
+
+  await expect(toolbar).toBeVisible()
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2)
+  expect(overflow).toBe(false)
 })

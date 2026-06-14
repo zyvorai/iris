@@ -3,6 +3,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Copy, Link2, Trash2 } from 'lucide-react'
+import GlassPanel from './nebula/GlassPanel'
+import Button from './nebula/Button'
+import EmptyState from './nebula/EmptyState'
 import type { HermesApp } from '../types'
 import { copyShareUrl, hermesApi, sharePublicUrl } from '../services/hermesApi'
 
@@ -24,8 +27,7 @@ export default function ShareLinksPanel({ app }: { app: HermesApp }) {
   const appShares = (shares.data ?? []).filter((s) => s.appId === app.id)
 
   const createMutation = useMutation({
-    mutationFn: (ttlMinutes: number) =>
-      hermesApi.createShare({ appId: app.id, ttlMinutes }),
+    mutationFn: (ttlMinutes: number) => hermesApi.createShare({ appId: app.id, ttlMinutes }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['shares'] }),
   })
 
@@ -35,58 +37,69 @@ export default function ShareLinksPanel({ app }: { app: HermesApp }) {
   })
 
   return (
-    <section className="glass-section share-panel">
-      <div className="share-panel-head">
+    <GlassPanel className="glass-panel-section share-panel-nebula">
+      <div className="share-panel-head-nebula">
         <div>
-          <h3>
-            <Link2 size={14} /> Share links
-          </h3>
-          <p className="hero-sub">Time-limited URLs for teammates without dock access.</p>
+          <p className="section-label">
+            <Link2 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            Share links
+          </p>
+          <p className="body-text">Time-limited URLs for teammates without launchpad access.</p>
         </div>
-        <div className="share-create-row">
+        <div className="share-create-row-nebula">
           {TTL_OPTIONS.map((opt) => (
-            <button
+            <Button
               key={opt.minutes}
-              type="button"
-              className="btn"
+              variant="secondary"
+              className="nebula-btn-compact"
               disabled={createMutation.isPending}
               onClick={() => void createMutation.mutate(opt.minutes)}
             >
               {opt.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
-      {createMutation.error ? (
-        <p className="app-problem">Could not create share link. App must be published.</p>
+
+      {shares.isLoading ? (
+        <div className="page-loading-skeleton page-loading-skeleton-compact">
+          <div className="skeleton-card" style={{ height: 48 }} />
+        </div>
       ) : null}
-      {appShares.length ? (
-        <ul className="share-list">
+
+      {createMutation.error ? (
+        <p className="service-status-summary" style={{ color: '#fca5a5' }}>
+          Could not create share link. App must be published.
+        </p>
+      ) : null}
+
+      {!shares.isLoading && appShares.length ? (
+        <ul className="share-list-nebula">
           {appShares.map((share) => (
-            <li key={share.token} className="share-item">
-              <div>
-                <code>{sharePublicUrl(share.sharePath)}</code>
+            <li key={share.token} className="share-item-nebula">
+              <div className="share-item-copy">
+                <code className="route-display-path">{sharePublicUrl(share.sharePath)}</code>
                 <span className="share-expiry">Expires {formatExpiry(share.expiresAt)}</span>
               </div>
-              <div className="app-actions">
-                <button type="button" className="btn" onClick={() => void copyShareUrl(share.sharePath)}>
+              <div className="action-row-primary">
+                <Button variant="ghost" className="nebula-btn-compact" onClick={() => void copyShareUrl(share.sharePath)}>
                   <Copy size={12} /> Copy
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-warn"
+                </Button>
+                <Button
+                  variant="danger"
+                  className="nebula-btn-compact"
                   disabled={revokeMutation.isPending}
                   onClick={() => void revokeMutation.mutate(share.token)}
                 >
                   <Trash2 size={12} /> Revoke
-                </button>
+                </Button>
               </div>
             </li>
           ))}
         </ul>
-      ) : (
-        <div className="empty">No active share links for this app.</div>
-      )}
-    </section>
+      ) : !shares.isLoading ? (
+        <EmptyState icon={<Link2 size={22} />} title="No active share links" description="Create a time-limited link above." />
+      ) : null}
+    </GlassPanel>
   )
 }

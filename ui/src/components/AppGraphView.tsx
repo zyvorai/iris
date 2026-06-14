@@ -1,9 +1,11 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import { GitBranch } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AppIcon from './AppIcon'
+import EmptyState from './nebula/EmptyState'
 import { statusLabel, statusTone } from '../services/hermesApi'
 import type { AppGraph, GraphEdge, GraphNode } from '../types'
 
@@ -101,7 +103,13 @@ export default function AppGraphView({ graph, focusId, onNodeClick, compact, gal
   }, [activeId, graph.edges])
 
   if (!graph.nodes.length) {
-    return <div className="empty">No published apps to graph yet.</div>
+    return (
+      <EmptyState
+        icon={<GitBranch size={22} />}
+        title="No published apps to graph yet"
+        description="Publish services to the launchpad to see dependency links."
+      />
+    )
   }
 
   return (

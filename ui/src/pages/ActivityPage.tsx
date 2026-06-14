@@ -132,7 +132,7 @@ export default function ActivityPage() {
             </Button>
           </div>
 
-          <PageToolbar className="activity-filters-toolbar">
+          <PageToolbar className="activity-filters-toolbar glass-toolbar">
             {(
               [
                 ['all', 'All'],
@@ -199,6 +199,12 @@ export default function ActivityPage() {
             />
           )}
         </GlassPanel>
+
+        {adminShares.isError ? (
+          <GlassPanel className="glass-panel-section context-banner-muted">
+            <p className="body-text">Share admin panel unavailable — admin access required or the shares API is temporarily unreachable.</p>
+          </GlassPanel>
+        ) : null}
 
         {adminShares.data ? (
           <GlassPanel className="glass-panel-section share-admin-panel">

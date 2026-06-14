@@ -5,7 +5,6 @@
 
 /* ── Legacy glass surfaces → Aether dash-card ── */
 .zeus-glass,
-.glass-section,
 .glass-hero,
 .zeus-card,
 .space-row.zeus-card,
@@ -27,7 +26,6 @@
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
-.glass-section,
 .glass-hero {
   padding: 1.5rem !important;
   margin-bottom: 0 !important;
@@ -40,13 +38,11 @@
     linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%) !important;
 }
 
-.glass-section:hover,
 .zeus-card:hover,
 .space-row.zeus-card:hover {
   border-color: rgba(59, 130, 246, 0.18) !important;
 }
 
-.glass-section h2,
 .section-head h2 {
   margin: 0 0 1rem;
   font-size: 0.6875rem !important;
@@ -75,65 +71,6 @@
 
 .hero-sub {
   color: var(--text-muted, #94a3b8) !important;
-}
-
-/* ── Buttons → nebula / Aether ── */
-.btn,
-a.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  min-height: 34px;
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-md, 12px);
-  border: 1px solid var(--border-soft);
-  background: var(--bg-chip, rgba(17, 21, 28, 0.65));
-  color: var(--text-secondary, #cbd5e1);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-}
-
-.btn:hover:not(:disabled) {
-  border-color: rgba(59, 130, 246, 0.32);
-  background: rgba(59, 130, 246, 0.08);
-  color: #dbeafe;
-  transform: translateY(-1px);
-}
-
-.btn-primary,
-a.btn-primary {
-  border: none !important;
-  background: linear-gradient(to right, var(--aether-primary, #3b82f6), var(--aether-primary-deep, #2563eb)) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.92;
-  color: #fff !important;
-  transform: translateY(-1px);
-}
-
-.btn-accent {
-  border-color: rgba(59, 130, 246, 0.38) !important;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
-  color: #dbeafe !important;
-}
-
-.btn-warn {
-  border-color: rgba(248, 113, 113, 0.3) !important;
-  background: rgba(248, 113, 113, 0.1) !important;
-  color: #fca5a5 !important;
-}
-
-.btn-sm {
-  min-height: 28px;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.72rem;
 }
 
 /* ── App cards & tiles ── */
@@ -238,8 +175,7 @@ a.btn-primary {
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12);
 }
 
-.filter-bar .btn.active,
-.filter-bar button.btn-accent {
+.filter-bar button.active {
   color: #fff !important;
   border-color: rgba(59, 130, 246, 0.38) !important;
   background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;

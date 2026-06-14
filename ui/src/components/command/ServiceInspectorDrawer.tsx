@@ -3,12 +3,14 @@
 
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Copy, ExternalLink, Link2, Route, Sparkles, Star, Stethoscope, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Copy, ExternalLink, Link2, Route, Star, X } from 'lucide-react'
 import AppIcon from '../AppIcon'
 import MeshPolicyPanel from '../MeshPolicyPanel'
 import RouteLens from '../RouteLens'
 import ShareLinksPanel from '../ShareLinksPanel'
+import Button from '../nebula/Button'
+import StatusBadge from '../nebula/StatusBadge'
+import EmptyState from '../nebula/EmptyState'
 import {
   appDetailPath,
   appLaunchPath,
@@ -16,8 +18,6 @@ import {
   copyAppUrl,
   hermesApi,
   openApp,
-  statusLabel,
-  statusTone,
 } from '../../services/hermesApi'
 import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
 import { useInspector } from '../../utils/inspectorContext'
@@ -34,18 +34,22 @@ function ActionLink({ action }: { action: SuggestedAction }) {
   if (action.href.startsWith('#copy:')) {
     const cmd = action.href.slice('#copy:'.length)
     return (
-      <button type="button" className="btn" onClick={() => void navigator.clipboard.writeText(cmd)}>
+      <Button variant="ghost" className="nebula-btn-compact" onClick={() => void navigator.clipboard.writeText(cmd)}>
         <Copy size={12} /> {action.label}
-      </button>
+      </Button>
     )
   }
   if (action.href.startsWith('/') && !action.href.startsWith('//')) {
-    return <a href={action.href}>{action.label}</a>
+    return (
+      <Button variant="ghost" className="nebula-btn-compact" href={action.href}>
+        {action.label}
+      </Button>
+    )
   }
   return (
-    <a href={action.href} target="_blank" rel="noreferrer">
+    <Button variant="ghost" className="nebula-btn-compact" href={action.href} target="_blank" rel="noreferrer">
       {action.label}
-    </a>
+    </Button>
   )
 }
 
@@ -97,38 +101,42 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
     void qc.invalidateQueries({ queryKey: ['favorites'] })
   }
 
-  const tabs: { id: InspectorTab; label: string; icon: typeof Route }[] = [
-    { id: 'overview', label: 'Overview', icon: Stethoscope },
-    { id: 'route', label: 'Route', icon: Route },
-    { id: 'share', label: 'Share', icon: Link2 },
-    { id: 'deps', label: 'Deps', icon: Sparkles },
-    { id: 'ai', label: 'Zeus AI', icon: Sparkles },
+  const tabs: { id: InspectorTab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'route', label: 'Route' },
+    { id: 'share', label: 'Share' },
+    { id: 'deps', label: 'Deps' },
+    { id: 'ai', label: 'Zeus AI' },
   ]
 
   return (
-    <div className="inspector-backdrop" onClick={onClose} role="presentation">
+    <div className="inspector-backdrop diagnosis-drawer-backdrop" onClick={onClose} role="presentation">
       <aside
-        className="service-inspector-drawer zeus-glass"
+        className="service-inspector-drawer diagnosis-drawer"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Service inspector"
         data-testid="service-inspector-drawer"
       >
-        <header className="inspector-header">
+        <header className="diagnosis-drawer-header inspector-header">
           {app.data ? (
             <div className="inspector-title">
               <AppIcon icon={app.data.icon} name={app.data.displayName} size="md" />
               <div>
                 <h2>{app.data.displayName}</h2>
-                <p>{app.data.category}</p>
+                <p className="body-text">{app.data.category}</p>
               </div>
             </div>
+          ) : app.isLoading ? (
+            <div className="page-loading-skeleton page-loading-skeleton-compact">
+              <div className="skeleton-toolbar" />
+            </div>
           ) : (
-            <h2>Loading…</h2>
+            <h2>Service unavailable</h2>
           )}
-          <button type="button" className="btn btn-icon" onClick={onClose} aria-label="Close">
+          <Button variant="ghost" onClick={onClose} aria-label="Close">
             <X size={16} />
-          </button>
+          </Button>
         </header>
 
         <div className="inspector-tabs" role="tablist">
@@ -138,7 +146,7 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
               type="button"
               role="tab"
               aria-selected={tab === t.id}
-              className={tab === t.id ? 'active' : ''}
+              className={`inspector-tab ${tab === t.id ? 'active' : ''}`}
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -146,100 +154,129 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
           ))}
         </div>
 
-        {tab === 'overview' && app.data ? (
-          <>
-            <div className="inspector-status-strip">
-              <span className={`status-chip ${statusTone(app.data.status)}`}>{statusLabel(app.data.status)}</span>
-              <span>{app.data.namespace}</span>
-              {!app.data.visibility.published ? <span className="chip chip-warn">Unpublished</span> : null}
-            </div>
-            <div className="inspector-facts zeus-glass">
-              <div className="inspector-fact">
-                <span>Gateway path</span>
-                <code>{appLaunchPath(app.data)}</code>
+        <div className="diagnosis-drawer-body">
+          {tab === 'overview' && app.data ? (
+            <>
+              <div className="inspector-status-strip">
+                <StatusBadge status={app.data.status} />
+                <span className="body-text">{app.data.namespace}</span>
+                {!app.data.visibility.published ? (
+                  <span className="nebula-status-badge status-warn">Unpublished</span>
+                ) : null}
               </div>
-              <div className="inspector-fact">
-                <span>Public URL</span>
-                <code>{appPublicUrl(app.data)}</code>
+              <div className="diagnosis-drawer-facts">
+                <div className="diagnosis-drawer-fact">
+                  <span>Gateway path</span>
+                  <code>{appLaunchPath(app.data)}</code>
+                </div>
+                <div className="diagnosis-drawer-fact">
+                  <span>Public URL</span>
+                  <code>{appPublicUrl(app.data)}</code>
+                </div>
+                <div className="diagnosis-drawer-fact">
+                  <span>Cluster port</span>
+                  <code>:{app.data.backend.port}</code>
+                </div>
+                <div className="diagnosis-drawer-fact">
+                  <span>Ready endpoints</span>
+                  <strong>{app.data.readyEndpoints}</strong>
+                </div>
               </div>
-              <div className="inspector-fact">
-                <span>Cluster port</span>
-                <code>:{app.data.backend.port}</code>
+              <div className="diagnosis-drawer-actions">
+                {!app.data.visibility.published ? (
+                  <Button variant="secondary" disabled={publish.isPending} onClick={() => void publish.mutate()}>
+                    Publish
+                  </Button>
+                ) : null}
+                <Button variant="primary" disabled={!canOpen} onClick={() => void openApp(app.data!)}>
+                  <ExternalLink size={14} /> Open
+                </Button>
+                <Button variant="ghost" onClick={() => void toggleFavorite()}>
+                  <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Pin'}
+                </Button>
+                <Button variant="ghost" onClick={() => void copyAppUrl(app.data!)}>
+                  <Copy size={14} /> Copy URL
+                </Button>
+                <Button variant="ghost" to={appDetailPath(app.data, true)}>
+                  Full detail
+                </Button>
               </div>
-              <div className="inspector-fact">
-                <span>Ready endpoints</span>
-                <strong>{app.data.readyEndpoints}</strong>
-              </div>
-            </div>
-            <div className="inspector-actions">
-              {!app.data.visibility.published ? (
-                <button type="button" className="btn btn-primary" disabled={publish.isPending} onClick={() => void publish.mutate()}>
-                  Publish
-                </button>
+            </>
+          ) : null}
+
+          {tab === 'route' ? (
+            <>
+              {diagnosis.isLoading ? (
+                <div className="page-loading-skeleton page-loading-skeleton-compact">
+                  <div className="skeleton-card" style={{ height: 80 }} />
+                </div>
+              ) : diagnosis.isError ? (
+                <EmptyState
+                  icon={<Route size={22} />}
+                  title="Could not load route"
+                  action={
+                    <Button variant="secondary" onClick={() => void diagnosis.refetch()}>
+                      Retry
+                    </Button>
+                  }
+                />
+              ) : diagnosis.data ? (
+                <RouteLens diagnosis={diagnosis.data} />
               ) : null}
-              <button type="button" className="btn btn-primary" disabled={!canOpen} onClick={() => void openApp(app.data!)}>
-                <ExternalLink size={14} /> Open
-              </button>
-              <button type="button" className="btn" onClick={() => void toggleFavorite()}>
-                <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Pin'}
-              </button>
-              <button type="button" className="btn" onClick={() => void copyAppUrl(app.data!)}>
-                <Copy size={14} /> Copy URL
-              </button>
-              <Link to={appDetailPath(app.data, true)} className="btn">
-                Full detail
-              </Link>
+              {app.data?.meta?.meshPolicies?.length || app.data?.meta?.meshRoutes?.length ? (
+                <MeshPolicyPanel routes={app.data.meta?.meshRoutes} policies={app.data.meta?.meshPolicies} />
+              ) : null}
+            </>
+          ) : null}
+
+          {tab === 'share' && app.data ? <ShareLinksPanel app={app.data} /> : null}
+
+          {tab === 'deps' ? (
+            <div className="inspector-deps">
+              {!deps.length ? (
+                <EmptyState icon={<Link2 size={22} />} title="No declared dependencies" />
+              ) : (
+                <ul className="inspector-dep-list">
+                  {deps.map(({ dep, app: depApp }) => (
+                    <li key={dep}>
+                      {depApp ? (
+                        <button type="button" className="inspector-dep-link" onClick={() => openInspector(depApp.id)}>
+                          <AppIcon icon={depApp.icon} name={depApp.displayName} size="sm" />
+                          <span>{depApp.displayName}</span>
+                        </button>
+                      ) : (
+                        <code>{dep}</code>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          </>
-        ) : null}
+          ) : null}
 
-        {tab === 'route' ? (
-          <>
-            {diagnosis.data ? <RouteLens diagnosis={diagnosis.data} /> : <p className="empty">Loading route chain…</p>}
-            {app.data?.meta?.meshPolicies?.length || app.data?.meta?.meshRoutes?.length ? (
-              <MeshPolicyPanel routes={app.data.meta?.meshRoutes} policies={app.data.meta?.meshPolicies} />
-            ) : null}
-          </>
-        ) : null}
-
-        {tab === 'share' && app.data ? <ShareLinksPanel app={app.data} /> : null}
-
-        {tab === 'deps' ? (
-          <div className="inspector-deps zeus-glass">
-            <h3>Dependencies</h3>
-            {!deps.length ? <p className="empty">No declared dependencies.</p> : null}
-            <ul className="inspector-dep-list">
-              {deps.map(({ dep, app: depApp }) => (
-                <li key={dep}>
-                  {depApp ? (
-                    <button type="button" className="zeus-rail-fav" onClick={() => openInspector(depApp.id)}>
-                      <AppIcon icon={depApp.icon} name={depApp.displayName} size="sm" />
-                      <span>{depApp.displayName}</span>
-                    </button>
-                  ) : (
-                    <code>{dep}</code>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        {tab === 'ai' ? (
-          <div className="inspector-ai zeus-glass">
-            <h3>Zeus AI diagnosis</h3>
-            {insight.loading ? <p className="empty">Analyzing service…</p> : <p>{insight.explanation}</p>}
-            {insight.suggestedActions.length ? (
-              <ul className="diagnose-action-list">
-                {insight.suggestedActions.map((action) => (
-                  <li key={action.label}>
-                    <ActionLink action={action} />
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
+          {tab === 'ai' ? (
+            <div className="inspector-ai">
+              {insight.loading ? (
+                <div className="page-loading-skeleton page-loading-skeleton-compact">
+                  <div className="skeleton-card" style={{ height: 64 }} />
+                </div>
+              ) : (
+                <>
+                  <p className="body-text">{insight.explanation || 'No AI insight available for this service.'}</p>
+                  {insight.suggestedActions.length ? (
+                    <ul className="diagnose-action-list">
+                      {insight.suggestedActions.map((action) => (
+                        <li key={action.label}>
+                          <ActionLink action={action} />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
+        </div>
       </aside>
     </div>
   )

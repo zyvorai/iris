@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Nebula migration polish** — unified diagnose drawer (retired `DiagnosePanel`), migrated share/mesh/shortcuts/inspector panels to Nebula components
+- True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
+- Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`
+- Command palette pending row while search / AI / intent queries load
+- Playwright smoke tests: health attention queue, discovery page, diagnose drawer, mobile toolbar overflow
 - **Nebula UX overhaul** — unified Liquid Glass design system (`nebula-tokens`, `nebula-layout`, `nebula-components`, `aether-bridge`)
 - Shared page primitives: `PageFrame`, `PageLoading`, `PageLoadError`, `EmptyState`, `ContextBanner`, `PageToolbar`
 - `HomeFleetSnapshot` — 3-metric home strip (Discovered, Published, Needs attention)
@@ -29,6 +34,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Warning log when the default dev session secret is in use
 
 ### Fixed
+- Teams page now waits for catalog before rendering owner app grids
+- Federated page handles clusters query loading/error via `PageFrame`
+- Activity page surfaces share-admin API failures with a muted banner
+- App graph panel shows inline skeleton while graph loads; empty graph uses `EmptyState`
 - Workspace switcher showed duplicate All/Production chips plus compact dropdown (CSS specificity vs `index.css`)
 - Cluster cards exposed raw in-cluster probe URLs and Go HTTP errors to end users
 - Refresh button in navbar was a no-op (dispatched a custom event with no listeners) — now calls `refreshHermesData(queryClient)`
@@ -43,6 +52,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `Makefile` hardcoded a specific deployment IP; default is now unset
 
 ### Changed
+- Deleted unused Zeus shell components (`ZeusDock`, `ZeusLeftRail`, `ZeusTopBar`, `MissionControlStrip`, orphaned home sections)
+- Trimmed `index.css` Zeus rail/dock blocks and legacy `.btn` bridge rules in `aether-bridge.css`
+- Help page wrapped in `PageFrame` for consistent page shell
 - Home, Catalog, Cluster, Health, Spaces, Discovery, Graph, Activity, Help, and App detail migrated to Nebula components
 - `AppCard` / `AttentionQueue` use `GlassPanel` + primary action + overflow menu (max two visible actions)
 - Quick Launch capped at 6 tiles; Mission Control uses flat space accordions

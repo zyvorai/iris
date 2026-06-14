@@ -13,6 +13,7 @@ import ContextBanner from '../components/nebula/ContextBanner'
 import EmptyState from '../components/nebula/EmptyState'
 import MetricCard from '../components/nebula/MetricCard'
 import Button from '../components/nebula/Button'
+import ActionMenu from '../components/nebula/ActionMenu'
 import { hermesApi } from '../services/hermesApi'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
@@ -141,6 +142,22 @@ export default function ClusterPage() {
     setStatusFilter('')
   }
 
+  const exportCatalog = () => {
+    void hermesApi.exportCatalog().then((blob) => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'hermes-catalog.json'
+      a.click()
+      URL.revokeObjectURL(url)
+    })
+  }
+
+  const catalogCount = catalog.data?.length ?? 0
+  const hasActiveFilters = Boolean(nsFilter || statusFilter)
+  const isTrulyEmpty = hasData && catalogCount === 0
+  const isFilterEmpty = hasData && catalogCount > 0 && !filtered.length
+
   return (
     <PageFrame
       loading={loading}
@@ -157,19 +174,37 @@ export default function ClusterPage() {
           />
         ) : undefined
       }
-      isEmpty={hasData && !filtered.length}
+      isEmpty={isTrulyEmpty || isFilterEmpty}
       empty={
         <GlassPanel className="glass-panel-section">
-          <EmptyState
-            icon={<Server size={22} />}
-            title="No services match your filters"
-            description="Clear filters or wait for the controller to finish scanning the cluster."
-            action={
-              <Button variant="secondary" onClick={clearFilters}>
-                Clear filters
-              </Button>
-            }
-          />
+          {isTrulyEmpty ? (
+            <EmptyState
+              icon={<Server size={22} />}
+              title="No services discovered yet"
+              description="Hermes scans your cluster continuously. Check discovery settings or wait for the controller to finish its first pass."
+              action={
+                <>
+                  <Button variant="primary" to="/discovery">
+                    Open discovery
+                  </Button>
+                  <Button variant="secondary" onClick={() => void catalog.refetch()}>
+                    Refresh
+                  </Button>
+                </>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={<Server size={22} />}
+              title="No services match your filters"
+              description="Clear filters or wait for the controller to finish scanning the cluster."
+              action={
+                <Button variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              }
+            />
+          )}
         </GlassPanel>
       }
     >
@@ -195,7 +230,7 @@ export default function ClusterPage() {
           </div>
         </GlassPanel>
 
-        <PageToolbar className="page-toolbar-sticky" data-testid="cluster-toolbar">
+        <PageToolbar className="page-toolbar-sticky page-toolbar-stacked" data-testid="cluster-toolbar">
           <select className="page-toolbar-select" value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
             <option value="">All namespaces</option>
             {namespaces.map((ns) => (
@@ -216,22 +251,11 @@ export default function ClusterPage() {
               Publish all in {nsFilter}
             </Button>
           ) : null}
-          <Button
-            variant="ghost"
-            className="nebula-btn-compact"
-            onClick={() => {
-              void hermesApi.exportCatalog().then((blob) => {
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = 'hermes-catalog.json'
-                a.click()
-                URL.revokeObjectURL(url)
-              })
-            }}
-          >
-            Export JSON
-          </Button>
+          <ActionMenu
+            className="cluster-export-menu"
+            label="Cluster actions"
+            items={[{ label: 'Export catalog JSON', onClick: exportCatalog }]}
+          />
           <div className="view-toggle">
             <button type="button" className={view === 'namespace' ? 'active' : ''} onClick={() => setView('namespace')}>
               By namespace
@@ -240,7 +264,9 @@ export default function ClusterPage() {
               Grid
             </button>
           </div>
-          <span className="body-text filter-count">{filtered.length} services</span>
+          <span className="body-text filter-count">
+            {filtered.length} services{hasActiveFilters && catalogCount > 0 ? ` · ${catalogCount} total` : ''}
+          </span>
         </PageToolbar>
 
         {view === 'grid' ? (

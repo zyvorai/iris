@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
-import DiagnosePanel from '../components/DiagnosePanel'
 import GlassPanel from '../components/nebula/GlassPanel'
 import HealthRing from '../components/nebula/HealthRing'
 import PageFrame from '../components/nebula/PageFrame'
@@ -22,6 +21,7 @@ import ServiceStatusMessage from '../components/nebula/ServiceStatusMessage'
 import ShareLinksPanel from '../components/ShareLinksPanel'
 import MeshPolicyPanel from '../components/MeshPolicyPanel'
 import { AppGraphPanel } from '../pages/GraphPage'
+import { useInspector } from '../utils/inspectorContext'
 import {
   appDetailPath,
   appLaunchPath,
@@ -38,12 +38,13 @@ export default function AppDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const [techOpen, setTechOpen] = useState(false)
-  const [diagnoseOpen, setDiagnoseOpen] = useState(() => searchParams.get('diagnose') === '1')
+  const { openDiagnose, diagnoseAppId } = useInspector()
   const qc = useQueryClient()
+  const appId = id ? decodeURIComponent(id) : ''
 
   const app = useQuery({
     queryKey: ['app', id],
-    queryFn: () => hermesApi.getApp(decodeURIComponent(id ?? '')),
+    queryFn: () => hermesApi.getApp(appId),
     enabled: Boolean(id),
   })
 
@@ -78,17 +79,21 @@ export default function AppDetailPage() {
   }, [app.data?.meta?.dependsOn, catalog.data])
 
   useEffect(() => {
-    setDiagnoseOpen(searchParams.get('diagnose') === '1')
-  }, [searchParams])
+    if (searchParams.get('diagnose') === '1' && appId && diagnoseAppId !== appId) {
+      openDiagnose(appId)
+    }
+  }, [searchParams, appId, diagnoseAppId, openDiagnose])
 
-  const openDiagnose = () => {
-    setDiagnoseOpen(true)
+  useEffect(() => {
+    if (!diagnoseAppId && searchParams.get('diagnose') === '1') {
+      setSearchParams({}, { replace: true })
+    }
+  }, [diagnoseAppId, searchParams, setSearchParams])
+
+  const handleOpenDiagnose = () => {
+    if (!appId) return
+    openDiagnose(appId)
     setSearchParams({ diagnose: '1' }, { replace: true })
-  }
-
-  const closeDiagnose = () => {
-    setDiagnoseOpen(false)
-    setSearchParams({}, { replace: true })
   }
 
   if (app.isLoading) {
@@ -123,7 +128,7 @@ export default function AppDetailPage() {
       onClick: () => void recommendMutation.mutate(!a.meta?.recommended),
     },
     { label: 'Copy URL', onClick: () => void copyAppUrl(a), disabled: !canOpen },
-    { label: 'Inspect route', onClick: openDiagnose },
+    { label: 'Inspect route', onClick: handleOpenDiagnose },
   ]
 
   return (
@@ -147,7 +152,7 @@ export default function AppDetailPage() {
             </div>
             <div className="app-detail-actions-nebula">
               {broken ? (
-                <Button variant="danger" onClick={openDiagnose}>
+                <Button variant="danger" onClick={handleOpenDiagnose}>
                   <Stethoscope size={14} /> Diagnose
                 </Button>
               ) : (
@@ -251,8 +256,6 @@ export default function AppDetailPage() {
             Back to catalog
           </Button>
         </div>
-
-        <DiagnosePanel app={a} open={diagnoseOpen} onClose={closeDiagnose} />
       </div>
     </PageFrame>
   )
