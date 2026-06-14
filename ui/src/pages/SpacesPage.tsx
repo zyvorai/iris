@@ -4,6 +4,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Layers } from 'lucide-react'
+import QuickLaunchTile from '../components/nebula/QuickLaunchTile'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
@@ -13,8 +14,6 @@ import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../util
 
 export default function SpacesPage() {
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
-  const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const published = (catalog.data ?? []).filter((a) => a.visibility.published)
 
   const loading = catalog.isLoading && !catalog.data
@@ -54,9 +53,9 @@ export default function SpacesPage() {
         <GlassPanel className="glass-panel-section">
           <p className="section-label">Quick preview</p>
           {published.length ? (
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="quick-launch-grid">
               {published.slice(0, 6).map((app) => (
-                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+                <QuickLaunchTile key={app.id} app={app} />
               ))}
             </div>
           ) : (
