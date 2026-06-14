@@ -455,13 +455,6 @@
 }
 
 .quick-launch-tile-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-
-.quick-launch-tile-name {
   display: block;
   max-width: 100%;
   overflow: hidden;
@@ -470,6 +463,7 @@
   font-size: 0.875rem;
   font-weight: 650;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .quick-launch-tile-ns {
