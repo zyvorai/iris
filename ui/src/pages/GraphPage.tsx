@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { GitBranch } from 'lucide-react'
+import { GitBranch, Sparkles } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
@@ -12,6 +12,8 @@ import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useInspector } from '../utils/inspectorContext'
 import type { AppGraph } from '../types'
 
 function filterGraph(
@@ -51,6 +53,9 @@ export default function GraphPage() {
   const [meshOnly, setMeshOnly] = useState(false)
 
   const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 15000 })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const fleetInsight = useFleetInsight()
+  const { openDiagnose } = useInspector()
 
   const namespaces = useMemo(() => {
     const set = new Set((graph.data?.nodes ?? []).map((n) => n.namespace))
@@ -72,6 +77,13 @@ export default function GraphPage() {
         : null,
     [graph.data, nsFilter, ownerFilter, statusFilter, brokenOnly, meshOnly],
   )
+
+  const focusApps = useMemo(() => {
+    const ids = fleetInsight.data?.focusAppIds ?? []
+    return ids
+      .map((id) => (catalog.data ?? []).find((app) => app.id === id))
+      .filter((app): app is NonNullable<typeof app> => !!app)
+  }, [fleetInsight.data, catalog.data])
 
   const brokenDeps = (graph.data?.edges ?? []).filter((e) => !e.resolved).length
   const loading = graph.isLoading && !graph.data
@@ -133,6 +145,38 @@ export default function GraphPage() {
               Mesh only
             </label>
           </PageToolbar>
+
+          {fleetInsight.data?.summary || fleetInsight.isLoading ? (
+            <div className="graph-ai-focus" data-testid="graph-ai-focus">
+              <p className="section-label">
+                <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Zeus AI
+              </p>
+              {fleetInsight.isLoading ? (
+                <div className="page-loading-skeleton page-loading-skeleton-compact">
+                  <div className="skeleton-card" style={{ height: 40 }} />
+                </div>
+              ) : (
+                <>
+                  <p className="body-text zeus-ai-explanation">{fleetInsight.data?.summary}</p>
+                  {focusApps.length ? (
+                    <div className="graph-ai-focus-chips">
+                      {focusApps.map((app) => (
+                        <button
+                          key={app.id}
+                          type="button"
+                          className="filter-chip"
+                          onClick={() => openDiagnose(app.id)}
+                        >
+                          Diagnose {app.displayName}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
 
           {filtered && !filtered.nodes.length ? (
             <EmptyState

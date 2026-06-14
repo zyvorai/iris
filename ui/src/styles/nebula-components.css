@@ -1555,6 +1555,21 @@
   margin-top: 1rem;
 }
 
+.graph-ai-focus {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent-primary) 6%, var(--glass-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.graph-ai-focus-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
 .app-card-desc {
   margin: 0;
   font-size: 0.78rem;

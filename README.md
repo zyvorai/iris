@@ -355,6 +355,9 @@ Honest checklist of what ships now:
 - [x] Service mesh route discovery (Istio VirtualService + Linkerd annotations)
 - [x] Federated catalog merge across remote Hermes clusters
 - [x] LLM search API with rule-based fallback (`/api/v1/search/llm`, Spotlight `ai:` prefix)
+- [x] Zeus AI insight APIs (`GET /api/v1/apps/{id}/insight`, `GET /api/v1/insights/fleet`) with LLM + rules fallback
+- [x] Fleet and per-app AI panels (Home, Health, Activity, Graph, Diagnose drawer, inspector AI tab)
+- [x] Spotlight `diagnose <app>` insight preview and `explain` fleet summary command
 - [x] Gateway SSE streaming and gRPC content-type pass-through
 - [x] Enterprise role rules (`HERMES_ROLE_RULES`) and optional K8s SAR RBAC
 - [x] Multi-cluster write federation (`POST /api/v1/federation/publish/*`, remote recommend)

@@ -10,6 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `ZeusAiPanel` on Home and Health; Diagnose drawer and inspector AI tab use context-aware insight
 - Spotlight natural-language queries route through `/search/llm` (richer catalog context, fixed `appIds` parsing)
 - Ask Zeus AI opens inspector directly on the AI tab
+- Spotlight `diagnose <app>` shows Zeus AI insight preview; `explain` surfaces fleet summary with focus services
+- Graph page Zeus AI focus chips and Activity fleet insight banner
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`

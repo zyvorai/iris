@@ -58,6 +58,9 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['show routes', 'routes'].includes(q)) return { type: 'routes' }
   if (['refresh', 'sync', 'resync'].includes(q)) return { type: 'refresh' }
   if (['export', 'export catalog'].includes(q)) return { type: 'export' }
+  if (['explain', 'explain fleet', 'ai summary', 'fleet summary', 'why unhealthy', 'fleet insight'].includes(q)) {
+    return { type: 'explain' }
+  }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
   const diagnose = raw.trim().match(/^diagnose\s+(.+)$/i)
@@ -98,7 +101,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
-  const { openDiagnose } = useInspector()
+  const { openDiagnose, openInspector } = useInspector()
 
   const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
@@ -110,6 +113,27 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
 
   const command = parseSpotlightCommand(q.trim())
   const isCommandQuery = !!command
+  const diagnoseTarget = useMemo(() => {
+    if (command?.type === 'diagnose' && command.arg) {
+      return findAppByName(catalog.data ?? [], command.arg)
+    }
+    return undefined
+  }, [command, catalog.data])
+
+  const diagnoseInsight = useQuery({
+    queryKey: ['app-insight', diagnoseTarget?.id],
+    queryFn: () => hermesApi.getAppInsight(diagnoseTarget!.id),
+    enabled: !!diagnoseTarget,
+    staleTime: 30_000,
+  })
+
+  const fleetInsight = useQuery({
+    queryKey: ['fleet-insight'],
+    queryFn: hermesApi.getFleetInsight,
+    enabled: command?.type === 'explain',
+    staleTime: 45_000,
+  })
+
   const query = q.trim().toLowerCase()
   const depQuery = depMatch(q.trim())
   const ownerQuery = ownerMatch(q.trim())
@@ -227,7 +251,46 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
 
     if (command?.type === 'diagnose' && command.arg) {
       const app = findAppByName(catalog.data ?? [], command.arg)
-      if (app) return [{ kind: 'app' as const, app, action: 'inspect' as const }]
+      if (app) {
+        const rows: Row[] = []
+        if (diagnoseInsight.data) {
+          rows.push({
+            kind: 'action',
+            label: diagnoseInsight.data.summary,
+            meta: `${diagnoseInsight.data.source === 'llm' ? 'Zeus AI' : 'Rules'} · ${diagnoseInsight.data.explanation.slice(0, 96)}${diagnoseInsight.data.explanation.length > 96 ? '…' : ''}`,
+            run: () => openInspector(app.id, 'ai'),
+          })
+        }
+        rows.push({ kind: 'app', app, action: 'inspect' })
+        return rows
+      }
+    }
+
+    if (command?.type === 'explain') {
+      if (fleetInsight.data) {
+        const rows: Row[] = [
+          {
+            kind: 'action',
+            label: fleetInsight.data.summary,
+            meta: fleetInsight.data.explanation,
+            run: () => navigate('/health'),
+          },
+        ]
+        for (const id of fleetInsight.data.focusAppIds ?? []) {
+          const app = (catalog.data ?? []).find((a) => a.id === id)
+          if (app) rows.push({ kind: 'app', app, action: 'inspect' })
+        }
+        return rows.slice(0, 8)
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Fleet health dashboard',
+          path: '/health',
+          icon: HeartPulse,
+          meta: fleetInsight.isLoading ? 'Loading Zeus AI fleet insight…' : 'View cluster health',
+        },
+      ]
     }
 
     if (command?.type === 'publish' && command.arg) {
@@ -428,7 +491,12 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     intent.data,
     matchesWorkspace,
     setWorkspaceId,
+    diagnoseInsight.data,
+    fleetInsight.data,
+    fleetInsight.isLoading,
     openDiagnose,
+    openInspector,
+    navigate,
     qc,
   ])
 
@@ -485,6 +553,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     if (command?.type === 'attention') return 'Commands · Attention'
     if (command?.type === 'routes') return 'Commands · Navigation'
     if (command?.type === 'open' || command?.type === 'diagnose') return 'Commands · Services'
+    if (command?.type === 'explain') return 'Zeus AI · Fleet'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'

@@ -22,7 +22,9 @@ import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { actionLabel, hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import type { AuditEvent, FederatedAuditEvent } from '../types'
 
 const actionIcons: Record<string, typeof Rocket> = {
@@ -79,6 +81,7 @@ export default function ActivityPage() {
     queryFn: () => (federated ? hermesApi.listFederatedAudit(200) : hermesApi.listAudit(200)),
     refetchInterval: 10000,
   })
+  const fleetInsight = useFleetInsight()
 
   const adminShares = useQuery({
     queryKey: ['shares', 'all'],
@@ -120,6 +123,17 @@ export default function ActivityPage() {
       errorTitle="Could not load activity"
     >
       <div className="page-grid">
+        {fleetInsight.data || fleetInsight.isLoading ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing fleet health for activity context…'}
+            source={fleetInsight.data?.source}
+            loading={fleetInsight.isLoading}
+            compact
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>
