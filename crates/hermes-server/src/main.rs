@@ -94,6 +94,31 @@ async fn main() -> anyhow::Result<()> {
     let addr: SocketAddr = bind.parse().context("parse bind address")?;
     tracing::info!("hermes-server listening on {addr} (auth={})", auth_cfg.mode);
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
+    tracing::info!("hermes-server stopped");
     Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+    #[cfg(unix)]
+    let sigterm = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+    #[cfg(not(unix))]
+    let sigterm = std::future::pending::<()>();
+    tokio::select! {
+        _ = ctrl_c => tracing::info!("received Ctrl+C"),
+        _ = sigterm => tracing::info!("received SIGTERM"),
+    }
+    tracing::info!("draining in-flight connections…");
 }

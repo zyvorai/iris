@@ -2,10 +2,11 @@
 
 VERSION ?= 0.1.0
 REGISTRY ?= ghcr.io/ssahani/hermes
-HERMES_HOST ?= 212.8.252.194
-HERMES_USER ?= sus
+HERMES_HOST ?=
+HERMES_USER ?= $(USER)
 
 deploy-remote:
+	@[ -n "$(HERMES_HOST)" ] || (echo "Error: set HERMES_HOST=<ip>"; exit 1)
 	chmod +x scripts/deploy-remote.sh scripts/e2e-deploy-verify.sh
 	./scripts/deploy-remote.sh $(HERMES_HOST) $(HERMES_USER) deploy
 

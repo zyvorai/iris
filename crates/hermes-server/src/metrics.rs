@@ -35,7 +35,7 @@ async fn prometheus(State(st): State<MetricsState>) -> impl IntoResponse {
             _ => {}
         }
     }
-    let audit_count = st.store.list_audit(1_000_000).map(|v| v.len()).unwrap_or(0);
+    let audit_count = st.store.count_audit().unwrap_or(0);
     let uptime = chrono::Utc::now().timestamp() - st.started_at;
 
     let body = format!(

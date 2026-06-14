@@ -32,17 +32,26 @@ pub struct AuthConfig {
     pub oidc_client_id: String,
     pub oidc_client_secret: String,
     pub oidc_redirect_url: String,
-    pub pending_states: Arc<Mutex<HashMap<String, ()>>>,
+    // value is expiry unix-seconds; states older than 5 minutes are swept on login
+    pub pending_states: Arc<Mutex<HashMap<String, u64>>>,
 }
 
 impl AuthConfig {
     pub fn from_env(fallback_user: String) -> Result<Self> {
+        const DEV_SECRET: &str = "hermes-dev-session-secret-change-me";
+        let session_secret = std::env::var("HERMES_SESSION_SECRET")
+            .unwrap_or_else(|_| DEV_SECRET.into());
+        if session_secret == DEV_SECRET {
+            tracing::warn!(
+                "HERMES_SESSION_SECRET is using the insecure development default. \
+                 Set it to a random secret (e.g. `openssl rand -hex 32`) before deploying."
+            );
+        }
         Ok(Self {
             mode: std::env::var("HERMES_AUTH_MODE").unwrap_or_else(|_| "none".into()),
             api_key: std::env::var("HERMES_API_KEY").unwrap_or_default(),
             fallback_user,
-            session_secret: std::env::var("HERMES_SESSION_SECRET")
-                .unwrap_or_else(|_| "hermes-dev-session-secret-change-me".into()),
+            session_secret,
             oidc_issuer: std::env::var("HERMES_OIDC_ISSUER").unwrap_or_default(),
             oidc_client_id: std::env::var("HERMES_OIDC_CLIENT_ID").unwrap_or_default(),
             oidc_client_secret: std::env::var("HERMES_OIDC_CLIENT_SECRET").unwrap_or_default(),
@@ -245,10 +254,16 @@ async fn login(State(auth): State<AuthConfig>) -> Result<Response, AppAuthError>
     }
     let discovery = fetch_discovery(&auth.oidc_issuer).await?;
     let state = random_token();
-    auth.pending_states
-        .lock()
-        .unwrap()
-        .insert(state.clone(), ());
+    let expiry = (SystemTime::now() + Duration::from_secs(300))
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    {
+        let mut pending = auth.pending_states.lock().unwrap();
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+        pending.retain(|_, exp| *exp > now);
+        pending.insert(state.clone(), expiry);
+    }
 
     let url = format!(
         "{}?response_type=code&client_id={}&redirect_uri={}&scope=openid%20profile%20email&state={}",
@@ -290,8 +305,11 @@ async fn callback(
         .ok_or(AppAuthError::BadRequest("missing state"))?;
     {
         let mut pending = auth.pending_states.lock().unwrap();
-        if pending.remove(&state).is_none() {
-            return Err(AppAuthError::BadRequest("invalid state"));
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+        match pending.remove(&state) {
+            None => return Err(AppAuthError::BadRequest("invalid or unknown state")),
+            Some(exp) if exp < now => return Err(AppAuthError::BadRequest("state token expired")),
+            Some(_) => {}
         }
     }
 

@@ -1,0 +1,50 @@
+version: "3.9"
+
+# Local development — no Kubernetes required.
+# Runs hermes-server with a seeded SQLite database.
+#
+# Usage:
+#   docker compose up --build
+#   open http://localhost:31847
+#
+# The controller (service discovery) requires a live cluster and is NOT
+# included here. Seed data provides sample apps for UI development.
+
+services:
+
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.seed
+    volumes:
+      - hermes-data:/data
+    environment:
+      HERMES_DB_PATH: /data/hermes.db
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "31847:31847"
+    volumes:
+      - hermes-data:/data
+    environment:
+      HERMES_BIND: "0.0.0.0:31847"
+      HERMES_DB_PATH: "/data/hermes.db"
+      HERMES_UI_DIR: "/app/ui"
+      HERMES_AUTH_MODE: "none"
+      HERMES_DEFAULT_USER: "dev"
+      RUST_LOG: "hermes_server=debug,tower_http=info"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:31847/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  hermes-data:

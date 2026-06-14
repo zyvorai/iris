@@ -646,6 +646,16 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
+
+    pub fn count_audit(&self) -> Result<u64> {
+        let conn = self.conn.lock().unwrap();
+        let count: u64 = conn.query_row(
+            "SELECT COUNT(*) FROM audit_events",
+            [],
+            |row| row.get(0),
+        )?;
+        Ok(count)
+    }
 }
 
 fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
@@ -682,6 +692,52 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
         updated_at: row.get(19)?,
         meta: serde_json::from_str(&meta_json).unwrap_or_default(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn in_memory() -> Store {
+        Store::open(":memory:").expect("open in-memory store")
+    }
+
+    #[test]
+    fn count_audit_empty() {
+        let store = in_memory();
+        assert_eq!(store.count_audit().unwrap(), 0);
+    }
+
+    #[test]
+    fn count_audit_after_records() {
+        let store = in_memory();
+        store.record_audit("alice", "launch", "ns/app", "").unwrap();
+        store.record_audit("bob", "search", "", "grafana").unwrap();
+        assert_eq!(store.count_audit().unwrap(), 2);
+    }
+
+    #[test]
+    fn list_audit_respects_limit() {
+        let store = in_memory();
+        for i in 0..10 {
+            store.record_audit("user", "launch", &format!("ns/app{i}"), "").unwrap();
+        }
+        assert_eq!(store.list_audit(3).unwrap().len(), 3);
+        assert_eq!(store.list_audit(100).unwrap().len(), 10);
+    }
+
+    #[test]
+    fn favorites_roundtrip() {
+        let store = in_memory();
+        store.add_favorite("alice", "ns/grafana").unwrap();
+        store.add_favorite("alice", "ns/prometheus").unwrap();
+        let favs = store.list_favorites("alice").unwrap();
+        assert!(favs.contains(&"ns/grafana".to_string()));
+        assert!(favs.contains(&"ns/prometheus".to_string()));
+        store.remove_favorite("alice", "ns/grafana").unwrap();
+        let favs = store.list_favorites("alice").unwrap();
+        assert!(!favs.contains(&"ns/grafana".to_string()));
+    }
 }
 
 fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::LabelCount> {

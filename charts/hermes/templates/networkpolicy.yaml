@@ -1,0 +1,37 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: hermes
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow inbound traffic on the Hermes NodePort / ClusterIP port
+    - ports:
+        - port: {{ .Values.service.port | default 31847 }}
+          protocol: TCP
+  egress:
+    # Allow DNS resolution
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Allow outbound HTTPS (OIDC discovery, OCI pulls, federation peers)
+    - ports:
+        - port: 443
+          protocol: TCP
+    # Allow Kubernetes API server access (controller watches)
+    - ports:
+        - port: 6443
+          protocol: TCP
+{{- end }}
