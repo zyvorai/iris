@@ -1,10 +1,12 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import AppIcon from '../AppIcon'
-import { openApp } from '../../services/hermesApi'
+import { Rocket } from 'lucide-react'
+import GlassPanel from '../nebula/GlassPanel'
+import QuickLaunchTile from '../nebula/QuickLaunchTile'
+import EmptyState from '../nebula/EmptyState'
+import Button from '../nebula/Button'
 import type { HermesApp } from '../../types'
 
 interface QuickLaunchBarProps {
@@ -12,34 +14,35 @@ interface QuickLaunchBarProps {
 }
 
 export default function QuickLaunchBar({ apps }: QuickLaunchBarProps) {
-  if (!apps.length) return null
-
   return (
-    <section className="glass-section quick-launch-bar" data-testid="quick-launch-bar">
-      <div className="section-head">
+    <GlassPanel className="glass-panel-section quick-launch-bar" data-testid="quick-launch-bar">
+      <div className="section-head-nebula">
         <div>
-          <h2>Quick Launch</h2>
-          <p className="hero-sub">Published services with ready endpoints — one click to open</p>
+          <p className="section-label">Quick Launch</p>
+          <p className="body-text">Published services with ready endpoints — one click to open</p>
         </div>
-        <Link to="/apps" className="section-link">
+        <Link to="/apps" className="section-link-nebula">
           All published
         </Link>
       </div>
-      <div className="quick-launch-grid">
-        {apps.map((app) => (
-          <button
-            key={app.id}
-            type="button"
-            className="quick-launch-tile zeus-glass"
-            title={app.displayName}
-            onClick={() => void openApp(app)}
-          >
-            <AppIcon icon={app.icon} name={app.displayName} size="md" />
-            <span>{app.displayName}</span>
-            <ExternalLink size={12} aria-hidden />
-          </button>
-        ))}
-      </div>
-    </section>
+      {apps.length ? (
+        <div className="quick-launch-grid">
+          {apps.map((app) => (
+            <QuickLaunchTile key={app.id} app={app} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={<Rocket size={22} />}
+          title="No published services ready"
+          description="Publish healthy services from Cluster to pin them here for one-click launch."
+          action={
+            <Button variant="primary" to="/cluster">
+              Publish on Cluster
+            </Button>
+          }
+        />
+      )}
+    </GlassPanel>
   )
 }

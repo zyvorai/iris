@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import PageToolbar from '../components/nebula/PageToolbar'
+import EmptyState from '../components/nebula/EmptyState'
 import { hermesApi } from '../services/hermesApi'
 import type { AppGraph } from '../types'
 
@@ -69,70 +73,78 @@ export default function GraphPage() {
   )
 
   const brokenDeps = (graph.data?.edges ?? []).filter((e) => !e.resolved).length
+  const loading = graph.isLoading && !graph.data
 
   return (
-    <>
-      <section className="glass-section">
-        <div className="section-head">
-          <div>
-            <h2>
-              <GitBranch size={16} /> Application graph
-            </h2>
-            <p className="hero-sub">Dependency links between published catalog apps</p>
+    <PageFrame
+      loading={loading}
+      error={graph.isError}
+      hasData={Boolean(graph.data)}
+      onRetry={() => void graph.refetch()}
+      errorTitle="Could not load application graph"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">
+                <GitBranch size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Application graph
+              </p>
+              <p className="body-text">Dependency links between published catalog apps</p>
+            </div>
+            {filtered ? (
+              <span className="nebula-status-badge status-unknown">
+                {filtered.nodes.length} apps · {filtered.edges.length} links
+                {brokenDeps ? ` · ${brokenDeps} unresolved` : ''}
+              </span>
+            ) : null}
+            <Link to="/apps" className="section-link-nebula">
+              Catalog
+            </Link>
           </div>
-          {filtered ? (
-            <span className="chip chip-muted">
-              {filtered.nodes.length} apps · {filtered.edges.length} links
-              {brokenDeps ? ` · ${brokenDeps} unresolved` : ''}
-            </span>
+
+          <PageToolbar className="graph-filters-toolbar">
+            <select className="page-toolbar-select" value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
+              <option value="">All namespaces</option>
+              {namespaces.map((ns) => (
+                <option key={ns} value={ns}>{ns}</option>
+              ))}
+            </select>
+            <select className="page-toolbar-select" value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} aria-label="Owner filter">
+              <option value="">All owners</option>
+              {owners.map((owner) => (
+                <option key={owner} value={owner}>{owner}</option>
+              ))}
+            </select>
+            <select className="page-toolbar-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Status filter">
+              <option value="">All statuses</option>
+              <option value="healthy">Healthy</option>
+              <option value="degraded">Degraded</option>
+              <option value="broken">Broken</option>
+            </select>
+            <label className="graph-broken-toggle body-text">
+              <input type="checkbox" checked={brokenOnly} onChange={(e) => setBrokenOnly(e.target.checked)} />
+              Broken deps
+            </label>
+            <label className="graph-broken-toggle body-text">
+              <input type="checkbox" checked={meshOnly} onChange={(e) => setMeshOnly(e.target.checked)} />
+              Mesh only
+            </label>
+          </PageToolbar>
+
+          {filtered && !filtered.nodes.length ? (
+            <EmptyState
+              icon={<GitBranch size={22} />}
+              title="No graph nodes match"
+              description="Publish more apps or clear filters to see dependency links."
+            />
+          ) : filtered ? (
+            <AppGraphView graph={filtered} />
           ) : null}
-          <Link to="/apps" className="section-link">
-            Catalog
-          </Link>
-        </div>
-
-        <div className="filter-bar graph-filters">
-          <select value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
-            <option value="">All namespaces</option>
-            {namespaces.map((ns) => (
-              <option key={ns} value={ns}>
-                {ns}
-              </option>
-            ))}
-          </select>
-          <select value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} aria-label="Owner filter">
-            <option value="">All owners</option>
-            {owners.map((owner) => (
-              <option key={owner} value={owner}>
-                {owner}
-              </option>
-            ))}
-          </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Status filter">
-            <option value="">All statuses</option>
-            <option value="healthy">Healthy</option>
-            <option value="degraded">Degraded</option>
-            <option value="broken">Broken</option>
-          </select>
-          <label className="graph-broken-toggle">
-            <input type="checkbox" checked={brokenOnly} onChange={(e) => setBrokenOnly(e.target.checked)} />
-            Broken deps only
-          </label>
-          <label className="graph-broken-toggle">
-            <input type="checkbox" checked={meshOnly} onChange={(e) => setMeshOnly(e.target.checked)} />
-            Mesh routes only
-          </label>
-        </div>
-
-        {graph.isLoading ? (
-          <div className="empty">Loading graph…</div>
-        ) : graph.error ? (
-          <div className="empty">Could not load application graph.</div>
-        ) : filtered ? (
-          <AppGraphView graph={filtered} />
-        ) : null}
-      </section>
-    </>
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }
 
@@ -145,14 +157,14 @@ export function AppGraphPanel({ appId }: { appId: string }) {
   if (!related) return null
 
   return (
-    <section className="glass-section">
-      <div className="section-head">
-        <h3>Dependency neighborhood</h3>
-        <Link to="/graph" className="section-link">
+    <GlassPanel className="glass-panel-section">
+      <div className="section-head-nebula">
+        <p className="section-label">Dependency neighborhood</p>
+        <Link to="/graph" className="section-link-nebula">
           Full graph
         </Link>
       </div>
       <AppGraphView graph={graph.data} focusId={appId} />
-    </section>
+    </GlassPanel>
   )
 }

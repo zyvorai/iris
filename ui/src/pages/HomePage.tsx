@@ -3,17 +3,13 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
-import AppCard from '../components/AppCard'
-import AttentionQueue from '../components/command/AttentionQueue'
-import QuickLaunchBar from '../components/command/QuickLaunchBar'
-import TeamPicksSection from '../components/command/TeamPicksSection'
-import HomeActivityFeed from '../components/command/HomeActivityFeed'
-import HomeMetricsStrip from '../components/command/HomeMetricsStrip'
-import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import PlatformPulseHero from '../components/command/PlatformPulseHero'
+import QuickLaunchBar from '../components/command/QuickLaunchBar'
+import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
+import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import ServiceGalaxy from '../components/command/ServiceGalaxy'
+import PageFrame from '../components/nebula/PageFrame'
+import ContextBanner from '../components/nebula/ContextBanner'
 import { hermesApi } from '../services/hermesApi'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
@@ -32,17 +28,31 @@ function statusRank(status: string): number {
   return 2
 }
 
+function buildAiHint(apps: HermesApp[]): string | undefined {
+  const unhealthy = apps.filter((a) => a.status !== 'healthy')
+  if (!unhealthy.length) return undefined
+
+  const timeouts = unhealthy.filter((a) => /timeout|deadline exceeded/i.test(a.statusMessage ?? '')).length
+  const stacks = new Map<string, number>()
+  for (const app of unhealthy) {
+    const key = app.namespace.split('-')[0] ?? app.namespace
+    stacks.set(key, (stacks.get(key) ?? 0) + 1)
+  }
+  const topStack = [...stacks.entries()].sort((a, b) => b[1] - a[1])[0]
+
+  const parts: string[] = [`${unhealthy.length} services need attention`]
+  if (timeouts > 0) parts.push(`Most failures are timeout-related (${timeouts})`)
+  if (topStack && topStack[1] >= 2) parts.push(`${topStack[0]} stack appears unreachable`)
+  return parts.join(' · ')
+}
+
 export default function HomePage() {
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
-  const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
-  const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
-  const { matchesWorkspace, workspaceId } = useWorkspace()
-  const { openInspector } = useInspector()
+  const { matchesWorkspace, workspaceId, setWorkspaceId } = useWorkspace()
+  const { openDiagnose } = useInspector()
 
-  const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const filterWs = (list: HermesApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
   const catalogApps = filterWs(catalog.data)
   const serviceCount = cluster.data?.total ?? catalogApps.length
@@ -51,6 +61,11 @@ export default function HomePage() {
   const degraded = cluster.data?.degraded ?? catalogApps.filter((a) => a.status === 'degraded').length
   const broken = cluster.data?.broken ?? catalogApps.filter((a) => a.status === 'broken').length
   const publishedCount = cluster.data?.published ?? catalogApps.filter((a) => a.visibility.published).length
+  const issueCount = degraded + broken
+
+  const loading = (catalog.isLoading && !catalog.data) || (cluster.isLoading && !cluster.data)
+  const error = catalog.isError || cluster.isError
+  const hasData = Boolean(catalog.data || cluster.data)
 
   const unhealthy = useMemo(
     () =>
@@ -60,97 +75,81 @@ export default function HomePage() {
     [catalogApps],
   )
 
-  const issueCount = degraded + broken
-
   const quickLaunchApps = useMemo(
     () =>
       catalogApps
         .filter((a) => a.visibility.published && a.readyEndpoints > 0 && a.status !== 'broken')
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .slice(0, 12),
+        .slice(0, 6),
     [catalogApps],
   )
 
-  const teamPicks = useMemo(
-    () => (recommended.data ?? []).filter(matchesWorkspace).slice(0, 6),
-    [recommended.data, matchesWorkspace],
+  const publishedApps = useMemo(
+    () => catalogApps.filter((a) => a.visibility.published),
+    [catalogApps],
   )
 
-  const pinnedAndRecent = useMemo(() => {
-    const seen = new Set<string>()
-    const merged: HermesApp[] = []
-    for (const app of [...(favorites.data ?? []), ...(recents.data ?? [])]) {
-      if (seen.has(app.id) || !matchesWorkspace(app)) continue
-      seen.add(app.id)
-      merged.push(app)
-    }
-    return merged.slice(0, 8)
-  }, [favorites.data, recents.data, matchesWorkspace])
+  const aiHint = useMemo(() => buildAiHint(catalogApps), [catalogApps])
 
-  const onInspect = (app: HermesApp) => openInspector(app.id)
   const onResolveIssues = () => {
-    if (unhealthy[0]) openInspector(unhealthy[0].id)
-    else document.getElementById('attention-queue')?.scrollIntoView({ behavior: 'smooth' })
+    if (unhealthy[0]) openDiagnose(unhealthy[0].id)
+    else document.getElementById('mission-control')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const onRetry = () => {
+    void catalog.refetch()
+    void cluster.refetch()
   }
 
   return (
-    <>
-      <PlatformPulseHero
-        greeting={greeting()}
-        userId={auth.data?.userId}
-        serviceCount={serviceCount}
-        namespaceCount={namespaceCount}
-        publishedCount={publishedCount}
-        healthy={healthy}
-        degraded={degraded}
-        broken={broken}
-        onResolveIssues={onResolveIssues}
-      />
+    <PageFrame
+      loading={loading}
+      error={error}
+      hasData={hasData}
+      onRetry={onRetry}
+      errorTitle="Could not load platform overview"
+      contextBanner={
+        workspaceId ? (
+          <ContextBanner
+            label={`Showing ${workspaceId} workspace only`}
+            detail="Clear the filter to see all cluster services"
+            onClear={() => setWorkspaceId('')}
+          />
+        ) : undefined
+      }
+    >
+      <div className="page-grid">
+        <PlatformPulseHero
+          greeting={greeting()}
+          userId={auth.data?.userId}
+          serviceCount={serviceCount}
+          namespaceCount={namespaceCount}
+          publishedCount={publishedCount}
+          healthy={healthy}
+          degraded={degraded}
+          broken={broken}
+          aiHint={aiHint}
+          onResolveIssues={onResolveIssues}
+        />
 
-      <QuickLaunchBar apps={quickLaunchApps} />
+        <HomeFleetSnapshot
+          serviceCount={serviceCount}
+          publishedCount={publishedCount}
+          namespaceCount={namespaceCount}
+          issueCount={issueCount}
+          brokenCount={broken}
+        />
 
-      <HomeMetricsStrip
-        serviceCount={serviceCount}
-        publishedCount={publishedCount}
-        namespaceCount={namespaceCount}
-        issueCount={issueCount}
-        brokenCount={broken}
-      />
+        <QuickLaunchBar apps={quickLaunchApps} />
 
-      <MissionControlSpaces apps={catalogApps} onInspect={onInspect} />
+        <MissionControlSpaces apps={catalogApps} />
 
-      <TeamPicksSection apps={teamPicks} favoriteIds={favIds} />
-
-      <HomeActivityFeed />
-
-      {workspaceId ? (
-        <section className="glass-section workspace-banner">
-          <p className="hero-sub">
-            Showing <strong>{workspaceId}</strong> workspace apps only. Clear the cluster chip in the top bar to see
-            everything.
-          </p>
-        </section>
-      ) : null}
-
-      <AttentionQueue apps={unhealthy} onInspect={onInspect} />
-
-      <ServiceGalaxy onNodeClick={(id) => openInspector(id)} publishedCount={publishedCount} />
-
-      {pinnedAndRecent.length > 0 ? (
-        <section className="glass-section">
-          <div className="section-head">
-            <h2>Recent &amp; Pinned</h2>
-            <Link to="/apps" className="section-link">
-              Catalog <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="app-grid">
-            {pinnedAndRecent.map((app) => (
-              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-    </>
+        <ServiceGalaxy
+          onNodeClick={(id) => openDiagnose(id)}
+          publishedCount={publishedCount}
+          publishedApps={publishedApps}
+        />
+      </div>
+    </PageFrame>
   )
 }

@@ -249,16 +249,20 @@ Inspired by macOS Dock, Launchpad, Raycast, Arc Browser, and Linear — but buil
 
 | Feature | Description |
 |---------|-------------|
+| Nebula UI | Unified Liquid Glass design — shared page frames, skeleton loading, empty states |
 | Glass UI | Translucent, tiered glass interface |
 | Spotlight (`⌘K`) | Search pages and cluster applications |
-| Home | Greeting, metrics, favorites, recents, health attention |
-| Apps | Published application catalog |
-| Cluster | Every service in the cluster, grouped by namespace |
+| Home | Command deck — hero, 3-metric snapshot, Quick Launch, Mission Control |
+| Apps | Published application catalog with unified toolbar |
+| Cluster | Every service grouped by namespace — collapsible sections, human-readable health hints |
 | Discovery | Unpublished applications queue — publish to dock |
-| Health | Fleet health summary |
+| Health | Fleet health summary and attention queue |
 | Favorites & recents | Personal application memory |
-| Health indicators | Healthy / Degraded / Offline per application |
+| Health indicators | Healthy / Degraded / Offline with friendly probe summaries |
 | Keyboard navigation | Arrow keys and Enter in Spotlight |
+| Mobile | Compact workspace switcher and responsive cluster/catalog layouts |
+
+See [docs/ui.md](docs/ui.md) for the UI architecture and development guide.
 
 Huge difference: infrastructure tables vs. an application launcher.
 
@@ -487,6 +491,7 @@ Hermes is how humans enter the software universe that Zeus runs.
 
 - [Architecture](docs/architecture.md)
 - [Install guide](docs/install.md)
+- [UI guide](docs/ui.md)
 - [Annotation reference](docs/annotations.md)
 
 ---

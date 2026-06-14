@@ -3,7 +3,11 @@
 
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { Layers } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
 import { hermesApi } from '../services/hermesApi'
 import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../utils/spaces'
 
@@ -13,34 +17,58 @@ export default function SpacesPage() {
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
   const published = (catalog.data ?? []).filter((a) => a.visibility.published)
 
+  const loading = catalog.isLoading && !catalog.data
+  const error = catalog.isError
+
   return (
-    <>
-      <section className="glass-hero">
-        <h2 className="hero-title">Spaces</h2>
-        <p className="hero-sub">Browse apps by category — monitoring, security, developer tools, and more.</p>
-      </section>
-      <section className="glass-section">
-        <div className="space-list">
-          {HERMES_SPACES.filter((space) => spaceCounts(published)[space.id] > 0).map((space) => (
-            <Link key={space.id} to={`/spaces/${space.id}`} className="space-row zeus-card">
-              <div>
-                <h3>{space.label}</h3>
-                <p>{space.description}</p>
-              </div>
-              <span className="chip chip-accent">{spaceCounts(published)[space.id]} apps</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-      <section className="glass-section">
-        <h2>Quick preview</h2>
-        <div className="app-grid">
-          {published.slice(0, 6).map((app) => (
-            <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
-          ))}
-        </div>
-      </section>
-    </>
+    <PageFrame
+      loading={loading}
+      error={error}
+      hasData={Boolean(catalog.data)}
+      onRetry={() => void catalog.refetch()}
+      errorTitle="Could not load spaces"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">Spaces</p>
+              <p className="body-text">
+                Browse published apps by category. Mission Control shows all discovered services; spaces show published apps only.
+              </p>
+            </div>
+          </div>
+          <div className="space-list" style={{ marginTop: '1rem', display: 'grid', gap: '0.75rem' }}>
+            {HERMES_SPACES.filter((space) => spaceCounts(published)[space.id] > 0).map((space) => (
+              <Link key={space.id} to={`/spaces/${space.id}`} className="hub-link-card">
+                <div>
+                  <h3>{space.label}</h3>
+                  <p>{space.description}</p>
+                </div>
+                <span className="nebula-status-badge status-healthy">{spaceCounts(published)[space.id]} apps</span>
+              </Link>
+            ))}
+          </div>
+        </GlassPanel>
+
+        <GlassPanel className="glass-panel-section">
+          <p className="section-label">Quick preview</p>
+          {published.length ? (
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {published.slice(0, 6).map((app) => (
+                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Layers size={22} />}
+              title="No published apps yet"
+              description="Publish services from Cluster to populate spaces."
+            />
+          )}
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }
 
@@ -55,23 +83,36 @@ export function SpaceDetailPage() {
     ? (groupAppsBySpace((catalog.data ?? []).filter((a) => a.visibility.published)).get(space.id) ?? [])
     : []
 
+  const loading = catalog.isLoading && !catalog.data
+
   return (
-    <>
-      <section className="glass-hero">
-        <Link to="/spaces" className="section-link">
-          ← All spaces
-        </Link>
-        <h2 className="hero-title">{space?.label ?? 'Space'}</h2>
-        <p className="hero-sub">{space?.description ?? 'Apps in this space'}</p>
-      </section>
-      <section className="glass-section" data-testid={`space-${spaceId}`}>
-        <h2>{apps.length} app{apps.length === 1 ? '' : 's'}</h2>
-        <div className="app-grid">
-          {apps.map((app) => (
-            <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
-          ))}
-        </div>
-      </section>
-    </>
+    <PageFrame
+      loading={loading}
+      error={catalog.isError}
+      hasData={Boolean(catalog.data)}
+      onRetry={() => void catalog.refetch()}
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <Link to="/spaces" className="section-link-nebula">
+            ← All spaces
+          </Link>
+          <h2 className="section-title" style={{ marginTop: '0.5rem' }}>{space?.label ?? 'Space'}</h2>
+          <p className="body-text">{space?.description ?? 'Published apps in this space'}</p>
+        </GlassPanel>
+        <GlassPanel className="glass-panel-section" data-testid={`space-${spaceId}`}>
+          <p className="section-label">{apps.length} published app{apps.length === 1 ? '' : 's'}</p>
+          {apps.length ? (
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {apps.map((app) => (
+                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={<Layers size={22} />} title="No apps in this space" description="Publish apps that match this category to see them here." />
+          )}
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }

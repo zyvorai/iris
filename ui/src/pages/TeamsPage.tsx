@@ -2,10 +2,13 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+import { GitBranch, Users } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
 import type { HermesApp } from '../types'
 import { hermesApi } from '../services/hermesApi'
 
@@ -25,60 +28,72 @@ export default function TeamsPage() {
     return map
   }, [catalog.data])
 
+  const loading = owners.isLoading && !owners.data
+
   return (
-    <>
-      <section className="glass-hero compact-hero">
-        <div className="hero-copy">
-          <div className="hero-kicker">
-            <Users size={16} /> Team ownership
+    <PageFrame
+      loading={loading}
+      error={owners.isError}
+      hasData={Boolean(owners.data)}
+      onRetry={() => void owners.refetch()}
+      errorTitle="Could not load teams"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">
+                <Users size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Team ownership
+              </p>
+              <p className="body-text">
+                Owners from service annotations — a lightweight org map over your catalog.
+              </p>
+            </div>
           </div>
-          <h2 className="hero-title">Who runs what</h2>
-          <p className="hero-sub">
-            Owners come from service annotations and discovery metadata — a lightweight org map over your catalog.
-          </p>
-        </div>
-      </section>
+        </GlassPanel>
 
-      {owners.isLoading ? (
-        <div className="empty glass-section">Loading teams…</div>
-      ) : !owners.data?.length ? (
-        <div className="empty glass-section">
-          No owner metadata yet. Add <code>hermes.zyvor.dev/owner</code> annotations to services.
-        </div>
-      ) : (
-        owners.data.map((owner) => {
-          const apps = appsByOwner.get(owner.id) ?? []
-          return (
-            <section key={owner.id} className="glass-section team-section">
-              <div className="section-head">
-                <div>
-                  <h2>{owner.label}</h2>
-                  <p className="hero-sub">
-                    {owner.appCount} apps
-                    {owner.recommended ? ` · ${owner.recommended} team picks` : ''}
-                    {owner.unhealthy ? ` · ${owner.unhealthy} need attention` : ''}
-                  </p>
+        {!owners.data?.length ? (
+          <GlassPanel className="glass-panel-section">
+            <EmptyState
+              icon={<Users size={22} />}
+              title="No owner metadata yet"
+              description="Add hermes.zyvor.dev/owner annotations to services."
+            />
+          </GlassPanel>
+        ) : (
+          owners.data.map((owner) => {
+            const apps = appsByOwner.get(owner.id) ?? []
+            return (
+              <GlassPanel key={owner.id} className="glass-panel-section">
+                <div className="section-head-nebula">
+                  <div>
+                    <h2 className="section-title">{owner.label}</h2>
+                    <p className="body-text">
+                      {owner.appCount} apps
+                      {owner.recommended ? ` · ${owner.recommended} team picks` : ''}
+                      {owner.unhealthy ? ` · ${owner.unhealthy} need attention` : ''}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              {apps.length ? (
-                <div className="app-grid">
-                  {apps.map((app) => (
-                    <AppCard key={app.id} app={app} />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty">No apps linked to this owner in the current catalog.</div>
-              )}
-            </section>
-          )
-        })
-      )}
+                {apps.length ? (
+                  <div className="app-grid" style={{ marginTop: '1rem' }}>
+                    {apps.map((app) => (
+                      <AppCard key={app.id} app={app} />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon={<Users size={22} />} title="No linked apps" description="No apps linked to this owner in the current catalog." />
+                )}
+              </GlassPanel>
+            )
+          })
+        )}
 
-      <div className="app-actions" style={{ marginTop: '0.5rem' }}>
-        <Link to="/graph" className="btn">
-          View dependency graph
-        </Link>
+        <Button variant="secondary" to="/graph">
+          <GitBranch size={14} /> View dependency graph
+        </Button>
       </div>
-    </>
+    </PageFrame>
   )
 }

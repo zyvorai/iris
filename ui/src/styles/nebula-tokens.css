@@ -1,0 +1,147 @@
+/*
+ * Hermes design tokens — aligned with Aether Liquid Glass palette
+ */
+:root {
+  color-scheme: dark;
+
+  /* Aether base surfaces */
+  --bg-root: #0a0d12;
+  --bg-elevated: #11151c;
+  --bg-panel: rgba(17, 21, 28, 0.82);
+  --bg-panel-strong: rgba(22, 27, 36, 0.94);
+  --bg-chip: rgba(17, 21, 28, 0.65);
+
+  --border-soft: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(59, 130, 246, 0.28);
+  --border-muted: rgba(148, 163, 184, 0.10);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+
+  /* Aether brand */
+  --aether-primary: #3b82f6;
+  --aether-primary-deep: #2563eb;
+  --aether-ai: #a855f7;
+  --accent-blue: var(--aether-primary);
+  --accent-cyan: #63a4ff;
+  --accent-orange: #f97316;
+  --accent-red: #f87171;
+  --accent-green: #34d399;
+  --accent-yellow: #fbbf24;
+  --accent-purple: #a855f7;
+
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 12px;
+
+  --shadow-panel:
+    0 18px 50px rgba(2, 6, 23, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-glow-blue: 0 0 0 1px rgba(99, 164, 255, 0.14), 0 16px 42px rgba(59, 130, 246, 0.14);
+  --shadow-glow-orange: 0 0 0 1px rgba(249, 115, 22, 0.18), 0 16px 42px rgba(249, 115, 22, 0.12);
+  --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.18), 0 16px 42px rgba(239, 68, 68, 0.12);
+  --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.18), 0 16px 42px rgba(16, 185, 129, 0.12);
+
+  --font-display: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Bridge to existing zeus/hermes tokens */
+  --hermes-bg: var(--bg-root);
+  --hermes-surface: rgba(15, 23, 42, 0.72);
+  --hermes-text: var(--text-primary);
+  --hermes-muted: var(--text-muted);
+  --hermes-border: var(--border-soft);
+  --hermes-accent: var(--aether-primary);
+  --hermes-accent-soft: rgba(59, 130, 246, 0.12);
+  --hermes-green: var(--accent-green);
+  --hermes-amber: var(--accent-yellow);
+  --hermes-red: var(--accent-red);
+  --hermes-glass-blur: 40px;
+  --hermes-glass-chrome-blur: 24px;
+  --hermes-glass-card-blur: 40px;
+  --hermes-glass-popover-blur: 20px;
+  --hermes-glass-chrome-bg: rgba(17, 21, 28, 0.88);
+
+  --zeus-bg-base: var(--bg-root);
+  --zeus-bg-slate: #0f172a;
+  --zeus-primary: var(--aether-primary);
+  --zeus-primary-soft: rgba(59, 130, 246, 0.18);
+  --zeus-primary-border: rgba(59, 130, 246, 0.35);
+  --zeus-success: var(--accent-green);
+  --zeus-warning: var(--accent-yellow);
+  --zeus-danger: var(--accent-red);
+  --zeus-info: #38bdf8;
+  --zeus-violet: var(--accent-purple);
+  --zeus-text: var(--text-primary);
+  --zeus-text-muted: var(--text-secondary);
+  --zeus-text-faint: var(--text-muted);
+  --zeus-border: rgba(255, 255, 255, 0.09);
+  --zeus-border-strong: rgba(255, 255, 255, 0.14);
+  --zeus-glass-blur: var(--hermes-glass-blur);
+  --zeus-glass-chrome-blur: var(--hermes-glass-chrome-blur);
+  --zeus-glass-card-blur: var(--hermes-glass-card-blur);
+  --zeus-glass-popover-blur: var(--hermes-glass-popover-blur);
+  --zeus-glass-chrome-bg: var(--hermes-glass-chrome-bg);
+  --zeus-radius-panel: 1.25rem;
+  --zeus-radius-window: 1.75rem;
+
+  --z-bg: var(--zeus-bg-base);
+  --z-orange: var(--zeus-primary);
+  --z-orange-soft: var(--zeus-primary-soft);
+  --z-green: var(--zeus-success);
+  --z-yellow: var(--zeus-warning);
+  --z-red: var(--zeus-danger);
+  --z-blue: var(--zeus-info);
+  --z-purple: var(--zeus-violet);
+  --z-text: var(--text-primary);
+  --z-text-muted: var(--text-secondary);
+  --z-text-faint: var(--text-muted);
+  --z-border: var(--border-soft);
+  --z-border-strong: var(--zeus-border-strong);
+}
+
+.page-kicker {
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aether-primary);
+  font-weight: 600;
+}
+
+.page-title {
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.08;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #fff 0%, #e2e8f0 45%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aether-primary);
+  margin: 0 0 0.35rem;
+}
+
+.body-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}

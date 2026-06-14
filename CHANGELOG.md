@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Nebula UX overhaul** — unified Liquid Glass design system (`nebula-tokens`, `nebula-layout`, `nebula-components`, `aether-bridge`)
+- Shared page primitives: `PageFrame`, `PageLoading`, `PageLoadError`, `EmptyState`, `ContextBanner`, `PageToolbar`
+- `HomeFleetSnapshot` — 3-metric home strip (Discovered, Published, Needs attention)
+- `serviceActions.ts` — shared Open/Diagnose/Publish/copy menu for `AppCard` and `ServiceCard`
+- `formatStatusMessage()` — human-readable health probe summaries with optional technical details
+- `RouteDisplay` — styled launchpad paths and public URLs with copy on app detail
+- Collapsible namespace groups on Cluster page (auto-expand when namespace has unhealthy services)
+- Compact workspace switcher dropdown below 900px viewport
+- Playwright smoke tests for skeleton loading, catalog/cluster toolbars, mobile layout
+- [docs/ui.md](docs/ui.md) — UI architecture and development guide
 - Aether-style two-row top navbar replacing the three-panel left-rail shell
 - `HermesNavbar` component with health chip, spotlight, refresh, help dropdown, and mobile drawer
 - Blue primary color scheme (`#3B82F6`) aligned with Aether design language
@@ -19,6 +29,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Warning log when the default dev session secret is in use
 
 ### Fixed
+- Workspace switcher showed duplicate All/Production chips plus compact dropdown (CSS specificity vs `index.css`)
+- Cluster cards exposed raw in-cluster probe URLs and Go HTTP errors to end users
 - Refresh button in navbar was a no-op (dispatched a custom event with no listeners) — now calls `refreshHermesData(queryClient)`
 - Health chip showed "100% healthy" while cluster data was still loading
 - `statusTone` ignored `degraded` services — now correctly shows `warn` when any service is degraded
@@ -31,6 +43,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `Makefile` hardcoded a specific deployment IP; default is now unset
 
 ### Changed
+- Home, Catalog, Cluster, Health, Spaces, Discovery, Graph, Activity, Help, and App detail migrated to Nebula components
+- `AppCard` / `AttentionQueue` use `GlassPanel` + primary action + overflow menu (max two visible actions)
+- Quick Launch capped at 6 tiles; Mission Control uses flat space accordions
+- Design tokens consolidated into `nebula-tokens.css`; `zeus-v9s-tokens.css` deprecated
+- Grafana demo app startup probe relaxed in Helm chart for slow DB migrations
 - `deploy-remote.sh` — box-drawn banner, numbered steps with elapsed timing, spinner for long SSH operations, rich summary box
 - `e2e-deploy-verify.sh` — category sections, failure list in summary, `check_gateway` overwrites waiting line with `\r`
 - `smoke-test.sh` — consistent banner, section headers, pass/fail collector

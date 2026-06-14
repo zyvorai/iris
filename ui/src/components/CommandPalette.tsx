@@ -54,7 +54,7 @@ function envMatch(query: string): string | null {
 function parseSpotlightCommand(raw: string): { type: string; arg?: string } | null {
   const q = raw.trim().toLowerCase()
   if (!q) return null
-  if (['attention', 'show unhealthy', 'unhealthy', 'show attention'].includes(q)) return { type: 'attention' }
+  if (['attention', 'show unhealthy', 'unhealthy', 'show attention', 'filter degraded', 'degraded', 'show degraded'].includes(q)) return { type: 'attention' }
   if (['show routes', 'routes'].includes(q)) return { type: 'routes' }
   if (['refresh', 'sync', 'resync'].includes(q)) return { type: 'refresh' }
   if (['export', 'export catalog'].includes(q)) return { type: 'export' }
@@ -98,7 +98,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
-  const { openInspector } = useInspector()
+  const { openDiagnose } = useInspector()
 
   const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
@@ -183,10 +183,20 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
 
   const rows: Row[] = useMemo(() => {
     if (command?.type === 'attention') {
-      return catalogUnhealthy.slice(0, 8).flatMap((app) => [
-        { kind: 'app' as const, app, action: 'inspect' as const },
-        { kind: 'app' as const, app, action: 'open' as const },
-      ])
+      const navRow = {
+        kind: 'nav' as const,
+        label: 'Open Mission Control',
+        path: '/#mission-control',
+        icon: Layers,
+        meta: `${catalogUnhealthy.length} services need attention`,
+      }
+      return [
+        navRow,
+        ...catalogUnhealthy.slice(0, 8).flatMap((app) => [
+          { kind: 'app' as const, app, action: 'inspect' as const },
+          { kind: 'app' as const, app, action: 'open' as const },
+        ]),
+      ]
     }
 
     if (command?.type === 'routes') {
@@ -376,7 +386,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
         kind: 'action',
         label: `Diagnose ${topUnhealthy.displayName}`,
         meta: 'Suggested · discovered service needs attention',
-        run: () => openInspector(topUnhealthy.id),
+        run: () => openDiagnose(topUnhealthy.id),
       })
     }
     list.push(...navItems.slice(0, 4).map((n) => ({ kind: 'nav' as const, ...n })))
@@ -404,7 +414,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     intent.data,
     matchesWorkspace,
     setWorkspaceId,
-    openInspector,
+    openDiagnose,
     qc,
   ])
 
@@ -428,7 +438,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
       return
     }
     if (row.action === 'inspect') {
-      openInspector(row.app.id)
+      openDiagnose(row.app.id)
       onClose()
       return
     }

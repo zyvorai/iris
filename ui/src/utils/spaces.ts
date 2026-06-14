@@ -5,11 +5,11 @@ import type { HermesApp } from '../types'
 
 export type SpaceId =
   | 'monitoring'
-  | 'virtualization'
   | 'security'
-  | 'storage'
-  | 'developer'
-  | 'ai'
+  | 'infrastructure'
+  | 'zeus-os'
+  | 'consolehub'
+  | 'databases'
   | 'other'
 
 export interface HermesSpace {
@@ -17,6 +17,8 @@ export interface HermesSpace {
   label: string
   description: string
   matchCategories: string[]
+  matchNamespaces?: string[]
+  matchNamePatterns?: RegExp[]
 }
 
 export const HERMES_SPACES: HermesSpace[] = [
@@ -27,34 +29,39 @@ export const HERMES_SPACES: HermesSpace[] = [
     matchCategories: ['monitoring', 'observability'],
   },
   {
-    id: 'virtualization',
-    label: 'Virtualization',
-    description: 'VM consoles and virtualization tools',
-    matchCategories: ['virtualization', 'vm', 'console'],
-  },
-  {
     id: 'security',
     label: 'Security',
     description: 'Identity, firewall, and security tooling',
     matchCategories: ['security', 'identity'],
   },
   {
-    id: 'storage',
-    label: 'Storage',
-    description: 'Volumes, object stores, and backups',
-    matchCategories: ['storage'],
+    id: 'infrastructure',
+    label: 'Infrastructure',
+    description: 'Storage, CI/CD, GitOps, and virtualization',
+    matchCategories: ['storage', 'ci/cd', 'gitops', 'developer tools', 'virtualization', 'vm', 'console', 'infrastructure'],
   },
   {
-    id: 'developer',
-    label: 'Developer',
-    description: 'CI/CD, GitOps, and developer tools',
-    matchCategories: ['ci/cd', 'gitops', 'developer tools'],
+    id: 'zeus-os',
+    label: 'Zeus OS',
+    description: 'Core Zeus platform services',
+    matchCategories: ['zeus', 'platform'],
+    matchNamespaces: ['zeus-os-system', 'zeus-system', 'zeus-os'],
+    matchNamePatterns: [/^zeus-/i],
   },
   {
-    id: 'ai',
-    label: 'AI',
-    description: 'AI workloads and assistants',
-    matchCategories: ['ai'],
+    id: 'consolehub',
+    label: 'ConsoleHub',
+    description: 'ConsoleHub remote access stack',
+    matchCategories: ['consolehub'],
+    matchNamespaces: ['zeus-os-system', 'consolehub'],
+    matchNamePatterns: [/consolehub/i, /guacamole/i],
+  },
+  {
+    id: 'databases',
+    label: 'Databases',
+    description: 'Database and data store services',
+    matchCategories: ['database', 'databases', 'data store', 'postgres', 'mysql', 'redis', 'mongo'],
+    matchNamePatterns: [/postgres/i, /mysql/i, /redis/i, /mongo/i, /mariadb/i],
   },
   {
     id: 'other',
@@ -64,6 +71,40 @@ export const HERMES_SPACES: HermesSpace[] = [
   },
 ]
 
+function matchesPatterns(app: HermesApp, patterns?: RegExp[]): boolean {
+  if (!patterns?.length) return false
+  const hay = `${app.displayName} ${app.slug} ${app.backend.name}`.toLowerCase()
+  return patterns.some((p) => p.test(hay))
+}
+
+function matchesNamespace(app: HermesApp, namespaces?: string[]): boolean {
+  if (!namespaces?.length) return false
+  const ns = app.namespace.toLowerCase()
+  return namespaces.some((n) => ns === n.toLowerCase() || ns.includes(n.toLowerCase()))
+}
+
+export function spaceForApp(app: HermesApp): SpaceId {
+  if (matchesPatterns(app, [/consolehub/i]) || (matchesNamespace(app, ['zeus-os-system']) && /guacamole|consolehub/i.test(app.displayName + app.slug))) {
+    return 'consolehub'
+  }
+  if (matchesNamespace(app, ['zeus-os-system', 'zeus-system', 'zeus-os']) || matchesPatterns(app, [/^zeus-/i])) {
+    return 'zeus-os'
+  }
+  if (matchesPatterns(app, [/postgres/i, /mysql/i, /redis/i, /mongo/i, /mariadb/i])) {
+    return 'databases'
+  }
+
+  const cat = (app.category || 'Custom').trim().toLowerCase()
+  for (const space of HERMES_SPACES) {
+    if (space.id === 'other') continue
+    if (space.matchCategories.some((c) => cat.includes(c) || c.includes(cat))) {
+      return space.id
+    }
+  }
+  return 'other'
+}
+
+/** @deprecated use spaceForApp */
 export function spaceForCategory(category: string): SpaceId {
   const cat = category.trim().toLowerCase()
   for (const space of HERMES_SPACES) {
@@ -81,7 +122,7 @@ export function groupAppsBySpace(apps: HermesApp[]): Map<SpaceId, HermesApp[]> {
     map.set(space.id, [])
   }
   for (const app of apps) {
-    map.get(spaceForCategory(app.category || 'Custom'))?.push(app)
+    map.get(spaceForApp(app))?.push(app)
   }
   return map
 }

@@ -2,8 +2,12 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Rocket } from 'lucide-react'
+import { Compass, Rocket } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
 import { hermesApi } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
 
@@ -33,49 +37,56 @@ export default function DiscoveryPage() {
     onSuccess: () => void refreshHermesData(qc),
   })
 
+  const loading = discovery.isLoading && !discovery.data
+
   return (
-    <>
-      <section className="glass-hero compact-hero">
-        <div className="hero-copy">
-          <h2 className="hero-title">Discovery queue</h2>
-          <p className="hero-sub">
-            {cluster.data?.discovery ?? '—'} unpublished services across {cluster.data?.namespaces ?? '—'} namespaces.
-            Publish to add them to your dock — or browse everything on Cluster.
-          </p>
-          {discovery.data?.length ? (
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={publishAll.isPending}
-              onClick={() => void publishAll.mutate()}
-            >
-              <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)} services
-            </button>
-          ) : null}
-        </div>
-      </section>
-      <section className="glass-section">
-        <h2>Unpublished services</h2>
-        {discovery.isLoading ? (
-          <div className="empty">Scanning cluster…</div>
-        ) : !discovery.data?.length ? (
-          <div className="empty">
-            No unpublished services in queue. Hermes indexes all cluster services — check the Cluster page for the full
-            catalog.
+    <PageFrame
+      loading={loading}
+      error={discovery.isError}
+      hasData={Boolean(discovery.data)}
+      onRetry={() => void discovery.refetch()}
+      errorTitle="Could not load discovery queue"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">Discovery</p>
+              <h2 className="section-title">Discovery queue</h2>
+              <p className="body-text">
+                {cluster.data?.discovery ?? '—'} unpublished services across {cluster.data?.namespaces ?? '—'} namespaces.
+              </p>
+            </div>
+            {discovery.data?.length ? (
+              <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>
+                <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)}
+              </Button>
+            ) : null}
           </div>
-        ) : (
-          <div className="app-grid">
-            {discovery.data.map((app) => (
-              <AppCard
-                key={app.id}
-                app={app}
-                onPublish={() => publish.mutate(app.id)}
-                onHide={() => hide.mutate(app.id)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-    </>
+        </GlassPanel>
+
+        <GlassPanel className="glass-panel-section">
+          <p className="section-label">Unpublished services</p>
+          {!discovery.data?.length ? (
+            <EmptyState
+              icon={<Compass size={22} />}
+              title="Queue is empty"
+              description="All discovered services are published. Check Cluster for the full inventory."
+            />
+          ) : (
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {discovery.data.map((app) => (
+                <AppCard
+                  key={app.id}
+                  app={app}
+                  onPublish={() => publish.mutate(app.id)}
+                  onHide={() => hide.mutate(app.id)}
+                />
+              ))}
+            </div>
+          )}
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }

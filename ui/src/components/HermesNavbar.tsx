@@ -191,9 +191,9 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
 
           <div className="hermes-nb-utilities">
             <WorkspaceSwitcher />
-            <span className="zeus-health-chip" data-tone={statusTone}>
+            <span className="zeus-health-chip zeus-health-chip-compact" data-tone={statusTone}>
               <span className="zeus-live-dot" data-tone={statusTone} aria-hidden />
-              {healthPct != null ? `${healthPct}%` : '—'} healthy
+              <span className="zeus-health-label">{healthPct != null ? `${healthPct}%` : '—'} healthy</span>
             </span>
             <button type="button" className="hermes-nb-pill hermes-nb-search-pill" onClick={onPaletteOpen}>
               <Search size={15} />

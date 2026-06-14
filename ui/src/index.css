@@ -1,4 +1,4 @@
-*
+/*
  * Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
  * https://zyvor.dev · info@zyvor.dev
  */
@@ -26,28 +26,10 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background-color: #0a0d12;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(59, 130, 246, 0.14), transparent 42%),
-    radial-gradient(ellipse 60% 40% at 88% 4%, rgba(168, 85, 247, 0.12), transparent 38%),
-    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(59, 130, 246, 0.06), transparent 48%),
-    linear-gradient(180deg, #0a0d12 0%, #11151c 38%, #161b24 100%);
-  background-attachment: fixed;
+  min-height: 100%;
 }
 
-.hermes-page-mesh {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.55;
-  background-image:
-    radial-gradient(at 27% 37%, rgba(59, 130, 246, 0.12) 0, transparent 50%),
-    radial-gradient(at 72% 18%, rgba(168, 85, 247, 0.1) 0, transparent 45%),
-    radial-gradient(at 85% 78%, rgba(59, 130, 246, 0.08) 0, transparent 48%);
-  filter: blur(48px);
-}
+/* Mesh grid handled in nebula-layout.css (.app-shell .hermes-page-mesh) */
 
 .command-surface-body,
 .hermes-dock {
@@ -87,15 +69,13 @@ button {
 .zeus-glass,
 .glass-section {
   position: relative;
-  overflow: visible;
-  border-radius: var(--zeus-radius-panel, 1.25rem);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(155deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(var(--zeus-glass-card-blur, 40px)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--zeus-glass-card-blur, 40px)) saturate(1.2);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 16px 40px -24px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  border-radius: var(--radius-xl, 28px);
+  border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.12));
+  background: linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-panel, 0 18px 50px rgba(2, 6, 23, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.04));
 }
 
 .zeus-card-active {
@@ -189,6 +169,14 @@ button {
   max-width: 1440px;
   width: 100%;
   margin: 0 auto;
+}
+
+/* Legacy pages outside main-scroll-area use .hermes-main when nested */
+.main-scroll-area > .hermes-main,
+.main-scroll-area .page-grid {
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 
 .glass-section {
@@ -1034,6 +1022,10 @@ button {
   flex-shrink: 0;
 }
 
+.space-infrastructure .space-tile-icon { background: rgba(251, 191, 36, 0.18); color: #fde68a; }
+.space-zeus-os .space-tile-icon { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+.space-consolehub .space-tile-icon { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; }
+.space-databases .space-tile-icon { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
 .space-monitoring .space-tile-icon { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
 .space-security .space-tile-icon { background: rgba(52, 211, 153, 0.18); color: #6ee7b7; }
 .space-storage .space-tile-icon { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
@@ -1446,19 +1438,26 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid var(--hermes-border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--hermes-text);
-  font-size: 0.72rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-chip);
+  color: var(--text-muted);
+  font-size: 0.75rem;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.workspace-chip:hover {
+  color: var(--text-secondary);
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.55);
 }
 
 .workspace-chip.active {
-  border-color: rgba(59, 130, 246, 0.45);
-  background: rgba(59, 130, 246, 0.15);
-  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.28);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08));
+  color: #dbeafe;
 }
 
 .workspace-count {
@@ -1691,7 +1690,7 @@ button {
 
 .hermes-page-footer {
   margin-top: auto;
-  padding: 1rem 1.5rem 6.75rem;
+  padding: 1rem 1.5rem 1rem;
   text-align: center;
 }
 
@@ -2004,16 +2003,28 @@ button {
 .zeus-health-chip,
 .zeus-status-chip {
   padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid var(--z-border);
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-chip);
   font-size: 0.75rem;
-  color: var(--z-text-muted);
+  color: var(--text-muted);
 }
 
-.zeus-health-chip[data-tone='ok'] { color: rgb(167 243 208); border-color: rgba(52, 211, 153, 0.35); }
-.zeus-health-chip[data-tone='warn'] { color: rgb(253 230 138); border-color: rgba(251, 191, 36, 0.35); }
-.zeus-health-chip[data-tone='bad'] { color: rgb(252 165 165); border-color: rgba(239, 68, 68, 0.35); }
+.zeus-health-chip[data-tone='ok'] {
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(16, 185, 129, 0.1);
+}
+.zeus-health-chip[data-tone='warn'] {
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.1);
+}
+.zeus-health-chip[data-tone='bad'] {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.1);
+}
 .zeus-status-chip.warn { color: var(--z-red); }
 a.zeus-status-chip {
   text-decoration: none;
@@ -2494,10 +2505,11 @@ a.zeus-status-chip:hover {
 }
 
 .zeus-switcher-label {
-  font-size: 0.72rem;
-  color: var(--z-text-faint);
+  font-size: 0.68rem;
+  color: var(--text-faint);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
 .zeus-federated-clusters {
@@ -2541,64 +2553,6 @@ a.zeus-status-chip:hover {
 .platform-pulse-copy {
   position: relative;
   z-index: 1;
-}
-
-.home-metrics-strip {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
-}
-
-@media (min-width: 900px) {
-  .home-metrics-strip {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.home-metric-tile {
-  display: block;
-  padding: 0.85rem 1rem;
-  text-decoration: none;
-  color: inherit;
-  transition: transform var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
-}
-
-.home-metric-tile:hover {
-  transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.28);
-  box-shadow: 0 12px 32px -16px rgba(59, 130, 246, 0.2);
-}
-
-.home-metric-tile-warn {
-  border-color: rgba(245, 158, 11, 0.35);
-  background: linear-gradient(160deg, rgba(245, 158, 11, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-}
-
-.home-metric-head {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--zeus-text-faint);
-}
-
-.home-metric-value {
-  margin: 0.45rem 0 0;
-  font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  color: var(--zeus-text);
-}
-
-.home-metric-sub {
-  margin: 0.2rem 0 0;
-  font-size: 0.72rem;
-  color: var(--zeus-text-muted);
 }
 
 .platform-pulse-hero.zeus-glass-hero {
@@ -3188,22 +3142,6 @@ a.zeus-status-chip:hover {
   gap: 0.35rem;
 }
 
-.catalog-toolbar-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  align-items: center;
-}
-
-.catalog-toolbar-row select {
-  padding: 0.45rem 0.65rem;
-  border-radius: 0.55rem;
-  border: 1px solid var(--hermes-border);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--hermes-text);
-  font-size: 0.78rem;
-}
-
 /* ── Aether-style top navbar ── */
 
 .hermes-navbar {
@@ -3328,7 +3266,7 @@ a.zeus-status-chip:hover {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #475569;
+  color: var(--text-muted, #94a3b8);
 }
 
 @media (min-width: 1400px) {
@@ -3609,7 +3547,7 @@ a.zeus-status-chip:hover {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #475569;
+  color: var(--text-muted, #94a3b8);
 }
 
 .hermes-nb-drawer-item {

@@ -46,15 +46,22 @@ spec:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 12
           livenessProbe:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
             periodSeconds: 10
+            failureThreshold: 30
           resources:
             requests:
               cpu: 50m

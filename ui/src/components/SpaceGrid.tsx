@@ -7,11 +7,11 @@ import type { HermesApp } from '../types'
 
 const SPACE_GRADIENTS: Record<string, string> = {
   monitoring: 'space-monitoring',
-  virtualization: 'space-virtualization',
   security: 'space-security',
-  storage: 'space-storage',
-  developer: 'space-developer',
-  ai: 'space-ai',
+  infrastructure: 'space-infrastructure',
+  'zeus-os': 'space-zeus-os',
+  consolehub: 'space-consolehub',
+  databases: 'space-databases',
   other: 'space-other',
 }
 

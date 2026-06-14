@@ -5,6 +5,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Globe, ShieldCheck, Upload } from 'lucide-react'
 import AppCard from '../components/AppCard'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
 import { hermesApi } from '../services/hermesApi'
 import type { FederatedApp } from '../types'
 
@@ -44,86 +48,76 @@ export default function FederatedPage() {
     byCluster.set(entry.clusterId, list)
   }
 
+  const loading = federated.isLoading && !federated.data
+
   return (
-    <section className="glass-section">
-      <div className="section-head">
-        <h2>
-          <Globe size={16} /> Federated catalog
-        </h2>
-        <span className="chip chip-muted">{federated.data?.length ?? 0} apps</span>
-        <Link to="/cluster" className="section-link">
-          Clusters
-        </Link>
-      </div>
-      {federated.isLoading ? (
-        <div className="empty">Loading federated catalog…</div>
-      ) : (
-        [...byCluster.entries()].map(([clusterId, entries]) => {
-          const canWrite = writeClusters.has(clusterId)
-          return (
-            <div key={clusterId} className="federated-cluster-block">
-              <div className="federated-cluster-head">
-                <h3>{entries[0]?.clusterName ?? clusterId}</h3>
-                {canWrite ? (
-                  <span className="chip chip-ok">Write federation enabled</span>
-                ) : (
-                  <span className="chip chip-muted">Read-only</span>
-                )}
-                {canWrite ? (
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    disabled={rbacCheck.isPending}
-                    onClick={() => rbacCheck.mutate(clusterId)}
-                  >
-                    <ShieldCheck size={14} />
-                    Check RBAC
-                  </button>
-                ) : null}
-              </div>
-              {rbacCheck.data && rbacCheck.variables === clusterId ? (
-                <p className={rbacCheck.data.ok ? 'federated-action-ok' : 'federated-action-error'}>
-                  {rbacCheck.data.detail ?? (rbacCheck.data.ok ? 'Publish allowed' : 'Publish denied')}
-                  {rbacCheck.data.allowedActions?.length
-                    ? ` · ${rbacCheck.data.allowedActions.join(', ')}`
-                    : ''}
-                </p>
-              ) : null}
-              <div className="app-grid">
-                {entries.map((entry) => (
-                  <div key={`${entry.clusterId}-${entry.id}`} className="federated-app-wrap">
-                    <AppCard app={entry} />
-                    {canWrite && !entry.id.includes('__offline__') ? (
-                      <button
-                        type="button"
-                        className="btn btn-sm federated-publish-btn"
-                        disabled={publishRemote.isPending}
-                        onClick={() => publishRemote.mutate({ clusterId: entry.clusterId, id: entry.id })}
-                      >
-                        <Upload size={14} />
-                        Publish on remote
-                      </button>
-                    ) : null}
-                    {publishRemote.isError &&
-                    publishRemote.variables?.id === entry.id &&
-                    publishRemote.variables?.clusterId === entry.clusterId ? (
-                      <p className="federated-action-error">Remote publish failed.</p>
-                    ) : null}
-                    {publishRemote.data &&
-                    !publishRemote.data.ok &&
-                    publishRemote.variables?.id === entry.id ? (
-                      <p className="federated-action-error">{publishRemote.data.detail ?? 'Failed'}</p>
-                    ) : null}
-                    {publishRemote.data?.ok && publishRemote.variables?.id === entry.id ? (
-                      <p className="federated-action-ok">{publishRemote.data.detail ?? 'Published'}</p>
+    <PageFrame
+      loading={loading}
+      error={federated.isError}
+      hasData={Boolean(federated.data)}
+      onRetry={() => void federated.refetch()}
+      errorTitle="Could not load federated catalog"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">Federation</p>
+              <h2 className="section-title">Federated catalog</h2>
+              <p className="body-text">Merged apps from remote clusters — publish when write federation is enabled.</p>
+            </div>
+            <span className="nebula-status-badge status-unknown">{federated.data?.length ?? 0} apps</span>
+            <Link to="/cluster" className="section-link-nebula">Clusters</Link>
+          </div>
+
+          {!byCluster.size ? (
+            <EmptyState icon={<Globe size={22} />} title="No federated apps" description="Configure HERMES_FEDERATED_CLUSTERS to merge remote catalogs." />
+          ) : (
+            [...byCluster.entries()].map(([clusterId, entries]) => {
+              const canWrite = writeClusters.has(clusterId)
+              return (
+                <div key={clusterId} className="mission-control-group-flat">
+                  <div className="section-head-nebula">
+                    <p className="section-label">{entries[0]?.clusterName ?? clusterId}</p>
+                    {canWrite ? (
+                      <span className="nebula-status-badge status-healthy">Write enabled</span>
+                    ) : (
+                      <span className="nebula-status-badge status-unknown">Read-only</span>
+                    )}
+                    {canWrite ? (
+                      <Button variant="ghost" className="nebula-btn-compact" disabled={rbacCheck.isPending} onClick={() => rbacCheck.mutate(clusterId)}>
+                        <ShieldCheck size={14} /> Check RBAC
+                      </Button>
                     ) : null}
                   </div>
-                ))}
-              </div>
-            </div>
-          )
-        })
-      )}
-    </section>
+                  {rbacCheck.data && rbacCheck.variables === clusterId ? (
+                    <p className={rbacCheck.data.ok ? 'federated-action-ok' : 'federated-action-error'}>
+                      {rbacCheck.data.detail ?? (rbacCheck.data.ok ? 'Publish allowed' : 'Publish denied')}
+                    </p>
+                  ) : null}
+                  <div className="app-grid" style={{ marginTop: '0.75rem' }}>
+                    {entries.map((entry) => (
+                      <div key={`${entry.clusterId}-${entry.id}`} className="federated-app-wrap">
+                        <AppCard app={entry} />
+                        {canWrite && !entry.id.includes('__offline__') ? (
+                          <Button
+                            variant="secondary"
+                            className="nebula-btn-compact federated-publish-btn"
+                            disabled={publishRemote.isPending}
+                            onClick={() => publishRemote.mutate({ clusterId: entry.clusterId, id: entry.id })}
+                          >
+                            <Upload size={14} /> Publish on remote
+                          </Button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }

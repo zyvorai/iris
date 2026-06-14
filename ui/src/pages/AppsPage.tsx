@@ -3,8 +3,14 @@
 
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Grid3X3 } from 'lucide-react'
 import AppCard from '../components/AppCard'
-import { environmentLabel, hermesApi } from '../services/hermesApi'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import PageToolbar from '../components/nebula/PageToolbar'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
+import { hermesApi } from '../services/hermesApi'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
 
@@ -23,30 +29,28 @@ function sortApps(apps: HermesApp[], sort: SortKey): HermesApp[] {
 
 export default function AppsPage() {
   const [filter, setFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
   const [mode, setMode] = useState<CatalogMode>('published')
   const [sort, setSort] = useState<SortKey>('name')
   const [statusFilter, setStatusFilter] = useState('')
-  const { workspaceId, matchesWorkspace } = useWorkspace()
+  const { matchesWorkspace } = useWorkspace()
   const published = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
 
   const source = mode === 'published' ? published.data : catalog.data
-
-  const environments = useMemo(() => {
-    const set = new Set<string>()
-    for (const a of source ?? []) {
-      if (a.meta?.environment) set.add(a.meta.environment)
-    }
-    return [...set].sort()
-  }, [source])
+  const loading = mode === 'published' ? published.isLoading && !published.data : catalog.isLoading && !catalog.data
+  const error = mode === 'published' ? published.isError : catalog.isError
+  const hasData = Boolean(source)
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase()
+    const cat = categoryFilter.trim().toLowerCase()
     const list = (source ?? []).filter((a) => {
       if (!matchesWorkspace(a)) return false
       if (statusFilter && a.status !== statusFilter) return false
+      if (cat && a.category.toLowerCase() !== cat) return false
       if (!q) return true
       return (
         a.displayName.toLowerCase().includes(q) ||
@@ -56,63 +60,122 @@ export default function AppsPage() {
       )
     })
     return sortApps(list, sort)
-  }, [source, filter, matchesWorkspace, sort, statusFilter])
+  }, [source, filter, categoryFilter, matchesWorkspace, sort, statusFilter])
 
   const categories = useMemo(() => {
     const set = new Set((source ?? []).map((a) => a.category))
     return [...set].sort()
   }, [source])
 
+  const onRetry = () => {
+    void published.refetch()
+    void catalog.refetch()
+  }
+
+  const clearFilters = () => {
+    setFilter('')
+    setCategoryFilter('')
+    setStatusFilter('')
+  }
+
   return (
-    <>
-      <section className="glass-section catalog-toolbar">
-        <div className="catalog-toolbar-row">
-          <div className="view-toggle" role="tablist">
-            <button type="button" className={mode === 'published' ? 'active' : ''} onClick={() => setMode('published')}>
-              Published ({published.data?.length ?? 0})
-            </button>
-            <button type="button" className={mode === 'all' ? 'active' : ''} onClick={() => setMode('all')}>
-              All discovered ({catalog.data?.length ?? 0})
-            </button>
+    <PageFrame
+      loading={loading}
+      error={error}
+      hasData={hasData}
+      onRetry={onRetry}
+      errorTitle="Could not load catalog"
+      isEmpty={hasData && !filtered.length}
+      empty={
+        <GlassPanel className="glass-panel-section">
+          <EmptyState
+            icon={<Grid3X3 size={22} />}
+            title="No apps match your filters"
+            description="Try clearing filters or browse the full cluster inventory."
+            action={
+              <>
+                <Button variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+                <Button variant="primary" to="/cluster">
+                  Browse cluster
+                </Button>
+              </>
+            }
+          />
+        </GlassPanel>
+      }
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">Catalog</p>
+              <p className="body-text">
+                Published launchpad apps and the full discovered cluster inventory.
+              </p>
+            </div>
           </div>
-          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} aria-label="Sort apps">
-            <option value="name">Sort: name</option>
-            <option value="status">Sort: status</option>
-            <option value="namespace">Sort: namespace</option>
-            <option value="updated">Sort: recently updated</option>
-          </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Filter by status">
-            <option value="">All statuses</option>
-            <option value="healthy">Healthy</option>
-            <option value="degraded">Degraded</option>
-            <option value="broken">Broken</option>
-          </select>
-        </div>
-      </section>
-      <div className="filter-bar">
-        <input placeholder="Filter apps…" value={filter} onChange={(e) => setFilter(e.target.value)} />
-        {categories.slice(0, 8).map((c) => (
-          <button key={c} type="button" className="btn" onClick={() => setFilter(c)}>
-            {c}
-          </button>
-        ))}
-        {environments.map((env) => (
-          <span key={env} className={`chip ${workspaceId === env ? 'chip-accent' : 'chip-muted'}`}>
-            {environmentLabel(env)}
-          </span>
-        ))}
+
+          <PageToolbar data-testid="catalog-toolbar">
+            <div className="view-toggle" role="tablist">
+              <button type="button" className={mode === 'published' ? 'active' : ''} onClick={() => setMode('published')}>
+                Published ({published.data?.length ?? 0})
+              </button>
+              <button type="button" className={mode === 'all' ? 'active' : ''} onClick={() => setMode('all')}>
+                All ({catalog.data?.length ?? 0})
+              </button>
+            </div>
+            <input
+              className="page-toolbar-search"
+              placeholder="Search apps…"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              aria-label="Search apps"
+            />
+            <select className="page-toolbar-select" value={sort} onChange={(e) => setSort(e.target.value as SortKey)} aria-label="Sort apps">
+              <option value="name">Sort: name</option>
+              <option value="status">Sort: status</option>
+              <option value="namespace">Sort: namespace</option>
+              <option value="updated">Recently updated</option>
+            </select>
+            <select className="page-toolbar-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option value="healthy">Healthy</option>
+              <option value="degraded">Degraded</option>
+              <option value="broken">Broken</option>
+            </select>
+          </PageToolbar>
+
+          {categories.length ? (
+            <div className="mission-control-filters" style={{ marginTop: '0.75rem' }}>
+              <button type="button" className={`filter-chip ${!categoryFilter ? 'active' : ''}`} onClick={() => setCategoryFilter('')}>
+                All categories
+              </button>
+              {categories.slice(0, 8).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`filter-chip ${categoryFilter === c ? 'active' : ''}`}
+                  onClick={() => setCategoryFilter(categoryFilter === c ? '' : c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <p className="body-text" style={{ marginTop: '1rem' }}>
+            {mode === 'published' ? 'Launchpad catalog' : 'Full cluster catalog'} · {filtered.length} apps
+          </p>
+
+          <div className="app-grid" style={{ marginTop: '1rem' }}>
+            {filtered.map((app) => (
+              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+            ))}
+          </div>
+        </GlassPanel>
       </div>
-      <section className="glass-section">
-        <h2>
-          {mode === 'published' ? 'Launchpad catalog' : 'Full cluster catalog'} · {filtered.length} apps
-        </h2>
-        {!filtered.length ? <div className="empty">No apps match your filters.</div> : null}
-        <div className="app-grid">
-          {filtered.map((app) => (
-            <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
-          ))}
-        </div>
-      </section>
-    </>
+    </PageFrame>
   )
 }

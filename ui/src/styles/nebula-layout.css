@@ -1,0 +1,108 @@
+/*
+ * Hermes layout — Aether-matched app shell
+ */
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background-color: var(--bg-root);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(59, 130, 246, 0.14), transparent 42%),
+    radial-gradient(ellipse 60% 40% at 88% 4%, rgba(168, 85, 247, 0.12), transparent 38%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(59, 130, 246, 0.06), transparent 48%),
+    linear-gradient(180deg, #0a0d12 0%, #11151c 38%, #161b24 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+
+.app-shell .hermes-page-mesh {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  filter: none;
+}
+
+.top-command-bar {
+  flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.main-scroll-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+  padding-bottom: 48px;
+  max-width: min(120rem, calc(100vw - 1.5rem));
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.main-scroll-area::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.main-scroll-area::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+
+.main-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+.page-grid {
+  display: grid;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .main-scroll-area {
+    padding: 16px;
+    padding-bottom: 40px;
+  }
+
+  .page-grid {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,9 +1,10 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { ChevronRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import ClusterHealthOrb from './ClusterHealthOrb'
+import { ChevronRight, GitBranch } from 'lucide-react'
+import GlassPanel from '../nebula/GlassPanel'
+import HealthRing, { healthTier } from '../nebula/HealthRing'
+import Button from '../nebula/Button'
 
 interface PlatformPulseHeroProps {
   greeting: string
@@ -14,6 +15,7 @@ interface PlatformPulseHeroProps {
   healthy: number
   degraded: number
   broken: number
+  aiHint?: string
   onResolveIssues?: () => void
 }
 
@@ -26,57 +28,57 @@ export default function PlatformPulseHero({
   healthy,
   degraded,
   broken,
+  aiHint,
   onResolveIssues,
 }: PlatformPulseHeroProps) {
   const who = userId ? userId.split('@')[0] : 'operator'
   const attentionCount = broken + degraded
   const healthPct = serviceCount > 0 ? Math.round((healthy / serviceCount) * 100) : 100
-  const unpublished = Math.max(0, serviceCount - publishedCount)
+  const tier = healthTier(healthPct)
+  const auraClass = `aura-${tier}`
+
   const headline =
-    broken > 0
-      ? 'needs attention'
+    broken > 0 || healthPct < 60
+      ? 'Your platform needs attention.'
       : degraded > 0
-        ? 'is degraded'
-        : healthPct >= 95
-          ? 'is healthy'
-          : 'is partially healthy'
-  const heroClass =
-    broken > 0
-      ? 'zeus-glass-hero-critical'
-      : degraded > 0 || healthPct < 80
-        ? 'zeus-glass-hero-warn'
-        : 'zeus-glass-hero'
+        ? 'Your platform is degraded.'
+        : healthPct >= 90
+          ? 'Your platform is excellent.'
+          : 'Your platform is stable.'
 
   return (
-    <section className={`platform-pulse-hero ${heroClass}`} data-testid="platform-pulse-hero">
-      <div className="zeus-glass-hero-glow" aria-hidden />
-      <div className="platform-pulse-copy">
-        <p className="hero-kicker">{greeting}</p>
-        <h2 className="hero-title">
-          {who}. Your platform <em>{headline}</em>.
-        </h2>
-        <p className="hero-sub">
-          {serviceCount} discovered · {publishedCount} published to launchpad · {namespaceCount} namespaces ·{' '}
-          {healthy} healthy
-          {degraded > 0 ? ` · ${degraded} degraded` : ''}
-          {broken > 0 ? ` · ${broken} broken` : ''}.
-          {unpublished > 0 ? ` ${unpublished} apps require publish before gateway open.` : ''}
-        </p>
-        <div className="platform-pulse-ctas">
-          <a href="#mission-control" className="btn btn-primary">
-            Open Mission Control <ChevronRight size={14} />
-          </a>
-          <Link to="/cluster" className="btn">
-            Publish &amp; cluster
-          </Link>
-          {attentionCount > 0 ? (
-            <button type="button" className="btn btn-warn" onClick={onResolveIssues}>
-              Review {attentionCount} issues
-            </button>
-          ) : null}
+    <GlassPanel className={`hero-command-panel ${auraClass}`} data-testid="platform-pulse-hero">
+      <div className="hero-aura" aria-hidden />
+      <div className="hero-layout">
+        <div className="hero-command-copy">
+          <p className="page-kicker">
+            {greeting}, {who}
+          </p>
+          <h1 className="page-title">{headline}</h1>
+          <p className="hero-command-stats body-text">
+            {serviceCount} discovered · {publishedCount} published · {namespaceCount} namespaces ·{' '}
+            {attentionCount > 0 ? `${attentionCount} degraded` : `${healthy} healthy`}
+          </p>
+          {aiHint ? <p className="hero-command-ai-hint">{aiHint}</p> : null}
+          <div className="hero-command-ctas">
+            <Button variant="primary" href="#mission-control">
+              Open Mission Control <ChevronRight size={14} />
+            </Button>
+            <Button variant="secondary" to="/cluster">
+              Publish &amp; Cluster
+            </Button>
+            <Button variant="secondary" to="/graph">
+              <GitBranch size={14} /> Topology
+            </Button>
+            {attentionCount > 0 ? (
+              <Button variant="danger" onClick={onResolveIssues}>
+                Review {attentionCount} Issues
+              </Button>
+            ) : null}
+          </div>
         </div>
+        <HealthRing healthy={healthy} total={serviceCount} attentionCount={attentionCount} />
       </div>
-      <ClusterHealthOrb healthy={healthy} total={serviceCount} degraded={degraded} broken={broken} />
-    </section>
+    </GlassPanel>
   )
 }

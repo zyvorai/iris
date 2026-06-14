@@ -4,10 +4,21 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Copy, ExternalLink, Route, Sparkles, Star, Stethoscope } from 'lucide-react'
+import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
+import AttentionQueue from '../components/command/AttentionQueue'
+import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
 import DiagnosePanel from '../components/DiagnosePanel'
+import GlassPanel from '../components/nebula/GlassPanel'
+import HealthRing from '../components/nebula/HealthRing'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
+import ActionMenu from '../components/nebula/ActionMenu'
+import StatusBadge from '../components/nebula/StatusBadge'
+import RouteDisplay from '../components/nebula/RouteDisplay'
+import ServiceStatusMessage from '../components/nebula/ServiceStatusMessage'
 import ShareLinksPanel from '../components/ShareLinksPanel'
 import MeshPolicyPanel from '../components/MeshPolicyPanel'
 import { AppGraphPanel } from '../pages/GraphPage'
@@ -20,7 +31,6 @@ import {
   hermesApi,
   openApp,
   sourceLabel,
-  statusLabel,
   statusTone,
 } from '../services/hermesApi'
 
@@ -81,163 +91,170 @@ export default function AppDetailPage() {
     setSearchParams({}, { replace: true })
   }
 
-  if (app.isLoading) return <div className="empty">Loading…</div>
-  if (app.error || !app.data) return <div className="empty">App not found</div>
+  if (app.isLoading) {
+    return (
+      <PageFrame loading error={false} hasData={false} onRetry={() => void app.refetch()}>
+        <div />
+      </PageFrame>
+    )
+  }
+  if (app.error || !app.data) {
+    return (
+      <PageFrame
+        loading={false}
+        error
+        hasData={false}
+        onRetry={() => void app.refetch()}
+        errorTitle="App not found"
+      >
+        <div />
+      </PageFrame>
+    )
+  }
 
   const a = app.data
   const broken = a.status === 'broken' || a.status === 'degraded'
   const canOpen = a.status !== 'broken' && a.readyEndpoints > 0
 
+  const overflowItems = [
+    { label: isFavorite ? 'Unpin' : 'Pin', onClick: () => void favMutation.mutate() },
+    {
+      label: a.meta?.recommended ? 'Remove team pick' : 'Mark team pick',
+      onClick: () => void recommendMutation.mutate(!a.meta?.recommended),
+    },
+    { label: 'Copy URL', onClick: () => void copyAppUrl(a), disabled: !canOpen },
+    { label: 'Inspect route', onClick: openDiagnose },
+  ]
+
   return (
-    <>
-      <section className={`glass-section app-detail-hero ${statusTone(a.status)}`}>
-        <div className="app-detail-head">
-          <div>
-            <p className="hero-kicker">{a.category}</p>
-            <h2>{a.displayName}</h2>
-            <p className="hero-sub">{a.description || 'Infrastructure application'}</p>
-            <div className="app-meta-row">
-              <span className={`status-chip ${statusTone(a.status)}`}>{statusLabel(a.status)}</span>
-              {a.meta?.environment ? (
-                <span className="chip chip-env">{environmentLabel(a.meta.environment)}</span>
+    <PageFrame loading={false} error={false} hasData onRetry={() => void app.refetch()}>
+      <div className="page-grid">
+        <GlassPanel className={`glass-panel-section app-detail-hero-nebula ${statusTone(a.status)}`}>
+          <div className="app-detail-head">
+            <div>
+              <p className="page-kicker">{a.category}</p>
+              <h1 className="page-title">{a.displayName}</h1>
+              <p className="body-text">{a.description || 'Infrastructure application'}</p>
+              <div className="app-meta-row">
+                <StatusBadge status={a.status} />
+                {a.meta?.environment ? (
+                  <span className="chip chip-env">{environmentLabel(a.meta.environment)}</span>
+                ) : null}
+              </div>
+              {broken && a.statusMessage ? (
+                <ServiceStatusMessage message={a.statusMessage} status={a.status} />
               ) : null}
             </div>
-            {broken && a.statusMessage ? <p className="app-problem">{a.statusMessage}</p> : null}
+            <div className="app-detail-actions-nebula">
+              {broken ? (
+                <Button variant="danger" onClick={openDiagnose}>
+                  <Stethoscope size={14} /> Diagnose
+                </Button>
+              ) : (
+                <Button variant="primary" disabled={!canOpen} onClick={() => void openApp(a)}>
+                  <ExternalLink size={14} /> {canOpen ? 'Open' : 'Cannot open'}
+                </Button>
+              )}
+              <ActionMenu items={overflowItems} label="App actions" />
+            </div>
           </div>
-          <div className="app-actions app-detail-actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={!canOpen}
-              title={canOpen ? undefined : 'Publish and ensure endpoints are ready before opening'}
-              onClick={() => void openApp(a)}
-            >
-              <ExternalLink size={12} /> {canOpen ? 'Open' : 'Cannot open'}
-            </button>
-            <button type="button" className="btn" onClick={() => void favMutation.mutate()}>
-              <Star size={12} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Unpin' : 'Pin'}
-            </button>
-            <button
-              type="button"
-              className={`btn ${a.meta?.recommended ? 'btn-accent' : ''}`}
-              onClick={() => void recommendMutation.mutate(!a.meta?.recommended)}
-            >
-              <Sparkles size={12} /> {a.meta?.recommended ? 'Team pick' : 'Mark team pick'}
-            </button>
-            <button type="button" className="btn" onClick={() => void copyAppUrl(a)}>
-              <Copy size={12} /> Copy URL
-            </button>
-            <button type="button" className="btn" onClick={openDiagnose}>
-              <Route size={12} /> Inspect route
-            </button>
-            {broken ? (
-              <button type="button" className="btn btn-warn" onClick={openDiagnose}>
-                <Stethoscope size={12} /> Diagnose
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </section>
+        </GlassPanel>
 
-      <section className="glass-section">
-        <div className="detail-grid detail-grid-human">
-          <div className="detail-row">
-            <span>Gateway path</span>
-            <code>{appLaunchPath(a)}</code>
-          </div>
-          <div className="detail-row">
-            <span>Public URL</span>
-            <code>{appPublicUrl(a)}</code>
-          </div>
-          <div className="detail-row">
-            <span>Cluster service port</span>
-            <code>:{a.backend.port}</code>
-            <span className="detail-hint">In-cluster only — not a browser URL</span>
-          </div>
-          {a.meta?.ingressHosts?.length ? (
-            <div className="detail-row">
-              <span>Ingress hosts</span>
-              <span className="ingress-host-list">
-                {a.meta.ingressHosts.map((host) => (
-                  <code key={host}>{host}</code>
-                ))}
-              </span>
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      {a.meta?.meshRoutes?.length || a.meta?.meshPolicies?.length ? (
-        <MeshPolicyPanel routes={a.meta.meshRoutes} policies={a.meta.meshPolicies} />
-      ) : null}
-
-      <section className="glass-section">
-        <button type="button" className="tech-toggle" onClick={() => setTechOpen((v) => !v)}>
-          Technical details
-          <span>{techOpen ? 'Hide' : 'Show'}</span>
-        </button>
-        {techOpen ? (
-          <div className="detail-grid detail-grid-tech">
-            <div className="detail-row">
-              <span>Namespace</span>
-              <span>{a.namespace}</span>
-            </div>
-            <div className="detail-row">
-              <span>Service</span>
-              <span>
-                {a.backend.name}:{a.backend.port}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span>Source</span>
-              <span>{sourceLabel(a.source)}</span>
-            </div>
-            <div className="detail-row">
-              <span>Ready endpoints</span>
-              <span>{a.readyEndpoints}</span>
-            </div>
-            <div className="detail-row">
-              <span>Auth</span>
-              <span>{a.authMode}</span>
-            </div>
-            {a.meta?.owner ? (
-              <div className="detail-row">
-                <span>Owner</span>
-                <span>{a.meta.owner}</span>
+        <GlassPanel className="glass-panel-section">
+          <p className="section-label">Routing</p>
+          <div className="route-display-list">
+            <RouteDisplay label="Launchpad path" path={appLaunchPath(a)} href={appPublicUrl(a)} />
+            <RouteDisplay label="Public URL" path={appPublicUrl(a)} href={appPublicUrl(a)} />
+            <RouteDisplay
+              label="In-cluster service"
+              path={`${a.backend.name}.${a.namespace}:${a.backend.port}`}
+              hint="Cluster DNS — not a browser URL"
+            />
+            {a.meta?.ingressHosts?.length ? (
+              <div className="route-display-row">
+                <span className="route-display-label">Ingress hosts</span>
+                <div className="route-display-hosts">
+                  {a.meta.ingressHosts.map((host) => (
+                    <code key={host} className="route-display-path">{host}</code>
+                  ))}
+                </div>
               </div>
             ) : null}
-            {dependencyLinks.length ? (
+          </div>
+        </GlassPanel>
+
+        {a.meta?.meshRoutes?.length || a.meta?.meshPolicies?.length ? (
+          <MeshPolicyPanel routes={a.meta.meshRoutes} policies={a.meta.meshPolicies} />
+        ) : null}
+
+        <GlassPanel className="glass-panel-section">
+          <button type="button" className="tech-toggle" onClick={() => setTechOpen((v) => !v)}>
+            Technical details
+            <span>{techOpen ? 'Hide' : 'Show'}</span>
+          </button>
+          {techOpen ? (
+            <div className="detail-grid detail-grid-tech">
               <div className="detail-row">
-                <span>Depends on</span>
-                <span className="dep-links">
-                  {dependencyLinks.map(({ dep, app: depApp }) =>
-                    depApp ? (
-                      <Link key={dep} to={appDetailPath(depApp)}>
-                        {depApp.displayName}
-                      </Link>
-                    ) : (
-                      <span key={dep}>{dep}</span>
-                    ),
-                  )}
+                <span>Namespace</span>
+                <span>{a.namespace}</span>
+              </div>
+              <div className="detail-row">
+                <span>Service</span>
+                <span>
+                  {a.backend.name}:{a.backend.port}
                 </span>
               </div>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+              <div className="detail-row">
+                <span>Source</span>
+                <span>{sourceLabel(a.source)}</span>
+              </div>
+              <div className="detail-row">
+                <span>Ready endpoints</span>
+                <span>{a.readyEndpoints}</span>
+              </div>
+              <div className="detail-row">
+                <span>Auth</span>
+                <span>{a.authMode}</span>
+              </div>
+              {a.meta?.owner ? (
+                <div className="detail-row">
+                  <span>Owner</span>
+                  <span>{a.meta.owner}</span>
+                </div>
+              ) : null}
+              {dependencyLinks.length ? (
+                <div className="detail-row">
+                  <span>Depends on</span>
+                  <span className="dep-links">
+                    {dependencyLinks.map(({ dep, app: depApp }) =>
+                      depApp ? (
+                        <Link key={dep} to={appDetailPath(depApp)}>
+                          {depApp.displayName}
+                        </Link>
+                      ) : (
+                        <span key={dep}>{dep}</span>
+                      ),
+                    )}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </GlassPanel>
 
-      <ShareLinksPanel app={a} />
+        <ShareLinksPanel app={a} />
 
-      <AppGraphPanel appId={a.id} />
+        <AppGraphPanel appId={a.id} />
 
-      <div className="app-actions" style={{ marginTop: '0.5rem' }}>
-        <Link to="/apps" className="btn">
-          Back to catalog
-        </Link>
+        <div className="app-detail-footer-actions">
+          <Button variant="ghost" to="/apps">
+            Back to catalog
+          </Button>
+        </div>
+
+        <DiagnosePanel app={a} open={diagnoseOpen} onClose={closeDiagnose} />
       </div>
-
-      <DiagnosePanel app={a} open={diagnoseOpen} onClose={closeDiagnose} />
-    </>
+    </PageFrame>
   )
 }
 
@@ -257,65 +274,64 @@ export function HealthPage() {
   const healthy = cluster.data?.healthy ?? catalog.data?.filter((a) => a.status === 'healthy').length ?? 0
   const degraded = cluster.data?.degraded ?? catalog.data?.filter((a) => a.status === 'degraded').length ?? 0
   const broken = cluster.data?.broken ?? catalog.data?.filter((a) => a.status === 'broken').length ?? 0
+  const issueCount = degraded + broken
+  const publishedCount = cluster.data?.published ?? catalog.data?.filter((a) => a.visibility.published).length ?? 0
+  const namespaceCount = cluster.data?.namespaces ?? 0
+
+  const loading = (catalog.isLoading && !catalog.data) || (cluster.isLoading && !cluster.data)
 
   return (
-    <>
-      <section className="glass-section">
-        <h2>Discovered services</h2>
-        <p className="hero-sub">Full cluster catalog health — not limited to launchpad-published apps.</p>
-        <div className="hero-stats">
-          <div className="stat-pill">
-            <strong>{serviceCount}</strong> discovered
+    <PageFrame
+      loading={loading}
+      error={catalog.isError || cluster.isError}
+      hasData={Boolean(catalog.data || cluster.data)}
+      onRetry={() => {
+        void catalog.refetch()
+        void cluster.refetch()
+      }}
+      errorTitle="Could not load health data"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section hero-command-panel aura-warning">
+          <div className="hero-aura" aria-hidden />
+          <div className="hero-layout">
+            <div className="hero-command-copy">
+              <p className="page-kicker">Health dashboard</p>
+              <h1 className="page-title">Cluster health overview</h1>
+              <p className="hero-command-stats body-text">
+                {serviceCount} discovered · {healthy} healthy · {degraded} degraded · {broken} broken
+              </p>
+            </div>
+            <HealthRing healthy={healthy} total={serviceCount} attentionCount={issueCount} />
           </div>
-          <div className="stat-pill">
-            <strong>{healthy}</strong> healthy
-          </div>
-          <div className="stat-pill">
-            <strong>{degraded}</strong> degraded
-          </div>
-          <div className="stat-pill">
-            <strong>{broken}</strong> broken
-          </div>
-        </div>
-      </section>
-      <section className="glass-section">
-        <h2>Needs attention ({unhealthy.length})</h2>
-        {unhealthy.length ? (
-          <div className="app-grid">
-            {unhealthy.map((app) => (
-              <AppCard key={app.id} app={app} />
-            ))}
-          </div>
-        ) : (
-          <div className="empty">All discovered services are healthy.</div>
-        )}
-      </section>
-      <section className="glass-section">
-        <h2>Published launchpad health</h2>
-        <p className="hero-sub">
-          Gateway probes only apps published to the launchpad ({publishedHealth.data?.total ?? 0} published).
-        </p>
-        <div className="hero-stats">
-          <div className="stat-pill">
-            <strong>{publishedHealth.data?.healthy ?? '—'}</strong> healthy
-          </div>
-          <div className="stat-pill">
-            <strong>{publishedHealth.data?.degraded ?? '—'}</strong> degraded
-          </div>
-          <div className="stat-pill">
-            <strong>{publishedHealth.data?.broken ?? '—'}</strong> broken
-          </div>
-        </div>
-        {publishedHealth.data?.apps.length ? (
-          <div className="app-grid">
-            {publishedHealth.data.apps.map((app) => (
-              <AppCard key={app.id} app={app} />
-            ))}
-          </div>
-        ) : (
-          <div className="empty">All published apps are healthy.</div>
-        )}
-      </section>
-    </>
+        </GlassPanel>
+
+        <HomeFleetSnapshot
+          serviceCount={serviceCount}
+          publishedCount={publishedCount}
+          namespaceCount={namespaceCount}
+          issueCount={issueCount}
+          brokenCount={broken}
+        />
+
+        <AttentionQueue apps={unhealthy} />
+
+        <GlassPanel className="glass-panel-section">
+          <p className="section-label">Published launchpad health</p>
+          <p className="body-text">
+            Gateway probes only apps published to the launchpad ({publishedHealth.data?.total ?? 0} published).
+          </p>
+          {publishedHealth.data?.apps.length ? (
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {publishedHealth.data.apps.map((app) => (
+                <AppCard key={app.id} app={app} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={<HeartPulse size={22} />} title="All published apps are healthy" />
+          )}
+        </GlassPanel>
+      </div>
+    </PageFrame>
   )
 }

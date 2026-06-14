@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Activity,
   Compass,
   Download,
   Globe,
@@ -16,6 +17,11 @@ import {
   Trash2,
   Users,
 } from 'lucide-react'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import PageToolbar from '../components/nebula/PageToolbar'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
 import { actionLabel, hermesApi } from '../services/hermesApi'
 import type { AuditEvent, FederatedAuditEvent } from '../types'
 
@@ -103,121 +109,126 @@ export default function ActivityPage() {
     })
   }, [audit.data, filter, search])
 
+  const loading = audit.isLoading && !audit.data
+
   return (
-    <>
-      <section className="glass-section">
-        <div className="section-head">
-          <h2>Activity</h2>
-          <span className="chip chip-muted">{events.length} events</span>
-          <label className="graph-broken-toggle">
-            <input type="checkbox" checked={federated} onChange={(e) => setFederated(e.target.checked)} />
-            Federated audit
-          </label>
-          <button type="button" className="btn" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
-            <Download size={12} /> Export CSV
-          </button>
-        </div>
-
-        <div className="filter-bar activity-filters">
-          {(
-            [
-              ['all', 'All'],
-              ['launch', 'Launches'],
-              ['share', 'Shares'],
-              ['discovery', 'Discovery'],
-              ['personal', 'Pins & picks'],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={`btn ${filter === id ? 'btn-accent' : ''}`}
-              onClick={() => setFilter(id)}
-            >
-              {label}
-            </button>
-          ))}
-          <input
-            type="search"
-            className="activity-search"
-            placeholder="Search activity…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search activity"
-          />
-        </div>
-
-        {audit.isLoading ? (
-          <div className="empty">Loading activity…</div>
-        ) : events.length ? (
-          <ol className="activity-timeline">
-            {events.map((event) => {
-              const Icon = actionIcons[event.action] ?? Users
-              const cluster = (event as FederatedAuditEvent).clusterName
-              return (
-                <li key={`${(event as FederatedAuditEvent).clusterId ?? 'local'}-${event.id}-${event.createdAt}`} className="activity-item">
-                  <span className="activity-icon" aria-hidden>
-                    <Icon size={14} />
-                  </span>
-                  <div className="activity-body">
-                    <div className="activity-head">
-                      <strong>{actionLabel(event.action)}</strong>
-                      {federated && cluster ? <span className="chip chip-muted">{cluster}</span> : null}
-                      <time dateTime={event.createdAt}>{event.createdAt ? new Date(event.createdAt).toLocaleString() : '—'}</time>
-                    </div>
-                    <p className="activity-meta">
-                      <span>{event.userId}</span>
-                      {event.appId ? (
-                        <>
-                          {' · '}
-                          <Link to={`/apps/${encodeURIComponent(event.appId)}`}>{event.appId}</Link>
-                        </>
-                      ) : null}
-                    </p>
-                    {event.detail ? <p className="activity-detail">{event.detail}</p> : null}
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
-        ) : (
-          <div className="empty">No activity yet. Launch apps, search, or pin favorites to populate the audit log.</div>
-        )}
-      </section>
-
-      {adminShares.data ? (
-        <section className="glass-section share-admin-panel">
-          <div className="section-head">
-            <h2>Share admin</h2>
-            <span className="chip chip-muted">{adminShares.data.length} active links</span>
+    <PageFrame
+      loading={loading}
+      error={audit.isError}
+      hasData={Boolean(audit.data)}
+      onRetry={() => void audit.refetch()}
+      errorTitle="Could not load activity"
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">Activity</p>
+              <p className="body-text">Audit log of launches, discovery, shares, and pins</p>
+            </div>
+            <span className="nebula-status-badge status-unknown">{events.length} events</span>
+            <Button variant="ghost" className="nebula-btn-compact" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
+              <Download size={12} /> Export
+            </Button>
           </div>
-          {adminShares.data.length ? (
-            <ul className="share-list">
-              {adminShares.data.map((share) => (
-                <li key={share.token} className="share-item">
-                  <div>
-                    <strong>{share.appId}</strong>
-                    <code>{`/launchpad/s/${share.token}`}</code>
-                    <span className="share-expiry">
-                      by {share.createdBy ?? 'unknown'} · expires {new Date(share.expiresAt).toLocaleString()}
+
+          <PageToolbar className="activity-filters-toolbar">
+            {(
+              [
+                ['all', 'All'],
+                ['launch', 'Launches'],
+                ['share', 'Shares'],
+                ['discovery', 'Discovery'],
+                ['personal', 'Pins'],
+              ] as const
+            ).map(([id, label]) => (
+              <button key={id} type="button" className={`filter-chip ${filter === id ? 'active' : ''}`} onClick={() => setFilter(id)}>
+                {label}
+              </button>
+            ))}
+            <label className="graph-broken-toggle body-text">
+              <input type="checkbox" checked={federated} onChange={(e) => setFederated(e.target.checked)} />
+              Federated
+            </label>
+            <input
+              type="search"
+              className="page-toolbar-search"
+              placeholder="Search activity…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search activity"
+            />
+          </PageToolbar>
+
+          {events.length ? (
+            <ol className="activity-timeline" style={{ marginTop: '1rem' }}>
+              {events.map((event) => {
+                const Icon = actionIcons[event.action] ?? Users
+                const cluster = (event as FederatedAuditEvent).clusterName
+                return (
+                  <li key={`${(event as FederatedAuditEvent).clusterId ?? 'local'}-${event.id}-${event.createdAt}`} className="activity-item">
+                    <span className="activity-icon" aria-hidden>
+                      <Icon size={14} />
                     </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-warn"
-                    disabled={revokeShare.isPending}
-                    onClick={() => void revokeShare.mutate(share.token)}
-                  >
-                    <Trash2 size={12} /> Revoke
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <div className="activity-body">
+                      <div className="activity-head">
+                        <strong>{actionLabel(event.action)}</strong>
+                        {federated && cluster ? <span className="nebula-status-badge status-unknown">{cluster}</span> : null}
+                        <time dateTime={event.createdAt}>{event.createdAt ? new Date(event.createdAt).toLocaleString() : '—'}</time>
+                      </div>
+                      <p className="activity-meta">
+                        <span>{event.userId}</span>
+                        {event.appId ? (
+                          <>
+                            {' · '}
+                            <Link to={`/apps/${encodeURIComponent(event.appId)}`}>{event.appId}</Link>
+                          </>
+                        ) : null}
+                      </p>
+                      {event.detail ? <p className="activity-detail">{event.detail}</p> : null}
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
           ) : (
-            <div className="empty">No active share links.</div>
+            <EmptyState
+              icon={<Activity size={22} />}
+              title="No activity yet"
+              description="Launch apps, search, or pin favorites to populate the audit log."
+            />
           )}
-        </section>
-      ) : null}
-    </>
+        </GlassPanel>
+
+        {adminShares.data ? (
+          <GlassPanel className="glass-panel-section share-admin-panel">
+            <div className="section-head-nebula">
+              <p className="section-label">Share admin</p>
+              <span className="nebula-status-badge status-unknown">{adminShares.data.length} active links</span>
+            </div>
+            {adminShares.data.length ? (
+              <ul className="share-list" style={{ marginTop: '1rem' }}>
+                {adminShares.data.map((share) => (
+                  <li key={share.token} className="share-item">
+                    <div>
+                      <strong>{share.appId}</strong>
+                      <code>{`/launchpad/s/${share.token}`}</code>
+                      <span className="share-expiry">
+                        by {share.createdBy ?? 'unknown'} · expires {new Date(share.expiresAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <Button variant="danger" className="nebula-btn-compact" disabled={revokeShare.isPending} onClick={() => void revokeShare.mutate(share.token)}>
+                      <Trash2 size={12} /> Revoke
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState icon={<Link2 size={22} />} title="No active share links" />
+            )}
+          </GlassPanel>
+        ) : null}
+      </div>
+    </PageFrame>
   )
 }

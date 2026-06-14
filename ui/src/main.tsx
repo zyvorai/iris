@@ -8,8 +8,11 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { WorkspaceProvider } from './utils/workspaceContext'
 import { applyShellPreferencesOnBoot } from './utils/hermesShellPreferences'
-import './styles/zeus-v9s-tokens.css'
+import './styles/nebula-tokens.css'
+import './styles/nebula-layout.css'
+import './styles/nebula-components.css'
 import './index.css'
+import './styles/aether-bridge.css'
 
 applyShellPreferencesOnBoot()
 

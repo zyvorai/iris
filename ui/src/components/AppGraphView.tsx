@@ -69,9 +69,17 @@ interface AppGraphViewProps {
   focusId?: string
   onNodeClick?: (appId: string) => void
   compact?: boolean
+  galaxy?: boolean
 }
 
-export default function AppGraphView({ graph, focusId, onNodeClick, compact }: AppGraphViewProps) {
+function galaxyNodeClass(status: string): string {
+  if (status === 'broken') return 'graph-node-broken'
+  if (status === 'degraded') return 'graph-node-degraded'
+  if (status === 'healthy') return 'graph-node-healthy'
+  return ''
+}
+
+export default function AppGraphView({ graph, focusId, onNodeClick, compact, galaxy }: AppGraphViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
 
@@ -128,8 +136,8 @@ export default function AppGraphView({ graph, focusId, onNodeClick, compact }: A
           const pos = positions.get(node.id)
           if (!pos) return null
           const dimmed = activeId && !related.has(node.id)
-          const broken = node.status !== 'healthy'
-          const className = `app-graph-node ${statusTone(node.status)} ${dimmed ? 'graph-node-dim' : ''} ${focusId === node.id ? 'graph-node-focus' : ''} ${broken ? 'graph-node-broken' : ''}`
+          const galaxyClass = galaxy ? galaxyNodeClass(node.status) : node.status !== 'healthy' ? 'graph-node-broken' : ''
+          const className = `app-graph-node ${statusTone(node.status)} ${dimmed ? 'graph-node-dim' : ''} ${focusId === node.id ? 'graph-node-focus' : ''} ${galaxyClass}`.trim()
           const style = { left: pos.x, top: pos.y, width: NODE_W, height: NODE_H }
           const hoverProps = {
             onMouseEnter: () => setHoverId(node.id),

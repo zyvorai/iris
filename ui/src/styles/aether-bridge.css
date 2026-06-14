@@ -1,0 +1,434 @@
+/*
+ * Aether bridge — remap legacy Hermes classes to Liquid Glass palette.
+ * Loaded after index.css so these win over zeus-v9s-era surfaces.
+ */
+
+/* ── Legacy glass surfaces → Aether dash-card ── */
+.zeus-glass,
+.glass-section,
+.glass-hero,
+.zeus-card,
+.space-row.zeus-card,
+.help-card,
+.team-section,
+.namespace-section,
+.share-admin-panel,
+.federated-cluster-block {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.12)) !important;
+  background:
+    linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl, 28px) !important;
+  box-shadow: var(--shadow-panel);
+  color: var(--text-primary, #f1f5f9);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.glass-section,
+.glass-hero {
+  padding: 1.5rem !important;
+  margin-bottom: 0 !important;
+}
+
+.glass-hero {
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.38), rgba(2, 6, 23, 0.12)),
+    radial-gradient(circle at top right, rgba(99, 164, 255, 0.10), transparent 42%),
+    linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%) !important;
+}
+
+.glass-section:hover,
+.zeus-card:hover,
+.space-row.zeus-card:hover {
+  border-color: rgba(59, 130, 246, 0.18) !important;
+}
+
+.glass-section h2,
+.section-head h2 {
+  margin: 0 0 1rem;
+  font-size: 0.6875rem !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--aether-primary, #3b82f6) !important;
+}
+
+.hero-kicker {
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  color: var(--aether-primary, #3b82f6) !important;
+}
+
+.hero-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  color: var(--text-muted, #94a3b8) !important;
+}
+
+/* ── Buttons → nebula / Aether ── */
+.btn,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-soft);
+  background: var(--bg-chip, rgba(17, 21, 28, 0.65));
+  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: rgba(59, 130, 246, 0.32);
+  background: rgba(59, 130, 246, 0.08);
+  color: #dbeafe;
+  transform: translateY(-1px);
+}
+
+.btn-primary,
+a.btn-primary {
+  border: none !important;
+  background: linear-gradient(to right, var(--aether-primary, #3b82f6), var(--aether-primary-deep, #2563eb)) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.btn-accent {
+  border-color: rgba(59, 130, 246, 0.38) !important;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+  color: #dbeafe !important;
+}
+
+.btn-warn {
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  background: rgba(248, 113, 113, 0.1) !important;
+  color: #fca5a5 !important;
+}
+
+.btn-sm {
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+/* ── App cards & tiles ── */
+.app-card,
+.space-row.zeus-card {
+  padding: 1rem 1.15rem !important;
+  border-radius: var(--radius-lg, 20px) !important;
+}
+
+.app-card:hover,
+.space-row.zeus-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.metric-tile,
+.stat-pill {
+  border: 1px solid var(--border-soft) !important;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(96, 165, 250, 0.12), transparent 38%),
+    linear-gradient(165deg, rgba(22, 27, 36, 0.92) 0%, rgba(17, 21, 28, 0.96) 100%) !important;
+  border-radius: var(--radius-md, 12px) !important;
+}
+
+.metric-value {
+  color: var(--text-primary, #f1f5f9);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-label {
+  color: var(--text-muted, #94a3b8);
+  letter-spacing: 0.18em;
+}
+
+/* ── Chips & status ── */
+.chip,
+.status-chip {
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chip-muted {
+  color: var(--text-muted, #94a3b8);
+}
+
+.chip-accent {
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.28);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.chip-ok,
+.status-chip.status-healthy {
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.chip-warn,
+.status-chip.status-warn,
+.status-chip.status-degraded {
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.status-chip.status-critical,
+.status-chip.status-broken {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ── Filter bars & tabs ── */
+.filter-bar,
+.catalog-toolbar-row {
+  gap: 0.45rem;
+}
+
+.view-toggle {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: rgba(17, 21, 28, 0.55);
+}
+
+.view-toggle button {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--text-muted, #94a3b8) !important;
+  border-radius: 999px !important;
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+.view-toggle button.active {
+  color: #fff !important;
+  border-color: rgba(59, 130, 246, 0.38) !important;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12);
+}
+
+.filter-bar .btn.active,
+.filter-bar button.btn-accent {
+  color: #fff !important;
+  border-color: rgba(59, 130, 246, 0.38) !important;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+}
+
+.filter-bar input,
+.activity-search,
+.catalog-toolbar input {
+  border: 1px solid var(--border-soft) !important;
+  background: rgba(10, 13, 18, 0.72) !important;
+  border-radius: var(--radius-md, 12px) !important;
+  color: var(--text-primary, #f1f5f9);
+}
+
+.catalog-toolbar select,
+.cluster-filters select,
+.graph-filters select,
+.activity-filters select {
+  border: 1px solid var(--border-soft);
+  background: rgba(10, 13, 18, 0.72);
+  border-radius: var(--radius-md, 12px);
+  color: var(--text-primary, #f1f5f9);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.catalog-toolbar select:focus,
+.cluster-filters select:focus,
+.graph-filters select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+/* ── Tables & lists ── */
+.cluster-table,
+.activity-timeline,
+.share-list {
+  border-color: var(--border-soft);
+}
+
+.cluster-row {
+  border-color: rgba(148, 163, 184, 0.08);
+}
+
+.cluster-row:hover:not(.cluster-head) {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.cluster-head {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.empty {
+  color: var(--text-muted, #94a3b8);
+  padding: 2rem 1rem;
+  text-align: center;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px dashed rgba(148, 163, 184, 0.18);
+  background: rgba(17, 21, 28, 0.45);
+}
+
+.section-link {
+  color: var(--text-muted, #94a3b8);
+}
+
+.section-link:hover {
+  color: #93c5fd;
+}
+
+/* ── Workspace & health chips ── */
+.workspace-switcher {
+  border: 1px solid var(--border-soft);
+  background: rgba(17, 21, 28, 0.55);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.2rem 0.35rem;
+}
+
+.workspace-chip {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.workspace-chip:hover:not(:disabled) {
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.workspace-chip.active {
+  color: #dbeafe !important;
+  border-color: rgba(59, 130, 246, 0.28) !important;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+}
+
+.zeus-health-chip {
+  border: 1px solid var(--border-soft);
+  background: rgba(17, 21, 28, 0.65);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.zeus-health-chip[data-tone='ok'] {
+  border-color: rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
+}
+
+.zeus-health-chip[data-tone='warn'] {
+  border-color: rgba(251, 191, 36, 0.25);
+  color: #fde68a;
+}
+
+.zeus-health-chip[data-tone='bad'] {
+  border-color: rgba(248, 113, 113, 0.25);
+  color: #fca5a5;
+}
+
+/* ── Footer ── */
+.hermes-page-footer {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 1.5rem;
+}
+
+.hermes-help-link {
+  color: var(--text-muted, #94a3b8);
+  border-radius: var(--radius-md, 12px);
+}
+
+.hermes-help-link:hover {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* ── Palette & modals ── */
+.palette-backdrop,
+.diagnosis-drawer-backdrop,
+.hermes-nb-backdrop {
+  background: rgba(10, 13, 18, 0.82) !important;
+  backdrop-filter: blur(8px);
+}
+
+.palette-panel,
+.hermes-nb-dropdown,
+.hermes-nb-drawer {
+  border: 1px solid var(--border-soft) !important;
+  background: rgba(17, 21, 28, 0.92) !important;
+  box-shadow: 0 16px 48px rgba(2, 6, 23, 0.36) !important;
+}
+
+.hermes-nb-dropdown-item.active,
+.hermes-nb-drawer-item.active {
+  color: var(--aether-primary, #3b82f6) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* ── Detail pages ── */
+.detail-row {
+  border-color: rgba(148, 163, 184, 0.08);
+}
+
+.app-detail-hero.status-critical,
+.app-detail-hero-nebula.status-critical {
+  border-color: rgba(248, 113, 113, 0.24) !important;
+  box-shadow: var(--shadow-glow-red);
+}
+
+.app-detail-hero.status-warn,
+.app-detail-hero-nebula.status-warn {
+  border-color: rgba(251, 191, 36, 0.22) !important;
+  box-shadow: var(--shadow-glow-orange);
+}
+
+.app-detail-hero.status-healthy,
+.app-detail-hero-nebula.status-healthy {
+  border-color: rgba(52, 211, 153, 0.22) !important;
+  box-shadow: var(--shadow-glow-green);
+}
+
+.app-problem {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #fde68a;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md, 12px);
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.16);
+}

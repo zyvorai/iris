@@ -4,18 +4,77 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Copy, ExternalLink, Server, Star } from 'lucide-react'
+import { ChevronDown, Layers, Rocket, Server, Compass } from 'lucide-react'
 import AppCard from '../components/AppCard'
-import { hermesApi, openApp, sourceLabel, statusLabel, statusTone } from '../services/hermesApi'
+import GlassPanel from '../components/nebula/GlassPanel'
+import PageFrame from '../components/nebula/PageFrame'
+import PageToolbar from '../components/nebula/PageToolbar'
+import ContextBanner from '../components/nebula/ContextBanner'
+import EmptyState from '../components/nebula/EmptyState'
+import MetricCard from '../components/nebula/MetricCard'
+import Button from '../components/nebula/Button'
+import { hermesApi } from '../services/hermesApi'
 import { useWorkspace } from '../utils/workspaceContext'
+import type { HermesApp } from '../types'
+
+function statusRank(status: string): number {
+  if (status === 'broken') return 0
+  if (status === 'degraded') return 1
+  return 2
+}
+
+function NamespaceGroup({
+  namespace,
+  apps,
+  favIds,
+  onPublish,
+}: {
+  namespace: string
+  apps: HermesApp[]
+  favIds: Set<string>
+  onPublish: (id: string) => void
+}) {
+  const unhealthy = apps.some((a) => a.status === 'broken' || a.status === 'degraded')
+  const [open, setOpen] = useState(unhealthy)
+  const sorted = useMemo(
+    () => [...apps].sort((a, b) => statusRank(a.status) - statusRank(b.status) || a.displayName.localeCompare(b.displayName)),
+    [apps],
+  )
+  const issueCount = apps.filter((a) => a.status !== 'healthy').length
+
+  return (
+    <GlassPanel className="glass-panel-section namespace-section">
+      <button type="button" className="mission-control-group-head namespace-group-head" onClick={() => setOpen((v) => !v)}>
+        <h3>{namespace}</h3>
+        <span className="mission-control-group-count">
+          {apps.length} service{apps.length === 1 ? '' : 's'}
+          {issueCount > 0 ? ` · ${issueCount} need attention` : ''}
+        </span>
+        <ChevronDown size={16} className={open ? 'rotated' : ''} aria-hidden />
+      </button>
+      {open ? (
+        <div className="mission-control-group-body" style={{ marginTop: '0.75rem' }}>
+          {sorted.map((app) => (
+            <AppCard
+              key={app.id}
+              app={app}
+              compact
+              favorite={favIds.has(app.id)}
+              onPublish={!app.visibility.published ? () => onPublish(app.id) : undefined}
+            />
+          ))}
+        </div>
+      ) : null}
+    </GlassPanel>
+  )
+}
 
 export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [view, setView] = useState<'grid' | 'namespace'>('namespace')
-  const [envFilter, setEnvFilter] = useState('')
   const qc = useQueryClient()
-  const { workspaceId, setWorkspaceId } = useWorkspace()
+  const { workspaceId, setWorkspaceId, matchesWorkspace } = useWorkspace()
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
@@ -39,12 +98,6 @@ export default function ClusterPage() {
     },
   })
 
-  const favMutation = useMutation({
-    mutationFn: ({ id, fav }: { id: string; fav: boolean }) =>
-      fav ? hermesApi.removeFavorite(id) : hermesApi.addFavorite(id),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['favorites'] }),
-  })
-
   const namespaces = useMemo(() => {
     const set = new Set((catalog.data ?? []).map((a) => a.namespace))
     return [...set].sort()
@@ -60,27 +113,14 @@ export default function ClusterPage() {
     },
   })
 
-  const environments = useMemo(() => {
-    const set = new Set<string>()
-    for (const app of catalog.data ?? []) {
-      if (app.meta?.environment) set.add(app.meta.environment)
-    }
-    return [...set].sort()
-  }, [catalog.data])
-
   const filtered = useMemo(() => {
     return (catalog.data ?? []).filter((a) => {
-      if (workspaceId && a.meta?.environment !== workspaceId) return false
+      if (!matchesWorkspace(a)) return false
       if (nsFilter && a.namespace !== nsFilter) return false
       if (statusFilter && a.status !== statusFilter) return false
-      if (envFilter && a.meta?.environment !== envFilter) return false
       return true
     })
-  }, [catalog.data, nsFilter, statusFilter, envFilter, workspaceId])
-
-  useEffect(() => {
-    if (envFilter) setWorkspaceId(envFilter)
-  }, [envFilter, setWorkspaceId])
+  }, [catalog.data, nsFilter, statusFilter, matchesWorkspace])
 
   const byNamespace = useMemo(() => {
     const map = new Map<string, typeof filtered>()
@@ -92,205 +132,143 @@ export default function ClusterPage() {
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
   }, [filtered])
 
+  const loading = catalog.isLoading && !catalog.data
+  const error = catalog.isError
+  const hasData = Boolean(catalog.data)
+
+  const clearFilters = () => {
+    setNsFilter('')
+    setStatusFilter('')
+  }
+
   return (
-    <>
-      <section className="glass-hero">
-        <div className="hero-copy">
-          <div className="hero-kicker">
-            <Server size={16} /> Cluster catalog
-          </div>
-          <h2 className="hero-title">Every service in your cluster</h2>
-          <p className="hero-sub">
-            Hermes watches all Kubernetes services cluster-wide — including Zeus OS, monitoring, and everything else.
-            Publish to pin services in your dock.
-            {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
-            {workspaceId ? ` Workspace: ${workspaceId}.` : ''}
-          </p>
-        </div>
-        {clusters.data && clusters.data.length > 1 ? (
-          <div className="cluster-federation-row">
-            {clusters.data.map((cluster) => (
-              <div
-                key={cluster.id}
-                className={`metric-tile cluster-tile ${cluster.status === 'offline' ? 'cluster-offline' : ''}`}
-              >
-                <span className="metric-value">{cluster.isLocal ? cluster.appCount : cluster.healthy}</span>
-                <span className="metric-label">
-                  {cluster.name}
-                  {!cluster.isLocal ? ` · ${cluster.status ?? 'unknown'}` : ''}
-                </span>
-                {!cluster.isLocal && cluster.url ? (
-                  <a href={cluster.url} target="_blank" rel="noreferrer" className="section-link">
-                    Open remote
-                  </a>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        ) : (
-        <div className="hero-metrics">
-          <div className="metric-tile">
-            <span className="metric-value">{summary.data?.total ?? '—'}</span>
-            <span className="metric-label">Services</span>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-value">{summary.data?.namespaces ?? '—'}</span>
-            <span className="metric-label">Namespaces</span>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-value">{summary.data?.published ?? '—'}</span>
-            <span className="metric-label">Published</span>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-value">{summary.data?.discovery ?? '—'}</span>
-            <span className="metric-label">Unpublished</span>
-          </div>
-        </div>
-        )}
-      </section>
-
-      <div className="filter-bar cluster-filters">
-        <select value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
-          <option value="">All namespaces</option>
-          {namespaces.map((ns) => (
-            <option key={ns} value={ns}>
-              {ns}
-            </option>
-          ))}
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Status filter">
-          <option value="">All statuses</option>
-          <option value="healthy">Healthy</option>
-          <option value="degraded">Degraded</option>
-          <option value="broken">Broken</option>
-          <option value="unknown">Unknown</option>
-        </select>
-        <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)} aria-label="Environment filter">
-          <option value="">All environments</option>
-          {environments.map((env) => (
-            <option key={env} value={env}>
-              {env}
-            </option>
-          ))}
-        </select>
-        {nsFilter ? (
-          <button
-            type="button"
-            className="btn"
-            onClick={() => publishNs.mutate(nsFilter)}
-            disabled={publishNs.isPending}
-          >
-            Publish all in {nsFilter}
-          </button>
-        ) : null}
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
-            void hermesApi.exportCatalog().then((blob) => {
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = 'hermes-catalog.json'
-              a.click()
-              URL.revokeObjectURL(url)
-            })
-          }}
-        >
-          Export JSON
-        </button>
-        <div className="view-toggle">
-          <button type="button" className={view === 'namespace' ? 'active' : ''} onClick={() => setView('namespace')}>
-            By namespace
-          </button>
-          <button type="button" className={view === 'grid' ? 'active' : ''} onClick={() => setView('grid')}>
-            Grid
-          </button>
-        </div>
-        <span className="filter-count">{filtered.length} services</span>
-      </div>
-
-      {catalog.isLoading ? (
-        <div className="empty glass-section">Scanning cluster services…</div>
-      ) : filtered.length === 0 ? (
-        <div className="empty glass-section">No services match your filters.</div>
-      ) : view === 'grid' ? (
-        <section className="glass-section">
-          <h2>All services</h2>
-          <div className="app-grid">
-            {filtered.map((app) => (
-              <AppCard
-                key={app.id}
-                app={app}
-                favorite={favIds.has(app.id)}
-                onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
-              />
-            ))}
-          </div>
-        </section>
-      ) : (
-        byNamespace.map(([ns, apps]) => (
-          <section key={ns} className="glass-section namespace-section">
-            <div className="section-head">
-              <h2>{ns}</h2>
-              <span className="chip chip-muted">{apps.length} services</span>
+    <PageFrame
+      loading={loading}
+      error={error}
+      hasData={hasData}
+      onRetry={() => void catalog.refetch()}
+      errorTitle="Could not load cluster catalog"
+      contextBanner={
+        workspaceId ? (
+          <ContextBanner
+            label={`Workspace filter: ${workspaceId}`}
+            detail="Change workspace in the top bar"
+            onClear={() => setWorkspaceId('')}
+          />
+        ) : undefined
+      }
+      isEmpty={hasData && !filtered.length}
+      empty={
+        <GlassPanel className="glass-panel-section">
+          <EmptyState
+            icon={<Server size={22} />}
+            title="No services match your filters"
+            description="Clear filters or wait for the controller to finish scanning the cluster."
+            action={
+              <Button variant="secondary" onClick={clearFilters}>
+                Clear filters
+              </Button>
+            }
+          />
+        </GlassPanel>
+      }
+    >
+      <div className="page-grid">
+        <GlassPanel className="glass-panel-section hero-command-panel">
+          <div className="section-head-nebula">
+            <div>
+              <p className="section-label">
+                <Server size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Cluster catalog
+              </p>
+              <p className="body-text">
+                Every service Hermes discovers cluster-wide. Publish to add apps to your launchpad.
+                {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
+              </p>
             </div>
-            <div className="cluster-table">
-              <div className="cluster-row cluster-head">
-                <span>Service</span>
-                <span>Status</span>
-                <span>Port</span>
-                <span>Source</span>
-                <span>Actions</span>
-              </div>
-              {apps.map((app) => (
-                <div key={app.id} className={`cluster-row ${statusTone(app.status)}`}>
-                  <span className="cluster-name">
-                    <strong>{app.displayName}</strong>
-                    <small>{app.backend.name}</small>
-                  </span>
-                  <span>
-                    <span className="status-chip">{statusLabel(app.status)}</span>
-                    {app.readyEndpoints > 0 ? (
-                      <small className="ready-count">{app.readyEndpoints} ready</small>
-                    ) : null}
-                  </span>
-                  <span>{app.backend.port}</span>
-                  <span className="chip chip-muted">{sourceLabel(app.source)}</span>
-                  <span className="cluster-actions">
-                    {!app.visibility.published ? (
-                      <button type="button" className="btn btn-primary" onClick={() => publish.mutate(app.id)}>
-                        Publish
-                      </button>
-                    ) : (
-                      <span className="chip chip-ok">Published</span>
-                    )}
-                    <button type="button" className="btn" onClick={() => openApp(app)} title="Open">
-                      <ExternalLink size={12} />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() => navigator.clipboard.writeText(window.location.origin + app.routePath)}
-                      title="Copy link"
-                    >
-                      <Copy size={12} />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() => favMutation.mutate({ id: app.id, fav: favIds.has(app.id) })}
-                      title="Pin"
-                    >
-                      <Star size={12} fill={favIds.has(app.id) ? 'currentColor' : 'none'} />
-                    </button>
-                  </span>
-                </div>
+          </div>
+          <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
+            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
+            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" />
+            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" />
+            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
+          </div>
+        </GlassPanel>
+
+        <PageToolbar className="page-toolbar-sticky" data-testid="cluster-toolbar">
+          <select className="page-toolbar-select" value={nsFilter} onChange={(e) => setNsFilter(e.target.value)} aria-label="Namespace filter">
+            <option value="">All namespaces</option>
+            {namespaces.map((ns) => (
+              <option key={ns} value={ns}>
+                {ns}
+              </option>
+            ))}
+          </select>
+          <select className="page-toolbar-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Status filter">
+            <option value="">All statuses</option>
+            <option value="healthy">Healthy</option>
+            <option value="degraded">Degraded</option>
+            <option value="broken">Broken</option>
+            <option value="unknown">Unknown</option>
+          </select>
+          {nsFilter ? (
+            <Button variant="secondary" className="nebula-btn-compact" disabled={publishNs.isPending} onClick={() => publishNs.mutate(nsFilter)}>
+              Publish all in {nsFilter}
+            </Button>
+          ) : null}
+          <Button
+            variant="ghost"
+            className="nebula-btn-compact"
+            onClick={() => {
+              void hermesApi.exportCatalog().then((blob) => {
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'hermes-catalog.json'
+                a.click()
+                URL.revokeObjectURL(url)
+              })
+            }}
+          >
+            Export JSON
+          </Button>
+          <div className="view-toggle">
+            <button type="button" className={view === 'namespace' ? 'active' : ''} onClick={() => setView('namespace')}>
+              By namespace
+            </button>
+            <button type="button" className={view === 'grid' ? 'active' : ''} onClick={() => setView('grid')}>
+              Grid
+            </button>
+          </div>
+          <span className="body-text filter-count">{filtered.length} services</span>
+        </PageToolbar>
+
+        {view === 'grid' ? (
+          <GlassPanel className="glass-panel-section">
+            <p className="section-label">All services</p>
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {filtered.map((app) => (
+                <AppCard
+                  key={app.id}
+                  app={app}
+                  favorite={favIds.has(app.id)}
+                  onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
+                />
               ))}
             </div>
-          </section>
-        ))
-      )}
-    </>
+          </GlassPanel>
+        ) : (
+          byNamespace.map(([ns, apps]) => (
+            <NamespaceGroup
+              key={ns}
+              namespace={ns}
+              apps={apps}
+              favIds={favIds}
+              onPublish={(id) => publish.mutate(id)}
+            />
+          ))
+        )}
+      </div>
+    </PageFrame>
   )
 }
