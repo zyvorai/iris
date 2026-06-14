@@ -12,6 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Ask Zeus AI opens inspector directly on the AI tab
 - Spotlight `diagnose <app>` shows Zeus AI insight preview; `explain` surfaces fleet summary with focus services
 - Graph page Zeus AI focus chips and Activity fleet insight banner
+- Playwright smoke tests for Spotlight explain/diagnose and Graph/Activity AI surfaces
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`

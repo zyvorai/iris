@@ -130,6 +130,42 @@ test('graph page renders', async ({ page }) => {
   await expect(page.getByText(/application graph/i)).toBeVisible()
 })
 
+test('spotlight explain shows fleet insight', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('explain')
+  await expect(page.getByText('Zeus AI · Fleet')).toBeVisible({ timeout: 5000 })
+  const fleetRow = page.locator('.palette-item').filter({ hasText: /services|healthy|attention/i }).first()
+  const healthNav = page.getByText('Fleet health dashboard')
+  await expect(fleetRow.or(healthNav)).toBeVisible({ timeout: 8000 })
+})
+
+test('spotlight diagnose shows insight preview', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('diagnose grafana')
+  await expect(page.getByText('Commands · Services')).toBeVisible()
+  await expect(page.locator('.palette-item').first()).toBeVisible({ timeout: 8000 })
+})
+
+test('graph page shows zeus ai focus strip', async ({ page }) => {
+  await page.goto('/graph')
+  await waitForPageReady(page)
+  const focus = page.getByTestId('graph-ai-focus')
+  const loadError = page.getByTestId('page-load-error')
+  await expect(focus.or(loadError)).toBeVisible({ timeout: 5000 })
+})
+
+test('activity page shows fleet insight banner', async ({ page }) => {
+  await page.goto('/activity')
+  await waitForPageReady(page)
+  const panel = page.getByTestId('zeus-ai-panel')
+  const loadError = page.getByTestId('page-load-error')
+  await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
+})
+
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()

@@ -30,6 +30,10 @@ export default function HelpPage() {
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: owner:, env:, depends:, ai:
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
+                Commands: <code>diagnose grafana</code> (AI insight preview), <code>explain</code> (fleet summary),
+                <code>open</code>, <code>publish</code>, <code>pin</code>, <code>refresh</code>, <code>export</code>.
+              </p>
+              <p className="body-text" style={{ marginTop: '0.5rem' }}>
                 Natural-language queries use Zeus AI when HERMES_LLM_API_URL is configured; otherwise Hermes falls back to rule-based intent search.
               </p>
             </article>
@@ -37,7 +41,7 @@ export default function HelpPage() {
               <Sparkles size={18} />
               <h3>Zeus AI insights</h3>
               <p>
-                Per-app insight and fleet summaries power the Ask Zeus AI tab, Diagnose drawer, Home, and Health pages.
+                Per-app insight and fleet summaries power Ask Zeus AI, Diagnose drawer, Home, Health, Activity, and Graph focus chips.
               </p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>

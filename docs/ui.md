@@ -51,7 +51,7 @@ When unset, Hermes uses rule-based insight and intent search — no external API
 | `GET /api/v1/apps/{id}/insight` | Per-app diagnosis + remediation narrative |
 | `GET /api/v1/insights/fleet` | Fleet-wide health summary and highlights |
 
-UI: Home fleet panel, Health AI summary, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:` prefix.
+UI: Home and Health fleet panels, Activity banner, Graph focus chips, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:` prefix, `explain` fleet summary, and `diagnose <app>` insight preview.
 
 ## Key pages
 
@@ -62,10 +62,10 @@ UI: Home fleet panel, Health AI summary, Diagnose drawer, Inspector Zeus AI tab,
 | `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, export via action menu |
 | `/health` | Fleet health + attention queue |
 | `/discovery` | Unpublished services queue with publish actions |
-| `/graph` | Dependency graph with filters |
+| `/graph` | Dependency graph with filters and Zeus AI focus chips |
 | `/federated` | Merged remote catalogs |
 | `/teams` | Owner metadata grouped by team |
-| `/activity` | Audit log with optional share-admin panel |
+| `/activity` | Audit log with fleet insight banner and optional share-admin panel |
 | `/help` | Static guide wrapped in `PageFrame` |
 | `/apps/:id` | App detail — Nebula panels, share links, mesh policies; diagnose opens global drawer |
 
