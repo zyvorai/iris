@@ -2,14 +2,11 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import CommandPalette from './CommandPalette'
+import HermesNavbar from './HermesNavbar'
 import HermesPageFooter from './HermesPageFooter'
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
-import ZeusDock from './shell/ZeusDock'
-import ZeusLeftRail from './shell/ZeusLeftRail'
-import ZeusTopBar from './shell/ZeusTopBar'
 import { useGlobalNavShortcuts } from '../hooks/useGlobalNavShortcuts'
 import { useInspector } from '../utils/inspectorContext'
 
@@ -20,23 +17,7 @@ interface LayoutProps {
   onPaletteClose: () => void
 }
 
-const titles: Record<string, string> = {
-  '/': 'Overview',
-  '/apps': 'Catalog',
-  '/spaces': 'Spaces',
-  '/cluster': 'Cluster',
-  '/graph': 'Graph',
-  '/teams': 'Teams',
-  '/discovery': 'Discovery',
-  '/health': 'Health',
-  '/activity': 'Activity',
-  '/help': 'Settings',
-  '/federated': 'Federated',
-}
-
 export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
-  const location = useLocation()
-  const pageTitle = titles[location.pathname] ?? 'Hermes'
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { appId, closeInspector } = useInspector()
   useGlobalNavShortcuts()
@@ -55,17 +36,11 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
   }, [])
 
   return (
-    <div className="hermes-shell command-surface-shell" data-shell-density="calm">
+    <div className="hermes-shell">
       <div className="hermes-page-mesh" aria-hidden />
-      <div className="command-surface-body">
-        <ZeusLeftRail />
-        <div className="command-surface-main">
-          <ZeusTopBar pageTitle={pageTitle} onPaletteOpen={onPaletteOpen} onOpenShortcuts={() => setShortcutsOpen(true)} />
-          <main className="hermes-main hermes-scroll-body">{children}</main>
-          <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
-        </div>
-      </div>
-      <ZeusDock onPaletteOpen={onPaletteOpen} />
+      <HermesNavbar onPaletteOpen={onPaletteOpen} onOpenShortcuts={() => setShortcutsOpen(true)} />
+      <main className="hermes-main hermes-scroll-body">{children}</main>
+      <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       {paletteOpen ? <CommandPalette onClose={onPaletteClose} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
       <ServiceInspectorDrawer appId={appId} onClose={closeInspector} />

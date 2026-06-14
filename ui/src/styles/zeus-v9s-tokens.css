@@ -3,11 +3,11 @@
  * Source palette: v9s/ui/src/index.css (:root + Liquid Glass)
  */
 :root {
-  --zeus-bg-base: #030712;
+  --zeus-bg-base: #0a0d12;
   --zeus-bg-slate: #0f172a;
-  --zeus-primary: #f97316;
-  --zeus-primary-soft: rgba(249, 115, 22, 0.18);
-  --zeus-primary-border: rgba(249, 115, 22, 0.35);
+  --zeus-primary: #3B82F6;
+  --zeus-primary-soft: rgba(59, 130, 246, 0.18);
+  --zeus-primary-border: rgba(59, 130, 246, 0.35);
   --zeus-success: #34d399;
   --zeus-warning: #fbbf24;
   --zeus-danger: #ef4444;
@@ -22,7 +22,7 @@
   --zeus-glass-chrome-blur: 24px;
   --zeus-glass-card-blur: 40px;
   --zeus-glass-popover-blur: 20px;
-  --zeus-glass-chrome-bg: rgba(12, 18, 32, 0.72);
+  --zeus-glass-chrome-bg: rgba(17, 21, 28, 0.88);
   --zeus-radius-panel: 1.25rem;
   --zeus-radius-window: 1.75rem;
 
