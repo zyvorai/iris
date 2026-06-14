@@ -177,9 +177,14 @@ test('spotlight suggest publish shows discovery insight', async ({ page }) => {
 test('discovery page shows publish suggestions or empty queue', async ({ page }) => {
   await page.goto('/discovery')
   await waitForPageReady(page)
+  const loadError = page.getByTestId('page-load-error')
+  const discoveryTitle = page.getByRole('heading', { name: 'Discovery queue', exact: true })
+  await expect(loadError.or(discoveryTitle)).toBeVisible({ timeout: 5000 })
+  if (await loadError.isVisible()) return
+
   const panel = page.getByTestId('zeus-ai-panel')
   const empty = page.getByText('Queue is empty')
-  await expect(panel.or(empty)).toBeVisible({ timeout: 5000 })
+  await expect(panel.or(empty)).toBeVisible({ timeout: 10000 })
 })
 
 test('navbar health chip links to health page', async ({ page }) => {

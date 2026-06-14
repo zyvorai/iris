@@ -28,7 +28,7 @@ export default function ZeusAiPanel({
 }: ZeusAiPanelProps) {
   if (loading) {
     return (
-      <GlassPanel className={`glass-panel-section zeus-ai-panel${compact ? ' zeus-ai-panel-compact' : ''}`}>
+      <GlassPanel className={`glass-panel-section zeus-ai-panel${compact ? ' zeus-ai-panel-compact' : ''}`} data-testid="zeus-ai-panel">
         <div className="page-loading-skeleton page-loading-skeleton-compact">
           <div className="skeleton-card" style={{ height: compact ? 48 : 72 }} />
         </div>
