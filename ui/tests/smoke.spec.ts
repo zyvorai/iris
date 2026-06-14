@@ -235,10 +235,9 @@ test('spotlight ai status shows rules or llm mode', async ({ page }) => {
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('ai status')
-  await expect(page.getByText('Zeus AI · Status')).toBeVisible({ timeout: 5000 })
-  const modeRow = page.getByText(/rules engine|live llm/i)
-  const helpNav = page.getByText(/help · zeus ai/i)
-  await expect(modeRow.or(helpNav)).toBeVisible({ timeout: 8000 })
+  const palette = page.getByRole('dialog', { name: 'Spotlight' })
+  await expect(palette.getByText('Zeus AI · Status')).toBeVisible({ timeout: 5000 })
+  await expect(palette.getByRole('button', { name: /rules engine|live llm/i })).toBeVisible({ timeout: 8000 })
 })
 
 test('health page ask zeus opens spotlight', async ({ page }) => {
