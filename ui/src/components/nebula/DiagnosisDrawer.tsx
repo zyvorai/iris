@@ -67,7 +67,7 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
     queryFn: () => hermesApi.listAudit(20),
     enabled: !!appId,
   })
-  const insight = useZeusAiInsight(appId, app.data?.displayName ?? '', !!appId)
+  const insight = useZeusAiInsight(appId, !!appId)
 
   const commands = useMemo(
     () => extractCommands(diagnosis.data?.suggestedActions ?? []),
@@ -149,15 +149,21 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
             </div>
           ) : null}
 
-          {!loading && !error && (diagnosis.data?.cause || diagnosis.data?.problem) ? (
-            <div className="diagnosis-drawer-section">
-              <h3>Likely cause</h3>
-              <p className="body-text">{diagnosis.data?.cause || diagnosis.data?.problem}</p>
-            </div>
-          ) : !loading && !error && insight.explanation ? (
-            <div className="diagnosis-drawer-section">
-              <h3>Likely cause</h3>
+          {!loading && !error && (diagnosis.data?.cause || diagnosis.data?.problem || insight.explanation) ? (
+            <div className="diagnosis-drawer-section diagnosis-drawer-ai">
+              <h3>
+                <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Zeus AI insight
+              </h3>
+              {insight.summary ? <p className="zeus-ai-summary body-text">{insight.summary}</p> : null}
               <p className="body-text">{insight.explanation}</p>
+              {insight.remediation.length ? (
+                <ul className="zeus-ai-remediation">
+                  {insight.remediation.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           ) : null}
 
@@ -202,10 +208,10 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
                   <Copy size={14} /> Copy commands
                 </Button>
               ) : null}
-              <Button variant="primary" onClick={() => { openInspector(appId); onClose() }}>
+              <Button variant="primary" onClick={() => { openInspector(appId, 'overview'); onClose() }}>
                 <Stethoscope size={14} /> Run check
               </Button>
-              <Button variant="ai" onClick={() => { openInspector(appId); onClose() }}>
+              <Button variant="ai" onClick={() => { openInspector(appId, 'ai'); onClose() }}>
                 <Sparkles size={14} /> Ask Zeus AI
               </Button>
               <Button variant="ghost" onClick={() => markKnownIssue(appId)}>

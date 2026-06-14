@@ -46,7 +46,7 @@ export default function ServiceCard({ app }: ServiceCardProps) {
 
   const menuItems = buildServiceMenuItems(app, {
     onDiagnose: () => openDiagnose(app.id),
-    onInspector: () => openInspector(app.id),
+    onInspector: () => openInspector(app.id, 'ai'),
     onPublish: !app.visibility.published ? () => void publish.mutate() : undefined,
   })
 

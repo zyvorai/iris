@@ -116,6 +116,14 @@ test('app detail opens global diagnose drawer', async ({ page }) => {
   await expect(page.getByTestId('diagnose-panel')).toBeVisible({ timeout: 5000 })
 })
 
+test('home shows zeus ai fleet insight panel', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  const panel = page.getByTestId('zeus-ai-panel')
+  const loadError = page.getByTestId('page-load-error')
+  await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
+})
+
 test('graph page renders', async ({ page }) => {
   await page.goto('/graph')
   await waitForPageReady(page)

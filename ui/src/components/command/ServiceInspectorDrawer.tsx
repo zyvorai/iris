@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Copy, ExternalLink, Link2, Route, Star, X } from 'lucide-react'
 import AppIcon from '../AppIcon'
@@ -11,6 +11,7 @@ import ShareLinksPanel from '../ShareLinksPanel'
 import Button from '../nebula/Button'
 import StatusBadge from '../nebula/StatusBadge'
 import EmptyState from '../nebula/EmptyState'
+import ZeusAiPanel from '../nebula/ZeusAiPanel'
 import {
   appDetailPath,
   appLaunchPath,
@@ -20,15 +21,14 @@ import {
   openApp,
 } from '../../services/hermesApi'
 import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
-import { useInspector } from '../../utils/inspectorContext'
+import { useInspector, type InspectorTab } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
 
 interface ServiceInspectorDrawerProps {
   appId: string | null
+  initialTab?: InspectorTab
   onClose: () => void
 }
-
-type InspectorTab = 'overview' | 'route' | 'share' | 'deps' | 'ai'
 
 function ActionLink({ action }: { action: SuggestedAction }) {
   if (action.href.startsWith('#copy:')) {
@@ -53,8 +53,8 @@ function ActionLink({ action }: { action: SuggestedAction }) {
   )
 }
 
-export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspectorDrawerProps) {
-  const [tab, setTab] = useState<InspectorTab>('overview')
+export default function ServiceInspectorDrawer({ appId, initialTab = 'overview', onClose }: ServiceInspectorDrawerProps) {
+  const [tab, setTab] = useState<InspectorTab>(initialTab)
   const { openInspector } = useInspector()
   const qc = useQueryClient()
   const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites, enabled: !!appId })
@@ -69,7 +69,7 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
     queryFn: () => hermesApi.getDiagnosis(appId!),
     enabled: !!appId,
   })
-  const insight = useZeusAiInsight(appId, app.data?.displayName ?? '', !!appId && tab === 'ai')
+  const insight = useZeusAiInsight(appId, !!appId && tab === 'ai')
   const publish = useMutation({
     mutationFn: () => hermesApi.publish(appId!),
     onSuccess: () => {
@@ -88,6 +88,10 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
       app: apps.find((a) => a.id === dep || a.slug === dep || a.canonicalSlug === dep || a.backend.name === dep),
     }))
   }, [app.data?.meta?.dependsOn, catalog.data])
+
+  useEffect(() => {
+    if (appId) setTab(initialTab)
+  }, [appId, initialTab])
 
   if (!appId) return null
 
@@ -255,26 +259,25 @@ export default function ServiceInspectorDrawer({ appId, onClose }: ServiceInspec
           ) : null}
 
           {tab === 'ai' ? (
-            <div className="inspector-ai">
-              {insight.loading ? (
-                <div className="page-loading-skeleton page-loading-skeleton-compact">
-                  <div className="skeleton-card" style={{ height: 64 }} />
-                </div>
-              ) : (
-                <>
-                  <p className="body-text">{insight.explanation || 'No AI insight available for this service.'}</p>
-                  {insight.suggestedActions.length ? (
-                    <ul className="diagnose-action-list">
-                      {insight.suggestedActions.map((action) => (
-                        <li key={action.label}>
-                          <ActionLink action={action} />
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </>
-              )}
-            </div>
+            <ZeusAiPanel
+              summary={insight.summary}
+              explanation={insight.explanation}
+              source={insight.source}
+              remediation={insight.remediation}
+              loading={insight.loading}
+              compact
+              action={
+                insight.suggestedActions.length ? (
+                  <ul className="diagnose-action-list">
+                    {insight.suggestedActions.map((action) => (
+                      <li key={action.label}>
+                        <ActionLink action={action} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : undefined
+              }
+            />
           ) : null}
         </div>
       </aside>

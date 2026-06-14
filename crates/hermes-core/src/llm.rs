@@ -40,41 +40,25 @@ struct ChatMessage {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct LlmAnswer {
     intent: String,
     answer: String,
+    #[serde(default, alias = "appIds")]
     app_ids: Vec<String>,
 }
 
-pub async fn llm_search_intent(apps: &[App], query: &str, cfg: &LlmConfig) -> Option<SearchIntent> {
-    let catalog: Vec<_> = apps
-        .iter()
-        .filter(|a| a.visibility.published && !a.visibility.hidden)
-        .take(80)
-        .map(|a| {
-            serde_json::json!({
-                "id": a.id,
-                "name": a.display_name,
-                "namespace": a.namespace,
-                "status": a.status,
-                "environment": a.meta.environment,
-                "owner": a.meta.owner,
-            })
-        })
-        .collect();
-    let system = "You are Hermes app search. Return JSON only: {\"intent\":\"...\",\"answer\":\"...\",\"appIds\":[\"id1\"]}. Pick matching app ids from the catalog.";
-    let user = format!(
-        "Catalog: {}\n\nQuery: {}",
-        serde_json::to_string(&catalog).ok()?,
-        query.trim()
-    );
+pub async fn llm_chat_json<T>(cfg: &LlmConfig, system: &str, user: &str) -> Option<T>
+where
+    T: for<'de> Deserialize<'de>,
+{
     let body = serde_json::json!({
         "model": cfg.model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "temperature": 0.1,
+        "temperature": 0.15,
     });
     let url = format!("{}/chat/completions", cfg.api_url.trim_end_matches('/'));
     let mut req = reqwest::Client::new()
@@ -92,7 +76,36 @@ pub async fn llm_search_intent(apps: &[App], query: &str, cfg: &LlmConfig) -> Op
     let content = parsed.choices.first()?.message.content.trim();
     let json_start = content.find('{')?;
     let json_end = content.rfind('}')?;
-    let llm: LlmAnswer = serde_json::from_str(&content[json_start..=json_end]).ok()?;
+    serde_json::from_str(&content[json_start..=json_end]).ok()
+}
+
+pub async fn llm_search_intent(apps: &[App], query: &str, cfg: &LlmConfig) -> Option<SearchIntent> {
+    let catalog: Vec<_> = apps
+        .iter()
+        .filter(|a| a.visibility.published && !a.visibility.hidden)
+        .take(80)
+        .map(|a| {
+            serde_json::json!({
+                "id": a.id,
+                "name": a.display_name,
+                "namespace": a.namespace,
+                "status": a.status,
+                "statusMessage": a.status_message,
+                "environment": a.meta.environment,
+                "owner": a.meta.owner,
+                "dependsOn": a.meta.depends_on,
+                "routePath": a.route_path,
+                "recommended": a.meta.recommended,
+            })
+        })
+        .collect();
+    let system = "You are Hermes app search. Return JSON only: {\"intent\":\"...\",\"answer\":\"...\",\"appIds\":[\"id1\"]}. Pick matching app ids from the catalog.";
+    let user = format!(
+        "Catalog: {}\n\nQuery: {}",
+        serde_json::to_string(&catalog).ok()?,
+        query.trim()
+    );
+    let llm: LlmAnswer = llm_chat_json(cfg, system, &user).await?;
     let matched: Vec<App> = apps
         .iter()
         .filter(|a| llm.app_ids.iter().any(|id| id == &a.id))

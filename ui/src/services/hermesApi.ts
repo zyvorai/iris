@@ -4,6 +4,7 @@
 import type {
   AppDiagnosis,
   AppGraph,
+  AppInsight,
   AuditEvent,
   CatalogStats,
   ClusterSummary,
@@ -16,6 +17,7 @@ import type {
   FederatedAuditEvent,
   FederationActionResult,
   FederationRbacStatus,
+  FleetInsight,
   SearchIntent,
   ShareLink,
   TeamOwner,
@@ -77,6 +79,8 @@ export const hermesApi = {
   listOwners: () => req<TeamOwner[]>('/owners'),
   getApp: (id: string) => req<HermesApp>(appPath(id)),
   getDiagnosis: (id: string) => req<AppDiagnosis>(`${appPath(id)}/diagnosis`),
+  getAppInsight: (id: string) => req<AppInsight>(`${appPath(id)}/insight`),
+  getFleetInsight: () => req<FleetInsight>('/insights/fleet'),
   listDiscovery: () => req<HermesApp[]>('/discovery'),
   publish: (id: string) => req<void>(`/discovery/publish/${encodeURIComponent(id)}`, { method: 'POST' }),
   publishNamespace: (namespace: string) =>

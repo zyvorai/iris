@@ -4,31 +4,33 @@
 import { useQuery } from '@tanstack/react-query'
 import { hermesApi } from '../services/hermesApi'
 
-export function useZeusAiInsight(appId: string | null, displayName: string, enabled = true) {
-  const diagnosis = useQuery({
-    queryKey: ['diagnosis', appId],
-    queryFn: () => hermesApi.getDiagnosis(appId!),
+export function useZeusAiInsight(appId: string | null, enabled = true) {
+  const insight = useQuery({
+    queryKey: ['app-insight', appId],
+    queryFn: () => hermesApi.getAppInsight(appId!),
     enabled: enabled && !!appId,
-  })
-
-  const llm = useQuery({
-    queryKey: ['zeus-ai', appId, displayName],
-    queryFn: () => hermesApi.searchLlm(`why is ${displayName} ${diagnosis.data?.problem ? 'having issues' : 'offline'}`),
-    enabled: enabled && !!appId && !!displayName,
     staleTime: 60_000,
   })
 
-  const explanation =
-    diagnosis.data?.cause ||
-    diagnosis.data?.problem ||
-    llm.data?.answer ||
-    (diagnosis.isLoading ? 'Analyzing service health…' : 'No insight available yet.')
-
   return {
-    diagnosis,
-    llm,
-    explanation,
-    suggestedActions: diagnosis.data?.suggestedActions ?? [],
-    loading: diagnosis.isLoading || llm.isLoading,
+    insight,
+    summary: insight.data?.summary ?? '',
+    explanation:
+      insight.data?.explanation ??
+      (insight.isLoading ? 'Zeus AI is analyzing this service…' : 'No insight available yet.'),
+    remediation: insight.data?.remediation ?? [],
+    suggestedActions: insight.data?.suggestedActions ?? [],
+    source: insight.data?.source,
+    loading: insight.isLoading,
   }
+}
+
+export function useFleetInsight(enabled = true) {
+  return useQuery({
+    queryKey: ['fleet-insight'],
+    queryFn: hermesApi.getFleetInsight,
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  })
 }

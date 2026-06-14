@@ -3,10 +3,13 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 
+export type InspectorTab = 'overview' | 'route' | 'share' | 'deps' | 'ai'
+
 interface InspectorContextValue {
   appId: string | null
+  inspectorTab: InspectorTab
   diagnoseAppId: string | null
-  openInspector: (appId: string) => void
+  openInspector: (appId: string, tab?: InspectorTab) => void
   closeInspector: () => void
   openDiagnose: (appId: string) => void
   closeDiagnose: () => void
@@ -16,14 +19,19 @@ const InspectorContext = createContext<InspectorContextValue | null>(null)
 
 export function InspectorProvider({ children }: { children: ReactNode }) {
   const [appId, setAppId] = useState<string | null>(null)
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('overview')
   const [diagnoseAppId, setDiagnoseAppId] = useState<string | null>(null)
 
-  const openInspector = useCallback((id: string) => {
+  const openInspector = useCallback((id: string, tab: InspectorTab = 'overview') => {
     setDiagnoseAppId(null)
     setAppId(id)
+    setInspectorTab(tab)
   }, [])
 
-  const closeInspector = useCallback(() => setAppId(null), [])
+  const closeInspector = useCallback(() => {
+    setAppId(null)
+    setInspectorTab('overview')
+  }, [])
 
   const openDiagnose = useCallback((id: string) => {
     setAppId(null)
@@ -33,8 +41,8 @@ export function InspectorProvider({ children }: { children: ReactNode }) {
   const closeDiagnose = useCallback(() => setDiagnoseAppId(null), [])
 
   const value = useMemo(
-    () => ({ appId, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose }),
-    [appId, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose],
+    () => ({ appId, inspectorTab, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose }),
+    [appId, inspectorTab, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose],
   )
   return <InspectorContext.Provider value={value}>{children}</InspectorContext.Provider>
 }

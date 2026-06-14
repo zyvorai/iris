@@ -166,8 +166,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
   })
 
   const intent = useQuery({
-    queryKey: ['search-intent', q],
-    queryFn: () => hermesApi.searchIntent(q),
+    queryKey: ['search-llm-intent', q],
+    queryFn: () => hermesApi.searchLlm(q),
     enabled: isIntentQuery,
   })
 

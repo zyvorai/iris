@@ -56,6 +56,23 @@ export interface SearchIntent {
   apps: HermesApp[]
 }
 
+export interface AppInsight {
+  appId: string
+  summary: string
+  explanation: string
+  source: string
+  remediation?: string[]
+  suggestedActions?: SuggestedAction[]
+}
+
+export interface FleetInsight {
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  focusAppIds?: string[]
+}
+
 export interface ClusterInfo {
   id: string
   name: string

@@ -11,6 +11,8 @@ import ServiceGalaxy from '../components/command/ServiceGalaxy'
 import PageFrame from '../components/nebula/PageFrame'
 import ContextBanner from '../components/nebula/ContextBanner'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
@@ -89,7 +91,15 @@ export default function HomePage() {
     [catalogApps],
   )
 
-  const aiHint = useMemo(() => buildAiHint(catalogApps), [catalogApps])
+  const fleetInsight = useFleetInsight(hasData)
+
+  const aiHint = useMemo(() => {
+    if (fleetInsight.data?.summary) {
+      const extra = fleetInsight.data.highlights?.[0]
+      return extra ? `${fleetInsight.data.summary} · ${extra}` : fleetInsight.data.summary
+    }
+    return buildAiHint(catalogApps)
+  }, [fleetInsight.data, catalogApps])
 
   const onResolveIssues = () => {
     if (unhealthy[0]) openDiagnose(unhealthy[0].id)
@@ -141,6 +151,18 @@ export default function HomePage() {
         />
 
         <QuickLaunchBar apps={quickLaunchApps} />
+
+        {hasData ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing fleet health…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+            compact
+          />
+        ) : null}
 
         <MissionControlSpaces apps={catalogApps} />
 

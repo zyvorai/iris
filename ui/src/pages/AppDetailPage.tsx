@@ -14,6 +14,8 @@ import HealthRing from '../components/nebula/HealthRing'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import ActionMenu from '../components/nebula/ActionMenu'
 import StatusBadge from '../components/nebula/StatusBadge'
 import RouteDisplay from '../components/nebula/RouteDisplay'
@@ -282,6 +284,8 @@ export function HealthPage() {
   const namespaceCount = cluster.data?.namespaces ?? 0
 
   const loading = (catalog.isLoading && !catalog.data) || (cluster.isLoading && !cluster.data)
+  const hasData = Boolean(catalog.data || cluster.data)
+  const fleetInsight = useFleetInsight(hasData)
 
   return (
     <PageFrame
@@ -316,6 +320,17 @@ export function HealthPage() {
           issueCount={issueCount}
           brokenCount={broken}
         />
+
+        {hasData ? (
+          <ZeusAiPanel
+            title="Zeus AI fleet summary"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Analyzing cluster health patterns…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+          />
+        ) : null}
 
         <AttentionQueue apps={unhealthy} />
 

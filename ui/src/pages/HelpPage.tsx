@@ -1,7 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { BookOpen, Compass, Globe, Rocket, Search } from 'lucide-react'
+import { BookOpen, Compass, Globe, Rocket, Search, Sparkles } from 'lucide-react'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import Button from '../components/nebula/Button'
@@ -28,6 +28,16 @@ export default function HelpPage() {
               <h3>Spotlight</h3>
               <p>
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: owner:, env:, depends:, ai:
+              </p>
+              <p className="body-text" style={{ marginTop: '0.5rem' }}>
+                Natural-language queries use Zeus AI when HERMES_LLM_API_URL is configured; otherwise Hermes falls back to rule-based intent search.
+              </p>
+            </article>
+            <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Sparkles size={18} />
+              <h3>Zeus AI insights</h3>
+              <p>
+                Per-app insight and fleet summaries power the Ask Zeus AI tab, Diagnose drawer, Home, and Health pages.
               </p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>

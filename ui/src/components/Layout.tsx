@@ -20,7 +20,7 @@ interface LayoutProps {
 
 export default function Layout({ children, paletteOpen, onPaletteOpen, onPaletteClose }: LayoutProps) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const { appId, diagnoseAppId, closeInspector, closeDiagnose } = useInspector()
+  const { appId, diagnoseAppId, inspectorTab, closeInspector, closeDiagnose } = useInspector()
   useGlobalNavShortcuts()
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function Layout({ children, paletteOpen, onPaletteOpen, onPalette
       {paletteOpen ? <CommandPalette onClose={onPaletteClose} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
       <DiagnosisDrawer appId={diagnoseAppId} onClose={closeDiagnose} />
-      <ServiceInspectorDrawer appId={appId} onClose={closeInspector} />
+      <ServiceInspectorDrawer appId={appId} initialTab={inspectorTab} onClose={closeInspector} />
     </div>
   )
 }

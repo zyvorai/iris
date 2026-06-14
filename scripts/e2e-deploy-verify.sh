@@ -78,6 +78,8 @@ check "search LLM"             "curl -sf '${BASE}/api/v1/search/llm?q=grafana' |
 check "clusters"               "curl -sf '${BASE}/api/v1/clusters' | grep -q '\"status\"'"
 check "health summary"         "curl -sf '${BASE}/api/v1/health/apps'"
 check "app diagnosis"          "curl -sf '${BASE}/api/v1/apps/hermes-demo/grafana/diagnosis' | grep -q '\"chain\"'"
+check "app insight"            "curl -sf '${BASE}/api/v1/apps/hermes-demo/grafana/insight' | grep -q '\"explanation\"'"
+check "fleet insight"          "curl -sf '${BASE}/api/v1/insights/fleet' | grep -q '\"summary\"'"
 check "recommended"            "curl -sf '${BASE}/api/v1/recommended'"
 check "shares"                 "curl -sf '${BASE}/api/v1/shares'"
 check "shares admin"           "curl -sf '${BASE}/api/v1/shares/all' | grep -q '^\\['"

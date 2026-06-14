@@ -6,7 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
-- **Nebula migration polish** — unified diagnose drawer (retired `DiagnosePanel`), migrated share/mesh/shortcuts/inspector panels to Nebula components
+- **Zeus AI insights** — `/api/v1/apps/{id}/insight` and `/api/v1/insights/fleet` with LLM + rule-based fallback
+- `ZeusAiPanel` on Home and Health; Diagnose drawer and inspector AI tab use context-aware insight
+- Spotlight natural-language queries route through `/search/llm` (richer catalog context, fixed `appIds` parsing)
+- Ask Zeus AI opens inspector directly on the AI tab
+
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`
 - Command palette pending row while search / AI / intent queries load

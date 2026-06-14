@@ -1712,3 +1712,44 @@
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
+
+.zeus-ai-panel {
+  border-color: rgba(168, 85, 247, 0.18);
+  background:
+    linear-gradient(165deg, rgba(30, 22, 46, 0.92) 0%, rgba(17, 21, 28, 0.94) 100%);
+}
+
+.zeus-ai-panel-compact {
+  padding: 1rem 1.15rem;
+}
+
+.zeus-ai-summary {
+  font-size: 0.95rem;
+  margin: 0.35rem 0 0;
+}
+
+.zeus-ai-explanation {
+  margin-top: 0.65rem;
+}
+
+.zeus-ai-remediation {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.zeus-ai-remediation li + li {
+  margin-top: 0.35rem;
+}
+
+.zeus-ai-actions {
+  margin-top: 0.75rem;
+}
+
+.diagnosis-drawer-ai {
+  border: 1px solid rgba(168, 85, 247, 0.16);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1rem;
+  background: rgba(168, 85, 247, 0.06);
+}

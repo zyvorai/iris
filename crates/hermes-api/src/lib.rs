@@ -15,10 +15,10 @@ use hermes_core::{
     allowed_namespaces_for_groups, build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
     build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
-    remote_set_recommended, resolve_search_intent, resolve_search_with_llm, App, AppDiagnosis, AppGraph,
-    AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest, FederatedApp, FederatedAuditEvent,
-    FederationActionResult, FederationRbacStatus, HealthSummary, RoleRule, SearchHit, SearchIntent, ShareLink,
-    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    remote_set_recommended, resolve_app_insight, resolve_fleet_insight, resolve_search_intent, resolve_search_with_llm,
+    App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, CreateShareRequest,
+    FederatedApp, FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, HealthSummary,
+    RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -63,6 +63,7 @@ pub fn routes(state: ApiState) -> Router {
         .route("/search", get(search))
         .route("/search/intent", get(search_intent))
         .route("/search/llm", get(search_llm))
+        .route("/insights/fleet", get(fleet_insight))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -206,6 +207,10 @@ async fn get_app_or_diagnosis(
         let app_id = app_id.trim_end_matches('/');
         return Ok(Json(diagnosis_for_app(&st, app_id)?).into_response());
     }
+    if let Some(app_id) = raw.strip_suffix("/insight") {
+        let app_id = app_id.trim_end_matches('/');
+        return Ok(Json(insight_for_app(&st, app_id).await?).into_response());
+    }
     let app = st
         .store
         .get_app(&raw)?
@@ -230,6 +235,36 @@ fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppErr
         }
     }
     Ok(build_diagnosis(&app))
+}
+
+async fn insight_for_app(st: &ApiState, app_id: &str) -> Result<AppInsight, AppError> {
+    let app = st
+        .store
+        .get_app(app_id)?
+        .ok_or(AppError::NotFound)?;
+    if !app_allowed(st, &app) {
+        return Err(AppError::NotFound);
+    }
+    let diagnosis = diagnosis_for_app(st, app_id)?;
+    Ok(resolve_app_insight(&app, &diagnosis).await)
+}
+
+async fn fleet_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<FleetInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let summary = st.store.cluster_summary()?;
+    let insight = resolve_fleet_insight(&apps, &summary).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("fleet_insight source={}", insight.source),
+    );
+    Ok(Json(insight))
 }
 
 async fn list_federated_catalog(

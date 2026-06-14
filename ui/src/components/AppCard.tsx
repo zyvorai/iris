@@ -61,7 +61,7 @@ export default function AppCard({ app, favorite = false, onPublish, onHide, comp
 
   const menuItems = buildServiceMenuItems(app, {
     onDiagnose: () => openDiagnose(app.id),
-    onInspector: () => openInspector(app.id),
+    onInspector: () => openInspector(app.id, 'ai'),
     onPublish: !app.visibility.published ? handlePublish : undefined,
     onHide,
     onPin: () => void favMutation.mutate(),

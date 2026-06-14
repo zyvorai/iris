@@ -31,6 +31,27 @@ Shared building blocks under `ui/src/components/nebula/`:
 | `RouteDisplay` | Launchpad path and public URL with copy |
 | `ServiceStatusMessage` | Human-readable health probe summaries |
 | `DiagnosisDrawer` | Global diagnose flow (route lens, AI insight, retry) |
+| `ZeusAiPanel` | Fleet and per-app AI summaries with rules/LLM source badge |
+
+## Zeus AI
+
+Configure OpenAI-compatible LLM access on the server:
+
+| Env | Purpose |
+|-----|---------|
+| `HERMES_LLM_API_URL` | Chat completions base URL (e.g. `https://api.openai.com/v1`) |
+| `HERMES_LLM_API_KEY` | Bearer token |
+| `HERMES_LLM_MODEL` | Model name (default `gpt-4o-mini`) |
+
+When unset, Hermes uses rule-based insight and intent search — no external API required.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/search/llm?q=` | Natural-language catalog search |
+| `GET /api/v1/apps/{id}/insight` | Per-app diagnosis + remediation narrative |
+| `GET /api/v1/insights/fleet` | Fleet-wide health summary and highlights |
+
+UI: Home fleet panel, Health AI summary, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:` prefix.
 
 ## Key pages
 
