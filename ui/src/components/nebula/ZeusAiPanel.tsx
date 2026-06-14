@@ -2,8 +2,9 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import type { ReactNode } from 'react'
-import { Sparkles } from 'lucide-react'
+import { RefreshCw, Sparkles } from 'lucide-react'
 import GlassPanel from './GlassPanel'
+import Button from './Button'
 
 interface ZeusAiPanelProps {
   title?: string
@@ -14,6 +15,8 @@ interface ZeusAiPanelProps {
   loading?: boolean
   compact?: boolean
   action?: ReactNode
+  onRefresh?: () => void
+  refreshing?: boolean
 }
 
 export default function ZeusAiPanel({
@@ -25,6 +28,8 @@ export default function ZeusAiPanel({
   loading,
   compact,
   action,
+  onRefresh,
+  refreshing,
 }: ZeusAiPanelProps) {
   if (loading) {
     return (
@@ -51,6 +56,18 @@ export default function ZeusAiPanel({
             {source === 'llm' ? 'AI' : 'Rules'}
           </span>
         ) : null}
+        {onRefresh ? (
+          <Button
+            variant="ghost"
+            className="nebula-btn-compact zeus-ai-refresh"
+            onClick={onRefresh}
+            disabled={refreshing}
+            title="Refresh insight"
+            aria-label="Refresh insight"
+          >
+            <RefreshCw size={14} className={refreshing ? 'hermes-nb-spin' : ''} />
+          </Button>
+        ) : null}
       </div>
       <p className="body-text zeus-ai-explanation">{explanation}</p>
       {remediation?.length ? (
@@ -65,11 +82,13 @@ export default function ZeusAiPanel({
   )
 }
 
-export function ZeusAiBadge({ source }: { source?: string }) {
+export function ZeusAiBadge({ source, warn }: { source?: string; warn?: boolean }) {
   if (!source) return null
+  const tone = warn ? 'status-degraded' : source === 'llm' ? 'status-healthy' : 'status-unknown'
+  const label = warn ? 'AI offline' : source === 'llm' ? 'Zeus AI' : 'Heuristic'
   return (
-    <span className={`nebula-status-badge zeus-ai-badge ${source === 'llm' ? 'status-healthy' : 'status-unknown'}`}>
-      <Sparkles size={10} /> {source === 'llm' ? 'Zeus AI' : 'Heuristic'}
+    <span className={`nebula-status-badge zeus-ai-badge ${tone}`}>
+      <Sparkles size={10} /> {label}
     </span>
   )
 }

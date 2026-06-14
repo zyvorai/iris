@@ -7,6 +7,7 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
@@ -74,6 +75,7 @@ export default function DiscoveryPage() {
             </div>
             {discovery.data?.length ? (
               <>
+                <AskZeusButton compact command="suggest publish" />
                 {discoveryInsight.data?.suggestPublishIds?.length ? (
                   <Button
                     variant="ai"
@@ -102,6 +104,8 @@ export default function DiscoveryPage() {
             remediation={discoveryInsight.data?.highlights}
             loading={discoveryInsight.isLoading}
             compact
+            onRefresh={() => void discoveryInsight.refetch()}
+            refreshing={discoveryInsight.isFetching && !discoveryInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={discoveryInsight.data?.suggestPublishIds ?? []}

@@ -461,7 +461,9 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             kind: 'action',
             label: `${mode}${model}`,
             meta: aiStatus.data.llmConfigured
-              ? 'Zeus AI is generating insight responses from your configured model'
+              ? aiStatus.data.llmReachable === false
+                ? aiStatus.data.probeMessage || 'LLM configured but unreachable — falling back to rules'
+                : 'Zeus AI is generating insight responses from your configured model'
               : 'Set HERMES_LLM_API_URL on the server for live LLM responses',
             run: () => navigate('/help'),
           },

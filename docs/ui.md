@@ -69,7 +69,7 @@ The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not 
 | `GET /api/v1/insights/owner/{owner}` | Team ownership health rollup |
 | `GET /api/v1/insights/federated` | Federated catalog health rollup |
 | `GET /api/v1/insights/activity` | Recent audit activity patterns |
-| `GET /api/v1/insights/status` | Whether live LLM is configured (Rules vs AI badge) |
+| `GET /api/v1/insights/status` | Whether live LLM is configured; probes `/models` when configured |
 
 UI: Home and Health fleet panels with diagnose chips, per-app insight on app detail, Activity audit insight, Graph topology insight, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Teams/Spaces/Federated summaries, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, `ns insight`, `graph insight`, `owner insight`, `federated insight`, `activity insight`, and `ai status`.
 

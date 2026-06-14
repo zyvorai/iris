@@ -201,7 +201,7 @@ pub use insight::{
 };
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
-pub use llm::{ai_status, llm_chat_json, llm_config_from_env, resolve_search_with_llm, AiStatus, LlmConfig};
+pub use llm::{ai_status, ai_status_with_probe, llm_chat_json, llm_config_from_env, llm_probe, resolve_search_with_llm, AiStatus, LlmConfig};
 pub use rbac::{
     allowed_actions_for_groups, allowed_namespaces_for_groups, can_perform_action,
     role_rules_from_env, RoleRule,

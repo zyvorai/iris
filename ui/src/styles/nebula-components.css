@@ -1586,6 +1586,14 @@
   margin-left: -0.15rem;
 }
 
+.zeus-ai-refresh {
+  margin-left: auto;
+}
+
+.section-head-nebula .zeus-ai-refresh {
+  margin-left: 0;
+}
+
 .shortcuts-list-compact li {
   grid-template-columns: 1fr;
 }

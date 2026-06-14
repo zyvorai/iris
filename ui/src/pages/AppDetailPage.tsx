@@ -4,12 +4,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, HeartPulse, Sparkles, Stethoscope } from 'lucide-react'
+import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
-import { useSpotlight } from '../utils/spotlightContext'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
 import GlassPanel from '../components/nebula/GlassPanel'
 import HealthRing from '../components/nebula/HealthRing'
@@ -286,7 +286,6 @@ export default function AppDetailPage() {
 
 export function HealthPage() {
   const { openDiagnose } = useInspector()
-  const { openSpotlight } = useSpotlight()
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
   const publishedHealth = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary, refetchInterval: 15000 })
@@ -332,13 +331,10 @@ export function HealthPage() {
                 {serviceCount} discovered · {healthy} healthy · {degraded} degraded · {broken} broken
               </p>
               <div className="hero-command-ctas">
-                <Button
-                  variant="ai"
-                  data-testid="ask-zeus-btn"
-                  onClick={() => openSpotlight(issueCount > 0 ? 'explain' : 'ai status')}
-                >
-                  <Sparkles size={14} /> Ask Zeus
-                </Button>
+                <AskZeusButton
+                  compact
+                  command={issueCount > 0 ? 'explain' : 'ai status'}
+                />
                 {issueCount > 0 ? (
                   <Button variant="secondary" to="/apps?status=unhealthy">
                     Review unhealthy apps

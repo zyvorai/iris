@@ -46,7 +46,9 @@ export default function HelpPage() {
               <h3>Zeus AI insights</h3>
               <p>
                 {aiStatus.data?.llmConfigured
-                  ? `Live LLM enabled (${aiStatus.data.model ?? 'configured model'}).`
+                  ? aiStatus.data.llmReachable === false
+                    ? `LLM configured but unreachable${aiStatus.data.probeMessage ? `: ${aiStatus.data.probeMessage}` : ''}. Insights use rules fallback.`
+                    : `Live LLM enabled (${aiStatus.data.model ?? 'configured model'}).`
                   : 'Rules engine active — set HERMES_LLM_API_URL for live LLM responses.'}
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>

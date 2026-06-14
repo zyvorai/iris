@@ -200,7 +200,9 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               data-tone={statusTone}
               title={
                 aiStatus.data?.llmConfigured
-                  ? `Zeus AI (${aiStatus.data.model}) · ${healthy} of ${total} healthy`
+                  ? aiStatus.data.llmReachable === false
+                    ? `Zeus AI unreachable${aiStatus.data.probeMessage ? `: ${aiStatus.data.probeMessage}` : ''}`
+                    : `Zeus AI (${aiStatus.data.model}) · ${healthy} of ${total} healthy`
                   : `Rules engine · ${healthy} of ${total} healthy`
               }
               data-testid="navbar-health-chip"
@@ -209,7 +211,10 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               <span className="zeus-health-label">{healthPct != null ? `${healthPct}%` : '—'} healthy</span>
             </Link>
             {aiStatus.data ? (
-              <ZeusAiBadge source={aiStatus.data.llmConfigured ? 'llm' : 'rules'} />
+              <ZeusAiBadge
+                source={aiStatus.data.llmConfigured ? 'llm' : 'rules'}
+                warn={aiStatus.data.llmConfigured && aiStatus.data.llmReachable === false}
+              />
             ) : null}
             <button type="button" className="hermes-nb-pill hermes-nb-search-pill" onClick={onPaletteOpen}>
               <Search size={15} />

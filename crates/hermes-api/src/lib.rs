@@ -19,7 +19,7 @@ use hermes_core::{
     resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
     resolve_federated_insight, resolve_activity_insight,
     resolve_search_intent,
-    resolve_search_with_llm, ai_status, App, AppDiagnosis, AppGraph, AppInsight, AiStatus, AuditEvent, CatalogStats,
+    resolve_search_with_llm, ai_status, ai_status_with_probe, App, AppDiagnosis, AppGraph, AppInsight, AiStatus, AuditEvent, CatalogStats,
     ClusterInfo, ClusterSummary, CreateShareRequest, DiscoveryInsight, FederatedApp,
     FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
     HealthSummary, NamespaceInsight, OwnerInsight, FederatedInsight, ActivityInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
@@ -262,7 +262,7 @@ async fn insight_for_app(st: &ApiState, app_id: &str) -> Result<AppInsight, AppE
 }
 
 async fn ai_status_route() -> Json<AiStatus> {
-    Json(ai_status())
+    Json(ai_status_with_probe().await)
 }
 
 async fn fleet_insight(

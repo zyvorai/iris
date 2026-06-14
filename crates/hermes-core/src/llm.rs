@@ -31,6 +31,10 @@ pub struct AiStatus {
     pub default_source: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub model: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub llm_reachable: Option<bool>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub probe_message: String,
 }
 
 pub fn ai_status() -> AiStatus {
@@ -39,13 +43,52 @@ pub fn ai_status() -> AiStatus {
             llm_configured: true,
             default_source: "llm".into(),
             model: cfg.model,
+            llm_reachable: None,
+            probe_message: String::new(),
         },
         None => AiStatus {
             llm_configured: false,
             default_source: "rules".into(),
             model: String::new(),
+            llm_reachable: None,
+            probe_message: String::new(),
         },
     }
+}
+
+pub async fn llm_probe(cfg: &LlmConfig) -> Result<(), String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(8))
+        .build()
+        .map_err(|e| e.to_string())?;
+    let url = format!("{}/models", cfg.api_url.trim_end_matches('/'));
+    let mut req = client.get(url);
+    if !cfg.api_key.is_empty() {
+        req = req.header("Authorization", format!("Bearer {}", cfg.api_key));
+    }
+    let resp = req
+        .send()
+        .await
+        .map_err(|e| format!("LLM probe failed: {e}"))?;
+    if resp.status().is_success() {
+        Ok(())
+    } else {
+        Err(format!("LLM API returned HTTP {}", resp.status()))
+    }
+}
+
+pub async fn ai_status_with_probe() -> AiStatus {
+    let mut status = ai_status();
+    if let Some(cfg) = llm_config_from_env() {
+        match llm_probe(&cfg).await {
+            Ok(()) => status.llm_reachable = Some(true),
+            Err(msg) => {
+                status.llm_reachable = Some(false);
+                status.probe_message = msg;
+            }
+        }
+    }
+    status
 }
 
 #[derive(Debug, Deserialize)]

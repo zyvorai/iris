@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch, Sparkles } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
@@ -109,6 +110,7 @@ export default function GraphPage() {
             <Link to="/apps" className="section-link-nebula">
               Catalog
             </Link>
+            <AskZeusButton compact command="graph insight" />
           </div>
 
           <PageToolbar className="graph-filters-toolbar glass-toolbar">

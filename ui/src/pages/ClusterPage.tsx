@@ -12,6 +12,7 @@ import PageToolbar from '../components/nebula/PageToolbar'
 import ContextBanner from '../components/nebula/ContextBanner'
 import EmptyState from '../components/nebula/EmptyState'
 import MetricCard from '../components/nebula/MetricCard'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
 import ActionMenu from '../components/nebula/ActionMenu'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
@@ -165,6 +166,13 @@ export default function ClusterPage() {
   const issueCount = (catalog.data ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a)).length
   const fleetInsight = useFleetInsight(hasData && issueCount > 0)
   const namespaceInsight = useNamespaceInsight(nsFilter || null, hasData && Boolean(nsFilter))
+  const askCommand = nsFilter
+    ? `ns insight ${nsFilter}`
+    : issueCount > 0
+      ? 'explain'
+      : (summary.data?.discovery ?? 0) > 0
+        ? 'suggest publish'
+        : 'ai status'
 
   return (
     <PageFrame
@@ -229,6 +237,7 @@ export default function ClusterPage() {
                 {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
               </p>
             </div>
+            <AskZeusButton compact command={askCommand} />
           </div>
           <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
             <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
@@ -247,6 +256,8 @@ export default function ClusterPage() {
             remediation={namespaceInsight.data?.highlights}
             loading={namespaceInsight.isLoading}
             compact
+            onRefresh={() => void namespaceInsight.refetch()}
+            refreshing={namespaceInsight.isFetching && !namespaceInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={namespaceInsight.data?.focusAppIds ?? []}
@@ -264,6 +275,8 @@ export default function ClusterPage() {
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
             compact
+            onRefresh={() => void fleetInsight.refetch()}
+            refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}

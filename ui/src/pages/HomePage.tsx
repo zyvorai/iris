@@ -165,6 +165,8 @@ export default function HomePage() {
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
             compact
+            onRefresh={() => void fleetInsight.refetch()}
+            refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}

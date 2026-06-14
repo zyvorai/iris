@@ -9,6 +9,7 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
@@ -153,6 +154,8 @@ export default function AppsPage() {
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
             compact
+            onRefresh={() => void fleetInsight.refetch()}
+            refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}
@@ -171,6 +174,7 @@ export default function AppsPage() {
                 Published launchpad apps and the full discovered cluster inventory.
               </p>
             </div>
+            <AskZeusButton compact command={showFleetAi ? 'explain' : 'suggest publish'} />
           </div>
 
           <PageToolbar className="page-toolbar-stacked" data-testid="catalog-toolbar">

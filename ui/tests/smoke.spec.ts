@@ -261,6 +261,15 @@ test('health page ask zeus opens spotlight', async ({ page }) => {
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
 })
 
+test('cluster page ask zeus opens spotlight', async ({ page }) => {
+  await page.goto('/cluster')
+  await waitForPageReady(page)
+  const loadError = page.getByTestId('page-load-error')
+  if (await loadError.isVisible()) return
+  await page.getByTestId('ask-zeus-btn').click()
+  await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
+})
+
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()

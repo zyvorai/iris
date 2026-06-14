@@ -126,6 +126,8 @@ export interface AiStatus {
   llmConfigured: boolean
   defaultSource: string
   model?: string
+  llmReachable?: boolean
+  probeMessage?: string
 }
 
 export interface ClusterInfo {
