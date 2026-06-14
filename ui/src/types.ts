@@ -90,6 +90,23 @@ export interface NamespaceInsight {
   focusAppIds?: string[]
 }
 
+export interface OwnerInsight {
+  owner: string
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  focusAppIds?: string[]
+}
+
+export interface GraphInsight {
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  focusAppIds?: string[]
+}
+
 export interface ClusterInfo {
   id: string
   name: string

@@ -9,10 +9,15 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import type { HermesApp } from '../types'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useInspector } from '../utils/inspectorContext'
 
 export default function TeamsPage() {
+  const { openDiagnose } = useInspector()
   const owners = useQuery({ queryKey: ['owners'], queryFn: hermesApi.listOwners })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
 
@@ -36,6 +41,9 @@ export default function TeamsPage() {
     void catalog.refetch()
   }
 
+  const issueCount = (catalog.data ?? []).filter((a) => a.status !== 'healthy').length
+  const fleetInsight = useFleetInsight(Boolean(catalog.data?.length) && issueCount > 0)
+
   return (
     <PageFrame
       loading={loading}
@@ -45,6 +53,25 @@ export default function TeamsPage() {
       errorTitle="Could not load teams"
     >
       <div className="page-grid">
+        {issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing team-owned services…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+            compact
+            action={
+              <ZeusAiFocusChips
+                appIds={fleetInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>

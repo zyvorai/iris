@@ -82,6 +82,8 @@ check "app insight"            "curl -sf '${BASE}/api/v1/apps/hermes-demo/grafan
 check "fleet insight"          "curl -sf '${BASE}/api/v1/insights/fleet' | grep -q '\"summary\"'"
 check "discovery insight"      "curl -sf '${BASE}/api/v1/insights/discovery' | grep -q '\"summary\"'"
 check "namespace insight"      "curl -sf '${BASE}/api/v1/insights/namespace/hermes-demo' | grep -q '\"namespace\"'"
+check "graph insight"          "curl -sf '${BASE}/api/v1/insights/graph' | grep -q '\"summary\"'"
+check "owner insight"          "curl -sf '${BASE}/api/v1/insights/owner/platform' | grep -q '\"owner\"'"
 check "recommended"            "curl -sf '${BASE}/api/v1/recommended'"
 check "shares"                 "curl -sf '${BASE}/api/v1/shares'"
 check "shares admin"           "curl -sf '${BASE}/api/v1/shares/all' | grep -q '^\\['"

@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::llm::{llm_chat_json, llm_config_from_env, LlmConfig};
-use crate::{App, AppDiagnosis, ClusterSummary, SuggestedAction};
+use crate::{App, AppDiagnosis, AppGraph, ClusterSummary, SuggestedAction};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -47,6 +47,31 @@ pub struct DiscoveryInsight {
 #[serde(rename_all = "camelCase")]
 pub struct NamespaceInsight {
     pub namespace: String,
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub focus_app_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GraphInsight {
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub focus_app_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct OwnerInsight {
+    pub owner: String,
     pub summary: String,
     pub explanation: String,
     pub source: String,
@@ -545,4 +570,322 @@ pub async fn resolve_namespace_insight(namespace: &str, apps: &[App]) -> Namespa
         }
     }
     rule_namespace_insight(namespace, apps)
+}
+
+pub fn rule_graph_insight(graph: &AppGraph) -> GraphInsight {
+    let unresolved: Vec<_> = graph.edges.iter().filter(|e| !e.resolved).collect();
+    let node_status: std::collections::HashMap<&str, &str> =
+        graph.nodes.iter().map(|n| (n.id.as_str(), n.status.as_str())).collect();
+
+    let mut focus = Vec::new();
+    for edge in &unresolved {
+        if node_status.get(edge.to.as_str()) == Some(&"broken") || node_status.get(edge.to.as_str()) == Some(&"degraded") {
+            focus.push(edge.to.clone());
+        }
+        if node_status.get(edge.from.as_str()) == Some(&"broken") {
+            focus.push(edge.from.clone());
+        }
+    }
+    focus.sort();
+    focus.dedup();
+    focus.truncate(6);
+
+    let mut highlights = Vec::new();
+    if !unresolved.is_empty() {
+        highlights.push(format!("{} unresolved dependency link(s)", unresolved.len()));
+    }
+    let broken_targets = unresolved
+        .iter()
+        .filter(|e| node_status.get(e.to.as_str()) == Some(&"broken"))
+        .count();
+    if broken_targets > 0 {
+        highlights.push(format!("{broken_targets} broken downstream consumer(s)"));
+    }
+    let mesh_nodes = graph.nodes.iter().filter(|n| !n.mesh_routes.is_empty()).count();
+    if mesh_nodes > 0 {
+        highlights.push(format!("{mesh_nodes} service(s) expose mesh routes"));
+    }
+
+    let summary = if unresolved.is_empty() {
+        format!(
+            "Dependency graph is clean — {} apps with {} resolved links.",
+            graph.nodes.len(),
+            graph.edges.len()
+        )
+    } else {
+        format!(
+            "{} unresolved dependency link(s) across {} apps — inspect downstream consumers first.",
+            unresolved.len(),
+            graph.nodes.len()
+        )
+    };
+
+    let explanation = if unresolved.is_empty() {
+        "Published catalog dependencies are mapped and resolved. Use filters to inspect mesh-only or broken subgraphs.".into()
+    } else {
+        "Hermes found dependency edges that do not resolve to healthy catalog apps. Broken downstream services often indicate upstream or routing failures.".into()
+    };
+
+    GraphInsight {
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+        focus_app_ids: focus,
+    }
+}
+
+async fn llm_graph_insight(graph: &AppGraph, cfg: &LlmConfig) -> Option<GraphInsight> {
+    let unresolved: Vec<_> = graph
+        .edges
+        .iter()
+        .filter(|e| !e.resolved)
+        .take(20)
+        .map(|e| serde_json::json!({"from": e.from, "to": e.to, "label": e.label}))
+        .collect();
+    let broken: Vec<_> = graph
+        .nodes
+        .iter()
+        .filter(|n| n.status != "healthy")
+        .take(20)
+        .map(|n| serde_json::json!({"id": n.id, "label": n.label, "status": n.status, "namespace": n.namespace}))
+        .collect();
+    let context = serde_json::json!({ "unresolvedEdges": unresolved, "unhealthyNodes": broken });
+    let system = "You are Zeus AI topology analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken downstream dependencies.";
+    let user = format!("Analyze dependency graph:\n{}", serde_json::to_string_pretty(&context).ok()?);
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LlmGraphInsight {
+        summary: String,
+        explanation: String,
+        #[serde(default)]
+        highlights: Vec<String>,
+        #[serde(default, alias = "focusAppIds")]
+        focus_app_ids: Vec<String>,
+    }
+    let llm: LlmGraphInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(GraphInsight {
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+        focus_app_ids: llm.focus_app_ids,
+    })
+}
+
+pub async fn resolve_graph_insight(graph: &AppGraph) -> GraphInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_graph_insight(graph, &cfg).await {
+            return insight;
+        }
+    }
+    rule_graph_insight(graph)
+}
+
+pub fn rule_owner_insight(owner: &str, apps: &[App]) -> OwnerInsight {
+    let needle = owner.to_lowercase();
+    let owned: Vec<_> = apps
+        .iter()
+        .filter(|a| a.meta.owner.to_lowercase() == needle)
+        .collect();
+    if owned.is_empty() {
+        return OwnerInsight {
+            owner: owner.into(),
+            summary: format!("No services owned by {owner}."),
+            explanation: "Add hermes.zyvor.dev/owner annotations or check the owner spelling.".into(),
+            source: "rules".into(),
+            highlights: vec![],
+            focus_app_ids: vec![],
+        };
+    }
+
+    let unhealthy: Vec<_> = owned.iter().filter(|a| a.status != "healthy").collect();
+    let broken = unhealthy.iter().filter(|a| a.status == "broken").count();
+    let degraded = unhealthy.iter().filter(|a| a.status == "degraded").count();
+    let published = owned.iter().filter(|a| a.visibility.published).count();
+    let recommended = owned.iter().filter(|a| a.meta.recommended).count();
+    let mut highlights = Vec::new();
+    if broken > 0 {
+        highlights.push(format!("{broken} broken service(s) owned by {owner}"));
+    }
+    if recommended > 0 {
+        highlights.push(format!("{recommended} team pick(s)"));
+    }
+    if published < owned.len() {
+        highlights.push(format!("{} unpublished", owned.len() - published));
+    }
+
+    let focus_app_ids: Vec<String> = unhealthy.iter().take(5).map(|a| a.id.clone()).collect();
+    let summary = if unhealthy.is_empty() {
+        format!("Team {owner} owns {} healthy service(s).", owned.len())
+    } else {
+        format!(
+            "Team {owner}: {} of {} services need attention ({} broken, {} degraded).",
+            unhealthy.len(),
+            owned.len(),
+            broken,
+            degraded
+        )
+    };
+    let explanation = if unhealthy.is_empty() {
+        format!("All services owned by {owner} passed latest probes.")
+    } else {
+        format!("Review {owner}'s broken apps first, then check shared dependencies and unpublished services.")
+    };
+
+    OwnerInsight {
+        owner: owner.into(),
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+        focus_app_ids,
+    }
+}
+
+async fn llm_owner_insight(owner: &str, apps: &[App], cfg: &LlmConfig) -> Option<OwnerInsight> {
+    let needle = owner.to_lowercase();
+    let sample: Vec<_> = apps
+        .iter()
+        .filter(|a| a.meta.owner.to_lowercase() == needle)
+        .take(25)
+        .map(|a| {
+            serde_json::json!({
+                "id": a.id,
+                "name": a.display_name,
+                "status": a.status,
+                "namespace": a.namespace,
+                "published": a.visibility.published,
+                "recommended": a.meta.recommended,
+            })
+        })
+        .collect();
+    if sample.is_empty() {
+        return None;
+    }
+    let system = "You are Zeus AI team analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}.";
+    let user = format!("Summarize owner team {owner}:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LlmOwnerInsight {
+        summary: String,
+        explanation: String,
+        #[serde(default)]
+        highlights: Vec<String>,
+        #[serde(default, alias = "focusAppIds")]
+        focus_app_ids: Vec<String>,
+    }
+    let llm: LlmOwnerInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(OwnerInsight {
+        owner: owner.into(),
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+        focus_app_ids: llm.focus_app_ids,
+    })
+}
+
+pub async fn resolve_owner_insight(owner: &str, apps: &[App]) -> OwnerInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_owner_insight(owner, apps, &cfg).await {
+            return insight;
+        }
+    }
+    rule_owner_insight(owner, apps)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{Backend, Visibility};
+
+    fn sample_app(id: &str, status: &str, owner: &str) -> App {
+        App {
+            id: id.into(),
+            slug: id.into(),
+            canonical_slug: id.into(),
+            display_name: id.into(),
+            description: String::new(),
+            category: "infra".into(),
+            namespace: "hermes-demo".into(),
+            route_path: format!("/launchpad/{id}"),
+            public_url: String::new(),
+            icon: String::new(),
+            status: status.into(),
+            status_message: String::new(),
+            score: 0,
+            rewrite: Default::default(),
+            ready_endpoints: 1,
+            source: "discovered".into(),
+            auth_mode: "none".into(),
+            backend: Backend {
+                kind: "service".into(),
+                name: id.into(),
+                port: 80,
+                scheme: "http".into(),
+                path: "/".into(),
+            },
+            visibility: Visibility { published: true, ..Default::default() },
+            meta: crate::AppMeta {
+                owner: owner.into(),
+                ..Default::default()
+            },
+            updated_at: String::new(),
+        }
+    }
+
+    #[test]
+    fn graph_insight_flags_unresolved_edges() {
+        let graph = AppGraph {
+            nodes: vec![
+                crate::GraphNode {
+                    id: "a".into(),
+                    label: "A".into(),
+                    category: "infra".into(),
+                    status: "healthy".into(),
+                    namespace: "ns".into(),
+                    owner: String::new(),
+                    icon: String::new(),
+                    mesh_routes: vec![],
+                },
+                crate::GraphNode {
+                    id: "b".into(),
+                    label: "B".into(),
+                    category: "infra".into(),
+                    status: "broken".into(),
+                    namespace: "ns".into(),
+                    owner: String::new(),
+                    icon: String::new(),
+                    mesh_routes: vec![],
+                },
+            ],
+            edges: vec![crate::GraphEdge {
+                from: "a".into(),
+                to: "b".into(),
+                label: "depends".into(),
+                resolved: false,
+            }],
+        };
+        let insight = rule_graph_insight(&graph);
+        assert!(insight.summary.contains("unresolved"));
+        assert!(insight.focus_app_ids.contains(&"b".into()));
+    }
+
+    #[test]
+    fn owner_insight_summarizes_unhealthy_team() {
+        let apps = vec![
+            sample_app("hermes-demo/ok", "healthy", "platform"),
+            sample_app("hermes-demo/bad", "broken", "platform"),
+        ];
+        let insight = rule_owner_insight("platform", &apps);
+        assert!(insight.summary.contains("need attention"));
+        assert_eq!(insight.focus_app_ids, vec!["hermes-demo/bad".to_string()]);
+    }
 }

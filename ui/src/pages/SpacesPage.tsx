@@ -9,7 +9,9 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { hermesApi } from '../services/hermesApi'
+import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../utils/spaces'
 
 export default function SpacesPage() {
@@ -18,6 +20,8 @@ export default function SpacesPage() {
 
   const loading = catalog.isLoading && !catalog.data
   const error = catalog.isError
+  const issueCount = (catalog.data ?? []).filter((a) => a.status !== 'healthy').length
+  const fleetInsight = useFleetInsight(Boolean(catalog.data?.length) && issueCount > 0)
 
   return (
     <PageFrame
@@ -28,6 +32,18 @@ export default function SpacesPage() {
       errorTitle="Could not load spaces"
     >
       <div className="page-grid">
+        {issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
+          <ZeusAiPanel
+            title="Fleet insight"
+            summary={fleetInsight.data?.summary}
+            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing space health…'}
+            source={fleetInsight.data?.source}
+            remediation={fleetInsight.data?.highlights}
+            loading={fleetInsight.isLoading}
+            compact
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>

@@ -13,6 +13,7 @@ import ContextBanner from '../components/nebula/ContextBanner'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZeusAiInsight'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
 import type { HermesApp } from '../types'
@@ -161,6 +162,13 @@ export default function HomePage() {
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
             compact
+            action={
+              <ZeusAiFocusChips
+                appIds={fleetInsight.data?.focusAppIds ?? []}
+                catalog={catalogApps}
+                onSelect={openDiagnose}
+              />
+            }
           />
         ) : null}
 

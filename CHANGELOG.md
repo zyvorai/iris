@@ -15,6 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Playwright smoke tests for Spotlight explain/diagnose and Graph/Activity AI surfaces
 - Discovery and namespace insight APIs; AI on Cluster, Discovery, Catalog filters, Federated, and Health attention queue
 - Spotlight `why`, `suggest publish`, and `ns insight` commands; navbar health chip links to Health with AI tooltip
+- Graph topology and owner team insight APIs with Spotlight commands; per-app Zeus AI on app detail; focus chips on Home/Health
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`

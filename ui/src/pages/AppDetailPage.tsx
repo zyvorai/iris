@@ -15,7 +15,8 @@ import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import { useFleetInsight, useZeusAiInsight } from '../hooks/useZeusAiInsight'
 import ActionMenu from '../components/nebula/ActionMenu'
 import StatusBadge from '../components/nebula/StatusBadge'
 import RouteDisplay from '../components/nebula/RouteDisplay'
@@ -79,6 +80,8 @@ export default function AppDetailPage() {
       return { dep, app: match }
     })
   }, [app.data?.meta?.dependsOn, catalog.data])
+
+  const appInsight = useZeusAiInsight(appId, Boolean(appId))
 
   useEffect(() => {
     if (searchParams.get('diagnose') === '1' && appId && diagnoseAppId !== appId) {
@@ -166,6 +169,23 @@ export default function AppDetailPage() {
             </div>
           </div>
         </GlassPanel>
+
+        <ZeusAiPanel
+          title="Zeus AI service insight"
+          summary={appInsight.summary || undefined}
+          explanation={appInsight.explanation}
+          source={appInsight.source}
+          remediation={appInsight.remediation}
+          loading={appInsight.loading}
+          compact
+          action={
+            broken ? (
+              <Button variant="ai" onClick={handleOpenDiagnose}>
+                Ask Zeus AI
+              </Button>
+            ) : undefined
+          }
+        />
 
         <GlassPanel className="glass-panel-section">
           <p className="section-label">Routing</p>
@@ -264,6 +284,7 @@ export default function AppDetailPage() {
 }
 
 export function HealthPage() {
+  const { openDiagnose } = useInspector()
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
   const publishedHealth = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary, refetchInterval: 15000 })
@@ -329,6 +350,13 @@ export function HealthPage() {
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
+            action={
+              <ZeusAiFocusChips
+                appIds={fleetInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
           />
         ) : null}
 

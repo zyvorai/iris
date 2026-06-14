@@ -189,6 +189,27 @@ test('navbar health chip links to health page', async ({ page }) => {
   await expect(page).toHaveURL(/\/health/)
 })
 
+test('spotlight graph insight shows topology summary', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('graph insight')
+  await expect(page.getByText('Zeus AI · Topology')).toBeVisible({ timeout: 5000 })
+})
+
+test('app detail shows zeus ai service insight', async ({ page }) => {
+  await page.goto('/apps')
+  await waitForPageReady(page)
+  const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
+  if (!(await firstAppLink.count())) {
+    test.skip()
+    return
+  }
+  await firstAppLink.click()
+  await waitForPageReady(page)
+  await expect(page.getByText('Zeus AI service insight')).toBeVisible({ timeout: 5000 })
+})
+
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()

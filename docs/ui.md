@@ -52,8 +52,10 @@ When unset, Hermes uses rule-based insight and intent search — no external API
 | `GET /api/v1/insights/fleet` | Fleet-wide health summary and highlights |
 | `GET /api/v1/insights/discovery` | Ranked publish suggestions for the discovery queue |
 | `GET /api/v1/insights/namespace/{ns}` | Namespace health rollup and focus services |
+| `GET /api/v1/insights/graph` | Topology insight for unresolved dependency links |
+| `GET /api/v1/insights/owner/{owner}` | Team ownership health rollup |
 
-UI: Home and Health fleet panels, Activity banner, Graph focus chips, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Federated summary, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, and `ns insight`.
+UI: Home and Health fleet panels with diagnose chips, per-app insight on app detail, Activity banner, Graph topology insight, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Teams/Spaces/Federated summaries, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, `ns insight`, `graph insight`, and `owner insight`.
 
 ## Key pages
 

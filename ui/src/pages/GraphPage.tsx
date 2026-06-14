@@ -13,7 +13,7 @@ import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useGraphInsight } from '../hooks/useZeusAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import type { AppGraph } from '../types'
 
@@ -55,7 +55,7 @@ export default function GraphPage() {
 
   const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 15000 })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
-  const fleetInsight = useFleetInsight()
+  const fleetInsight = useGraphInsight()
   const { openDiagnose } = useInspector()
 
   const namespaces = useMemo(() => {
@@ -152,7 +152,7 @@ export default function GraphPage() {
                 </div>
               ) : (
                 <>
-                  <p className="body-text zeus-ai-explanation">{fleetInsight.data?.summary}</p>
+                  <p className="body-text zeus-ai-explanation">{fleetInsight.data?.explanation ?? fleetInsight.data?.summary}</p>
                   <ZeusAiFocusChips
                     appIds={fleetInsight.data?.focusAppIds ?? []}
                     catalog={catalog.data ?? []}

@@ -53,3 +53,22 @@ export function useNamespaceInsight(namespace: string | null, enabled = true) {
     staleTime: 45_000,
   })
 }
+
+export function useGraphInsight(enabled = true) {
+  return useQuery({
+    queryKey: ['graph-insight'],
+    queryFn: hermesApi.getGraphInsight,
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  })
+}
+
+export function useOwnerInsight(owner: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ['owner-insight', owner],
+    queryFn: () => hermesApi.getOwnerInsight(owner!),
+    enabled: enabled && !!owner,
+    staleTime: 45_000,
+  })
+}

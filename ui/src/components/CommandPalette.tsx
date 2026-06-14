@@ -64,6 +64,9 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['suggest publish', 'publish suggest', 'what to publish', 'discovery insight'].includes(q)) {
     return { type: 'suggest_publish' }
   }
+  if (['graph insight', 'topology insight', 'dependency insight'].includes(q)) {
+    return { type: 'graph_insight' }
+  }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
   const why = raw.trim().match(/^why\s+(?:is\s+)?(.+?)(?:\s+down|\s+unhealthy|\s+broken)?$/i)
@@ -72,6 +75,8 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (diagnose?.[1]) return { type: 'diagnose', arg: diagnose[1].trim() }
   const nsInsight = raw.trim().match(/^(?:namespace insight|ns insight)\s+(.+)$/i)
   if (nsInsight?.[1]) return { type: 'ns_insight', arg: nsInsight[1].trim() }
+  const ownerInsight = raw.trim().match(/^(?:owner insight|team insight)\s+(.+)$/i)
+  if (ownerInsight?.[1]) return { type: 'owner_insight', arg: ownerInsight[1].trim() }
   const publish = raw.trim().match(/^publish\s+(.+)$/i)
   if (publish?.[1]) return { type: 'publish', arg: publish[1].trim() }
   const pin = raw.trim().match(/^pin\s+(.+)$/i)
@@ -152,6 +157,20 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     queryKey: ['namespace-insight', command?.arg],
     queryFn: () => hermesApi.getNamespaceInsight(command!.arg!),
     enabled: command?.type === 'ns_insight' && !!command.arg,
+    staleTime: 45_000,
+  })
+
+  const graphInsight = useQuery({
+    queryKey: ['graph-insight'],
+    queryFn: hermesApi.getGraphInsight,
+    enabled: command?.type === 'graph_insight',
+    staleTime: 45_000,
+  })
+
+  const ownerInsightQuery = useQuery({
+    queryKey: ['owner-insight', command?.arg],
+    queryFn: () => hermesApi.getOwnerInsight(command!.arg!),
+    enabled: command?.type === 'owner_insight' && !!command.arg,
     staleTime: 45_000,
   })
 
@@ -344,6 +363,60 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
           path: `/cluster?ns=${encodeURIComponent(command.arg)}`,
           icon: Server,
           meta: namespaceInsight.isLoading ? 'Loading Zeus AI namespace insight…' : 'View namespace services',
+        },
+      ]
+    }
+
+    if (command?.type === 'graph_insight') {
+      if (graphInsight.data) {
+        const rows: Row[] = [
+          {
+            kind: 'action',
+            label: graphInsight.data.summary,
+            meta: graphInsight.data.explanation,
+            run: () => navigate('/graph'),
+          },
+        ]
+        for (const id of graphInsight.data.focusAppIds ?? []) {
+          const app = (catalog.data ?? []).find((a) => a.id === id)
+          if (app) rows.push({ kind: 'app', app, action: 'inspect' })
+        }
+        return rows.slice(0, 8)
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Application graph',
+          path: '/graph',
+          icon: GitBranch,
+          meta: graphInsight.isLoading ? 'Loading Zeus AI topology insight…' : 'View dependency graph',
+        },
+      ]
+    }
+
+    if (command?.type === 'owner_insight' && command.arg) {
+      if (ownerInsightQuery.data) {
+        const rows: Row[] = [
+          {
+            kind: 'action',
+            label: ownerInsightQuery.data.summary,
+            meta: ownerInsightQuery.data.explanation,
+            run: () => navigate('/teams'),
+          },
+        ]
+        for (const id of ownerInsightQuery.data.focusAppIds ?? []) {
+          const app = (catalog.data ?? []).find((a) => a.id === id)
+          if (app) rows.push({ kind: 'app', app, action: 'inspect' })
+        }
+        return rows.slice(0, 8)
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Teams',
+          path: '/teams',
+          icon: Users,
+          meta: ownerInsightQuery.isLoading ? 'Loading Zeus AI team insight…' : 'View team ownership',
         },
       ]
     }
@@ -580,6 +653,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     discoveryInsight.isLoading,
     namespaceInsight.data,
     namespaceInsight.isLoading,
+    graphInsight.data,
+    graphInsight.isLoading,
+    ownerInsightQuery.data,
+    ownerInsightQuery.isLoading,
     openDiagnose,
     openInspector,
     navigate,
@@ -642,6 +719,8 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     if (command?.type === 'explain') return 'Zeus AI · Fleet'
     if (command?.type === 'suggest_publish') return 'Zeus AI · Discovery'
     if (command?.type === 'ns_insight') return 'Zeus AI · Namespace'
+    if (command?.type === 'graph_insight') return 'Zeus AI · Topology'
+    if (command?.type === 'owner_insight') return 'Zeus AI · Team'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'

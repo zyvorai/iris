@@ -16,10 +16,12 @@ use hermes_core::{
     build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
     remote_set_recommended, resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight,
-    resolve_namespace_insight, resolve_search_intent, resolve_search_with_llm,
-    App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary,
-    CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent, FederationActionResult,
-    FederationRbacStatus, FleetInsight, HealthSummary, NamespaceInsight, RoleRule, SearchHit, SearchIntent, ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight, resolve_search_intent,
+    resolve_search_with_llm, App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats,
+    ClusterInfo, ClusterSummary, CreateShareRequest, DiscoveryInsight, FederatedApp,
+    FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
+    HealthSummary, NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
+    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -67,6 +69,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/insights/fleet", get(fleet_insight))
         .route("/insights/discovery", get(discovery_insight))
         .route("/insights/namespace/{namespace}", get(namespace_insight))
+        .route("/insights/graph", get(graph_insight))
+        .route("/insights/owner/{owner}", get(owner_insight))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -301,6 +305,42 @@ async fn namespace_insight(
         "search",
         "",
         &format!("namespace_insight ns={namespace} source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn graph_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<GraphInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let graph = build_graph(&apps);
+    let insight = resolve_graph_insight(&graph).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("graph_insight source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn owner_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path(owner): Path<String>,
+) -> Result<Json<OwnerInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let insight = resolve_owner_insight(&owner, &apps).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("owner_insight owner={owner} source={}", insight.source),
     );
     Ok(Json(insight))
 }
