@@ -65,6 +65,21 @@ else
     )
 fi
 
+if [ -n "${HERMES_LLM_API_URL:-}" ]; then
+    helm_args+=(--set "server.llm.apiUrl=${HERMES_LLM_API_URL}")
+fi
+if [ -n "${HERMES_LLM_MODEL:-}" ]; then
+    helm_args+=(--set "server.llm.model=${HERMES_LLM_MODEL}")
+fi
+if [ -n "${HERMES_LLM_API_KEY:-}" ]; then
+    kubectl create secret generic hermes-llm \
+        --from-literal=apiKey="${HERMES_LLM_API_KEY}" \
+        -n "${HELM_NS}" \
+        --dry-run=client -o yaml | kubectl apply -f -
+    helm_args+=(--set "server.llm.existingSecret=hermes-llm")
+    helm_args+=(--set "server.llm.apiKey=")
+fi
+
 helm "${helm_args[@]}"
 
 echo ""

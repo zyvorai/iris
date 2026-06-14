@@ -131,9 +131,18 @@ spec:
             - name: HERMES_LLM_API_URL
               value: {{ .Values.server.llm.apiUrl | quote }}
             {{- end }}
-            {{- if .Values.server.llm.apiKey }}
+            {{- if .Values.server.llm.existingSecret }}
             - name: HERMES_LLM_API_KEY
-              value: {{ .Values.server.llm.apiKey | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.server.llm.existingSecret | quote }}
+                  key: {{ .Values.server.llm.secretKey | default "apiKey" | quote }}
+            {{- else if .Values.server.llm.apiKey }}
+            - name: HERMES_LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-llm
+                  key: {{ .Values.server.llm.secretKey | default "apiKey" | quote }}
             {{- end }}
             {{- if .Values.server.llm.model }}
             - name: HERMES_LLM_MODEL

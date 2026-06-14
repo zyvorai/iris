@@ -21,6 +21,7 @@ const spotlightAi = [
   'graph insight — topology / unresolved deps',
   'ns insight <namespace> — namespace rollup',
   'owner insight <team> — team ownership health',
+  'ai status — Rules vs live LLM mode',
   'ai: <question> — natural-language catalog search',
 ]
 

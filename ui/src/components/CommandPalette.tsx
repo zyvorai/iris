@@ -68,6 +68,9 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['graph insight', 'topology insight', 'dependency insight'].includes(q)) {
     return { type: 'graph_insight' }
   }
+  if (['ai status', 'zeus status', 'llm status', 'ai mode'].includes(q)) {
+    return { type: 'ai_status' }
+  }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
   const why = raw.trim().match(/^why\s+(?:is\s+)?(.+?)(?:\s+down|\s+unhealthy|\s+broken)?$/i)
@@ -173,6 +176,13 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     queryFn: () => hermesApi.getOwnerInsight(command!.arg!),
     enabled: command?.type === 'owner_insight' && !!command.arg,
     staleTime: 45_000,
+  })
+
+  const aiStatus = useQuery({
+    queryKey: ['ai-status'],
+    queryFn: hermesApi.getAiStatus,
+    enabled: command?.type === 'ai_status',
+    staleTime: 60_000,
   })
 
   const query = q.trim().toLowerCase()
@@ -422,6 +432,39 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
       ]
     }
 
+    if (command?.type === 'ai_status') {
+      if (aiStatus.data) {
+        const mode = aiStatus.data.llmConfigured ? 'Live LLM' : 'Rules engine'
+        const model = aiStatus.data.model ? ` · ${aiStatus.data.model}` : ''
+        return [
+          {
+            kind: 'action',
+            label: `${mode}${model}`,
+            meta: aiStatus.data.llmConfigured
+              ? 'Zeus AI is generating insight responses from your configured model'
+              : 'Set HERMES_LLM_API_URL on the server for live LLM responses',
+            run: () => navigate('/help'),
+          },
+          {
+            kind: 'nav',
+            label: 'Fleet health dashboard',
+            path: '/health',
+            icon: HeartPulse,
+            meta: 'Review Zeus AI fleet summary',
+          },
+        ]
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Help · Zeus AI',
+          path: '/help',
+          icon: HelpCircle,
+          meta: aiStatus.isLoading ? 'Loading AI status…' : 'View configuration guide',
+        },
+      ]
+    }
+
     if (command?.type === 'explain') {
       if (fleetInsight.data) {
         const rows: Row[] = [
@@ -658,6 +701,8 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     graphInsight.isLoading,
     ownerInsightQuery.data,
     ownerInsightQuery.isLoading,
+    aiStatus.data,
+    aiStatus.isLoading,
     openDiagnose,
     openInspector,
     navigate,
@@ -726,6 +771,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     if (command?.type === 'ns_insight') return 'Zeus AI · Namespace'
     if (command?.type === 'graph_insight') return 'Zeus AI · Topology'
     if (command?.type === 'owner_insight') return 'Zeus AI · Team'
+    if (command?.type === 'ai_status') return 'Zeus AI · Status'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'

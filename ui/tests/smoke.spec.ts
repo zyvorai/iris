@@ -230,6 +230,26 @@ test('home ask zeus opens spotlight with fleet command', async ({ page }) => {
   await expect(page.getByPlaceholder(/open grafana/i)).toHaveValue(/explain|suggest publish/)
 })
 
+test('spotlight ai status shows rules or llm mode', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('ai status')
+  await expect(page.getByText('Zeus AI · Status')).toBeVisible({ timeout: 5000 })
+  const modeRow = page.getByText(/rules engine|live llm/i)
+  const helpNav = page.getByText(/help · zeus ai/i)
+  await expect(modeRow.or(helpNav)).toBeVisible({ timeout: 8000 })
+})
+
+test('health page ask zeus opens spotlight', async ({ page }) => {
+  await page.goto('/health')
+  await waitForPageReady(page)
+  const loadError = page.getByTestId('page-load-error')
+  if (await loadError.isVisible()) return
+  await page.getByTestId('ask-zeus-btn').click()
+  await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
+})
+
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()

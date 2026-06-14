@@ -65,8 +65,12 @@ usage() {
     HERMES_NODE_PORT   NodePort           (default: 31847)
     HERMES_TAG         Image tag          (default: git short SHA)
     HERMES_SSH_RETRIES SSH retry count    (default: 3)
+    HERMES_LLM_API_URL OpenAI-compatible chat completions base URL
+    HERMES_LLM_API_KEY Bearer token (stored in K8s secret hermes-llm on remote)
+    HERMES_LLM_MODEL   Model name         (default: gpt-4o-mini)
 
   Examples:
+    HERMES_LLM_API_URL=https://api.openai.com/v1 HERMES_LLM_API_KEY=sk-... deploy-remote.sh 212.8.252.194 sus
     deploy-remote.sh 212.8.252.194 sus
     deploy-remote.sh sus@212.8.252.194 --k8s --skip-build
     deploy-remote.sh 212.8.252.194 sus --quick --skip-e2e
@@ -383,6 +387,9 @@ deploy_helm() {
         HERMES_NODE_PORT="${HERMES_NODE_PORT}" \
         HERMES_USE_NODEPORT=1 \
         HERMES_DEMO_APPS="${WITH_DEMO_APPS}" \
+        HERMES_LLM_API_URL="${HERMES_LLM_API_URL:-}" \
+        HERMES_LLM_API_KEY="${HERMES_LLM_API_KEY:-}" \
+        HERMES_LLM_MODEL="${HERMES_LLM_MODEL:-}" \
         bash <<'REMOTE' || { _spin_stop; fail "Helm deploy failed"; }
 set -euo pipefail
 cd "${REMOTE_DIR}"

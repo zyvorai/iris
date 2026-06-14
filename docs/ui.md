@@ -45,6 +45,19 @@ Configure OpenAI-compatible LLM access on the server:
 
 When unset, Hermes uses rule-based insight and intent search — no external API required.
 
+**Remote deploy with LLM:**
+
+```bash
+export HERMES_LLM_API_URL=https://api.openai.com/v1
+export HERMES_LLM_API_KEY=sk-...
+./scripts/deploy-remote.sh 175.110.114.93 sus
+
+# Or apply LLM settings to an existing deploy (Helm only):
+./scripts/configure-llm-remote.sh 175.110.114.93 sus
+```
+
+The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not in plain Helm values).
+
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /api/v1/search/llm?q=` | Natural-language catalog search |

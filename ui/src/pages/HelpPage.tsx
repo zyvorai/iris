@@ -35,7 +35,7 @@ export default function HelpPage() {
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: <code>owner:</code>, <code>env:</code>, <code>depends:</code>, <code>ai:</code>
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
-                Zeus AI commands: <code>explain</code>, <code>diagnose grafana</code>, <code>why grafana</code>, <code>suggest publish</code>, <code>graph insight</code>, <code>ns insight hermes-demo</code>, <code>owner insight platform</code>
+                Zeus AI commands: <code>explain</code>, <code>diagnose grafana</code>, <code>why grafana</code>, <code>suggest publish</code>, <code>graph insight</code>, <code>ns insight hermes-demo</code>, <code>owner insight platform</code>, <code>ai status</code>
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
                 Actions: <code>open</code>, <code>publish</code>, <code>pin</code>, <code>refresh</code>, <code>export</code>, <code>attention</code>
