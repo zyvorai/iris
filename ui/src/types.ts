@@ -107,6 +107,21 @@ export interface GraphInsight {
   focusAppIds?: string[]
 }
 
+export interface FederatedInsight {
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+  focusAppIds?: string[]
+}
+
+export interface ActivityInsight {
+  summary: string
+  explanation: string
+  source: string
+  highlights?: string[]
+}
+
 export interface AiStatus {
   llmConfigured: boolean
   defaultSource: string

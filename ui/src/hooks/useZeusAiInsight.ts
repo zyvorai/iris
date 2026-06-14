@@ -80,3 +80,23 @@ export function useAiStatus() {
     staleTime: 60_000,
   })
 }
+
+export function useFederatedInsight(enabled = true) {
+  return useQuery({
+    queryKey: ['federated-insight'],
+    queryFn: hermesApi.getFederatedInsight,
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  })
+}
+
+export function useActivityInsight(enabled = true) {
+  return useQuery({
+    queryKey: ['activity-insight'],
+    queryFn: hermesApi.getActivityInsight,
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  })
+}

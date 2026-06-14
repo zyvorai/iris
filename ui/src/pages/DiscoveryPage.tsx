@@ -24,6 +24,9 @@ export default function DiscoveryPage() {
     onSuccess: () => void refreshHermesData(qc),
   })
 
+  const loading = discovery.isLoading && !discovery.data
+  const discoveryInsight = useDiscoveryInsight(Boolean(discovery.data?.length))
+
   const publishAll = useMutation({
     mutationFn: async () => {
       const apps = discovery.data ?? []
@@ -35,13 +38,21 @@ export default function DiscoveryPage() {
     onSuccess: () => void refreshHermesData(qc),
   })
 
+  const publishZeusPicks = useMutation({
+    mutationFn: async () => {
+      const ids = discoveryInsight.data?.suggestPublishIds ?? []
+      for (const id of ids.slice(0, 10)) {
+        await hermesApi.publish(id)
+      }
+      return ids.length
+    },
+    onSuccess: () => void refreshHermesData(qc),
+  })
+
   const hide = useMutation({
     mutationFn: hermesApi.hide,
     onSuccess: () => void refreshHermesData(qc),
   })
-
-  const loading = discovery.isLoading && !discovery.data
-  const discoveryInsight = useDiscoveryInsight(Boolean(discovery.data?.length))
 
   return (
     <PageFrame
@@ -62,9 +73,22 @@ export default function DiscoveryPage() {
               </p>
             </div>
             {discovery.data?.length ? (
-              <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>
-                <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)}
-              </Button>
+              <>
+                {discoveryInsight.data?.suggestPublishIds?.length ? (
+                  <Button
+                    variant="ai"
+                    className="nebula-btn-compact"
+                    disabled={publishZeusPicks.isPending}
+                    onClick={() => void publishZeusPicks.mutate()}
+                    data-testid="publish-zeus-picks"
+                  >
+                    Publish Zeus picks ({Math.min(discoveryInsight.data.suggestPublishIds.length, 10)})
+                  </Button>
+                ) : null}
+                <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>
+                  <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)}
+                </Button>
+              </>
             ) : null}
           </div>
         </GlassPanel>

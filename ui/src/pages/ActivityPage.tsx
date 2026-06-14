@@ -24,7 +24,7 @@ import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { actionLabel, hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useActivityInsight } from '../hooks/useZeusAiInsight'
 import type { AuditEvent, FederatedAuditEvent } from '../types'
 
 const actionIcons: Record<string, typeof Rocket> = {
@@ -81,7 +81,7 @@ export default function ActivityPage() {
     queryFn: () => (federated ? hermesApi.listFederatedAudit(200) : hermesApi.listAudit(200)),
     refetchInterval: 10000,
   })
-  const fleetInsight = useFleetInsight()
+  const activityInsight = useActivityInsight()
 
   const adminShares = useQuery({
     queryKey: ['shares', 'all'],
@@ -123,13 +123,14 @@ export default function ActivityPage() {
       errorTitle="Could not load activity"
     >
       <div className="page-grid">
-        {fleetInsight.data || fleetInsight.isLoading ? (
+        {activityInsight.data || activityInsight.isLoading ? (
           <ZeusAiPanel
-            title="Fleet insight"
-            summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing fleet health for activity context…'}
-            source={fleetInsight.data?.source}
-            loading={fleetInsight.isLoading}
+            title="Activity insight"
+            summary={activityInsight.data?.summary}
+            explanation={activityInsight.data?.explanation ?? 'Zeus AI is summarizing recent platform activity…'}
+            source={activityInsight.data?.source}
+            remediation={activityInsight.data?.highlights}
+            loading={activityInsight.isLoading}
             compact
           />
         ) : null}

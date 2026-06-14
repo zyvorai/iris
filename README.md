@@ -359,6 +359,7 @@ Honest checklist of what ships now:
 - [x] Discovery and namespace insight APIs with publish ranking and namespace rollups
 - [x] Graph topology and team owner insight APIs; AI status endpoint; Ask Zeus hero + navbar mode badge
 - [x] Helm LLM secret + deploy/configure scripts; Spotlight `ai status`; Health page Ask Zeus
+- [x] Federated and activity insight APIs; Discovery Publish Zeus picks; Spotlight federation/activity commands
 - [x] Fleet and per-app AI panels (Home, Health, Activity, Graph, Diagnose drawer, inspector AI tab)
 - [x] Spotlight `diagnose <app>` insight preview and `explain` fleet summary command
 - [x] Gateway SSE streaming and gRPC content-type pass-through

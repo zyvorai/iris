@@ -20,6 +20,8 @@ import type {
   FederationActionResult,
   FederationRbacStatus,
   FleetInsight,
+  FederatedInsight,
+  ActivityInsight,
   GraphInsight,
   NamespaceInsight,
   OwnerInsight,
@@ -93,6 +95,8 @@ export const hermesApi = {
   getGraphInsight: () => req<GraphInsight>('/insights/graph'),
   getOwnerInsight: (owner: string) =>
     req<OwnerInsight>(`/insights/owner/${encodeURIComponent(owner)}`),
+  getFederatedInsight: () => req<FederatedInsight>('/insights/federated'),
+  getActivityInsight: () => req<ActivityInsight>('/insights/activity'),
   listDiscovery: () => req<HermesApp[]>('/discovery'),
   publish: (id: string) => req<void>(`/discovery/publish/${encodeURIComponent(id)}`, { method: 'POST' }),
   publishNamespace: (namespace: string) =>

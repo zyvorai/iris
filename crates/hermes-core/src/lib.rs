@@ -195,8 +195,9 @@ pub use federation::{
 };
 pub use insight::{
     resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight, resolve_graph_insight,
-    resolve_namespace_insight, resolve_owner_insight, AppInsight, DiscoveryInsight, FleetInsight,
-    GraphInsight, NamespaceInsight, OwnerInsight,
+    resolve_namespace_insight, resolve_owner_insight, resolve_federated_insight, resolve_activity_insight,
+    AppInsight, DiscoveryInsight, FleetInsight, GraphInsight, NamespaceInsight, OwnerInsight,
+    FederatedInsight, ActivityInsight,
 };
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};

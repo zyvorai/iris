@@ -16,11 +16,13 @@ use hermes_core::{
     build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
     list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
     remote_set_recommended, resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight,
-    resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight, resolve_search_intent,
+    resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
+    resolve_federated_insight, resolve_activity_insight,
+    resolve_search_intent,
     resolve_search_with_llm, ai_status, App, AppDiagnosis, AppGraph, AppInsight, AiStatus, AuditEvent, CatalogStats,
     ClusterInfo, ClusterSummary, CreateShareRequest, DiscoveryInsight, FederatedApp,
     FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
-    HealthSummary, NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
+    HealthSummary, NamespaceInsight, OwnerInsight, FederatedInsight, ActivityInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
     ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
@@ -72,6 +74,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/insights/namespace/{namespace}", get(namespace_insight))
         .route("/insights/graph", get(graph_insight))
         .route("/insights/owner/{owner}", get(owner_insight))
+        .route("/insights/federated", get(federated_insight))
+        .route("/insights/activity", get(activity_insight))
         .route("/favorites", get(list_favorites))
         .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
         .route("/recents", get(list_recents))
@@ -346,6 +350,40 @@ async fn owner_insight(
         "search",
         "",
         &format!("owner_insight owner={owner} source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn federated_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<FederatedInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let entries = build_federated_catalog(&apps).await;
+    let insight = resolve_federated_insight(&entries).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("federated_insight source={}", insight.source),
+    );
+    Ok(Json(insight))
+}
+
+async fn activity_insight(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<ActivityInsight>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let events = st.store.list_audit(100)?;
+    let insight = resolve_activity_insight(&events).await;
+    let _ = st.store.record_audit(
+        &uid,
+        "search",
+        "",
+        &format!("activity_insight source={}", insight.source),
     );
     Ok(Json(insight))
 }

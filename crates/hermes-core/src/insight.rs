@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::llm::{llm_chat_json, llm_config_from_env, LlmConfig};
-use crate::{App, AppDiagnosis, AppGraph, ClusterSummary, SuggestedAction};
+use crate::{App, AppDiagnosis, AppGraph, AuditEvent, ClusterSummary, FederatedApp, SuggestedAction};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -79,6 +79,28 @@ pub struct OwnerInsight {
     pub highlights: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub focus_app_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FederatedInsight {
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub focus_app_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ActivityInsight {
+    pub summary: String,
+    pub explanation: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub highlights: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -799,6 +821,223 @@ pub async fn resolve_owner_insight(owner: &str, apps: &[App]) -> OwnerInsight {
         }
     }
     rule_owner_insight(owner, apps)
+}
+
+pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
+    if entries.is_empty() {
+        return FederatedInsight {
+            summary: "No federated apps in catalog.".into(),
+            explanation: "Configure HERMES_FEDERATED_CLUSTERS to merge remote cluster catalogs into Hermes.".into(),
+            source: "rules".into(),
+            highlights: vec!["Add peer cluster URLs in Helm values or HERMES_FEDERATED_CLUSTERS".into()],
+            focus_app_ids: vec![],
+        };
+    }
+
+    let mut cluster_ids = std::collections::BTreeSet::new();
+    for entry in entries {
+        cluster_ids.insert(entry.cluster_id.as_str());
+    }
+    let unhealthy: Vec<_> = entries.iter().filter(|e| e.app.status != "healthy").collect();
+    let broken = unhealthy.iter().filter(|e| e.app.status == "broken").count();
+
+    let summary = if unhealthy.is_empty() {
+        format!(
+            "{} federated app(s) across {} cluster(s) are healthy.",
+            entries.len(),
+            cluster_ids.len()
+        )
+    } else {
+        format!(
+            "{} of {} federated services need attention ({} broken).",
+            unhealthy.len(),
+            entries.len(),
+            broken
+        )
+    };
+
+    let explanation = if unhealthy.is_empty() {
+        "Remote catalogs merged successfully. Use write federation to publish across peer clusters.".into()
+    } else {
+        "Inspect unhealthy remote services on their origin cluster before cross-cluster publish or dependency changes.".into()
+    };
+
+    let mut highlights: Vec<String> = unhealthy
+        .iter()
+        .map(|e| format!("{} · {} ({})", e.app.display_name, e.cluster_name, e.app.status))
+        .take(4)
+        .collect();
+    if highlights.is_empty() {
+        highlights.push(format!("{} read-only peer cluster(s) synced", cluster_ids.len()));
+    }
+
+    let focus_app_ids: Vec<String> = unhealthy
+        .iter()
+        .map(|e| e.app.id.clone())
+        .take(6)
+        .collect();
+
+    FederatedInsight {
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+        focus_app_ids,
+    }
+}
+
+async fn llm_federated_insight(entries: &[FederatedApp], cfg: &LlmConfig) -> Option<FederatedInsight> {
+    let sample: Vec<_> = entries
+        .iter()
+        .take(40)
+        .map(|e| {
+            serde_json::json!({
+                "id": e.app.id,
+                "name": e.app.display_name,
+                "clusterId": e.cluster_id,
+                "clusterName": e.cluster_name,
+                "status": e.app.status,
+                "namespace": e.app.namespace,
+            })
+        })
+        .collect();
+    let system = "You are Zeus AI federation analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize unhealthy remote services.";
+    let user = format!("Federated catalog:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    let llm: LlmFleetInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(FederatedInsight {
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+        focus_app_ids: llm.focus_app_ids,
+    })
+}
+
+pub async fn resolve_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_federated_insight(entries, &cfg).await {
+            return insight;
+        }
+    }
+    rule_federated_insight(entries)
+}
+
+pub fn rule_activity_insight(events: &[AuditEvent]) -> ActivityInsight {
+    if events.is_empty() {
+        return ActivityInsight {
+            summary: "No platform activity recorded yet.".into(),
+            explanation: "Launches, discovery publishes, Spotlight searches, and share links will appear in the audit log.".into(),
+            source: "rules".into(),
+            highlights: vec!["Open an app from Quick Launch to seed activity".into()],
+        };
+    }
+
+    let mut action_counts = std::collections::BTreeMap::<&str, usize>::new();
+    for event in events {
+        *action_counts.entry(event.action.as_str()).or_default() += 1;
+    }
+
+    let launches = *action_counts.get("launch").unwrap_or(&0) + *action_counts.get("recent").unwrap_or(&0);
+    let discovery = action_counts
+        .get("publish")
+        .copied()
+        .unwrap_or(0)
+        + action_counts.get("publish_namespace").copied().unwrap_or(0);
+    let searches = *action_counts.get("search").unwrap_or(&0);
+
+    let summary = format!(
+        "{} recent audit events — {} launches, {} discovery actions, {} searches.",
+        events.len(),
+        launches,
+        discovery,
+        searches
+    );
+
+    let explanation = if discovery > launches {
+        "Discovery and publish activity is outpacing launches — review the Discovery queue and publish high-value services.".into()
+    } else if launches > 0 {
+        "Operators are actively launching services. Check Health if launch volume correlates with new unhealthy apps.".into()
+    } else {
+        "Most recent activity is search and catalog operations. Use Spotlight or Mission Control to drive launches.".into()
+    };
+
+    let mut ranked: Vec<_> = action_counts.iter().map(|(a, c)| (*a, *c)).collect();
+    ranked.sort_by(|a, b| b.1.cmp(&a.1));
+    let mut highlights: Vec<String> = ranked
+        .iter()
+        .take(4)
+        .map(|(action, count)| format!("{action}: {count}"))
+        .collect();
+    if let Some(latest) = events.first() {
+        highlights.insert(
+            0,
+            format!(
+                "Latest: {} by {}{}",
+                latest.action,
+                latest.user_id,
+                if latest.app_id.is_empty() {
+                    String::new()
+                } else {
+                    format!(" on {}", latest.app_id)
+                }
+            ),
+        );
+    }
+
+    ActivityInsight {
+        summary,
+        explanation,
+        source: "rules".into(),
+        highlights,
+    }
+}
+
+async fn llm_activity_insight(events: &[AuditEvent], cfg: &LlmConfig) -> Option<ActivityInsight> {
+    let sample: Vec<_> = events
+        .iter()
+        .take(50)
+        .map(|e| {
+            serde_json::json!({
+                "action": e.action,
+                "userId": e.user_id,
+                "appId": e.app_id,
+                "detail": e.detail,
+                "createdAt": e.created_at,
+            })
+        })
+        .collect();
+    let system = "You are Zeus AI platform activity analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"]}. Surface operator patterns and anomalies.";
+    let user = format!("Recent audit events:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LlmActivityInsight {
+        summary: String,
+        explanation: String,
+        #[serde(default)]
+        highlights: Vec<String>,
+    }
+    let llm: LlmActivityInsight = llm_chat_json(cfg, system, &user).await?;
+    if llm.summary.trim().is_empty() {
+        return None;
+    }
+    Some(ActivityInsight {
+        summary: llm.summary,
+        explanation: llm.explanation,
+        source: "llm".into(),
+        highlights: llm.highlights,
+    })
+}
+
+pub async fn resolve_activity_insight(events: &[AuditEvent]) -> ActivityInsight {
+    if let Some(cfg) = llm_config_from_env() {
+        if let Some(insight) = llm_activity_insight(events, &cfg).await {
+            return insight;
+        }
+    }
+    rule_activity_insight(events)
 }
 
 #[cfg(test)]

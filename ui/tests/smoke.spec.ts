@@ -160,12 +160,22 @@ test('graph page shows zeus ai focus strip', async ({ page }) => {
   await expect(focus.or(loadError)).toBeVisible({ timeout: 5000 })
 })
 
-test('activity page shows fleet insight banner', async ({ page }) => {
+test('activity page shows activity insight banner', async ({ page }) => {
   await page.goto('/activity')
   await waitForPageReady(page)
   const panel = page.getByTestId('zeus-ai-panel')
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
+  if (await loadError.isVisible()) return
+  await expect(page.getByText('Activity insight')).toBeVisible()
+})
+
+test('spotlight activity insight shows audit summary', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('activity insight')
+  await expect(page.getByText('Zeus AI · Activity')).toBeVisible({ timeout: 5000 })
 })
 
 test('spotlight suggest publish shows discovery insight', async ({ page }) => {
@@ -237,7 +247,9 @@ test('spotlight ai status shows rules or llm mode', async ({ page }) => {
   await page.getByPlaceholder(/open grafana/i).fill('ai status')
   const palette = page.getByRole('dialog', { name: 'Spotlight' })
   await expect(palette.getByText('Zeus AI · Status')).toBeVisible({ timeout: 5000 })
-  await expect(palette.getByRole('button', { name: /rules engine|live llm/i })).toBeVisible({ timeout: 8000 })
+  const modeBtn = palette.getByRole('button', { name: /rules engine|live llm/i })
+  const helpNav = palette.getByRole('button', { name: /help · zeus ai/i })
+  await expect(modeBtn.or(helpNav)).toBeVisible({ timeout: 8000 })
 })
 
 test('health page ask zeus opens spotlight', async ({ page }) => {

@@ -18,6 +18,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Graph topology and owner team insight APIs with Spotlight commands; per-app Zeus AI on app detail; focus chips on Home/Health
 - AI status endpoint, navbar Rules/AI badge, Ask Zeus hero button, and Spotlight seed context
 - Helm LLM Kubernetes secret, deploy/configure-llm-remote scripts, Spotlight `ai status`, Health Ask Zeus
+- Federated and activity Zeus AI insight APIs, Discovery Publish Zeus picks, Spotlight federation/activity commands
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`

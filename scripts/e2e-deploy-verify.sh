@@ -84,6 +84,8 @@ check "discovery insight"      "curl -sf '${BASE}/api/v1/insights/discovery' | g
 check "namespace insight"      "curl -sf '${BASE}/api/v1/insights/namespace/hermes-demo' | grep -q '\"namespace\"'"
 check "graph insight"          "curl -sf '${BASE}/api/v1/insights/graph' | grep -q '\"summary\"'"
 check "owner insight"          "curl -sf '${BASE}/api/v1/insights/owner/platform' | grep -q '\"owner\"'"
+check "federated insight"      "curl -sf '${BASE}/api/v1/insights/federated' | grep -q '\"summary\"'"
+check "activity insight"       "curl -sf '${BASE}/api/v1/insights/activity' | grep -q '\"summary\"'"
 check "ai status"                "curl -sf '${BASE}/api/v1/insights/status' | grep -q '\"defaultSource\"'"
 check "recommended"            "curl -sf '${BASE}/api/v1/recommended'"
 check "shares"                 "curl -sf '${BASE}/api/v1/shares'"

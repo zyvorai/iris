@@ -71,6 +71,12 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['ai status', 'zeus status', 'llm status', 'ai mode'].includes(q)) {
     return { type: 'ai_status' }
   }
+  if (['federated insight', 'federation insight'].includes(q)) {
+    return { type: 'federated_insight' }
+  }
+  if (['activity insight', 'audit insight'].includes(q)) {
+    return { type: 'activity_insight' }
+  }
   const open = raw.trim().match(/^open\s+(.+)$/i)
   if (open?.[1]) return { type: 'open', arg: open[1].trim() }
   const why = raw.trim().match(/^why\s+(?:is\s+)?(.+?)(?:\s+down|\s+unhealthy|\s+broken)?$/i)
@@ -183,6 +189,20 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     queryFn: hermesApi.getAiStatus,
     enabled: command?.type === 'ai_status',
     staleTime: 60_000,
+  })
+
+  const federatedInsight = useQuery({
+    queryKey: ['federated-insight'],
+    queryFn: hermesApi.getFederatedInsight,
+    enabled: command?.type === 'federated_insight',
+    staleTime: 45_000,
+  })
+
+  const activityInsight = useQuery({
+    queryKey: ['activity-insight'],
+    queryFn: hermesApi.getActivityInsight,
+    enabled: command?.type === 'activity_insight',
+    staleTime: 45_000,
   })
 
   const query = q.trim().toLowerCase()
@@ -465,6 +485,64 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
       ]
     }
 
+    if (command?.type === 'federated_insight') {
+      if (federatedInsight.data) {
+        return [
+          {
+            kind: 'action',
+            label: federatedInsight.data.summary,
+            meta: federatedInsight.data.explanation,
+            run: () => navigate('/federated'),
+          },
+          {
+            kind: 'nav',
+            label: 'Federated catalog',
+            path: '/federated',
+            icon: Globe,
+            meta: 'Merged remote cluster apps',
+          },
+        ]
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Federated catalog',
+          path: '/federated',
+          icon: Globe,
+          meta: federatedInsight.isLoading ? 'Loading Zeus AI federation insight…' : 'View peer clusters',
+        },
+      ]
+    }
+
+    if (command?.type === 'activity_insight') {
+      if (activityInsight.data) {
+        return [
+          {
+            kind: 'action',
+            label: activityInsight.data.summary,
+            meta: activityInsight.data.explanation,
+            run: () => navigate('/activity'),
+          },
+          {
+            kind: 'nav',
+            label: 'Activity log',
+            path: '/activity',
+            icon: History,
+            meta: 'Full audit timeline',
+          },
+        ]
+      }
+      return [
+        {
+          kind: 'nav',
+          label: 'Activity log',
+          path: '/activity',
+          icon: History,
+          meta: activityInsight.isLoading ? 'Loading Zeus AI activity insight…' : 'View audit events',
+        },
+      ]
+    }
+
     if (command?.type === 'explain') {
       if (fleetInsight.data) {
         const rows: Row[] = [
@@ -703,6 +781,10 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     ownerInsightQuery.isLoading,
     aiStatus.data,
     aiStatus.isLoading,
+    federatedInsight.data,
+    federatedInsight.isLoading,
+    activityInsight.data,
+    activityInsight.isLoading,
     openDiagnose,
     openInspector,
     navigate,
@@ -772,6 +854,8 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     if (command?.type === 'graph_insight') return 'Zeus AI · Topology'
     if (command?.type === 'owner_insight') return 'Zeus AI · Team'
     if (command?.type === 'ai_status') return 'Zeus AI · Status'
+    if (command?.type === 'federated_insight') return 'Zeus AI · Federation'
+    if (command?.type === 'activity_insight') return 'Zeus AI · Activity'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'
