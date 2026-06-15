@@ -361,6 +361,7 @@ Honest checklist of what ships now:
 - [x] Helm LLM secret + deploy/configure scripts; Spotlight `ai status`; Health page Ask Zeus
 - [x] Federated and activity insight APIs; Discovery Publish Zeus picks; Spotlight federation/activity commands
 - [x] LLM probe on status endpoint, Ask Zeus across Cluster/Discovery/Graph/Apps, ZeusAiPanel refresh
+- [x] Teams owner insight, Graph full ZeusAiPanel, Federated/Activity Ask Zeus + refresh, extended smoke tests
 - [x] Fleet and per-app AI panels (Home, Health, Activity, Graph, Diagnose drawer, inspector AI tab)
 - [x] Spotlight `diagnose <app>` insight preview and `explain` fleet summary command
 - [x] Gateway SSE streaming and gRPC content-type pass-through

@@ -20,6 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Helm LLM Kubernetes secret, deploy/configure-llm-remote scripts, Spotlight `ai status`, Health Ask Zeus
 - Federated and activity Zeus AI insight APIs, Discovery Publish Zeus picks, Spotlight federation/activity commands
 - LLM connectivity probe on `/insights/status`, Ask Zeus on Cluster/Discovery/Graph/Apps, insight panel refresh
+- Teams owner insight panel, Graph ZeusAiPanel upgrade, Federated/Activity Ask Zeus + refresh
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`

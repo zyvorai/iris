@@ -152,12 +152,32 @@ test('spotlight diagnose shows insight preview', async ({ page }) => {
   await expect(insightRow.or(empty)).toBeVisible({ timeout: 8000 })
 })
 
-test('graph page shows zeus ai focus strip', async ({ page }) => {
+test('graph page shows zeus ai topology panel', async ({ page }) => {
   await page.goto('/graph')
   await waitForPageReady(page)
-  const focus = page.getByTestId('graph-ai-focus')
+  const panel = page.getByTestId('zeus-ai-panel')
   const loadError = page.getByTestId('page-load-error')
-  await expect(focus.or(loadError)).toBeVisible({ timeout: 5000 })
+  await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
+  if (await loadError.isVisible()) return
+  await expect(page.getByText('Topology insight')).toBeVisible()
+})
+
+test('spotlight federated insight shows federation summary', async ({ page }) => {
+  await page.goto('/')
+  await waitForPageReady(page)
+  await page.keyboard.press('Meta+k')
+  await page.getByPlaceholder(/open grafana/i).fill('federated insight')
+  await expect(page.getByText('Zeus AI · Federation')).toBeVisible({ timeout: 5000 })
+})
+
+test('discovery publish zeus picks button when suggestions exist', async ({ page }) => {
+  await page.goto('/discovery')
+  await waitForPageReady(page)
+  const loadError = page.getByTestId('page-load-error')
+  if (await loadError.isVisible()) return
+  const publishBtn = page.getByTestId('publish-zeus-picks')
+  if (!(await publishBtn.count())) return
+  await expect(publishBtn).toBeVisible()
 })
 
 test('activity page shows activity insight banner', async ({ page }) => {

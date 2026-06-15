@@ -21,6 +21,7 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import { actionLabel, hermesApi } from '../services/hermesApi'
@@ -132,6 +133,8 @@ export default function ActivityPage() {
             remediation={activityInsight.data?.highlights}
             loading={activityInsight.isLoading}
             compact
+            onRefresh={() => void activityInsight.refetch()}
+            refreshing={activityInsight.isFetching && !activityInsight.isLoading}
           />
         ) : null}
 
@@ -142,6 +145,7 @@ export default function ActivityPage() {
               <p className="body-text">Audit log of launches, discovery, shares, and pins</p>
             </div>
             <span className="nebula-status-badge status-unknown">{events.length} events</span>
+            <AskZeusButton compact command="activity insight" />
             <Button variant="ghost" className="nebula-btn-compact" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
               <Download size={12} /> Export
             </Button>

@@ -8,6 +8,7 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import Button from '../components/nebula/Button'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
@@ -91,6 +92,8 @@ export default function FederatedPage() {
             remediation={federatedInsight.data?.highlights}
             loading={federatedInsight.isLoading}
             compact
+            onRefresh={() => void federatedInsight.refetch()}
+            refreshing={federatedInsight.isFetching && !federatedInsight.isLoading}
             action={
               <ZeusAiFocusChips
                 appIds={federatedInsight.data?.focusAppIds ?? []}
@@ -109,6 +112,7 @@ export default function FederatedPage() {
               <p className="body-text">Merged apps from remote clusters — publish when write federation is enabled.</p>
             </div>
             <span className="nebula-status-badge status-unknown">{federated.data?.length ?? 0} apps</span>
+            <AskZeusButton compact command="federated insight" />
             <Link to="/cluster" className="section-link-nebula">Clusters</Link>
           </div>
 

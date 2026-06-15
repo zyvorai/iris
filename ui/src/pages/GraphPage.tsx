@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { GitBranch, Sparkles } from 'lucide-react'
+import { GitBranch } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
 import AskZeusButton from '../components/nebula/AskZeusButton'
 import GlassPanel from '../components/nebula/GlassPanel'
@@ -12,6 +12,7 @@ import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
+import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
 import { useGraphInsight } from '../hooks/useZeusAiInsight'
@@ -56,7 +57,7 @@ export default function GraphPage() {
 
   const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 15000 })
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
-  const fleetInsight = useGraphInsight()
+  const graphInsight = useGraphInsight(Boolean(graph.data))
   const { openDiagnose } = useInspector()
 
   const namespaces = useMemo(() => {
@@ -92,6 +93,27 @@ export default function GraphPage() {
       errorTitle="Could not load application graph"
     >
       <div className="page-grid">
+        {graph.data && (graphInsight.data || graphInsight.isLoading) ? (
+          <ZeusAiPanel
+            title="Topology insight"
+            summary={graphInsight.data?.summary}
+            explanation={graphInsight.data?.explanation ?? 'Zeus AI is analyzing dependency topology…'}
+            source={graphInsight.data?.source}
+            remediation={graphInsight.data?.highlights}
+            loading={graphInsight.isLoading}
+            compact
+            onRefresh={() => void graphInsight.refetch()}
+            refreshing={graphInsight.isFetching && !graphInsight.isLoading}
+            action={
+              <ZeusAiFocusChips
+                appIds={graphInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : null}
+
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <div>
@@ -141,29 +163,6 @@ export default function GraphPage() {
               Mesh only
             </label>
           </PageToolbar>
-
-          {fleetInsight.data?.summary || fleetInsight.isLoading ? (
-            <div className="graph-ai-focus" data-testid="graph-ai-focus">
-              <p className="section-label">
-                <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Zeus AI
-              </p>
-              {fleetInsight.isLoading ? (
-                <div className="page-loading-skeleton page-loading-skeleton-compact">
-                  <div className="skeleton-card" style={{ height: 40 }} />
-                </div>
-              ) : (
-                <>
-                  <p className="body-text zeus-ai-explanation">{fleetInsight.data?.explanation ?? fleetInsight.data?.summary}</p>
-                  <ZeusAiFocusChips
-                    appIds={fleetInsight.data?.focusAppIds ?? []}
-                    catalog={catalog.data ?? []}
-                    onSelect={openDiagnose}
-                  />
-                </>
-              )}
-            </div>
-          ) : null}
 
           {filtered && !filtered.nodes.length ? (
             <EmptyState

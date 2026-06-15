@@ -9,11 +9,12 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
+import AskZeusButton from '../components/nebula/AskZeusButton'
 import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
 import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
 import type { HermesApp } from '../types'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useOwnerInsight } from '../hooks/useZeusAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 
 export default function TeamsPage() {
@@ -33,6 +34,17 @@ export default function TeamsPage() {
     return map
   }, [catalog.data])
 
+  const focusOwner = useMemo(() => {
+    if (!owners.data?.length) return null
+    const troubled = [...owners.data]
+      .filter((o) => o.unhealthy > 0)
+      .sort((a, b) => b.unhealthy - a.unhealthy || b.appCount - a.appCount)
+    if (troubled[0]) return troubled[0].id
+    return owners.data[0]?.id ?? null
+  }, [owners.data])
+
+  const ownerInsight = useOwnerInsight(focusOwner, Boolean(focusOwner && catalog.data))
+
   const loading = (owners.isLoading && !owners.data) || (catalog.isLoading && !catalog.data)
   const error = owners.isError || catalog.isError
 
@@ -41,8 +53,7 @@ export default function TeamsPage() {
     void catalog.refetch()
   }
 
-  const issueCount = (catalog.data ?? []).filter((a) => a.status !== 'healthy').length
-  const fleetInsight = useFleetInsight(Boolean(catalog.data?.length) && issueCount > 0)
+  const focusLabel = owners.data?.find((o) => o.id === focusOwner)?.label ?? focusOwner
 
   return (
     <PageFrame
@@ -53,18 +64,20 @@ export default function TeamsPage() {
       errorTitle="Could not load teams"
     >
       <div className="page-grid">
-        {issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
+        {focusOwner && (ownerInsight.data || ownerInsight.isLoading) ? (
           <ZeusAiPanel
-            title="Fleet insight"
-            summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing team-owned services…'}
-            source={fleetInsight.data?.source}
-            remediation={fleetInsight.data?.highlights}
-            loading={fleetInsight.isLoading}
+            title={focusLabel ? `Team · ${focusLabel}` : 'Team insight'}
+            summary={ownerInsight.data?.summary}
+            explanation={ownerInsight.data?.explanation ?? 'Zeus AI is analyzing team ownership health…'}
+            source={ownerInsight.data?.source}
+            remediation={ownerInsight.data?.highlights}
+            loading={ownerInsight.isLoading}
             compact
+            onRefresh={() => void ownerInsight.refetch()}
+            refreshing={ownerInsight.isFetching && !ownerInsight.isLoading}
             action={
               <ZeusAiFocusChips
-                appIds={fleetInsight.data?.focusAppIds ?? []}
+                appIds={ownerInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}
               />
@@ -83,6 +96,9 @@ export default function TeamsPage() {
                 Owners from service annotations — a lightweight org map over your catalog.
               </p>
             </div>
+            {focusOwner ? (
+              <AskZeusButton compact command={`owner insight ${focusOwner}`} />
+            ) : null}
           </div>
         </GlassPanel>
 
