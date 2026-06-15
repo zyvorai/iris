@@ -377,6 +377,11 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		published = w.cfg.AutoPublish
 	}
 
+	// Annotation-enabled services still inherit signature canonical slugs when not overridden.
+	if sig != nil && canonicalSlug == "" && sig.CanonicalSlug != "" {
+		canonicalSlug = sig.CanonicalSlug
+	}
+
 	svcKey := svc.Namespace + "/" + svc.Name
 	if hosts, ok := w.ingressHosts[svcKey]; ok && len(hosts) > 0 {
 		score += 15

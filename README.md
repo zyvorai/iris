@@ -397,8 +397,18 @@ Open `https://hermes.zeus.local/` (or NodePort if ingress is disabled).
 ### Remote K3s deploy
 
 ```bash
-./scripts/deploy-remote.sh <host> <user> deploy
-./scripts/e2e-deploy-verify.sh http://<host>:31847
+# Default staging host (212.8.252.194 sus)
+make deploy-remote
+
+# Or explicit:
+./scripts/deploy-all-remote.sh 212.8.252.194 sus
+./scripts/deploy-remote.sh 212.8.252.194 sus
+
+# Post-deploy smoke
+make test-remote-smoke
+
+# Full Zyvor stack (VMRogue + PacketWolf + Aether)
+./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
 ```
 
 ### Local development

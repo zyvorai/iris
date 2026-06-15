@@ -482,6 +482,17 @@ REMOTE
 print_summary() {
     local total=$((SECONDS - DEPLOY_START))
     local url="http://${TARGET_HOST}:${HERMES_NODE_PORT}"
+    # shellcheck source=lib/resolve-zyvor-sibling.sh
+    source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh" 2>/dev/null || true
+    local smoke="./scripts/test-all-features-remote.sh ${TARGET_HOST} ${TARGET_USER}"
+    local stack="./scripts/test-zyvor-stack-remote.sh ${TARGET_HOST} 30151 ${TARGET_USER}"
+    if declare -F resolve_zyvor_script >/dev/null 2>&1; then
+        local vmrogue_script
+        vmrogue_script="$(resolve_zyvor_script "${PROJECT_DIR}" VMRogue "scripts/test-zyvor-stack-remote.sh" 2>/dev/null || true)"
+        if [ -n "${vmrogue_script}" ]; then
+            stack="${vmrogue_script} ${TARGET_HOST} 30151 ${TARGET_USER}"
+        fi
+    fi
     hr
     printf "  ${C_OK}✓${C_RST}  ${C_BOLD}Deploy complete${C_RST}  ${C_DIM}%ds total${C_RST}\n\n" "$total"
     printf "  ${C_BOLD}┌──────────────────────────────────────────────────────────┐${C_RST}\n"
@@ -491,8 +502,10 @@ print_summary() {
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Namespace" "${HERMES_NAMESPACE}"
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Log"       "${DEPLOY_LOG}"
     printf "  ${C_BOLD}└──────────────────────────────────────────────────────────┘${C_RST}\n\n"
-    printf "  ${C_DIM}kubectl -n %s get pods${C_RST}\n" "${HERMES_NAMESPACE}"
-    printf "  ${C_DIM}./scripts/e2e-deploy-verify.sh %s${C_RST}\n\n" "${url}"
+    printf "  ${C_INFO}🧪${C_RST}  ${C_DIM}Next:${C_RST}  ${C_BOLD}%s${C_RST}\n" "${smoke}"
+    printf "  ${C_DIM}       ${C_RST}%s\n" "${stack}"
+    printf "  ${C_DIM}       ${C_RST}./scripts/e2e-deploy-verify.sh %s\n" "${url}"
+    printf "  ${C_DIM}       ${C_RST}kubectl -n %s get pods\n\n" "${HERMES_NAMESPACE}"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────

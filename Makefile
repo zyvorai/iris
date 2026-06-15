@@ -1,20 +1,48 @@
-.PHONY: build build-go build-rust build-ui test clean docker deploy-remote
+.PHONY: build build-go build-rust build-ui test clean docker \
+	deploy-remote deploy-all-remote deploy-remote-verify deploy-remote-uninstall \
+	test-remote-smoke test-remote-quick test-remote-all test-platform-remote
 
 VERSION ?= 0.1.0
 REGISTRY ?= ghcr.io/ssahani/hermes
-HERMES_HOST ?=
-HERMES_USER ?= $(USER)
+DEPLOY_HOST ?= 212.8.252.194
+DEPLOY_USER ?= sus
+HERMES_HOST ?= $(DEPLOY_HOST)
+HERMES_USER ?= $(DEPLOY_USER)
 
 deploy-remote:
-	@[ -n "$(HERMES_HOST)" ] || (echo "Error: set HERMES_HOST=<ip>"; exit 1)
-	chmod +x scripts/deploy-remote.sh scripts/e2e-deploy-verify.sh
-	./scripts/deploy-remote.sh $(HERMES_HOST) $(HERMES_USER) deploy
+	chmod +x scripts/deploy-remote.sh scripts/e2e-deploy-verify.sh \
+		scripts/lib/resolve-zyvor-sibling.sh 2>/dev/null || true
+	./scripts/deploy-remote.sh $(HERMES_HOST) $(HERMES_USER)
+
+deploy-all-remote:
+	chmod +x scripts/deploy-all-remote.sh scripts/deploy-remote.sh \
+		scripts/e2e-deploy-verify.sh scripts/lib/resolve-zyvor-sibling.sh 2>/dev/null || true
+	./scripts/deploy-all-remote.sh $(HERMES_HOST) $(HERMES_USER)
 
 deploy-remote-verify:
+	chmod +x scripts/deploy-remote.sh 2>/dev/null || true
 	./scripts/deploy-remote.sh $(HERMES_HOST) $(HERMES_USER) --verify-only
 
 deploy-remote-uninstall:
+	chmod +x scripts/deploy-remote.sh 2>/dev/null || true
 	./scripts/deploy-remote.sh $(HERMES_HOST) $(HERMES_USER) --uninstall
+
+test-remote-smoke:
+	chmod +x scripts/test-all-features-remote.sh scripts/e2e-deploy-verify.sh 2>/dev/null || true
+	@HERMES_TEST_TIERS=smoke ./scripts/test-all-features-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
+
+test-remote-quick:
+	chmod +x scripts/test-all-features-remote.sh scripts/e2e-deploy-verify.sh 2>/dev/null || true
+	@HERMES_TEST_TIERS=quick ./scripts/test-all-features-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
+
+test-remote-all:
+	chmod +x scripts/test-all-features-remote.sh scripts/e2e-deploy-verify.sh \
+		scripts/deploy-remote.sh 2>/dev/null || true
+	@HERMES_TEST_TIERS=full ./scripts/test-all-features-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
+
+test-platform-remote:
+	chmod +x scripts/test-platform-remote.sh scripts/lib/resolve-zyvor-sibling.sh 2>/dev/null || true
+	@AETHER_TEST_TIERS=full HERMES_TEST_TIERS=full ./scripts/test-platform-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
 
 build: build-go build-rust build-ui
 
