@@ -93,7 +93,7 @@ export default function GraphPage() {
       errorTitle="Could not load application graph"
     >
       <div className="page-grid">
-        {graph.data && (graphInsight.data || graphInsight.isLoading) ? (
+        {graph.data ? (
           <ZeusAiPanel
             title="Topology insight"
             summary={graphInsight.data?.summary}

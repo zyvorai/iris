@@ -34,6 +34,14 @@ export default function ZeusAiPanel({
   if (loading) {
     return (
       <GlassPanel className={`glass-panel-section zeus-ai-panel${compact ? ' zeus-ai-panel-compact' : ''}`} data-testid="zeus-ai-panel">
+        <div className="section-head-nebula">
+          <div>
+            <p className="section-label">
+              <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              {title}
+            </p>
+          </div>
+        </div>
         <div className="page-loading-skeleton page-loading-skeleton-compact">
           <div className="skeleton-card" style={{ height: compact ? 48 : 72 }} />
         </div>

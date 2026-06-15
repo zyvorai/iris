@@ -54,6 +54,9 @@ export HERMES_LLM_API_KEY=sk-...
 
 # Or apply LLM settings to an existing deploy (Helm only):
 ./scripts/configure-llm-remote.sh 175.110.114.93 sus
+
+# Or install Ollama on the remote host and point Hermes at it (k3s: binds 0.0.0.0, uses node IP):
+./scripts/setup-ollama-remote.sh 175.110.114.93 sus
 ```
 
 The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not in plain Helm values).

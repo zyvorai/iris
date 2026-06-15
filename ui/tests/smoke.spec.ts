@@ -159,7 +159,7 @@ test('graph page shows zeus ai topology panel', async ({ page }) => {
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
-  await expect(page.getByText('Topology insight')).toBeVisible()
+  await expect(page.getByTestId('zeus-ai-panel').getByText('Topology insight')).toBeVisible()
 })
 
 test('spotlight federated insight shows federation summary', async ({ page }) => {
@@ -187,7 +187,7 @@ test('activity page shows activity insight banner', async ({ page }) => {
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
-  await expect(page.getByText('Activity insight')).toBeVisible()
+  await expect(page.getByTestId('zeus-ai-panel').getByText('Activity insight')).toBeVisible()
 })
 
 test('spotlight activity insight shows audit summary', async ({ page }) => {
@@ -244,7 +244,7 @@ test('app detail shows zeus ai service insight', async ({ page }) => {
   }
   await firstAppLink.click()
   await waitForPageReady(page)
-  await expect(page.getByText('Zeus AI service insight')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByTestId('zeus-ai-panel').getByText('Zeus AI service insight')).toBeVisible({ timeout: 5000 })
 })
 
 test('home ask zeus opens spotlight with fleet command', async ({ page }) => {

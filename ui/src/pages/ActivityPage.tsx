@@ -124,7 +124,7 @@ export default function ActivityPage() {
       errorTitle="Could not load activity"
     >
       <div className="page-grid">
-        {activityInsight.data || activityInsight.isLoading ? (
+        {audit.data ? (
           <ZeusAiPanel
             title="Activity insight"
             summary={activityInsight.data?.summary}
