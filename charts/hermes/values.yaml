@@ -8,11 +8,11 @@ replicaCount: 1
 image:
   controller:
     repository: ghcr.io/ssahani/hermes-controller
-    tag: "0.1.0"
+    tag: "0.2.0"
     pullPolicy: IfNotPresent
   server:
     repository: ghcr.io/ssahani/hermes-server
-    tag: "0.1.0"
+    tag: "0.2.0"
     pullPolicy: IfNotPresent
 
 serviceAccount:

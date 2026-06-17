@@ -7,7 +7,7 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # shellcheck source=scripts/lib/k3s-image-import.sh
 source "${SCRIPT_DIR}/lib/k3s-image-import.sh"
 
-VERSION="0.1.0"
+VERSION="0.2.0"
 REMOTE_DIR=""
 DEPLOY_PROFILE="k3s"
 DEPLOY_LOG="${HERMES_DEPLOY_LOG:-${HOME}/.hermes/deploy-$(date +%Y%m%d-%H%M%S).log}"

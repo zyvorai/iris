@@ -12,6 +12,8 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 ├──────────────────────────────────────────────────────────────┤
 │  Discovery    Continuous cluster scan · annotation-aware     │
 ├──────────────────────────────────────────────────────────────┤
+│  Zeus AI      Fleet insight · Spotlight NL · diagnose flows  │
+├──────────────────────────────────────────────────────────────┤
 │  Platform     Zeus OS application layer · Helm · Go/Rust   │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -20,13 +22,14 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 
 ## Why Hermes
 
-| Problem | Hermek answer |
+| Problem | Hermes answer |
 |---------|---------------|
 | "Where is Grafana?" every Monday | Living app catalog with one-click launch |
 | Bookmark sprawl and tribal knowledge | Permanent URLs — cluster self-documents |
 | Port-forward culture | Gateway front door to every workload |
 | Infrastructure UX ≠ human UX | macOS Launchpad mental model for K8s |
 | Apps exist but aren't discoverable | Continuous discovery across namespaces |
+| Raw probe errors and namespace archaeology | Zeus AI explains fleet health in plain language |
 
 **Not** a dashboard. **Not** an ingress controller. **The** application memory for your clusters.
 
@@ -38,7 +41,8 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 |-------|-------------------|
 | **Controller** | Go discovery + gateway — `controller/`, `cmd/` |
 | **API** | Rust API layer — `crates/`, `api/` |
-| **UI** | React application experience — `ui/` |
+| **UI** | React Nebula launchpad — `ui/` |
+| **Zeus AI** | Insight APIs + Spotlight NL search — `crates/hermes-core/src/insight.rs`, `docs/ui.md` |
 | **Charts** | Helm install — `charts/hermes/` |
 | **Deploy** | Remote k3s scripts — `scripts/` |
 
@@ -50,7 +54,9 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 git clone https://github.com/ssahani/hermes.git && cd hermes
 
 # Helm install
-helm install hermes ./charts/hermes   -n hermes-system --create-namespace   --set global.domain=zeus.local
+helm install hermes ./charts/hermes \
+  -n hermes-system --create-namespace \
+  --set global.domain=zeus.local
 
 # Remote lab deploy
 make deploy-remote
@@ -61,12 +67,22 @@ make build && ./scripts/smoke-test.sh
 # → http://localhost:31847
 ```
 
+Optional LLM for Zeus AI (rule-based fallback works without a key):
+
+```bash
+export HERMES_LLM_API_URL=https://api.openai.com/v1
+export HERMES_LLM_API_KEY=sk-...
+./scripts/deploy-remote.sh <host> <user>
+# Or local Ollama: ./scripts/setup-ollama-remote.sh <host> <user>
+```
+
 | Scenario | Path |
 |----------|------|
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Install guide | [docs/install.md](docs/install.md) |
-| UI behavior | [docs/ui.md](docs/ui.md) |
+| UI & Zeus AI | [docs/ui.md](docs/ui.md) |
 | Annotations | [docs/annotations.md](docs/annotations.md) |
+| User stories | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
 
 ---
 
@@ -90,8 +106,10 @@ Hermes answers — without namespace archaeology.
 | Goal | Document |
 |------|----------|
 | Docs index | [docs/README.md](docs/README.md) |
-| User stories | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
-| Full README deep dive | See git history or product specs in repo |
+| User stories & validation | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
+| Full product deep dive | [docs/FULL_README_LEGACY.md](docs/FULL_README_LEGACY.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Zyvor Platform Stack
 
@@ -116,10 +134,10 @@ Hermes answers — without namespace archaeology.
 
 ## Development
 
-See project docs for CI, testing, and contribution guidelines. Historical build summaries in the repo root are snapshots — **`docs/` and this README are authoritative.**
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build, test, and CI workflows. **`docs/` and this README are authoritative** for current behavior.
 
 ---
 
 ## License
 
-See [LICENSE](LICENSE) or project-specific licensing files in `docs/legal/`.
+Copyright (c) 2026 ZyvorAI Labs Private Limited. See [LICENSE](LICENSE).

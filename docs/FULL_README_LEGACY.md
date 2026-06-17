@@ -207,11 +207,13 @@ Type a namespace → every application in that namespace.
 
 Type `monitoring` → Grafana, Prometheus, and related tools.
 
-Cluster-wide catalog search is available from the API (`/api/v1/search`) and the **⌘K** Spotlight palette in Hermes Dock.
+Cluster-wide catalog search is available from the API (`/api/v1/search`) and the **⌘K** Spotlight palette in the Nebula UI.
+
+Natural-language and intent search: `/api/v1/search/llm`, `/api/v1/search/intent`, and Spotlight commands (`explain`, `diagnose`, `why`, `suggest publish`).
 
 ---
 
-### 6. Application Graph — *roadmap v3*
+### 6. Application Graph — *shipped in v0.2*
 
 Visualize relationships:
 
@@ -219,27 +221,40 @@ Visualize relationships:
 Grafana → Prometheus → Loki → MinIO
 ```
 
-Understand systems instantly. Dependency mapping, ownership tracking, and root-cause discovery are on the long-term roadmap.
+**Available today:**
+
+- `/graph` page with dependency topology and mesh filters
+- `GET /api/v1/graph` and `GET /api/v1/insights/graph`
+- Zeus AI focus chips for unresolved dependency links
+
+**Roadmap:** automated root-cause tracing across mesh hops.
 
 ---
 
-### 7. AI-Powered Discovery — *roadmap v2+*
+### 7. Zeus AI — *shipped in v0.2*
 
-Future capability:
+Natural-language intelligence over the application catalog:
 
-- "Where are all production dashboards?"
-- "Which applications depend on Redis?"
-- "What applications are unhealthy?"
+- "Where are all production dashboards?" → Spotlight `explain` / fleet insight
+- "Which applications depend on Redis?" → Graph topology + `graph insight`
+- "What applications are unhealthy?" → Health attention queue + `diagnose <app>`
 
-Natural-language discovery over the application catalog.
+**Available today:**
+
+- Fleet, per-app, discovery, namespace, graph, owner, federated, and activity insight APIs
+- `ZeusAiPanel` on Home, Health, Activity, Graph, Discovery, Cluster, Federated, Teams
+- LLM + rule-based fallback (`GET /api/v1/insights/status`)
+- Helm LLM secret, `configure-llm-remote.sh`, `setup-ollama-remote.sh`
+
+See [docs/ui.md](docs/ui.md) for endpoints and Spotlight commands.
 
 ---
 
-## Hermes Dock
+## Hermes UI (Nebula)
 
 Most Kubernetes UIs look like namespaces, pods, services, and deployments.
 
-Hermes Dock looks like applications.
+Hermes looks like applications.
 
 ```text
 Grafana    Prometheus    Harbor    Jenkins    GitLab    Backstage
@@ -247,18 +262,21 @@ Grafana    Prometheus    Harbor    Jenkins    GitLab    Backstage
 
 Inspired by macOS Dock, Launchpad, Raycast, Arc Browser, and Linear — but built for Kubernetes.
 
-**Features (v0.1):**
+**Features (v0.2):**
 
 | Feature | Description |
 |---------|-------------|
 | Nebula UI | Unified Liquid Glass design — shared page frames, skeleton loading, empty states |
 | Glass UI | Translucent, tiered glass interface |
-| Spotlight (`⌘K`) | Search pages and cluster applications |
+| Spotlight (`⌘K`) | Search pages, cluster applications, and Zeus AI commands |
 | Home | Command deck — hero, 3-metric snapshot, Quick Launch, Mission Control |
 | Apps | Published application catalog with unified toolbar |
 | Cluster | Every service grouped by namespace — collapsible sections, human-readable health hints |
-| Discovery | Unpublished applications queue — publish to dock |
+| Discovery | Unpublished applications queue — publish to launchpad |
 | Health | Fleet health summary and attention queue |
+| Graph | Dependency topology with Zeus AI focus chips |
+| Federated / Teams | Multi-cluster catalog merge and owner grouping |
+| Zeus AI | Fleet and per-app insight with LLM + rules fallback |
 | Favorites & recents | Personal application memory |
 | Health indicators | Healthy / Degraded / Offline with friendly probe summaries |
 | Keyboard navigation | Arrow keys and Enter in Spotlight |
@@ -280,7 +298,7 @@ Users immediately know:
 - **Degraded** — reachable but failing health checks
 - **Offline** — no ready endpoints
 
-Health flows from the discovery engine into the dock, search results, and cluster catalog.
+Health flows from the discovery engine into the launchpad, search results, and cluster catalog.
 
 ---
 
@@ -302,12 +320,12 @@ Hermes becomes: **Search → Launch → Work.**
 
 ```mermaid
 flowchart TB
-  Dock[Hermes_Dock_UI]
+  UI[Hermes_UI_Nebula]
   Server[hermes-server_Rust]
   Controller[hermes-controller_Go]
   SQLite[(SQLite_catalog)]
   Cluster[Kubernetes_Cluster]
-  Dock -->|REST| Server
+  UI -->|REST| Server
   Server --> SQLite
   Controller -->|watch_Services_EndpointSlices| Cluster
   Controller --> SQLite
@@ -318,7 +336,7 @@ flowchart TB
 |-----------|----------|------|
 | `hermes-controller` | Go | Discovery engine — watches Services and EndpointSlices, signature recognition, health polling, catalog writes |
 | `hermes-server` | Rust | API, universal gateway, embedded UI host |
-| **Hermes Dock** | React | Application launcher — search, browse, launch |
+| **Hermes UI (Nebula)** | React | Service launchpad — search, browse, launch, Zeus AI |
 
 Shared SQLite catalog on a PVC keeps controller and server in sync.
 
@@ -326,7 +344,7 @@ See [docs/architecture.md](docs/architecture.md) for routes, data flow, and secu
 
 ---
 
-## Available Today (v0.1)
+## Available Today (v0.2)
 
 Honest checklist of what ships now:
 
@@ -334,7 +352,7 @@ Honest checklist of what ships now:
 - [x] Signature recognition for popular platform tools
 - [x] Ingress and Gateway API (`HTTPRoute`) route discovery
 - [x] Optional annotation enrichment (`hermes.zyvor.dev/*`) including canonical slugs
-- [x] Hermes Dock — Home, Apps, Cluster, Discovery, Health, Activity
+- [x] Nebula UI — Home, Apps, Cluster, Discovery, Health, Activity, Graph, Federated, Teams
 - [x] Universal gateway at `/a/{namespace}/{slug}` and `/apps/{slug}` with WebSocket support
 - [x] Favorites, recents, cluster-wide search, audit log
 - [x] API key and OIDC authentication (optional)
@@ -500,20 +518,23 @@ Hermes is how humans enter the software universe that Zeus runs.
 
 | Version | Focus |
 |---------|-------|
-| **v0.1** | Discovery, dock, gateway, search, favorites, health, cluster catalog |
-| **v1 (now)** | Canonical slugs, ingress/Gateway API, audit log, API key + OIDC auth, Activity page |
-| **v2** | Multi-cluster federation, AI search, team workspaces |
-| **v3** | Application graph, dependency mapping, ownership tracking |
-| **v4** | Enterprise application intelligence — every app, dependency, owner, route, and cluster |
+| **v0.1** | Discovery, gateway, search, favorites, health, cluster catalog |
+| **v0.2 (now)** | Nebula UI, Zeus AI, application graph, federation, teams, mesh policies |
+| **v0.3** | In-cluster mesh policy editing, federated activity webhooks |
+| **v1** | Enterprise application intelligence — every app, dependency, owner, route, and cluster |
 
 ---
 
 ## Documentation
 
+- [Documentation index](docs/README.md)
+- [User stories & validation](docs/USER_STORIES.md)
 - [Architecture](docs/architecture.md)
 - [Install guide](docs/install.md)
-- [UI guide](docs/ui.md)
+- [UI & Zeus AI guide](docs/ui.md)
 - [Annotation reference](docs/annotations.md)
+- [Contributing](../CONTRIBUTING.md)
+- [Changelog](../CHANGELOG.md)
 
 ---
 

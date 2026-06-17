@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-17
+
 ### Added
 - **Zeus AI insights** — `/api/v1/apps/{id}/insight` and `/api/v1/insights/fleet` with LLM + rule-based fallback
 - `ZeusAiPanel` on Home and Health; Diagnose drawer and inspector AI tab use context-aware insight
