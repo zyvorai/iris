@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- [docs/development.md](docs/development.md) — developer guide (repo map, local dev, extending controller/API/UI)
+- [docs/api.md](docs/api.md) — HTTP route reference for REST, gateway, auth, and insights
+- `Dockerfile.seed` — enables `docker compose` local dev without a cluster
+
 ## [0.2.0] — 2026-06-17
 
 ### Added

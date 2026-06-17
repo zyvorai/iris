@@ -282,7 +282,7 @@ Inspired by macOS Dock, Launchpad, Raycast, Arc Browser, and Linear — but buil
 | Keyboard navigation | Arrow keys and Enter in Spotlight |
 | Mobile | Compact workspace switcher and responsive cluster/catalog layouts |
 
-See [docs/ui.md](docs/ui.md) for the UI architecture and development guide.
+See [docs/development.md](docs/development.md) for the developer guide and [docs/ui.md](docs/ui.md) for the UI architecture.
 
 Huge difference: infrastructure tables vs. an application launcher.
 
@@ -431,14 +431,7 @@ make test-remote-smoke
 ./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
 ```
 
-### Local development
-
-```bash
-make build
-./scripts/smoke-test.sh
-```
-
-Open http://localhost:31847
+See [docs/development.md](docs/development.md) for local development workflows.
 
 ### Enrich a custom application (optional)
 
@@ -528,6 +521,8 @@ Hermes is how humans enter the software universe that Zeus runs.
 ## Documentation
 
 - [Documentation index](docs/README.md)
+- [Developer guide](docs/development.md)
+- [API reference](docs/api.md)
 - [User stories & validation](docs/USER_STORIES.md)
 - [Architecture](docs/architecture.md)
 - [Install guide](docs/install.md)

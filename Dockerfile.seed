@@ -1,0 +1,11 @@
+FROM golang:1.23-alpine AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+COPY cmd ./cmd
+COPY controller ./controller
+RUN cd cmd/hermes-seed && go build -o /hermes-seed .
+
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /hermes-seed /usr/local/bin/hermes-seed
+ENTRYPOINT ["/usr/local/bin/hermes-seed"]

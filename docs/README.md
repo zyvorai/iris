@@ -6,6 +6,8 @@ The application operating layer for Kubernetes
 
 | Goal | Document |
 |------|----------|
+| **Developer guide** | [development.md](development.md) |
+| **API reference** | [api.md](api.md) |
 | Architecture | [architecture.md](architecture.md) |
 | Install | [install.md](install.md) |
 | UI & Zeus AI | [ui.md](ui.md) |

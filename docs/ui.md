@@ -146,3 +146,5 @@ cd ui && npm run build
 ```
 
 See the repository root `Makefile` and `scripts/deploy-remote.sh` for cluster deploy helpers.
+
+For backend and API details see [development.md](development.md) and [api.md](api.md).

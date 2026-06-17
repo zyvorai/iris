@@ -30,3 +30,5 @@ User opens app → Gateway /a/{ns}/{slug} → ClusterIP service
 - NetworkPolicy Helm template restricts pod-to-pod traffic
 
 See [USER_STORIES.md](USER_STORIES.md) Story 5 for gateway exposure acceptance criteria.
+
+For local development and extending Hermes, see [development.md](development.md). Full HTTP route catalog: [api.md](api.md).

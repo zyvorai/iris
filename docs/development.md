@@ -1,0 +1,369 @@
+# Hermes Developer Guide
+
+How to build, run, and extend Hermes locally. For contribution workflow see [CONTRIBUTING.md](../CONTRIBUTING.md). For operators see [install.md](install.md).
+
+## Overview
+
+Hermes has three runtime parts that share a **SQLite catalog** — no RPC between controller and server:
+
+```text
+Kubernetes cluster
+       │
+       ▼
+hermes-controller (Go)  ──writes──▶  SQLite  ◀──reads──  hermes-server (Rust)
+                                              │
+                                              ├── REST API  /api/v1/*
+                                              ├── Gateway   /a/{ns}/{slug}
+                                              └── UI        /  (ui/dist)
+```
+
+| Component | Path | Language | Responsibility |
+|-----------|------|----------|----------------|
+| Controller | `cmd/hermes-controller`, `controller/` | Go | Watch Services, Ingress, Gateway API, mesh; health polls; catalog writes |
+| Server | `crates/hermes-server` | Rust | HTTP server: API, gateway proxy, auth, metrics, embedded UI |
+| UI | `ui/` | React + Vite | Nebula launchpad (built to `ui/dist/`) |
+
+Rust workspace crates:
+
+| Crate | Role |
+|-------|------|
+| `hermes-core` | Models, SQLite (Rust), search, graph, diagnosis, Zeus AI, federation, RBAC |
+| `hermes-api` | Axum REST routes under `/api/v1/*` |
+| `hermes-gateway` | Reverse proxy to cluster backends |
+| `hermes-server` | Binary wiring auth, metrics, SPA fallback |
+
+---
+
+## Repository map
+
+```text
+hermes/
+├── cmd/
+│   ├── hermes-controller/   # K8s watcher binary
+│   └── hermes-seed/           # Local SQLite seed (smoke / compose)
+├── controller/
+│   ├── discovery/             # Informers, health, ingress/gateway/mesh
+│   ├── model/                 # App, Backend, Visibility types
+│   ├── signatures/            # Known-app heuristics (Grafana, Argo CD, …)
+│   └── store/                 # Go SQLite layer
+├── crates/
+│   ├── hermes-core/
+│   ├── hermes-api/
+│   ├── hermes-gateway/
+│   └── hermes-server/
+├── ui/                        # React app
+├── charts/hermes/             # Helm chart (controller + server pod, shared PVC)
+├── scripts/                   # smoke-test, deploy-remote, e2e-deploy-verify
+├── examples/                  # Annotated Service YAML
+└── docs/
+```
+
+**Note:** `api/v1alpha1/` holds an experimental AppRoute CRD — not part of the main build. The REST API lives in `crates/hermes-api/`.
+
+---
+
+## Prerequisites
+
+| Tool | Version | Used for |
+|------|---------|----------|
+| Rust | stable | Server and workspace crates |
+| Go | 1.23+ | Controller and seed |
+| Node.js | 20+ | UI |
+| Helm | 3.x | Chart lint and deploy |
+| Docker | optional | Images and `docker compose` |
+| kubectl | optional | Controller against a real cluster |
+
+---
+
+## Local development
+
+### Path A — smoke test (fastest)
+
+No Kubernetes required. Seeds SQLite with Grafana, Prometheus, and Argo CD demo apps.
+
+```bash
+make build-rust          # or: cargo build -p hermes-server
+./scripts/smoke-test.sh
+# → http://localhost:31847
+```
+
+`smoke-test.sh` builds the server, runs `go run ./cmd/hermes-seed`, starts `hermes-server`, and checks health, catalog, search, gateway, and WebSocket echo.
+
+Overrides: `HERMES_PORT=31848`, `HERMES_DB_PATH=/tmp/my.db`.
+
+### Path B — full build
+
+```bash
+make build               # controller + server + UI
+./scripts/smoke-test.sh
+```
+
+### Path C — UI hot reload
+
+Terminal 1 — API server (seed DB first or point at existing SQLite):
+
+```bash
+go run ./cmd/hermes-seed /tmp/hermes-dev.db
+HERMES_DB_PATH=/tmp/hermes-dev.db cargo run -p hermes-server
+```
+
+Terminal 2 — Vite dev server (proxies API to `:31847`):
+
+```bash
+cd ui && npm ci && npm run dev
+# → http://localhost:5173
+```
+
+### Path D — Docker Compose
+
+Server + seeded SQLite, no controller:
+
+```bash
+docker compose up --build
+open http://localhost:31847
+```
+
+### Path E — against a real cluster
+
+Run controller and server with the **same** `HERMES_DB_PATH`:
+
+```bash
+export HERMES_DB_PATH=/tmp/hermes.db
+export KUBECONFIG=~/.kube/config
+
+go run ./cmd/hermes-controller &
+HERMES_DB_PATH=$HERMES_DB_PATH cargo run -p hermes-server
+```
+
+In production, Helm runs both in one pod with a shared PVC at `/data/hermes/hermes.db`.
+
+---
+
+## Makefile targets
+
+| Target | Description |
+|--------|-------------|
+| `make build` | Go controller + Rust server + UI |
+| `make build-go` / `build-rust` / `build-ui` | Individual components |
+| `make test` | `go test`, `cargo test`, UI tests |
+| `make clean` | Remove `bin/`, `ui/dist/`, `target/` |
+| `make docker` | Build controller and server images |
+| `make helm-template` | Render chart locally |
+| `make deploy-remote` | Helm deploy to remote k3s |
+| `make test-remote-smoke` | Post-deploy API checks |
+
+Default deploy: `DEPLOY_HOST=212.8.252.194`, `DEPLOY_USER=sus`, `VERSION=0.2.0`.
+
+---
+
+## Environment variables
+
+Copy [.env.example](../.env.example) to `.env` for local reference.
+
+### Server
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HERMES_BIND` | `0.0.0.0:31847` | Listen address |
+| `HERMES_DB_PATH` | `/data/hermes/hermes.db` | SQLite path (must match controller) |
+| `HERMES_UI_DIR` | `./ui/dist` | Built UI assets |
+| `HERMES_DEFAULT_USER` | `local` | User when `HERMES_AUTH_MODE=none` |
+| `HERMES_AUTH_MODE` | `none` | `none` \| `api_key` \| `oidc` |
+| `HERMES_API_KEY` | — | Required when mode is `api_key` |
+| `HERMES_SESSION_SECRET` | dev default | **Required in production** |
+| `HERMES_OIDC_*` | — | Issuer, client ID/secret, redirect URL |
+| `HERMES_ALLOWED_NAMESPACES` | (all) | Comma-separated API/gateway filter |
+| `HERMES_ADMIN_USERS` / `HERMES_ADMIN_GROUPS` | — | Admin bypass lists |
+| `HERMES_WORKSPACE_RULES` | — | JSON workspace ACL |
+| `HERMES_ROLE_RULES` | — | JSON role action rules |
+| `HERMES_K8S_RBAC` | `false` | Enable Kubernetes SAR checks |
+| `HERMES_CLUSTER_ID` / `HERMES_CLUSTER_NAME` | `local` | Local cluster identity |
+| `HERMES_FEDERATED_CLUSTERS` | — | JSON array of peer Hermes clusters |
+| `HERMES_FEDERATION_TRUST_HEADERS` | `false` | Trust `x-hermes-user` from peers |
+| `HERMES_LLM_API_URL` / `HERMES_LLM_API_KEY` / `HERMES_LLM_MODEL` | — | Zeus AI LLM (rule fallback when unset) |
+| `RUST_LOG` | `hermes_server=info` | Tracing filter |
+
+### Controller
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HERMES_DB_PATH` | `/data/hermes/hermes.db` | Same SQLite file as server |
+| `HERMES_PUBLIC_BASE_URL` | `http://localhost:31847` | Public URLs in catalog |
+| `HERMES_PUBLIC_PATH_PREFIX` | `""` | e.g. `/launchpad` |
+| `HERMES_AUTO_PUBLISH` | `false` | Auto-publish annotated services |
+| `HERMES_AUTO_SUGGEST` | `true` | Signature-match without annotation |
+| `HERMES_DISCOVER_ALL` | `true` | Index all eligible services |
+| `HERMES_DISCOVER_INGRESS` | `true` | Ingress host discovery |
+| `HERMES_DISCOVER_GATEWAY_API` | `true` | Gateway API HTTPRoutes |
+| `HERMES_DISCOVER_MESH` | `true` | Istio / Linkerd mesh routes |
+| `HERMES_WATCH_NAMESPACES` | (all) | Comma-separated namespace filter |
+| `KUBECONFIG` | `~/.kube/config` | Local kubeconfig when not in-cluster |
+
+Helm values mirror these under `charts/hermes/values.yaml` → `controller.*` and `server.*`.
+
+---
+
+## Controller internals
+
+### Discovery pipeline
+
+1. **Service informer** — watches cluster Services (and EndpointSlices for readiness).
+2. **Annotation parse** — `hermes.zyvor.dev/*` keys (see [annotations.md](annotations.md)).
+3. **Signature match** — `controller/signatures/` recognizes Grafana, Prometheus, Argo CD, etc.
+4. **Ingress / Gateway API / mesh** — optional route metadata when `HERMES_DISCOVER_*` enabled.
+5. **Health refresh** — polls backends every 30s; updates `status`, `ready_count`, diagnosis.
+6. **SQLite upsert** — `controller/store` writes `apps` table; prunes stale discoveries.
+
+### Adding a signature
+
+Edit `controller/signatures/signatures.go`:
+
+1. Add a `Signature` entry with namespace/name/port/label heuristics.
+2. Set `Category`, `Icon`, and optional `CanonicalSlug`.
+3. Run `go test ./controller/signatures/...`.
+4. Resync: restart controller or wait for next informer event.
+
+### Annotating a custom app
+
+```yaml
+metadata:
+  annotations:
+    hermes.zyvor.dev/enabled: "true"
+    hermes.zyvor.dev/name: "My App"
+    hermes.zyvor.dev/category: "Internal"
+    hermes.zyvor.dev/published: "true"
+    hermes.zyvor.dev/port: "8080"
+```
+
+Apply `examples/grafana-service-annotated.yaml` as a template.
+
+---
+
+## Server & API internals
+
+### Route assembly
+
+`hermes-server/src/main.rs` builds:
+
+| Layer | Auth | Routes |
+|-------|------|--------|
+| Public | No | `/healthz`, `/metrics`, `/auth/*`, `/api/v1/ws-echo` |
+| Protected | Yes | `/api/v1/*`, gateway (`/a/`, `/launchpad/`) |
+| Fallback | No | SPA static files from `HERMES_UI_DIR` |
+
+Full route catalog: **[api.md](api.md)**.
+
+### Adding a REST endpoint
+
+1. Add handler in `crates/hermes-api/src/lib.rs`.
+2. Register route in the `Router::new()` chain.
+3. Use `State<ApiState>` for store / config access.
+4. Add `e2e-deploy-verify.sh` check and update [api.md](api.md).
+5. Wire UI in `ui/src/services/hermesApi.ts` if user-facing.
+
+### Adding a Zeus AI insight
+
+1. Add logic in `crates/hermes-core/src/insight.rs`.
+2. Expose route in `hermes-api` under `/api/v1/insights/…`.
+3. Add hook in `ui/src/hooks/useZeusAiInsight.ts` and surface in a page or Spotlight command.
+
+### Gateway proxy
+
+`hermes-gateway` resolves published apps from SQLite, blocks unready backends (502), and proxies to `{service}.{namespace}.svc.cluster.local`. Supports HTTP/1.1, HTTP/2 (gRPC), SSE, and WebSocket upgrade.
+
+---
+
+## UI development
+
+See [ui.md](ui.md) for the Nebula design system, page primitives, and Zeus AI surfaces.
+
+```bash
+cd ui
+npm ci
+npm run dev          # Vite on :5173, proxies to :31847
+npm run build        # → ui/dist/
+npm run test:e2e     # Playwright smoke tests
+```
+
+Add a page:
+
+1. Create `ui/src/pages/MyPage.tsx` using `PageFrame`.
+2. Register route in `ui/src/App.tsx`.
+3. Add navbar link in `HermesNavbar.tsx` if needed.
+4. Add Playwright smoke test in `ui/tests/smoke.spec.ts`.
+
+---
+
+## Testing
+
+| Layer | Command |
+|-------|---------|
+| Rust | `cargo test --workspace --locked` |
+| Go | `go test ./...` |
+| UI build | `cd ui && npm run build` |
+| Local smoke | `./scripts/smoke-test.sh` |
+| Playwright | `cd ui && npm run test:e2e` |
+| Live deploy E2E | `./scripts/e2e-deploy-verify.sh http://host:31847` |
+| Remote tiers | `make test-remote-smoke` / `test-remote-quick` / `test-remote-all` |
+
+CI (`.github/workflows/ci.yml`): Rust test/clippy/fmt, Go test/vet, UI build, Helm lint.
+
+---
+
+## Troubleshooting
+
+### Empty catalog
+
+| Cause | Fix |
+|-------|-----|
+| Server only, no controller | Run `go run ./cmd/hermes-seed` or `smoke-test.sh` |
+| Controller not connected | Check `kubectl`, in-cluster SA, or `KUBECONFIG` |
+| Namespace filter too narrow | Clear `HERMES_WATCH_NAMESPACES` |
+
+### Gateway 403 / 502
+
+| Code | Meaning |
+|------|---------|
+| 403 | App not published — publish via Discovery or `hermes.zyvor.dev/published=true` |
+| 502 | No ready endpoints — check Service/Endpoints in cluster |
+
+### SQLite errors
+
+Both processes must use the **same** `HERMES_DB_PATH`. WAL mode with 5s busy timeout is enabled on both sides.
+
+### UI blank
+
+Run `make build-ui` or set `HERMES_UI_DIR` to an existing `ui/dist/`.
+
+### Zeus AI uses rules only
+
+Check `GET /api/v1/insights/status`. Set `HERMES_LLM_*` or run `./scripts/setup-ollama-remote.sh` on deploy hosts.
+
+### Debug commands
+
+```bash
+curl -sf http://localhost:31847/healthz
+curl -s http://localhost:31847/api/v1/apps | jq .
+curl -s http://localhost:31847/api/v1/insights/status | jq .
+
+RUST_LOG=hermes_server=debug,tower_http=debug cargo run -p hermes-server
+
+kubectl logs -n hermes-system deploy/hermes -c controller -f
+kubectl logs -n hermes-system deploy/hermes -c server -f
+
+sqlite3 /tmp/hermes-smoke.db "SELECT id, display_name, status FROM apps;"
+```
+
+---
+
+## Related docs
+
+| Doc | Purpose |
+|-----|---------|
+| [api.md](api.md) | HTTP route reference |
+| [architecture.md](architecture.md) | High-level data flow |
+| [ui.md](ui.md) | Nebula UI and Zeus AI |
+| [annotations.md](annotations.md) | Service annotation reference |
+| [install.md](install.md) | Helm install and operator config |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | PR workflow |
+| [USER_STORIES.md](USER_STORIES.md) | Acceptance criteria |

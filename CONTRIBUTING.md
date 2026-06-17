@@ -56,7 +56,8 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 | Change type | Update |
 |-------------|--------|
 | UI behavior | [docs/ui.md](docs/ui.md) |
-| New API route | [docs/architecture.md](docs/architecture.md) + changelog |
+| New API route | [docs/api.md](docs/api.md) + [docs/architecture.md](docs/architecture.md) + changelog |
+| Local dev / extending Hermes | [docs/development.md](docs/development.md) |
 | Install / deploy | [docs/install.md](docs/install.md) |
 | User-facing feature | [docs/USER_STORIES.md](docs/USER_STORIES.md) + [CHANGELOG.md](CHANGELOG.md) |
 
@@ -75,4 +76,4 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 
 ## Questions
 
-Open an issue or see [docs/README.md](docs/README.md) for architecture and install guides.
+Open an issue or see [docs/development.md](docs/development.md) and [docs/README.md](docs/README.md).

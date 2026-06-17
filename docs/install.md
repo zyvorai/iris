@@ -36,6 +36,8 @@ make build
 
 Open http://localhost:31847
 
+Full developer guide: [development.md](development.md) · API reference: [api.md](api.md)
+
 ## Configuration
 
 | Variable | Component | Description |

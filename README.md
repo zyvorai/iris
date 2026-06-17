@@ -40,7 +40,7 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 | Layer | What's in the repo |
 |-------|-------------------|
 | **Controller** | Go discovery + gateway — `controller/`, `cmd/` |
-| **API** | Rust API layer — `crates/`, `api/` |
+| **API** | Rust REST + gateway — `crates/hermes-api`, `crates/hermes-gateway` |
 | **UI** | React Nebula launchpad — `ui/` |
 | **Zeus AI** | Insight APIs + Spotlight NL search — `crates/hermes-core/src/insight.rs`, `docs/ui.md` |
 | **Charts** | Helm install — `charts/hermes/` |
@@ -78,6 +78,8 @@ export HERMES_LLM_API_KEY=sk-...
 
 | Scenario | Path |
 |----------|------|
+| **Developer guide** | [docs/development.md](docs/development.md) |
+| **API reference** | [docs/api.md](docs/api.md) |
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Install guide | [docs/install.md](docs/install.md) |
 | UI & Zeus AI | [docs/ui.md](docs/ui.md) |
@@ -106,6 +108,8 @@ Hermes answers — without namespace archaeology.
 | Goal | Document |
 |------|----------|
 | Docs index | [docs/README.md](docs/README.md) |
+| **Developer guide** | [docs/development.md](docs/development.md) |
+| **API reference** | [docs/api.md](docs/api.md) |
 | User stories & validation | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
 | Full product deep dive | [docs/FULL_README_LEGACY.md](docs/FULL_README_LEGACY.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
