@@ -54,6 +54,8 @@ Hermes eliminates tribal knowledge, bookmark sprawl, and port-forward culture. T
 
 ---
 
+**Docs:** [Documentation index](docs/README.md) · [User stories](docs/USER_STORIES.md)
+
 ## What Hermes Is
 
 Hermes is the application layer of **Zeus OS**.
