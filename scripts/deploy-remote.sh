@@ -187,7 +187,8 @@ _ssh() {
             return "$ec"
         fi
         n=$((n + 1))
-        warn "SSH retry ${n}/${SSH_RETRIES}"; sleep 2
+        local _d=$(( 2 * (n - 1) )); _d=$(( _d < 2 ? 2 : _d > 30 ? 30 : _d ))
+        warn "SSH retry ${n}/${SSH_RETRIES}"; sleep "${_d}"
     done
     return "$ec"
 }
@@ -338,9 +339,15 @@ if ! command -v cargo >/dev/null; then
 fi
 source "$HOME/.cargo/env" 2>/dev/null || true
 
-if ! command -v node >/dev/null; then
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | $SUDO bash - 2>/dev/null || true
-    $SUDO dnf install -y nodejs 2>/dev/null || $SUDO apt-get install -y nodejs npm 2>/dev/null || true
+_nv=$(node -v 2>/dev/null | cut -c2- | cut -d. -f1 || echo 0)
+if [ "${_nv:-0}" -lt 18 ]; then
+    if command -v apt-get >/dev/null; then
+        curl -fsSL https://deb.nodesource.com/setup_22.x | $SUDO bash - 2>/dev/null || true
+        $SUDO apt-get install -y -qq nodejs 2>/dev/null || true
+    else
+        curl -fsSL https://rpm.nodesource.com/setup_22.x | $SUDO bash - 2>/dev/null || true
+        $SUDO dnf install -y nodejs 2>/dev/null || true
+    fi
 fi
 
 DOCKER_BIN=""
