@@ -7,11 +7,11 @@ replicaCount: 1
 
 image:
   controller:
-    repository: ghcr.io/ssahani/hermes-controller
+    repository: ghcr.io/hypersdk/hermes-controller
     tag: "0.2.0"
     pullPolicy: IfNotPresent
   server:
-    repository: ghcr.io/ssahani/hermes-server
+    repository: ghcr.io/hypersdk/hermes-server
     tag: "0.2.0"
     pullPolicy: IfNotPresent
 
@@ -121,3 +121,12 @@ demoApps:
 
 networkPolicy:
   enabled: false
+
+# Licence key (optional — 30-day keyless trial runs without this)
+# To apply a commercial licence after the trial:
+#   kubectl create secret generic hermes-license --from-literal=license.key="<key>" -n hermes-system
+#   helm upgrade hermes oci://ghcr.io/hypersdk/charts/hermes --reuse-values \
+#     --set license.existingSecret="hermes-license" -n hermes-system
+license:
+  key: ""
+  existingSecret: ""

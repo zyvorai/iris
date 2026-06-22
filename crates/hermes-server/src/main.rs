@@ -2,6 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 mod auth;
+mod license;
 mod metrics;
 
 use std::env;
@@ -31,6 +32,9 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or_else(|_| "hermes_server=info,tower_http=info".into()),
         )
         .init();
+
+    let lic = license::load_and_check()?;
+    eprintln!("Hermes licence: {} — valid until {}", lic.licensee, lic.expires);
 
     let bind = env::var("HERMES_BIND").unwrap_or_else(|_| "0.0.0.0:31847".into());
     let db_path = env::var("HERMES_DB_PATH").unwrap_or_else(|_| "/data/hermes/hermes.db".into());
