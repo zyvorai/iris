@@ -1,0 +1,70 @@
+{
+  "routes": [
+    {
+      "label": "Overview",
+      "path": "/",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
+      "label": "Catalog",
+      "path": "/apps",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
+      "label": "Cluster",
+      "path": "/cluster",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
+      "label": "Health",
+      "path": "/health",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
+      "label": "Spaces",
+      "path": "/spaces",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
+      "label": "Graph",
+      "path": "/graph",
+      "category": "Explore",
+      "legacy": false
+    },
+    {
+      "label": "Discovery",
+      "path": "/discovery",
+      "category": "Explore",
+      "legacy": false
+    },
+    {
+      "label": "Federated",
+      "path": "/federated",
+      "category": "Explore",
+      "legacy": false
+    },
+    {
+      "label": "Teams",
+      "path": "/teams",
+      "category": "Admin",
+      "legacy": false
+    },
+    {
+      "label": "Activity",
+      "path": "/activity",
+      "category": "Audit",
+      "legacy": false
+    },
+    {
+      "label": "Help",
+      "path": "/help",
+      "category": "Support",
+      "legacy": false
+    }
+  ]
+}

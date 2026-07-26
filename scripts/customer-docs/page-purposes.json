@@ -1,0 +1,13 @@
+{
+  "/": "Overview \u2014 Primary surface.",
+  "/apps": "Catalog \u2014 Primary surface.",
+  "/cluster": "Cluster \u2014 Primary surface.",
+  "/health": "Health \u2014 Primary surface.",
+  "/spaces": "Spaces \u2014 Primary surface.",
+  "/graph": "Graph \u2014 Explore surface.",
+  "/discovery": "Discovery \u2014 Explore surface.",
+  "/federated": "Federated \u2014 Explore surface.",
+  "/teams": "Teams \u2014 Admin surface.",
+  "/activity": "Activity \u2014 Audit surface.",
+  "/help": "Help \u2014 Support surface."
+}

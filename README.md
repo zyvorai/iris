@@ -7,6 +7,8 @@
 
 **[Hermes — Customer Feature Guide](docs/hermes-customer-feature-guide.md)** — a complete, customer-facing reference covering all **60 features** across **12 areas**, grounded in the product's actual capabilities. Also available as a print-ready **[PDF](docs/hermes-customer-feature-guide.pdf)**.
 
+**[Customer manual (page-by-page)](docs/customer/README.md)** — getting started, admin basics, and a guide for every product surface (PDFs under `docs/customer/pdf/`).
+
 **Every Application. One Door.**
 
 Hermes transforms Kubernetes from an infrastructure platform into an application platform — auto-discovering every dashboard, API, and internal tool, then giving users a permanent front door to launch software without `kubectl port-forward`.
