@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS go-builder
+FROM docker.io/library/golang:1.23-alpine AS go-builder
 RUN apk add --no-cache git
 WORKDIR /src
 COPY go.mod go.sum ./
@@ -6,7 +6,7 @@ COPY cmd ./cmd
 COPY controller ./controller
 RUN cd cmd/hermes-controller && go build -o /hermes-controller .
 
-FROM alpine:3.21
+FROM docker.io/library/alpine:3.21
 RUN apk add --no-cache ca-certificates
 COPY --from=go-builder /hermes-controller /usr/local/bin/hermes-controller
 USER 65532:65532

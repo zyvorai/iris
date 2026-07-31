@@ -6,7 +6,7 @@ use std::sync::{Arc, OnceLock};
 use axum::{
     body::Body,
     extract::{FromRequestParts, Path, State, WebSocketUpgrade},
-    http::{header, HeaderMap, HeaderName, HeaderValue, Request, StatusCode},
+    http::{header, HeaderMap, HeaderName, HeaderValue, Request, StatusCode, Uri},
     response::{IntoResponse, Response},
     routing::any,
     Router,
@@ -23,19 +23,25 @@ pub struct GatewayState {
 
 pub fn routes(state: GatewayState) -> Router {
     Router::new()
-        // Zeus Launchpad public URLs
+        // Zeus Launchpad public URLs (with and without trailing slash on roots)
         .route("/launchpad/apps/{slug}", any(proxy_canonical_root))
+        .route("/launchpad/apps/{slug}/", any(proxy_canonical_root))
         .route("/launchpad/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/launchpad/a/{namespace}/{slug}", any(proxy_root))
+        .route("/launchpad/a/{namespace}/{slug}/", any(proxy_root))
         .route("/launchpad/a/{namespace}/{slug}/{*rest}", any(proxy_path))
         .route("/launchpad/s/{token}", any(share_proxy_root))
+        .route("/launchpad/s/{token}/", any(share_proxy_root))
         .route("/launchpad/s/{token}/{*rest}", any(share_proxy_path))
         // Legacy aliases
         .route("/apps/{slug}", any(proxy_canonical_root))
+        .route("/apps/{slug}/", any(proxy_canonical_root))
         .route("/apps/{slug}/{*rest}", any(proxy_canonical_path))
         .route("/a/{namespace}/{slug}", any(proxy_root))
+        .route("/a/{namespace}/{slug}/", any(proxy_root))
         .route("/a/{namespace}/{slug}/{*rest}", any(proxy_path))
         .route("/s/{token}", any(share_proxy_root))
+        .route("/s/{token}/", any(share_proxy_root))
         .route("/s/{token}/{*rest}", any(share_proxy_path))
         .with_state(state)
 }
@@ -188,20 +194,27 @@ async fn proxy_app(st: GatewayState, app: hermes_core::App, rest: String, req: R
     );
 
     if is_websocket_upgrade(req.headers()) {
+        let query = req.uri().query().map(str::to_string);
+        let forwarded = collect_forward_context(req.headers(), &app);
         let (mut parts, _body) = req.into_parts();
         match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
             Ok(ws) => {
                 let backend_path = build_backend_path(&app, &rest);
-                let ws_url = format!(
+                let mut ws_url = format!(
                     "ws://{}.{}.svc.cluster.local:{}{}",
                     app.backend.name, app.namespace, app.backend.port, backend_path
                 );
-                return ws.on_upgrade(move |client_ws| async move {
-                    if let Err(e) = tunnel_websocket(client_ws, &ws_url).await {
-                        tracing::warn!("ws tunnel: {e:#}");
-                    }
-                })
-                .into_response();
+                if let Some(q) = query.as_deref().filter(|q| !q.is_empty()) {
+                    ws_url.push('?');
+                    ws_url.push_str(q);
+                }
+                return ws
+                    .on_upgrade(move |client_ws| async move {
+                        if let Err(e) = tunnel_websocket(client_ws, &ws_url, &forwarded).await {
+                            tracing::warn!("ws tunnel: {e:#}");
+                        }
+                    })
+                    .into_response();
             }
             Err(e) => return e.into_response(),
         }
@@ -275,9 +288,53 @@ fn proxy_client(headers: &HeaderMap) -> &'static reqwest::Client {
     }
 }
 
+#[derive(Clone, Default)]
+struct ForwardContext {
+    proto: String,
+    host: String,
+    prefix: String,
+    cookie: Option<String>,
+    authorization: Option<String>,
+    hermes_user: Option<String>,
+}
+
+fn collect_forward_context(headers: &HeaderMap, app: &hermes_core::App) -> ForwardContext {
+    let proto = headers
+        .get("x-forwarded-proto")
+        .and_then(|v| v.to_str().ok())
+        .filter(|s| !s.is_empty())
+        .unwrap_or("http")
+        .to_string();
+    let host = headers
+        .get(header::HOST)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("")
+        .to_string();
+    ForwardContext {
+        proto,
+        host,
+        prefix: app.route_path.trim_end_matches('/').to_string(),
+        cookie: headers
+            .get(header::COOKIE)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_string),
+        authorization: headers
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_string),
+        hermes_user: headers
+            .get("x-hermes-user")
+            .and_then(|v| v.to_str().ok())
+            .filter(|s| !s.is_empty())
+            .map(str::to_string),
+    }
+}
+
 async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
+    let query = req.uri().query().map(str::to_string);
+    let forward = collect_forward_context(req.headers(), &app);
     let backend_path = build_backend_path(&app, &rest);
-    let target = format!(
+    let mut target = format!(
         "{}://{}.{}.svc.cluster.local:{}{}",
         app.backend.scheme,
         app.backend.name,
@@ -285,10 +342,14 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
         app.backend.port,
         backend_path
     );
+    if let Some(q) = query.as_deref().filter(|q| !q.is_empty()) {
+        target.push('?');
+        target.push_str(q);
+    }
 
     let method = req.method().clone();
     let mut headers = filter_request_headers(req.headers());
-    inject_hermes_headers(&mut headers, &app);
+    inject_hermes_headers(&mut headers, &app, &forward);
 
     let client = proxy_client(&headers);
 
@@ -308,10 +369,19 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
                 StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
             let mut out_headers = HeaderMap::new();
             for (k, v) in resp.headers() {
-                if should_forward_response_header(k) {
-                    if let Ok(val) = HeaderValue::from_bytes(v.as_bytes()) {
-                        out_headers.insert(k.clone(), val);
-                    }
+                if !should_forward_response_header(k) {
+                    continue;
+                }
+                let value = if k.as_str() == "location" || k.as_str() == "refresh" {
+                    rewrite_redirect_header(&app, k.as_str(), v.as_bytes())
+                } else if k.as_str() == "set-cookie" {
+                    rewrite_set_cookie(&app, v.as_bytes())
+                } else {
+                    HeaderValue::from_bytes(v.as_bytes()).ok()
+                };
+                if let Some(val) = value {
+                    // Preserve multiple Set-Cookie headers.
+                    out_headers.append(k.clone(), val);
                 }
             }
             if wants_streaming(&headers)
@@ -340,11 +410,50 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
 async fn tunnel_websocket(
     client_ws: axum::extract::ws::WebSocket,
     upstream_url: &str,
+    forward: &ForwardContext,
 ) -> anyhow::Result<()> {
-    use tokio_tungstenite::tungstenite::client::IntoClientRequest;
     use tokio_tungstenite::connect_async;
+    use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
-    let request = upstream_url.into_client_request()?;
+    let mut request = upstream_url.into_client_request()?;
+    {
+        let headers = request.headers_mut();
+        if !forward.host.is_empty() {
+            let _ = headers.insert(
+                "x-forwarded-host",
+                forward.host.parse().unwrap_or_else(|_| "unknown".parse().unwrap()),
+            );
+        }
+        let _ = headers.insert(
+            "x-forwarded-proto",
+            forward.proto.parse().unwrap_or_else(|_| "http".parse().unwrap()),
+        );
+        if !forward.prefix.is_empty() {
+            let _ = headers.insert(
+                "x-forwarded-prefix",
+                forward.prefix.parse().unwrap_or_else(|_| "/".parse().unwrap()),
+            );
+        }
+        if let Some(cookie) = &forward.cookie {
+            let _ = headers.insert(
+                "cookie",
+                cookie.parse().unwrap_or_else(|_| "".parse().unwrap()),
+            );
+        }
+        if let Some(auth) = &forward.authorization {
+            let _ = headers.insert(
+                "authorization",
+                auth.parse().unwrap_or_else(|_| "".parse().unwrap()),
+            );
+        }
+        if let Some(user) = &forward.hermes_user {
+            let _ = headers.insert(
+                "x-hermes-user",
+                user.parse().unwrap_or_else(|_| "".parse().unwrap()),
+            );
+        }
+    }
+
     let (upstream, _) = connect_async(request).await?;
     let (mut client_sink, mut client_stream) = client_ws.split();
     let (mut upstream_sink, mut upstream_stream) = upstream.split();
@@ -417,14 +526,19 @@ async fn tunnel_websocket(
     Ok(())
 }
 
-fn build_backend_path(app: &hermes_core::App, rest: &str) -> String {
+/// Build the upstream path.
+///
+/// Mode A (default): Axum already stripped the mount; forward `backend.path` + `rest`.
+/// Mode B (`rewrite.add_prefix`): re-attach the public mount so subpath-aware apps
+/// (Grafana `serve_from_sub_path`, Prometheus `--web.route-prefix`, …) see the full path.
+pub fn build_backend_path(app: &hermes_core::App, rest: &str) -> String {
     let base = if app.backend.path.is_empty() {
         "/".to_string()
     } else {
         app.backend.path.clone()
     };
 
-    let suffix = {
+    let mut suffix = {
         let s = rest.trim();
         if s.is_empty() {
             String::new()
@@ -435,22 +549,45 @@ fn build_backend_path(app: &hermes_core::App, rest: &str) -> String {
         }
     };
 
-    let mut suffix = suffix;
+    // Historical strip_prefix: only applies when rest still contains the mount
+    // (e.g. callers that pass the full public path).
     if !app.rewrite.strip_prefix.is_empty() && !suffix.is_empty() {
         let strip = app.rewrite.strip_prefix.trim_end_matches('/');
-        if suffix.starts_with(strip) {
-            suffix = suffix.strip_prefix(strip).unwrap_or(&suffix).to_string();
+        if suffix == strip {
+            suffix.clear();
+        } else if let Some(stripped) = suffix.strip_prefix(strip) {
+            if stripped.is_empty() || stripped.starts_with('/') {
+                suffix = stripped.to_string();
+            }
         }
     }
 
-    if suffix.is_empty() || suffix == "/" {
-        return normalize_path(&base);
-    }
-
-    if base.ends_with('/') {
+    let path = if suffix.is_empty() || suffix == "/" {
+        normalize_path(&base)
+    } else if base.ends_with('/') {
         normalize_path(&format!("{}{}", base.trim_end_matches('/'), suffix))
     } else {
-        normalize_path(&format!("{}/{}", base.trim_end_matches('/'), suffix.trim_start_matches('/')))
+        normalize_path(&format!(
+            "{}/{}",
+            base.trim_end_matches('/'),
+            suffix.trim_start_matches('/')
+        ))
+    };
+
+    if app.rewrite.add_prefix.is_empty() {
+        return path;
+    }
+
+    let prefix = app.rewrite.add_prefix.trim_end_matches('/');
+    if path == "/" {
+        // Prefer trailing slash so directory-style apps (Grafana) do not 301.
+        format!("{prefix}/")
+    } else if path.starts_with(prefix)
+        && (path.len() == prefix.len() || path.as_bytes().get(prefix.len()) == Some(&b'/'))
+    {
+        path
+    } else {
+        format!("{prefix}{path}")
     }
 }
 
@@ -472,11 +609,12 @@ fn filter_request_headers(in_headers: &HeaderMap) -> HeaderMap {
         if name.eq_ignore_ascii_case("host")
             || name.eq_ignore_ascii_case("connection")
             || name.eq_ignore_ascii_case("upgrade")
+            || name.eq_ignore_ascii_case("content-length")
             || name.starts_with("sec-websocket")
         {
             continue;
         }
-        out.insert(k.clone(), v.clone());
+        out.append(k.clone(), v.clone());
     }
     out
 }
@@ -488,13 +626,13 @@ fn to_reqwest_headers(headers: &HeaderMap) -> reqwest::header::HeaderMap {
             reqwest::header::HeaderName::from_bytes(k.as_str().as_bytes()),
             reqwest::header::HeaderValue::from_bytes(v.as_bytes()),
         ) {
-            hm.insert(name, val);
+            hm.append(name, val);
         }
     }
     hm
 }
 
-fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App) {
+fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App, forward: &ForwardContext) {
     headers.insert(
         HeaderName::from_static("x-hermes-app"),
         HeaderValue::from_str(&app.slug).unwrap_or(HeaderValue::from_static("unknown")),
@@ -505,22 +643,29 @@ fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App) {
     );
     headers.insert(
         HeaderName::from_static("x-forwarded-proto"),
-        HeaderValue::from_static("https"),
+        HeaderValue::from_str(&forward.proto).unwrap_or(HeaderValue::from_static("http")),
     );
+    if !forward.host.is_empty() {
+        let _ = headers.insert(
+            HeaderName::from_static("x-forwarded-host"),
+            HeaderValue::from_str(&forward.host).unwrap_or(HeaderValue::from_static("unknown")),
+        );
+    }
+    if !forward.prefix.is_empty() {
+        let _ = headers.insert(
+            HeaderName::from_static("x-forwarded-prefix"),
+            HeaderValue::from_str(&forward.prefix).unwrap_or(HeaderValue::from_static("/")),
+        );
+    }
     if app.auth_mode != "none" {
-        if let Some(user) = headers
-            .get("x-hermes-user")
-            .and_then(|v| v.to_str().ok())
-            .filter(|s| !s.is_empty())
-            .map(str::to_string)
-        {
+        if let Some(user) = forward.hermes_user.as_deref() {
             let _ = headers.insert(
                 HeaderName::from_static("x-forwarded-user"),
-                HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("unknown")),
+                HeaderValue::from_str(user).unwrap_or(HeaderValue::from_static("unknown")),
             );
             let _ = headers.insert(
                 HeaderName::from_static("remote-user"),
-                HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("unknown")),
+                HeaderValue::from_str(user).unwrap_or(HeaderValue::from_static("unknown")),
             );
         }
     }
@@ -531,4 +676,233 @@ fn should_forward_response_header(name: &header::HeaderName) -> bool {
         name.as_str(),
         "connection" | "keep-alive" | "transfer-encoding" | "upgrade"
     )
+}
+
+fn route_mount(app: &hermes_core::App) -> String {
+    app.route_path.trim_end_matches('/').to_string()
+}
+
+fn path_under_mount(mount: &str, path: &str) -> bool {
+    path == mount
+        || path.starts_with(&(mount.to_string() + "/"))
+        || path == (mount.to_string() + "/")
+}
+
+/// Rewrite absolute-path redirects so they stay under the launchpad mount.
+pub fn rewrite_location(app: &hermes_core::App, location: &str) -> String {
+    let mount = route_mount(app);
+    let location = location.trim();
+    if location.is_empty() {
+        return format!("{mount}/");
+    }
+
+    // Absolute URL — rewrite path if present; keep relative query/fragment.
+    if let Ok(uri) = location.parse::<Uri>() {
+        if uri.scheme().is_some() || location.starts_with("//") {
+            let path = uri.path();
+            let rewritten = rewrite_absolute_path(app, &mount, path);
+            let mut out = rewritten;
+            if let Some(q) = uri.query() {
+                out.push('?');
+                out.push_str(q);
+            }
+            return out;
+        }
+    }
+
+    if location.starts_with('/') {
+        return rewrite_absolute_path(app, &mount, location);
+    }
+
+    // Relative Location — browser resolves against current public URL.
+    location.to_string()
+}
+
+fn rewrite_absolute_path(app: &hermes_core::App, mount: &str, path: &str) -> String {
+    if path.is_empty() || path == "/" {
+        return format!("{mount}/");
+    }
+    if path_under_mount(mount, path) {
+        return path.to_string();
+    }
+    // Mode B backends may emit paths that already include add_prefix.
+    let add = app.rewrite.add_prefix.trim_end_matches('/');
+    if !add.is_empty() && path_under_mount(add, path) {
+        return path.to_string();
+    }
+    if mount.is_empty() {
+        return path.to_string();
+    }
+    format!("{mount}{path}")
+}
+
+fn rewrite_redirect_header(app: &hermes_core::App, name: &str, raw: &[u8]) -> Option<HeaderValue> {
+    let s = std::str::from_utf8(raw).ok()?;
+    let rewritten = if name == "refresh" {
+        rewrite_refresh(app, s)
+    } else {
+        rewrite_location(app, s)
+    };
+    HeaderValue::from_str(&rewritten).ok()
+}
+
+fn rewrite_refresh(app: &hermes_core::App, value: &str) -> String {
+    // e.g. "0;url=/login" or "5; URL=/graph"
+    let lower = value.to_ascii_lowercase();
+    if let Some(idx) = lower.find("url=") {
+        let (prefix, url_part) = value.split_at(idx + 4);
+        let url = url_part.trim().trim_matches('"').trim_matches('\'');
+        format!("{prefix}{}", rewrite_location(app, url))
+    } else {
+        value.to_string()
+    }
+}
+
+pub fn rewrite_set_cookie_value(app: &hermes_core::App, value: &str) -> String {
+    let mount = route_mount(app);
+    if mount.is_empty() {
+        return value.to_string();
+    }
+    let mut parts: Vec<String> = Vec::new();
+    let mut saw_path = false;
+    for part in value.split(';') {
+        let trimmed = part.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if let Some(rest) = trimmed
+            .strip_prefix("Path=")
+            .or_else(|| trimmed.strip_prefix("path="))
+        {
+            saw_path = true;
+            let path = if rest.is_empty() || rest == "/" {
+                format!("{mount}/")
+            } else if path_under_mount(&mount, rest) {
+                rest.to_string()
+            } else if rest.starts_with('/') {
+                format!("{mount}{rest}")
+            } else {
+                format!("{mount}/{rest}")
+            };
+            parts.push(format!("Path={path}"));
+        } else {
+            parts.push(trimmed.to_string());
+        }
+    }
+    if !saw_path {
+        parts.push(format!("Path={mount}/"));
+    }
+    parts.join("; ")
+}
+
+fn rewrite_set_cookie(app: &hermes_core::App, raw: &[u8]) -> Option<HeaderValue> {
+    let s = std::str::from_utf8(raw).ok()?;
+    HeaderValue::from_str(&rewrite_set_cookie_value(app, s)).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hermes_core::{App, AppMeta, Backend, Rewrite, Visibility};
+
+    fn sample_app(rewrite: Rewrite) -> App {
+        App {
+            id: "hermes-demo/grafana".into(),
+            slug: "grafana".into(),
+            canonical_slug: "grafana".into(),
+            display_name: "Grafana".into(),
+            description: String::new(),
+            namespace: "hermes-demo".into(),
+            category: "Monitoring".into(),
+            icon: "grafana".into(),
+            backend: Backend {
+                kind: "Service".into(),
+                name: "grafana".into(),
+                port: 80,
+                scheme: "http".into(),
+                path: "/".into(),
+            },
+            route_path: "/launchpad/a/hermes-demo/grafana".into(),
+            public_url: "http://example/launchpad/apps/grafana".into(),
+            status: "healthy".into(),
+            status_message: String::new(),
+            source: "annotation".into(),
+            auth_mode: "none".into(),
+            score: 100,
+            visibility: Visibility {
+                published: true,
+                hidden: false,
+                favorite: false,
+            },
+            rewrite,
+            ready_endpoints: 1,
+            updated_at: String::new(),
+            meta: AppMeta::default(),
+        }
+    }
+
+    #[test]
+    fn backend_path_mode_a_root_and_rest() {
+        let app = sample_app(Rewrite {
+            strip_prefix: "/launchpad/a/hermes-demo/grafana".into(),
+            add_prefix: String::new(),
+        });
+        assert_eq!(build_backend_path(&app, ""), "/");
+        assert_eq!(build_backend_path(&app, "graph"), "/graph");
+        assert_eq!(build_backend_path(&app, "/api/v1/query"), "/api/v1/query");
+    }
+
+    #[test]
+    fn backend_path_mode_b_add_prefix() {
+        let app = sample_app(Rewrite {
+            strip_prefix: String::new(),
+            add_prefix: "/launchpad/a/hermes-demo/grafana".into(),
+        });
+        assert_eq!(
+            build_backend_path(&app, ""),
+            "/launchpad/a/hermes-demo/grafana/"
+        );
+        assert_eq!(
+            build_backend_path(&app, "login"),
+            "/launchpad/a/hermes-demo/grafana/login"
+        );
+        assert_eq!(
+            build_backend_path(&app, "/api/health"),
+            "/launchpad/a/hermes-demo/grafana/api/health"
+        );
+    }
+
+    #[test]
+    fn location_rewrite_absolute_paths() {
+        let app = sample_app(Rewrite::default());
+        assert_eq!(
+            rewrite_location(&app, "/"),
+            "/launchpad/a/hermes-demo/grafana/"
+        );
+        assert_eq!(
+            rewrite_location(&app, "/login"),
+            "/launchpad/a/hermes-demo/grafana/login"
+        );
+        assert_eq!(
+            rewrite_location(&app, "/launchpad/a/hermes-demo/grafana/"),
+            "/launchpad/a/hermes-demo/grafana/"
+        );
+        assert_eq!(
+            rewrite_location(&app, "http://grafana.hermes-demo.svc/login"),
+            "/launchpad/a/hermes-demo/grafana/login"
+        );
+    }
+
+    #[test]
+    fn set_cookie_path_scoped_to_mount() {
+        let app = sample_app(Rewrite::default());
+        assert_eq!(
+            rewrite_set_cookie_value(&app, "sid=abc; Path=/; HttpOnly"),
+            "sid=abc; Path=/launchpad/a/hermes-demo/grafana/; HttpOnly"
+        );
+        assert_eq!(
+            rewrite_set_cookie_value(&app, "sid=abc; Path=/grafana"),
+            "sid=abc; Path=/launchpad/a/hermes-demo/grafana/grafana"
+        );
+    }
 }

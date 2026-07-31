@@ -30,6 +30,3 @@ rand = "0.8"
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }
 time = "0.3"
 chrono = { workspace = true }
-hmac = "0.12"
-sha2 = "0.10"
-base64 = "0.22"

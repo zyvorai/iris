@@ -46,6 +46,7 @@ const (
 	annoOwner       = annoPrefix + "owner"
 	annoDependsOn   = annoPrefix + "depends-on"
 	annoRecommended = annoPrefix + "recommended"
+	annoServeFromSubPath = annoPrefix + "serve-from-sub-path"
 )
 
 type Config struct {
@@ -436,6 +437,13 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		meta.MeshPolicies = append([]model.MeshPolicy(nil), policies...)
 	}
 
+	rewrite := model.Rewrite{StripPrefix: routePath}
+	if ann[annoServeFromSubPath] == "true" {
+		// Subpath-aware backends (Grafana serve_from_sub_path, Prometheus route-prefix, …)
+		// must receive the full public mount path on every request.
+		rewrite = model.Rewrite{AddPrefix: routePath}
+	}
+
 	return model.App{
 		ID:            id,
 		Slug:          slug,
@@ -458,7 +466,7 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		AuthMode:   auth,
 		Score:      score,
 		Visibility: model.Visibility{Published: published},
-		Rewrite:    model.Rewrite{StripPrefix: routePath},
+		Rewrite:    rewrite,
 		Meta:       meta,
 	}, true
 }

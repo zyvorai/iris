@@ -86,6 +86,7 @@ metadata:
     hermes.zyvor.dev/depends-on: "prometheus"
     hermes.zyvor.dev/owner: "platform-team"
     hermes.zyvor.dev/environment: "production"
+    hermes.zyvor.dev/serve-from-sub-path: "true"
 spec:
   selector:
     app: grafana
@@ -114,7 +115,11 @@ spec:
       containers:
         - name: prometheus
           image: prom/prometheus:v2.55.1
-          args: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-lifecycle"]
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--web.enable-lifecycle"
+            - "--web.external-url={{ $publicBase }}/launchpad/a/hermes-demo/prometheus-server/"
+            - "--web.route-prefix=/"
           ports:
             - containerPort: 9090
           readinessProbe:

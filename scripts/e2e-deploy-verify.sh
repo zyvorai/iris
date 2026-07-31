@@ -101,8 +101,38 @@ check "federation rbac 404"    "curl -sf '${BASE}/api/v1/federation/rbac/_missin
 section "Gateway routes"
 
 check_gateway "launchpad gateway"  "${BASE}/launchpad/a/hermes-demo/grafana"
+check_gateway "launchpad trailing slash" "${BASE}/launchpad/a/hermes-demo/grafana/"
 check "launchpad canonical"        "code=\$(curl -s -o /dev/null -w '%{http_code}' '${BASE}/launchpad/apps/grafana'); test \"\$code\" != '404'"
 check_gateway "legacy gateway"     "${BASE}/a/hermes-demo/grafana"
+
+# Assert redirects stay under the launchpad mount (not SPA fallback).
+loc="$(curl -sI "${BASE}/launchpad/a/hermes-demo/grafana" 2>/dev/null | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} $1=="location:"{print $2; exit}')"
+if [ -n "${loc}" ]; then
+    case "${loc}" in
+        */launchpad/a/hermes-demo/grafana*|*/a/hermes-demo/grafana*)
+            printf "  ${C_OK}✓${C_RST}  grafana Location under mount\n"; pass=$((pass + 1)) ;;
+        *)
+            printf "  ${C_FAIL}✗${C_RST}  grafana Location under mount ${C_DIM}%s${C_RST}\n" "${loc}"
+            FAILED+=("grafana Location under mount"); fail=$((fail + 1)) ;;
+    esac
+else
+    # 200 with no redirect is also fine once slash routes are fixed.
+    code="$(curl -s -o /dev/null -w '%{http_code}' "${BASE}/launchpad/a/hermes-demo/grafana/" 2>/dev/null || true)"
+    if echo "${code}" | grep -qE '^(200|301|302)$'; then
+        printf "  ${C_OK}✓${C_RST}  grafana root reachable\n"; pass=$((pass + 1))
+    else
+        printf "  ${C_FAIL}✗${C_RST}  grafana root reachable ${C_DIM}HTTP %s${C_RST}\n" "${code:-none}"
+        FAILED+=("grafana root reachable"); fail=$((fail + 1))
+    fi
+fi
+
+# Proxied JSON APIs must not return the Hermes SPA.
+check "grafana api health via gateway" \
+    "curl -sf '${BASE}/launchpad/a/hermes-demo/grafana/api/health' | grep -q '\"database\"'"
+check "prometheus query via gateway" \
+    "curl -sf --get '${BASE}/launchpad/a/hermes-demo/prometheus-server/api/v1/query' --data-urlencode 'query=up' | grep -q '\"status\"'"
+check "prometheus trailing-slash root not SPA" \
+    "! curl -s '${BASE}/launchpad/a/hermes-demo/prometheus-server/' | grep -q 'Hermes Dock'"
 
 # ── Share link flow ───────────────────────────────────────────────────────────
 section "Share link  (create → access → revoke)"

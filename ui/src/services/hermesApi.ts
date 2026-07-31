@@ -159,9 +159,23 @@ export function copyShareUrl(sharePath: string) {
 
 export function appLaunchPath(app: HermesApp): string {
   const path = app.routePath || `/a/${app.namespace}/${app.slug}`
-  if (path.startsWith('/launchpad/')) return path
-  if (path.startsWith('/a/')) return `/launchpad${path}`
-  return path
+  let launch = path
+  if (path.startsWith('/a/')) launch = `/launchpad${path}`
+  else if (path.startsWith('/launchpad/') || path.startsWith('/apps/') || path.startsWith('/s/')) {
+    launch = path
+  }
+  // Directory-style mount so browsers (and Grafana) do not 301 onto a trailing
+  // slash that previously missed the gateway and fell through to the SPA.
+  if (
+    (launch.startsWith('/launchpad/a/') ||
+      launch.startsWith('/launchpad/apps/') ||
+      launch.startsWith('/a/') ||
+      launch.startsWith('/apps/')) &&
+    !launch.endsWith('/')
+  ) {
+    return `${launch}/`
+  }
+  return launch
 }
 
 export function appPublicUrl(app: HermesApp): string {

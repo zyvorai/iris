@@ -129,11 +129,22 @@ Gateway routes accept **any HTTP method** and proxy to Kubernetes backend servic
 | Method | Path | Description |
 |--------|------|-------------|
 | ANY | `/launchpad/apps/{slug}` | Proxy by canonical slug (root) |
+| ANY | `/launchpad/apps/{slug}/` | Same (trailing slash) |
 | ANY | `/launchpad/apps/{slug}/{*rest}` | Proxy by canonical slug (subpath) |
 | ANY | `/launchpad/a/{namespace}/{slug}` | Proxy by namespace + slug (root) |
+| ANY | `/launchpad/a/{namespace}/{slug}/` | Same (trailing slash) |
 | ANY | `/launchpad/a/{namespace}/{slug}/{*rest}` | Proxy by namespace + slug (subpath) |
 | ANY | `/launchpad/s/{token}` | Share-link proxy (root) |
+| ANY | `/launchpad/s/{token}/` | Same (trailing slash) |
 | ANY | `/launchpad/s/{token}/{*rest}` | Share-link proxy (subpath) |
+
+The gateway also:
+
+- Forwards the request query string
+- Rewrites `Location` / `Refresh` redirects under the app mount
+- Scopes `Set-Cookie` `Path` to the mount
+- Sets `X-Forwarded-Proto` / `Host` / `Prefix` from the client request (not hardcoded HTTPS)
+- Honors `rewrite.addPrefix` when `hermes.zyvor.dev/serve-from-sub-path=true`
 
 ### Legacy aliases (same handlers)
 
