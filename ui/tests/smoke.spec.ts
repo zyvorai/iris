@@ -170,12 +170,12 @@ test('spotlight federated insight shows federation summary', async ({ page }) =>
   await expect(page.getByText('Zyra AI · Federation')).toBeVisible({ timeout: 5000 })
 })
 
-test('discovery publish zeus picks button when suggestions exist', async ({ page }) => {
+test('discovery publish zyra picks button when suggestions exist', async ({ page }) => {
   await page.goto('/discovery')
   await waitForPageReady(page)
   const loadError = page.getByTestId('page-load-error')
   if (await loadError.isVisible()) return
-  const publishBtn = page.getByTestId('publish-zeus-picks')
+  const publishBtn = page.getByTestId('publish-zyra-picks')
   if (!(await publishBtn.count())) return
   await expect(publishBtn).toBeVisible()
 })

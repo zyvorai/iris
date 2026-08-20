@@ -68,7 +68,7 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   if (['graph insight', 'topology insight', 'dependency insight'].includes(q)) {
     return { type: 'graph_insight' }
   }
-  if (['ai status', 'zeus status', 'llm status', 'ai mode'].includes(q)) {
+  if (['ai status', 'zyra status', 'llm status', 'ai mode'].includes(q)) {
     return { type: 'ai_status' }
   }
   if (['federated insight', 'federation insight'].includes(q)) {

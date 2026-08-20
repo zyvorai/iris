@@ -69,7 +69,7 @@ server:
     existingSecret: ""
     secretKey: apiKey
     model: gpt-4o-mini
-    # Set apiUrl + apiKey (or existingSecret) to enable live Zeus AI (OpenAI-compatible).
+    # Set apiUrl + apiKey (or existingSecret) to enable live Zyra AI (OpenAI-compatible).
 
 cluster:
   id: local

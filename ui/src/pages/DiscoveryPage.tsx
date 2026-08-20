@@ -39,7 +39,7 @@ export default function DiscoveryPage() {
     onSuccess: () => void refreshHermesData(qc),
   })
 
-  const publishZeusPicks = useMutation({
+  const publishZyraPicks = useMutation({
     mutationFn: async () => {
       const ids = discoveryInsight.data?.suggestPublishIds ?? []
       for (const id of ids.slice(0, 10)) {
@@ -80,11 +80,11 @@ export default function DiscoveryPage() {
                   <Button
                     variant="ai"
                     className="nebula-btn-compact"
-                    disabled={publishZeusPicks.isPending}
-                    onClick={() => void publishZeusPicks.mutate()}
-                    data-testid="publish-zeus-picks"
+                    disabled={publishZyraPicks.isPending}
+                    onClick={() => void publishZyraPicks.mutate()}
+                    data-testid="publish-zyra-picks"
                   >
-                    Publish Zeus picks ({Math.min(discoveryInsight.data.suggestPublishIds.length, 10)})
+                    Publish Zyra picks ({Math.min(discoveryInsight.data.suggestPublishIds.length, 10)})
                   </Button>
                 ) : null}
                 <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>

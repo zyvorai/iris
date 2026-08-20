@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Apply Zeus AI LLM settings to an existing Hermes remote deployment (Helm only).
+# Apply Zyra AI LLM settings to an existing Hermes remote deployment (Helm only).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
