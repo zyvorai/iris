@@ -7,12 +7,12 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useDiscoveryInsight } from '../hooks/useZeusAiInsight'
+import { useDiscoveryInsight } from '../hooks/useZyraAiInsight'
 import { refreshHermesData } from '../utils/refreshCatalog'
 
 export default function DiscoveryPage() {
@@ -75,7 +75,7 @@ export default function DiscoveryPage() {
             </div>
             {discovery.data?.length ? (
               <>
-                <AskZeusButton compact command="suggest publish" />
+                <AskZyraButton compact command="suggest publish" />
                 {discoveryInsight.data?.suggestPublishIds?.length ? (
                   <Button
                     variant="ai"
@@ -96,10 +96,10 @@ export default function DiscoveryPage() {
         </GlassPanel>
 
         {discovery.data?.length ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Publish suggestions"
             summary={discoveryInsight.data?.summary}
-            explanation={discoveryInsight.data?.explanation ?? 'Zeus AI is ranking unpublished services…'}
+            explanation={discoveryInsight.data?.explanation ?? 'Zyra AI is ranking unpublished services…'}
             source={discoveryInsight.data?.source}
             remediation={discoveryInsight.data?.highlights}
             loading={discoveryInsight.isLoading}
@@ -107,7 +107,7 @@ export default function DiscoveryPage() {
             onRefresh={() => void discoveryInsight.refetch()}
             refreshing={discoveryInsight.isFetching && !discoveryInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={discoveryInsight.data?.suggestPublishIds ?? []}
                 catalog={discovery.data}
                 onSelect={(id) => publish.mutate(id)}

@@ -6,7 +6,7 @@ import { RefreshCw, Sparkles } from 'lucide-react'
 import GlassPanel from './GlassPanel'
 import Button from './Button'
 
-interface ZeusAiPanelProps {
+interface ZyraAiPanelProps {
   title?: string
   summary?: string
   explanation: string
@@ -19,8 +19,8 @@ interface ZeusAiPanelProps {
   refreshing?: boolean
 }
 
-export default function ZeusAiPanel({
-  title = 'Zeus AI',
+export default function ZyraAiPanel({
+  title = 'Zyra AI',
   summary,
   explanation,
   source,
@@ -30,10 +30,10 @@ export default function ZeusAiPanel({
   action,
   onRefresh,
   refreshing,
-}: ZeusAiPanelProps) {
+}: ZyraAiPanelProps) {
   if (loading) {
     return (
-      <GlassPanel className={`glass-panel-section zeus-ai-panel${compact ? ' zeus-ai-panel-compact' : ''}`} data-testid="zeus-ai-panel">
+      <GlassPanel className={`glass-panel-section zyra-ai-panel${compact ? ' zyra-ai-panel-compact' : ''}`} data-testid="zyra-ai-panel">
         <div className="section-head-nebula">
           <div>
             <p className="section-label">
@@ -50,14 +50,14 @@ export default function ZeusAiPanel({
   }
 
   return (
-    <GlassPanel className={`glass-panel-section zeus-ai-panel${compact ? ' zeus-ai-panel-compact' : ''}`} data-testid="zeus-ai-panel">
+    <GlassPanel className={`glass-panel-section zyra-ai-panel${compact ? ' zyra-ai-panel-compact' : ''}`} data-testid="zyra-ai-panel">
       <div className="section-head-nebula">
         <div>
           <p className="section-label">
             <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
             {title}
           </p>
-          {summary ? <h3 className="section-title zeus-ai-summary">{summary}</h3> : null}
+          {summary ? <h3 className="section-title zyra-ai-summary">{summary}</h3> : null}
         </div>
         {source ? (
           <span className={`nebula-status-badge ${source === 'llm' ? 'status-healthy' : 'status-unknown'}`}>
@@ -67,7 +67,7 @@ export default function ZeusAiPanel({
         {onRefresh ? (
           <Button
             variant="ghost"
-            className="nebula-btn-compact zeus-ai-refresh"
+            className="nebula-btn-compact zyra-ai-refresh"
             onClick={onRefresh}
             disabled={refreshing}
             title="Refresh insight"
@@ -77,25 +77,25 @@ export default function ZeusAiPanel({
           </Button>
         ) : null}
       </div>
-      <p className="body-text zeus-ai-explanation">{explanation}</p>
+      <p className="body-text zyra-ai-explanation">{explanation}</p>
       {remediation?.length ? (
-        <ul className="zeus-ai-remediation">
+        <ul className="zyra-ai-remediation">
           {remediation.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ul>
       ) : null}
-      {action ? <div className="zeus-ai-actions">{action}</div> : null}
+      {action ? <div className="zyra-ai-actions">{action}</div> : null}
     </GlassPanel>
   )
 }
 
-export function ZeusAiBadge({ source, warn }: { source?: string; warn?: boolean }) {
+export function ZyraAiBadge({ source, warn }: { source?: string; warn?: boolean }) {
   if (!source) return null
   const tone = warn ? 'status-degraded' : source === 'llm' ? 'status-healthy' : 'status-unknown'
-  const label = warn ? 'AI offline' : source === 'llm' ? 'Zeus AI' : 'Heuristic'
+  const label = warn ? 'AI offline' : source === 'llm' ? 'Zyra AI' : 'Heuristic'
   return (
-    <span className={`nebula-status-badge zeus-ai-badge ${tone}`}>
+    <span className={`nebula-status-badge zyra-ai-badge ${tone}`}>
       <Sparkles size={10} /> {label}
     </span>
   )

@@ -27,7 +27,7 @@ Rust workspace crates:
 
 | Crate | Role |
 |-------|------|
-| `hermes-core` | Models, SQLite (Rust), search, graph, diagnosis, Zeus AI, federation, RBAC |
+| `hermes-core` | Models, SQLite (Rust), search, graph, diagnosis, Zyra AI, federation, RBAC |
 | `hermes-api` | Axum REST routes under `/api/v1/*` |
 | `hermes-gateway` | Reverse proxy to cluster backends |
 | `hermes-server` | Binary wiring auth, metrics, SPA fallback |
@@ -180,7 +180,7 @@ Copy [.env.example](../.env.example) to `.env` for local reference.
 | `HERMES_CLUSTER_ID` / `HERMES_CLUSTER_NAME` | `local` | Local cluster identity |
 | `HERMES_FEDERATED_CLUSTERS` | — | JSON array of peer Hermes clusters |
 | `HERMES_FEDERATION_TRUST_HEADERS` | `false` | Trust `x-hermes-user` from peers |
-| `HERMES_LLM_API_URL` / `HERMES_LLM_API_KEY` / `HERMES_LLM_MODEL` | — | Zeus AI LLM (rule fallback when unset) |
+| `HERMES_LLM_API_URL` / `HERMES_LLM_API_KEY` / `HERMES_LLM_MODEL` | — | Zyra AI LLM (rule fallback when unset) |
 | `RUST_LOG` | `hermes_server=info` | Tracing filter |
 
 ### Controller
@@ -261,11 +261,11 @@ Full route catalog: **[api.md](api.md)**.
 4. Add `e2e-deploy-verify.sh` check and update [api.md](api.md).
 5. Wire UI in `ui/src/services/hermesApi.ts` if user-facing.
 
-### Adding a Zeus AI insight
+### Adding a Zyra AI insight
 
 1. Add logic in `crates/hermes-core/src/insight.rs`.
 2. Expose route in `hermes-api` under `/api/v1/insights/…`.
-3. Add hook in `ui/src/hooks/useZeusAiInsight.ts` and surface in a page or Spotlight command.
+3. Add hook in `ui/src/hooks/useZyraAiInsight.ts` and surface in a page or Spotlight command.
 
 ### Gateway proxy
 
@@ -275,7 +275,7 @@ Full route catalog: **[api.md](api.md)**.
 
 ## UI development
 
-See [ui.md](ui.md) for the Nebula design system, page primitives, and Zeus AI surfaces.
+See [ui.md](ui.md) for the Nebula design system, page primitives, and Zyra AI surfaces.
 
 ```bash
 cd ui
@@ -335,7 +335,7 @@ Both processes must use the **same** `HERMES_DB_PATH`. WAL mode with 5s busy tim
 
 Run `make build-ui` or set `HERMES_UI_DIR` to an existing `ui/dist/`.
 
-### Zeus AI uses rules only
+### Zyra AI uses rules only
 
 Check `GET /api/v1/insights/status`. Set `HERMES_LLM_*` or run `./scripts/setup-ollama-remote.sh` on deploy hosts.
 
@@ -362,7 +362,7 @@ sqlite3 /tmp/hermes-smoke.db "SELECT id, display_name, status FROM apps;"
 |-----|---------|
 | [api.md](api.md) | HTTP route reference |
 | [architecture.md](architecture.md) | High-level data flow |
-| [ui.md](ui.md) | Nebula UI and Zeus AI |
+| [ui.md](ui.md) | Nebula UI and Zyra AI |
 | [annotations.md](annotations.md) | Service annotation reference |
 | [install.md](install.md) | Helm install and operator config |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | PR workflow |

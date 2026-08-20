@@ -38,7 +38,7 @@ export function buildServiceMenuItems(
     { label: 'Copy public URL', onClick: () => void navigator.clipboard.writeText(appPublicUrl(app)) },
   ]
   if (opts.onDiagnose) items.push({ label: 'Diagnose', onClick: opts.onDiagnose })
-  if (opts.onInspector) items.push({ label: 'Ask Zeus AI', onClick: opts.onInspector })
+  if (opts.onInspector) items.push({ label: 'Ask Zyra AI', onClick: opts.onInspector })
   if (opts.onPublish) items.push({ label: 'Publish', onClick: opts.onPublish })
   if (opts.onPin) items.push({ label: opts.favorite ? 'Unpin' : 'Pin', onClick: opts.onPin })
   if (opts.onHide) items.push({ label: 'Hide from discovery', onClick: opts.onHide })

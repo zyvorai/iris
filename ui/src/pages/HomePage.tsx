@@ -11,9 +11,9 @@ import ServiceGalaxy from '../components/command/ServiceGalaxy'
 import PageFrame from '../components/nebula/PageFrame'
 import ContextBanner from '../components/nebula/ContextBanner'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import { useFleetInsight } from '../hooks/useZyraAiInsight'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { useInspector } from '../utils/inspectorContext'
 import { useSpotlight } from '../utils/spotlightContext'
 import { useWorkspace } from '../utils/workspaceContext'
@@ -143,7 +143,7 @@ export default function HomePage() {
           broken={broken}
           aiHint={aiHint}
           onResolveIssues={onResolveIssues}
-          onAskZeus={() => openSpotlight(issueCount > 0 ? 'explain' : 'suggest publish')}
+          onAskZyra={() => openSpotlight(issueCount > 0 ? 'explain' : 'suggest publish')}
         />
 
         <HomeFleetSnapshot
@@ -157,10 +157,10 @@ export default function HomePage() {
         <QuickLaunchBar apps={quickLaunchApps} />
 
         {hasData ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Fleet insight"
             summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing fleet health…'}
+            explanation={fleetInsight.data?.explanation ?? 'Zyra AI is summarizing fleet health…'}
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
@@ -168,7 +168,7 @@ export default function HomePage() {
             onRefresh={() => void fleetInsight.refetch()}
             refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}
                 catalog={catalogApps}
                 onSelect={openDiagnose}

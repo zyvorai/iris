@@ -51,7 +51,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 | Each app shows Healthy / Degraded / Offline with human-readable probe summaries | Shipped |
 | Home hero and navbar health chip reflect fleet health percentage | Shipped |
 | Health page attention queue lists services needing action | Shipped |
-| Diagnose drawer shows route lens, suggested commands, and Zeus AI insight | Shipped |
+| Diagnose drawer shows route lens, suggested commands, and Zyra AI insight | Shipped |
 | Gateway blocks proxy when no ready endpoints exist | Shipped |
 
 ---
@@ -93,12 +93,12 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 |---------------------|--------|
 | Discovery page lists unpublished services with publish action | Shipped |
 | Bulk namespace publish via API | Shipped |
-| Zeus AI ranks publish suggestions on Discovery page | Shipped |
+| Zyra AI ranks publish suggestions on Discovery page | Shipped |
 | Spotlight `suggest publish` surfaces ranked candidates | Shipped |
 
 ---
 
-### Story 7 — Zeus AI fleet intelligence
+### Story 7 — Zyra AI fleet intelligence
 
 **As Alex** (Developer), I want natural-language answers about my cluster's applications, **so that** I can diagnose issues without reading raw probe errors.
 
@@ -121,7 +121,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 |---------------------|--------|
 | Federated page merges remote Hermes cluster catalogs | Shipped |
 | Teams page groups apps by owner metadata | Shipped |
-| Graph page shows dependency topology with Zeus AI focus chips | Shipped |
+| Graph page shows dependency topology with Zyra AI focus chips | Shipped |
 | Activity page aggregates audit events with fleet insight banner | Shipped |
 | Workspaces filter catalog by environment (dev / staging / production) | Shipped |
 
@@ -135,11 +135,11 @@ Map each story to automated or manual checks before marking production-ready.
 |-------|--------------------------------------|-----------------------------------------------|--------------------------------|
 | 1 Discover | `cluster page renders toolbar` | `apps`, `catalog`, `cluster summary` | Go controller tests |
 | 2 Launch | `home loads nebula command deck`, `spotlight opens from navbar` | `launchpad canonical`, `search` | Rust + UI build |
-| 3 Health | `health page loads attention queue`, `home shows zeus ai fleet insight panel` | `health summary`, `app diagnosis`, `app insight`, `fleet insight` | Rust tests |
+| 3 Health | `health page loads attention queue`, `home shows zyra ai fleet insight panel` | `health summary`, `app diagnosis`, `app insight`, `fleet insight` | Rust tests |
 | 4 Port-forward | `footer visible after scroll`, `catalog page renders toolbar` | `recommended`, `audit`, `shares` | Helm lint |
 | 5 Security | — | `federation rbac 404`, `shares admin` | Rust clippy/fmt |
 | 6 Publish | `discovery page renders toolbar or empty state` | `discovery insight` | — |
-| 7 Zeus AI | `spotlight explain`, `spotlight diagnose`, `graph page renders` | `search LLM`, `fleet/discovery/namespace/graph/owner/federated/activity insight`, `ai status` | Rust tests |
+| 7 Zyra AI | `spotlight explain`, `spotlight diagnose`, `graph page renders` | `search LLM`, `fleet/discovery/namespace/graph/owner/federated/activity insight`, `ai status` | Rust tests |
 | 8 Federation | `spotlight federated insight shows federation summary`, `graph page renders` | `federated catalog`, `federated audit`, `graph (nodes)`, `owners`, `workspaces` | — |
 
 **Manual lab steps**

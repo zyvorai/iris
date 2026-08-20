@@ -116,10 +116,10 @@ test('app detail opens global diagnose drawer', async ({ page }) => {
   await expect(page.getByTestId('diagnose-panel')).toBeVisible({ timeout: 5000 })
 })
 
-test('home shows zeus ai fleet insight panel', async ({ page }) => {
+test('home shows zyra ai fleet insight panel', async ({ page }) => {
   await page.goto('/')
   await waitForPageReady(page)
-  const panel = page.getByTestId('zeus-ai-panel')
+  const panel = page.getByTestId('zyra-ai-panel')
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
 })
@@ -135,7 +135,7 @@ test('spotlight explain shows fleet insight', async ({ page }) => {
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('explain')
-  await expect(page.getByText('Zeus AI · Fleet')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Zyra AI · Fleet')).toBeVisible({ timeout: 5000 })
   const fleetRow = page.locator('.palette-item').filter({ hasText: /services|healthy|attention/i }).first()
   const healthNav = page.getByText('Fleet health dashboard')
   await expect(fleetRow.or(healthNav)).toBeVisible({ timeout: 8000 })
@@ -152,14 +152,14 @@ test('spotlight diagnose shows insight preview', async ({ page }) => {
   await expect(insightRow.or(empty)).toBeVisible({ timeout: 8000 })
 })
 
-test('graph page shows zeus ai topology panel', async ({ page }) => {
+test('graph page shows zyra ai topology panel', async ({ page }) => {
   await page.goto('/graph')
   await waitForPageReady(page)
-  const panel = page.getByTestId('zeus-ai-panel')
+  const panel = page.getByTestId('zyra-ai-panel')
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
-  await expect(page.getByTestId('zeus-ai-panel').getByText('Topology insight')).toBeVisible()
+  await expect(page.getByTestId('zyra-ai-panel').getByText('Topology insight')).toBeVisible()
 })
 
 test('spotlight federated insight shows federation summary', async ({ page }) => {
@@ -167,7 +167,7 @@ test('spotlight federated insight shows federation summary', async ({ page }) =>
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('federated insight')
-  await expect(page.getByText('Zeus AI · Federation')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Zyra AI · Federation')).toBeVisible({ timeout: 5000 })
 })
 
 test('discovery publish zeus picks button when suggestions exist', async ({ page }) => {
@@ -183,11 +183,11 @@ test('discovery publish zeus picks button when suggestions exist', async ({ page
 test('activity page shows activity insight banner', async ({ page }) => {
   await page.goto('/activity')
   await waitForPageReady(page)
-  const panel = page.getByTestId('zeus-ai-panel')
+  const panel = page.getByTestId('zyra-ai-panel')
   const loadError = page.getByTestId('page-load-error')
   await expect(panel.or(loadError)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
-  await expect(page.getByTestId('zeus-ai-panel').getByText('Activity insight')).toBeVisible()
+  await expect(page.getByTestId('zyra-ai-panel').getByText('Activity insight')).toBeVisible()
 })
 
 test('spotlight activity insight shows audit summary', async ({ page }) => {
@@ -195,7 +195,7 @@ test('spotlight activity insight shows audit summary', async ({ page }) => {
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('activity insight')
-  await expect(page.getByText('Zeus AI · Activity')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Zyra AI · Activity')).toBeVisible({ timeout: 5000 })
 })
 
 test('spotlight suggest publish shows discovery insight', async ({ page }) => {
@@ -203,7 +203,7 @@ test('spotlight suggest publish shows discovery insight', async ({ page }) => {
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('suggest publish')
-  await expect(page.getByText('Zeus AI · Discovery')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Zyra AI · Discovery')).toBeVisible({ timeout: 5000 })
 })
 
 test('discovery page shows publish suggestions or empty queue', async ({ page }) => {
@@ -214,7 +214,7 @@ test('discovery page shows publish suggestions or empty queue', async ({ page })
   await expect(loadError.or(discoveryTitle)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
 
-  const panel = page.getByTestId('zeus-ai-panel')
+  const panel = page.getByTestId('zyra-ai-panel')
   const empty = page.getByText('Queue is empty')
   await expect(panel.or(empty)).toBeVisible({ timeout: 10000 })
 })
@@ -231,10 +231,10 @@ test('spotlight graph insight shows topology summary', async ({ page }) => {
   await waitForPageReady(page)
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('graph insight')
-  await expect(page.getByText('Zeus AI · Topology')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Zyra AI · Topology')).toBeVisible({ timeout: 5000 })
 })
 
-test('app detail shows zeus ai service insight', async ({ page }) => {
+test('app detail shows zyra ai service insight', async ({ page }) => {
   await page.goto('/apps')
   await waitForPageReady(page)
   const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
@@ -244,10 +244,10 @@ test('app detail shows zeus ai service insight', async ({ page }) => {
   }
   await firstAppLink.click()
   await waitForPageReady(page)
-  await expect(page.getByTestId('zeus-ai-panel').getByText('Zeus AI service insight')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByTestId('zyra-ai-panel').getByText('Zyra AI service insight')).toBeVisible({ timeout: 5000 })
 })
 
-test('home ask zeus opens spotlight with fleet command', async ({ page }) => {
+test('home ask zyra opens spotlight with fleet command', async ({ page }) => {
   await page.goto('/')
   await waitForPageReady(page)
   const hero = page.getByTestId('platform-pulse-hero')
@@ -255,7 +255,7 @@ test('home ask zeus opens spotlight with fleet command', async ({ page }) => {
   await expect(hero.or(loadError)).toBeVisible({ timeout: 5000 })
   if (await loadError.isVisible()) return
 
-  await page.getByTestId('ask-zeus-btn').click()
+  await page.getByTestId('ask-zyra-btn').click()
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
   await expect(page.getByPlaceholder(/open grafana/i)).toHaveValue(/explain|suggest publish/)
 })
@@ -266,27 +266,27 @@ test('spotlight ai status shows rules or llm mode', async ({ page }) => {
   await page.keyboard.press('Meta+k')
   await page.getByPlaceholder(/open grafana/i).fill('ai status')
   const palette = page.getByRole('dialog', { name: 'Spotlight' })
-  await expect(palette.getByText('Zeus AI · Status')).toBeVisible({ timeout: 5000 })
+  await expect(palette.getByText('Zyra AI · Status')).toBeVisible({ timeout: 5000 })
   const modeBtn = palette.getByRole('button', { name: /rules engine|live llm/i })
-  const helpNav = palette.getByRole('button', { name: /help · zeus ai/i })
+  const helpNav = palette.getByRole('button', { name: /help · zyra ai/i })
   await expect(modeBtn.or(helpNav)).toBeVisible({ timeout: 8000 })
 })
 
-test('health page ask zeus opens spotlight', async ({ page }) => {
+test('health page ask zyra opens spotlight', async ({ page }) => {
   await page.goto('/health')
   await waitForPageReady(page)
   const loadError = page.getByTestId('page-load-error')
   if (await loadError.isVisible()) return
-  await page.getByTestId('ask-zeus-btn').click()
+  await page.getByTestId('ask-zyra-btn').click()
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
 })
 
-test('cluster page ask zeus opens spotlight', async ({ page }) => {
+test('cluster page ask zyra opens spotlight', async ({ page }) => {
   await page.goto('/cluster')
   await waitForPageReady(page)
   const loadError = page.getByTestId('page-load-error')
   if (await loadError.isVisible()) return
-  await page.getByTestId('ask-zeus-btn').click()
+  await page.getByTestId('ask-zyra-btn').click()
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
 })
 

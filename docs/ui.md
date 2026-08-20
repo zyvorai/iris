@@ -31,9 +31,9 @@ Shared building blocks under `ui/src/components/nebula/`:
 | `RouteDisplay` | Launchpad path and public URL with copy |
 | `ServiceStatusMessage` | Human-readable health probe summaries |
 | `DiagnosisDrawer` | Global diagnose flow (route lens, AI insight, retry) |
-| `ZeusAiPanel` | Fleet and per-app AI summaries with rules/LLM source badge |
+| `ZyraAiPanel` | Fleet and per-app AI summaries with rules/LLM source badge |
 
-## Zeus AI
+## Zyra AI
 
 Configure OpenAI-compatible LLM access on the server:
 
@@ -74,7 +74,7 @@ The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not 
 | `GET /api/v1/insights/activity` | Recent audit activity patterns |
 | `GET /api/v1/insights/status` | Whether live LLM is configured; probes `/models` when configured |
 
-UI: Home and Health fleet panels with diagnose chips, per-app insight on app detail, Activity audit insight, Graph topology insight, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Teams/Spaces/Federated summaries, navbar health tooltip, Diagnose drawer, Inspector Zeus AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, `ns insight`, `graph insight`, `owner insight`, `federated insight`, `activity insight`, and `ai status`.
+UI: Home and Health fleet panels with diagnose chips, per-app insight on app detail, Activity audit insight, Graph topology insight, Discovery publish suggestions, Cluster namespace insight, Catalog unhealthy filter insight, Teams/Spaces/Federated summaries, navbar health tooltip, Diagnose drawer, Inspector Zyra AI tab, Spotlight `ai:`, `explain`, `why`, `diagnose`, `suggest publish`, `ns insight`, `graph insight`, `owner insight`, `federated insight`, `activity insight`, and `ai status`.
 
 ## Key pages
 
@@ -82,10 +82,10 @@ UI: Home and Health fleet panels with diagnose chips, per-app insight on app det
 |-------|----------|
 | `/` | Command deck — hero, 3-metric fleet snapshot, Quick Launch (max 6), Mission Control accordions |
 | `/apps` | Published catalog with unified toolbar, category chip overflow, true-empty vs filter-empty states |
-| `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, Zeus AI namespace/fleet insight |
+| `/cluster` | Full cluster catalog — metrics row, sticky stacked filters on mobile, Zyra AI namespace/fleet insight |
 | `/health` | Fleet health + attention queue with AI summary |
-| `/discovery` | Unpublished services queue with Zeus AI publish suggestions |
-| `/graph` | Dependency graph with filters and Zeus AI focus chips |
+| `/discovery` | Unpublished services queue with Zyra AI publish suggestions |
+| `/graph` | Dependency graph with filters and Zyra AI focus chips |
 | `/federated` | Merged remote catalogs |
 | `/teams` | Owner metadata grouped by team |
 | `/activity` | Audit log with fleet insight banner and optional share-admin panel |
@@ -96,7 +96,7 @@ UI: Home and Health fleet panels with diagnose chips, per-app insight on app det
 
 All **Diagnose** and **Inspect route** actions call `openDiagnose(appId)` from `inspectorContext.tsx`. The global `DiagnosisDrawer` in `Layout.tsx` is the single diagnose surface — there is no inline diagnose panel on app detail.
 
-The drawer shows loading skeletons, error + retry, route lens, suggested kubectl commands, and Zeus AI insight.
+The drawer shows loading skeletons, error + retry, route lens, suggested kubectl commands, and Zyra AI insight.
 
 ## Mobile toolbars
 

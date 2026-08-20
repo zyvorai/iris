@@ -10,7 +10,7 @@ The application operating layer for Kubernetes
 | **API reference** | [api.md](api.md) |
 | Architecture | [architecture.md](architecture.md) |
 | Install | [install.md](install.md) |
-| UI & Zeus AI | [ui.md](ui.md) |
+| UI & Zyra AI | [ui.md](ui.md) |
 | Annotations | [annotations.md](annotations.md) |
 | **User journeys & acceptance criteria** | [User Stories](USER_STORIES.md) |
 | Full product deep dive | [FULL_README_LEGACY.md](FULL_README_LEGACY.md) |
@@ -26,11 +26,11 @@ Persona-based journeys with acceptance criteria and a validation matrix: **[USER
 | Morgan (Platform Team) | Auto-discover apps across namespaces |
 | Jordan (Security) | Control which apps are exposed via gateway |
 
-Stories cover discovery, launch, health, gateway exposure, publish workflow, Zeus AI, and federation.
+Stories cover discovery, launch, health, gateway exposure, publish workflow, Zyra AI, and federation.
 
-## Zeus AI
+## Zyra AI
 
-Hermes ships fleet and per-app intelligence with LLM + rule-based fallback. Configure via `HERMES_LLM_*` env vars or `setup-ollama-remote.sh`. Full endpoint and Spotlight command reference: **[ui.md](ui.md#zeus-ai)**.
+Hermes ships fleet and per-app intelligence with LLM + rule-based fallback. Configure via `HERMES_LLM_*` env vars or `setup-ollama-remote.sh`. Full endpoint and Spotlight command reference: **[ui.md](ui.md#zyra-ai)**.
 
 ## Ecosystem
 

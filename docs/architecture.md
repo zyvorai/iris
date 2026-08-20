@@ -3,8 +3,8 @@
 Hermes v0.2 is the Application Operating Layer for Kubernetes — a standalone platform with three parts:
 
 1. **Hermes Controller** (Go) — watches Services and EndpointSlices, parses annotations, applies known-app signatures, polls health, writes catalog to SQLite.
-2. **Hermes Server** (Rust) — REST API, reverse proxy gateway, Zeus AI insight layer, embedded React UI.
-3. **Hermes UI (Nebula)** (React) — glass-style launchpad with Spotlight search, favorites, discovery, and Zeus AI panels.
+2. **Hermes Server** (Rust) — REST API, reverse proxy gateway, Zyra AI insight layer, embedded React UI.
+3. **Hermes UI (Nebula)** (React) — glass-style launchpad with Spotlight search, favorites, discovery, and Zyra AI panels.
 
 ## Data flow
 

@@ -5,9 +5,9 @@ import { BookOpen, Compass, Globe, Rocket, Search, Sparkles } from 'lucide-react
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import Button from '../components/nebula/Button'
-import { ZeusAiBadge } from '../components/nebula/ZeusAiPanel'
+import { ZyraAiBadge } from '../components/nebula/ZyraAiPanel'
 import { ZyvorInline } from '../components/ZyvorBrand'
-import { useAiStatus } from '../hooks/useZeusAiInsight'
+import { useAiStatus } from '../hooks/useZyraAiInsight'
 
 export default function HelpPage() {
   const aiStatus = useAiStatus()
@@ -24,7 +24,7 @@ export default function HelpPage() {
                 Discover, launch, and govern catalog apps across your cluster and federated peers.
               </p>
             </div>
-            {aiStatus.data ? <ZeusAiBadge source={aiStatus.data.llmConfigured ? 'llm' : 'rules'} /> : null}
+            {aiStatus.data ? <ZyraAiBadge source={aiStatus.data.llmConfigured ? 'llm' : 'rules'} /> : null}
           </div>
 
           <div className="help-grid" style={{ marginTop: '1.25rem' }}>
@@ -35,7 +35,7 @@ export default function HelpPage() {
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: <code>owner:</code>, <code>env:</code>, <code>depends:</code>, <code>ai:</code>
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
-                Zeus AI commands: <code>explain</code>, <code>diagnose grafana</code>, <code>why grafana</code>, <code>suggest publish</code>, <code>graph insight</code>, <code>ns insight hermes-demo</code>, <code>owner insight platform</code>, <code>federated insight</code>, <code>activity insight</code>, <code>ai status</code>
+                Zyra AI commands: <code>explain</code>, <code>diagnose grafana</code>, <code>why grafana</code>, <code>suggest publish</code>, <code>graph insight</code>, <code>ns insight hermes-demo</code>, <code>owner insight platform</code>, <code>federated insight</code>, <code>activity insight</code>, <code>ai status</code>
               </p>
               <p className="body-text" style={{ marginTop: '0.5rem' }}>
                 Actions: <code>open</code>, <code>publish</code>, <code>pin</code>, <code>refresh</code>, <code>export</code>, <code>attention</code>
@@ -43,7 +43,7 @@ export default function HelpPage() {
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <Sparkles size={18} />
-              <h3>Zeus AI insights</h3>
+              <h3>Zyra AI insights</h3>
               <p>
                 {aiStatus.data?.llmConfigured
                   ? aiStatus.data.llmReachable === false

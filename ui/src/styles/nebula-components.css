@@ -1582,15 +1582,15 @@
   color: inherit;
 }
 
-.hermes-nb-utilities .zeus-ai-badge {
+.hermes-nb-utilities .zyra-ai-badge {
   margin-left: -0.15rem;
 }
 
-.zeus-ai-refresh {
+.zyra-ai-refresh {
   margin-left: auto;
 }
 
-.section-head-nebula .zeus-ai-refresh {
+.section-head-nebula .zyra-ai-refresh {
   margin-left: 0;
 }
 
@@ -1761,37 +1761,37 @@
   margin-bottom: 0.75rem;
 }
 
-.zeus-ai-panel {
+.zyra-ai-panel {
   border-color: rgba(168, 85, 247, 0.18);
   background:
     linear-gradient(165deg, rgba(30, 22, 46, 0.92) 0%, rgba(17, 21, 28, 0.94) 100%);
 }
 
-.zeus-ai-panel-compact {
+.zyra-ai-panel-compact {
   padding: 1rem 1.15rem;
 }
 
-.zeus-ai-summary {
+.zyra-ai-summary {
   font-size: 0.95rem;
   margin: 0.35rem 0 0;
 }
 
-.zeus-ai-explanation {
+.zyra-ai-explanation {
   margin-top: 0.65rem;
 }
 
-.zeus-ai-remediation {
+.zyra-ai-remediation {
   margin: 0.75rem 0 0;
   padding-left: 1.1rem;
   color: var(--text-secondary);
   font-size: 0.8125rem;
 }
 
-.zeus-ai-remediation li + li {
+.zyra-ai-remediation li + li {
   margin-top: 0.35rem;
 }
 
-.zeus-ai-actions {
+.zyra-ai-actions {
   margin-top: 0.75rem;
 }
 

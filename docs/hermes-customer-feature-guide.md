@@ -4,7 +4,7 @@
 
 Hermes turns Kubernetes from an infrastructure platform into an application platform. It continuously discovers every dashboard, API, and internal tool running in your cluster, recognizes what each one is, monitors its health, and gives users a permanent front door to launch software — no more kubectl port-forward, bookmark sprawl, or namespace archaeology. Think macOS Launchpad and Spotlight, but for your clusters.
 
-**40+** REST & gateway endpoints · **11** Nebula UI pages · **8** Zeus AI insight APIs · **15+** recognized platform tools · **3** discovery sources (Service, Ingress/Gateway API, mesh) · **0** port-forwards needed
+**40+** REST & gateway endpoints · **11** Nebula UI pages · **8** Zyra AI insight APIs · **15+** recognized platform tools · **3** discovery sources (Service, Ingress/Gateway API, mesh) · **0** port-forwards needed
 
 This is the customer-facing onboarding guide — how to access the product, your first workflows, and how to use every feature. A print-ready PDF of the same content sits alongside this file.
 
@@ -16,7 +16,7 @@ This is the customer-facing onboarding guide — how to access the product, your
 3. [Universal Gateway](#3-universal-gateway)
 4. [Nebula Launchpad UI](#4-nebula-launchpad-ui)
 5. [Spotlight Search](#5-spotlight-search)
-6. [Zeus AI Intelligence](#6-zeus-ai-intelligence)
+6. [Zyra AI Intelligence](#6-zyra-ai-intelligence)
 7. [Health & Diagnostics](#7-health-diagnostics)
 8. [Application Graph](#8-application-graph)
 9. [Multi-Cluster & Teams](#9-multi-cluster-teams)
@@ -30,9 +30,9 @@ This is the customer-facing onboarding guide — how to access the product, your
 
 - **Web:** Nebula launchpad UI on NodePort **31847** — open `http://localhost:31847` (or `http://:31847`). Press `⌘K` / `Ctrl+K` for Spotlight to search and launch any app through the gateway. Key pages: `/` (Command Deck), `/apps`, `/cluster`, `/discovery`, `/health`, `/graph`, `/teams`, `/federated`, `/activity`.
 - **CLI:** There is no dedicated end-user CLI — Hermes is operated with `kubectl` / `helm` plus repo scripts (`./scripts/deploy-remote.sh  `, `./scripts/configure-llm-remote.sh`, `./scripts/setup-ollama-remote.sh`, `./scripts/e2e-deploy-verify.sh http://host:31847`). Every action is also scriptable over REST with `curl`.
-- **API:** REST + WebSocket surface under `http://localhost:31847/api/v1`. Public (no auth): `GET /healthz`, `GET /metrics`, `/auth/*`, `/api/v1/ws-echo`. Example: `curl -s http://localhost:31847/api/v1/apps | jq '.[0]'`. Embedded Zeus AI insights live under `/api/v1/insights/*` and `/api/v1/search/llm`.
+- **API:** REST + WebSocket surface under `http://localhost:31847/api/v1`. Public (no auth): `GET /healthz`, `GET /metrics`, `/auth/*`, `/api/v1/ws-echo`. Example: `curl -s http://localhost:31847/api/v1/apps | jq '.[0]'`. Embedded Zyra AI insights live under `/api/v1/insights/*` and `/api/v1/search/llm`.
 - **Login:** Auth is disabled unless `HERMES_AUTH_MODE` is set. With `api_key`, send `Authorization: Bearer `; with `oidc`, sign in at `/auth/login` (redirects to your IdP, sets a session cookie). `GET /auth/me` returns the current user, groups, workspaces, and allowed actions.
-- **Needs:** A running Kubernetes cluster (Hermes installs via Helm); optionally set an OpenAI-compatible LLM (`HERMES_LLM_API_URL` + `HERMES_LLM_API_KEY`) to unlock Zeus AI natural-language answers — rule-based mode works with no key.
+- **Needs:** A running Kubernetes cluster (Hermes installs via Helm); optionally set an OpenAI-compatible LLM (`HERMES_LLM_API_URL` + `HERMES_LLM_API_KEY`) to unlock Zyra AI natural-language answers — rule-based mode works with no key.
 
 **Your first workflows**
 
@@ -42,7 +42,7 @@ This is the customer-facing onboarding guide — how to access the product, your
   1. Open the Nebula UI at `http://:31847` — discovery starts automatically across every namespace.
 - **Review the discovery queue and publish an app**
   1. Let discovery run (`discoverAll: true` by default) so newly found Services land in the queue.
-  1. Open `/discovery` in the UI and review candidates ranked by Zeus AI publish suggestions.
+  1. Open `/discovery` in the UI and review candidates ranked by Zyra AI publish suggestions.
   1. Click Publish on the right services (or `POST /api/v1/discovery/publish/{namespace}/{slug}`; bulk with `/api/v1/discovery/publish-namespace/{namespace}`).
   1. The app now appears on Home Quick Launch and the `/apps` catalog.
 - **Launch an app with zero port-forward**
@@ -54,10 +54,10 @@ This is the customer-facing onboarding guide — how to access the product, your
   1. Set `hermes.zyvor.dev/published: "true"` to publish it immediately, or leave it for the discovery queue.
   1. The app renders with a polished name, icon, owner, and dependency edges on `/apps` and `/graph`.
 - **Diagnose an unhealthy app**
-  1. Open `/health` and read the attention queue with its Zeus AI summary.
+  1. Open `/health` and read the attention queue with its Zyra AI summary.
   1. Click Diagnose on a failing service to open the global Diagnosis drawer.
-  1. Read the route lens, friendly probe summary (expand for raw detail), suggested kubectl commands, and Zeus AI remediation narrative (`GET /api/v1/apps/{id}/diagnosis` + `/insight`).
-- **Enable Zeus AI natural-language mode**
+  1. Read the route lens, friendly probe summary (expand for raw detail), suggested kubectl commands, and Zyra AI remediation narrative (`GET /api/v1/apps/{id}/diagnosis` + `/insight`).
+- **Enable Zyra AI natural-language mode**
   1. Create the LLM secret: `kubectl create secret generic hermes-llm --from-literal=apiKey="sk-..." -n hermes-system`.
   1. Upgrade with LLM settings: `helm upgrade hermes oci://ghcr.io/hypersdk/charts/hermes --reuse-values --set server.llm.apiUrl="https://api.openai.com/v1" --set server.llm.existingSecret="hermes-llm" --set server.llm.model="gpt-4o-mini" -n hermes-system`.
   1. Confirm the active mode: `GET /api/v1/insights/status` (or Spotlight `ai status`) should report `defaultSource: llm`.
@@ -146,7 +146,7 @@ _A Command-K palette that finds apps, pages, and answers the way Spotlight finds
 - **Spotlight AI Commands** — Built-in commands like explain, why, diagnose <app>, suggest publish, ns insight, and ai status. — _Run diagnostics and get fleet answers straight from the search bar._
   - **How:** In Spotlight (`⌘K`) type `explain`, `why`, `diagnose `, `suggest publish`, `ns insight`, `graph insight`, `owner insight`, or `ai status`.
 
-## 6. Zeus AI Intelligence
+## 6. Zyra AI Intelligence
 
 _Natural-language insight over your application catalog — with or without an external LLM._
 
@@ -161,7 +161,7 @@ _Natural-language insight over your application catalog — with or without an e
 - **Dual-Mode LLM + Rules** — Uses an OpenAI-compatible LLM when configured and falls back to deterministic rules otherwise; a status endpoint reports which is active. — _Full intelligence with no external API required — connect an LLM only if you want richer answers._
   - **How:** Set `HERMES_LLM_API_URL`, `HERMES_LLM_API_KEY`, `HERMES_LLM_MODEL`; check the active mode via `GET /api/v1/insights/status` or Spotlight `ai status`.
 
-> Zeus AI works out of the box in rule-based mode with no API key. Point it at OpenAI, an OpenAI-compatible endpoint, or a local Ollama install (helper script included) to unlock richer natural-language answers.
+> Zyra AI works out of the box in rule-based mode with no API key. Point it at OpenAI, an OpenAI-compatible endpoint, or a local Ollama install (helper script included) to unlock richer natural-language answers.
 
 ## 7. Health & Diagnostics
 
@@ -170,8 +170,8 @@ _Real-time health for every app, translated from raw probe errors into answers h
 - **Real-Time Health Status** — Classifies every app as Healthy, Degraded, or Offline from endpoint readiness and backend probes. — _Know an app works before you send a teammate to it._
   - **How:** Status shows on `/apps` and `/health` cards; REST `GET /api/v1/health/apps`.
 - **Attention Queue** — The Health page lists exactly the services that need action, with an AI summary. — _Focus on what's broken instead of scanning a wall of green._
-  - **How:** Web UI `/health` (attention queue with Zeus AI summary).
-- **Diagnose Drawer** — A global drawer showing route lens, suggested kubectl commands, probe errors, and Zeus AI insight for any app. — _Go from something's wrong to a fix without leaving the launchpad._
+  - **How:** Web UI `/health` (attention queue with Zyra AI summary).
+- **Diagnose Drawer** — A global drawer showing route lens, suggested kubectl commands, probe errors, and Zyra AI insight for any app. — _Go from something's wrong to a fix without leaving the launchpad._
   - **How:** Click Diagnose or Inspect route on any app to open the global drawer; REST `GET /api/v1/apps/{id}/diagnosis`.
 - **Friendly Probe Summaries** — Maps raw errors like context deadline exceeded into short summaries with an expandable technical view. — _Everyone understands the status; operators can still see the raw detail._
   - **How:** Automatic on cards — a short summary plus endpoint chip; expand technical details on the card or Diagnose drawer for the raw message.
@@ -186,7 +186,7 @@ _See how your applications actually connect, and where a dependency is failing._
   - **How:** Web UI `/graph`; REST `GET /api/v1/graph` (returns `nodes` and `edges`).
 - **Mesh Route Filters** — Filter the graph by service-mesh routing to focus on mesh-connected apps. — _Isolate the mesh view when tracing east-west traffic._
   - **How:** Use the filter controls on the `/graph` page to scope to mesh-routed apps.
-- **AI Focus Chips** — Zeus AI highlights unresolved or broken dependency links directly on the graph. — _The graph points you at the weak link instead of leaving you to hunt._
+- **AI Focus Chips** — Zyra AI highlights unresolved or broken dependency links directly on the graph. — _The graph points you at the weak link instead of leaving you to hunt._
   - **How:** Shown on `/graph`; REST `GET /api/v1/insights/graph` or Spotlight `graph insight`.
 - **Declared Dependencies** — Reads depends-on annotations to draw explicit relationships like Grafana to Prometheus to Loki. — _Your intended architecture shows up as a real, navigable map._
   - **How:** Set `hermes.zyvor.dev/depends-on: "prometheus,loki"` on the Service; edges render on `/graph`.
@@ -259,7 +259,7 @@ _Ship Hermes with a Helm chart, monitor it with Prometheus, and run it on a lean
 2. **Let discovery run** — With discoverAll on by default, Hermes watches every namespace and populates the discovery queue automatically — no manual registration.
 3. **Publish your apps** — Review the Discovery page and publish the right services (or set hermes.zyvor.dev/published: "true"). Add annotations to enrich names, icons, owners, and dependencies.
 4. **Launch from the launchpad** — Open the Nebula UI, hit Command-K to Spotlight-search, and click to launch any app through the gateway — no port-forward.
-5. **Optional: connect Zeus AI** — Set HERMES_LLM_API_URL and HERMES_LLM_API_KEY (or run the Ollama setup script) for natural-language search and insight. Rule-based mode works with no key.
+5. **Optional: connect Zyra AI** — Set HERMES_LLM_API_URL and HERMES_LLM_API_KEY (or run the Ollama setup script) for natural-language search and insight. Rule-based mode works with no key.
 
 > **Good to know:** Feature availability reflects Hermes v0.2. Some capabilities are roadmap-only and not yet shipped, including in-cluster mesh policy editing and federated activity export webhooks. Discovery covers Kubernetes Services, Ingress/Gateway API routes, and Istio/Linkerd mesh routes today; discovery of arbitrary custom resources is on the roadmap. The multi-cluster registry is an early single-cluster-first MVP. Hermes ships with a 30-day trial license (HMAC-SHA256 enforced); continued use requires a commercial license from sales@zyvor.dev.
 

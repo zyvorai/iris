@@ -17,7 +17,7 @@ interface PlatformPulseHeroProps {
   broken: number
   aiHint?: string
   onResolveIssues?: () => void
-  onAskZeus?: () => void
+  onAskZyra?: () => void
 }
 
 export default function PlatformPulseHero({
@@ -31,7 +31,7 @@ export default function PlatformPulseHero({
   broken,
   aiHint,
   onResolveIssues,
-  onAskZeus,
+  onAskZyra,
 }: PlatformPulseHeroProps) {
   const who = userId ? userId.split('@')[0] : 'operator'
   const attentionCount = broken + degraded
@@ -77,9 +77,9 @@ export default function PlatformPulseHero({
                 Review {attentionCount} Issues
               </Button>
             ) : null}
-            {onAskZeus ? (
-              <Button variant="ai" onClick={onAskZeus} data-testid="ask-zeus-btn">
-                <Sparkles size={14} /> Ask Zeus
+            {onAskZyra ? (
+              <Button variant="ai" onClick={onAskZyra} data-testid="ask-zyra-btn">
+                <Sparkles size={14} /> Ask Zyra
               </Button>
             ) : null}
           </div>

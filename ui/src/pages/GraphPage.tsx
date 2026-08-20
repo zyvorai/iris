@@ -6,16 +6,16 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useGraphInsight } from '../hooks/useZeusAiInsight'
+import { useGraphInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import type { AppGraph } from '../types'
 
@@ -94,10 +94,10 @@ export default function GraphPage() {
     >
       <div className="page-grid">
         {graph.data ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Topology insight"
             summary={graphInsight.data?.summary}
-            explanation={graphInsight.data?.explanation ?? 'Zeus AI is analyzing dependency topology…'}
+            explanation={graphInsight.data?.explanation ?? 'Zyra AI is analyzing dependency topology…'}
             source={graphInsight.data?.source}
             remediation={graphInsight.data?.highlights}
             loading={graphInsight.isLoading}
@@ -105,7 +105,7 @@ export default function GraphPage() {
             onRefresh={() => void graphInsight.refetch()}
             refreshing={graphInsight.isFetching && !graphInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={graphInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}
@@ -132,7 +132,7 @@ export default function GraphPage() {
             <Link to="/apps" className="section-link-nebula">
               Catalog
             </Link>
-            <AskZeusButton compact command="graph insight" />
+            <AskZyraButton compact command="graph insight" />
           </div>
 
           <PageToolbar className="graph-filters-toolbar glass-toolbar">

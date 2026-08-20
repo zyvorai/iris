@@ -38,7 +38,7 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/apps` | List all apps (RBAC/workspace filtered) |
 | GET | `/api/v1/apps/{id}` | Get app by ID (`namespace/slug`) |
 | GET | `/api/v1/apps/{id}/diagnosis` | Diagnosis chain (route lens, probe errors, suggestions) |
-| GET | `/api/v1/apps/{id}/insight` | Zeus AI per-app insight |
+| GET | `/api/v1/apps/{id}/insight` | Zyra AI per-app insight |
 | GET | `/api/v1/catalog` | Published catalog for current user |
 | GET | `/api/v1/catalog/federated` | Merged catalog across federated clusters |
 | GET | `/api/v1/catalog/export` | Download catalog as JSON |
@@ -67,7 +67,7 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/search/intent` | `q`, `limit` | Rule-based intent parsing |
 | GET | `/api/v1/search/llm` | `q`, `limit` | LLM-powered intent search (rules fallback) |
 
-### Zeus AI insights
+### Zyra AI insights
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -80,7 +80,7 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/insights/federated` | Cross-cluster federated insight |
 | GET | `/api/v1/insights/activity` | Audit activity patterns |
 
-Configure LLM via `HERMES_LLM_API_URL`, `HERMES_LLM_API_KEY`, `HERMES_LLM_MODEL`. See [ui.md](ui.md#zeus-ai).
+Configure LLM via `HERMES_LLM_API_URL`, `HERMES_LLM_API_KEY`, `HERMES_LLM_MODEL`. See [ui.md](ui.md#zyra-ai).
 
 ### Federation (write)
 
@@ -181,7 +181,7 @@ curl -s "$BASE/api/v1/catalog" | jq 'length'
 curl -s "$BASE/api/v1/search?q=grafana" | jq .
 curl -s "$BASE/api/v1/search/llm?q=unhealthy+apps" | jq .
 
-# Zeus AI
+# Zyra AI
 curl -s "$BASE/api/v1/insights/status" | jq .
 curl -s "$BASE/api/v1/insights/fleet" | jq .
 curl -s "$BASE/api/v1/apps/monitoring/grafana/insight" | jq .

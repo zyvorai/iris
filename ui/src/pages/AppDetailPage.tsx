@@ -8,16 +8,16 @@ import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
 import GlassPanel from '../components/nebula/GlassPanel'
 import HealthRing from '../components/nebula/HealthRing'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
-import { useFleetInsight, useZeusAiInsight } from '../hooks/useZeusAiInsight'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
+import { useFleetInsight, useZyraAiInsight } from '../hooks/useZyraAiInsight'
 import ActionMenu from '../components/nebula/ActionMenu'
 import StatusBadge from '../components/nebula/StatusBadge'
 import RouteDisplay from '../components/nebula/RouteDisplay'
@@ -82,7 +82,7 @@ export default function AppDetailPage() {
     })
   }, [app.data?.meta?.dependsOn, catalog.data])
 
-  const appInsight = useZeusAiInsight(appId, Boolean(appId))
+  const appInsight = useZyraAiInsight(appId, Boolean(appId))
 
   useEffect(() => {
     if (searchParams.get('diagnose') === '1' && appId && diagnoseAppId !== appId) {
@@ -171,8 +171,8 @@ export default function AppDetailPage() {
           </div>
         </GlassPanel>
 
-        <ZeusAiPanel
-          title="Zeus AI service insight"
+        <ZyraAiPanel
+          title="Zyra AI service insight"
           summary={appInsight.summary || undefined}
           explanation={appInsight.explanation}
           source={appInsight.source}
@@ -182,7 +182,7 @@ export default function AppDetailPage() {
           action={
             broken ? (
               <Button variant="ai" onClick={handleOpenDiagnose}>
-                Ask Zeus AI
+                Ask Zyra AI
               </Button>
             ) : undefined
           }
@@ -331,7 +331,7 @@ export function HealthPage() {
                 {serviceCount} discovered · {healthy} healthy · {degraded} degraded · {broken} broken
               </p>
               <div className="hero-command-ctas">
-                <AskZeusButton
+                <AskZyraButton
                   compact
                   command={issueCount > 0 ? 'explain' : 'ai status'}
                 />
@@ -355,15 +355,15 @@ export function HealthPage() {
         />
 
         {hasData ? (
-          <ZeusAiPanel
-            title="Zeus AI fleet summary"
+          <ZyraAiPanel
+            title="Zyra AI fleet summary"
             summary={fleetInsight.data?.summary}
             explanation={fleetInsight.data?.explanation ?? 'Analyzing cluster health patterns…'}
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}

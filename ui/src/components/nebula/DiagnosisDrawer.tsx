@@ -8,7 +8,7 @@ import RouteLens from '../RouteLens'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
 import { hermesApi, statusLabel } from '../../services/hermesApi'
-import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
+import { useZyraAiInsight } from '../../hooks/useZyraAiInsight'
 import { useInspector } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
 
@@ -67,7 +67,7 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
     queryFn: () => hermesApi.listAudit(20),
     enabled: !!appId,
   })
-  const insight = useZeusAiInsight(appId, !!appId)
+  const insight = useZyraAiInsight(appId, !!appId)
 
   const commands = useMemo(
     () => extractCommands(diagnosis.data?.suggestedActions ?? []),
@@ -153,12 +153,12 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
             <div className="diagnosis-drawer-section diagnosis-drawer-ai">
               <h3>
                 <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Zeus AI insight
+                Zyra AI insight
               </h3>
-              {insight.summary ? <p className="zeus-ai-summary body-text">{insight.summary}</p> : null}
+              {insight.summary ? <p className="zyra-ai-summary body-text">{insight.summary}</p> : null}
               <p className="body-text">{insight.explanation}</p>
               {insight.remediation.length ? (
-                <ul className="zeus-ai-remediation">
+                <ul className="zyra-ai-remediation">
                   {insight.remediation.map((step) => (
                     <li key={step}>{step}</li>
                   ))}
@@ -212,7 +212,7 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
                 <Stethoscope size={14} /> Run check
               </Button>
               <Button variant="ai" onClick={() => { openInspector(appId, 'ai'); onClose() }}>
-                <Sparkles size={14} /> Ask Zeus AI
+                <Sparkles size={14} /> Ask Zyra AI
               </Button>
               <Button variant="ghost" onClick={() => markKnownIssue(appId)}>
                 Mark as known issue

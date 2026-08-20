@@ -21,11 +21,11 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import { actionLabel, hermesApi } from '../services/hermesApi'
-import { useActivityInsight } from '../hooks/useZeusAiInsight'
+import { useActivityInsight } from '../hooks/useZyraAiInsight'
 import type { AuditEvent, FederatedAuditEvent } from '../types'
 
 const actionIcons: Record<string, typeof Rocket> = {
@@ -125,10 +125,10 @@ export default function ActivityPage() {
     >
       <div className="page-grid">
         {audit.data ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Activity insight"
             summary={activityInsight.data?.summary}
-            explanation={activityInsight.data?.explanation ?? 'Zeus AI is summarizing recent platform activity…'}
+            explanation={activityInsight.data?.explanation ?? 'Zyra AI is summarizing recent platform activity…'}
             source={activityInsight.data?.source}
             remediation={activityInsight.data?.highlights}
             loading={activityInsight.isLoading}
@@ -145,7 +145,7 @@ export default function ActivityPage() {
               <p className="body-text">Audit log of launches, discovery, shares, and pins</p>
             </div>
             <span className="nebula-status-badge status-unknown">{events.length} events</span>
-            <AskZeusButton compact command="activity insight" />
+            <AskZyraButton compact command="activity insight" />
             <Button variant="ghost" className="nebula-btn-compact" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
               <Download size={12} /> Export
             </Button>

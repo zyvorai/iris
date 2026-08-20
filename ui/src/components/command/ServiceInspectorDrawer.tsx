@@ -11,7 +11,7 @@ import ShareLinksPanel from '../ShareLinksPanel'
 import Button from '../nebula/Button'
 import StatusBadge from '../nebula/StatusBadge'
 import EmptyState from '../nebula/EmptyState'
-import ZeusAiPanel from '../nebula/ZeusAiPanel'
+import ZyraAiPanel from '../nebula/ZyraAiPanel'
 import {
   appDetailPath,
   appLaunchPath,
@@ -20,7 +20,7 @@ import {
   hermesApi,
   openApp,
 } from '../../services/hermesApi'
-import { useZeusAiInsight } from '../../hooks/useZeusAiInsight'
+import { useZyraAiInsight } from '../../hooks/useZyraAiInsight'
 import { useInspector, type InspectorTab } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
 
@@ -69,7 +69,7 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
     queryFn: () => hermesApi.getDiagnosis(appId!),
     enabled: !!appId,
   })
-  const insight = useZeusAiInsight(appId, !!appId && tab === 'ai')
+  const insight = useZyraAiInsight(appId, !!appId && tab === 'ai')
   const publish = useMutation({
     mutationFn: () => hermesApi.publish(appId!),
     onSuccess: () => {
@@ -110,7 +110,7 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
     { id: 'route', label: 'Route' },
     { id: 'share', label: 'Share' },
     { id: 'deps', label: 'Deps' },
-    { id: 'ai', label: 'Zeus AI' },
+    { id: 'ai', label: 'Zyra AI' },
   ]
 
   return (
@@ -259,7 +259,7 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
           ) : null}
 
           {tab === 'ai' ? (
-            <ZeusAiPanel
+            <ZyraAiPanel
               summary={insight.summary}
               explanation={insight.explanation}
               source={insight.source}

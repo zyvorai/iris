@@ -71,7 +71,7 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
           ))}
         </ul>
         <div className="shortcuts-ai-section">
-          <p className="section-label" style={{ marginTop: '1rem' }}>Spotlight · Zeus AI</p>
+          <p className="section-label" style={{ marginTop: '1rem' }}>Spotlight · Zyra AI</p>
           <ul className="shortcuts-list-nebula shortcuts-list-compact">
             {spotlightAi.map((item) => (
               <li key={item}>

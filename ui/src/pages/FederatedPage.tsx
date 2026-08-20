@@ -8,12 +8,12 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useFederatedInsight } from '../hooks/useZeusAiInsight'
+import { useFederatedInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import type { FederatedApp } from '../types'
 
@@ -84,10 +84,10 @@ export default function FederatedPage() {
     >
       <div className="page-grid">
         {federated.data?.length ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Federated insight"
             summary={federatedInsight.data?.summary}
-            explanation={federatedInsight.data?.explanation ?? 'Zeus AI is analyzing federated catalogs…'}
+            explanation={federatedInsight.data?.explanation ?? 'Zyra AI is analyzing federated catalogs…'}
             source={federatedInsight.data?.source}
             remediation={federatedInsight.data?.highlights}
             loading={federatedInsight.isLoading}
@@ -95,7 +95,7 @@ export default function FederatedPage() {
             onRefresh={() => void federatedInsight.refetch()}
             refreshing={federatedInsight.isFetching && !federatedInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={federatedInsight.data?.focusAppIds ?? []}
                 catalog={federated.data}
                 onSelect={openDiagnose}
@@ -112,7 +112,7 @@ export default function FederatedPage() {
               <p className="body-text">Merged apps from remote clusters — publish when write federation is enabled.</p>
             </div>
             <span className="nebula-status-badge status-unknown">{federated.data?.length ?? 0} apps</span>
-            <AskZeusButton compact command="federated insight" />
+            <AskZyraButton compact command="federated insight" />
             <Link to="/cluster" className="section-link-nebula">Clusters</Link>
           </div>
 

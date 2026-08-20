@@ -20,7 +20,7 @@ kubectl -n hermes-system rollout status deployment/hermes
 
 Visit `http://<node-ip>:31847` — Hermes auto-discovers all services on your cluster.
 
-## 4. Enable Zeus AI (optional)
+## 4. Enable Zyra AI (optional)
 
 ```bash
 kubectl create secret generic hermes-llm --from-literal=apiKey="sk-..." -n hermes-system

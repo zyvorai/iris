@@ -12,13 +12,13 @@ import PageToolbar from '../components/nebula/PageToolbar'
 import ContextBanner from '../components/nebula/ContextBanner'
 import EmptyState from '../components/nebula/EmptyState'
 import MetricCard from '../components/nebula/MetricCard'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ActionMenu from '../components/nebula/ActionMenu'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight, useNamespaceInsight } from '../hooks/useZeusAiInsight'
+import { useFleetInsight, useNamespaceInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import type { HermesApp } from '../types'
@@ -237,7 +237,7 @@ export default function ClusterPage() {
                 {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
               </p>
             </div>
-            <AskZeusButton compact command={askCommand} />
+            <AskZyraButton compact command={askCommand} />
           </div>
           <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
             <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
@@ -248,10 +248,10 @@ export default function ClusterPage() {
         </GlassPanel>
 
         {nsFilter && (namespaceInsight.data || namespaceInsight.isLoading) ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title={`Namespace · ${nsFilter}`}
             summary={namespaceInsight.data?.summary}
-            explanation={namespaceInsight.data?.explanation ?? 'Zeus AI is analyzing this namespace…'}
+            explanation={namespaceInsight.data?.explanation ?? 'Zyra AI is analyzing this namespace…'}
             source={namespaceInsight.data?.source}
             remediation={namespaceInsight.data?.highlights}
             loading={namespaceInsight.isLoading}
@@ -259,7 +259,7 @@ export default function ClusterPage() {
             onRefresh={() => void namespaceInsight.refetch()}
             refreshing={namespaceInsight.isFetching && !namespaceInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={namespaceInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}
@@ -267,10 +267,10 @@ export default function ClusterPage() {
             }
           />
         ) : issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Fleet insight"
             summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing cluster health…'}
+            explanation={fleetInsight.data?.explanation ?? 'Zyra AI is summarizing cluster health…'}
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
@@ -278,7 +278,7 @@ export default function ClusterPage() {
             onRefresh={() => void fleetInsight.refetch()}
             refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}

@@ -9,9 +9,9 @@ import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../utils/spaces'
 
 export default function SpacesPage() {
@@ -33,10 +33,10 @@ export default function SpacesPage() {
     >
       <div className="page-grid">
         {issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Fleet insight"
             summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing space health…'}
+            explanation={fleetInsight.data?.explanation ?? 'Zyra AI is summarizing space health…'}
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}

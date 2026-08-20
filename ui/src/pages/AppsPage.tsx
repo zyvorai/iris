@@ -9,12 +9,12 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
-import AskZeusButton from '../components/nebula/AskZeusButton'
+import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
-import { useFleetInsight } from '../hooks/useZeusAiInsight'
+import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import type { HermesApp } from '../types'
@@ -146,10 +146,10 @@ export default function AppsPage() {
     >
       <div className="page-grid">
         {showFleetAi && (fleetInsight.data || fleetInsight.isLoading) ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title="Fleet insight"
             summary={fleetInsight.data?.summary}
-            explanation={fleetInsight.data?.explanation ?? 'Zeus AI is summarizing filtered services…'}
+            explanation={fleetInsight.data?.explanation ?? 'Zyra AI is summarizing filtered services…'}
             source={fleetInsight.data?.source}
             remediation={fleetInsight.data?.highlights}
             loading={fleetInsight.isLoading}
@@ -157,7 +157,7 @@ export default function AppsPage() {
             onRefresh={() => void fleetInsight.refetch()}
             refreshing={fleetInsight.isFetching && !fleetInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={fleetInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}
@@ -174,7 +174,7 @@ export default function AppsPage() {
                 Published launchpad apps and the full discovered cluster inventory.
               </p>
             </div>
-            <AskZeusButton compact command={showFleetAi ? 'explain' : 'suggest publish'} />
+            <AskZyraButton compact command={showFleetAi ? 'explain' : 'suggest publish'} />
           </div>
 
           <PageToolbar className="page-toolbar-stacked" data-testid="catalog-toolbar">

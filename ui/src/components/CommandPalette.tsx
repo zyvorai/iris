@@ -328,7 +328,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           rows.push({
             kind: 'action',
             label: diagnoseInsight.data.summary,
-            meta: `${diagnoseInsight.data.source === 'llm' ? 'Zeus AI' : 'Rules'} · ${diagnoseInsight.data.explanation.slice(0, 96)}${diagnoseInsight.data.explanation.length > 96 ? '…' : ''}`,
+            meta: `${diagnoseInsight.data.source === 'llm' ? 'Zyra AI' : 'Rules'} · ${diagnoseInsight.data.explanation.slice(0, 96)}${diagnoseInsight.data.explanation.length > 96 ? '…' : ''}`,
             run: () => openInspector(app.id, 'ai'),
           })
         }
@@ -353,7 +353,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             rows.push({
               kind: 'action',
               label: `Publish ${app.displayName}`,
-              meta: `${app.namespace} · Zeus AI suggested`,
+              meta: `${app.namespace} · Zyra AI suggested`,
               run: () => void hermesApi.publish(app.id).then(() => refreshHermesData(qc)),
             })
           }
@@ -366,7 +366,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Discovery queue',
           path: '/discovery',
           icon: Compass,
-          meta: discoveryInsight.isLoading ? 'Loading Zeus AI publish suggestions…' : 'Review unpublished services',
+          meta: discoveryInsight.isLoading ? 'Loading Zyra AI publish suggestions…' : 'Review unpublished services',
         },
       ]
     }
@@ -393,7 +393,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: `Cluster · ${command.arg}`,
           path: `/cluster?ns=${encodeURIComponent(command.arg)}`,
           icon: Server,
-          meta: namespaceInsight.isLoading ? 'Loading Zeus AI namespace insight…' : 'View namespace services',
+          meta: namespaceInsight.isLoading ? 'Loading Zyra AI namespace insight…' : 'View namespace services',
         },
       ]
     }
@@ -420,7 +420,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Application graph',
           path: '/graph',
           icon: GitBranch,
-          meta: graphInsight.isLoading ? 'Loading Zeus AI topology insight…' : 'View dependency graph',
+          meta: graphInsight.isLoading ? 'Loading Zyra AI topology insight…' : 'View dependency graph',
         },
       ]
     }
@@ -447,7 +447,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Teams',
           path: '/teams',
           icon: Users,
-          meta: ownerInsightQuery.isLoading ? 'Loading Zeus AI team insight…' : 'View team ownership',
+          meta: ownerInsightQuery.isLoading ? 'Loading Zyra AI team insight…' : 'View team ownership',
         },
       ]
     }
@@ -463,7 +463,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             meta: aiStatus.data.llmConfigured
               ? aiStatus.data.llmReachable === false
                 ? aiStatus.data.probeMessage || 'LLM configured but unreachable — falling back to rules'
-                : 'Zeus AI is generating insight responses from your configured model'
+                : 'Zyra AI is generating insight responses from your configured model'
               : 'Set HERMES_LLM_API_URL on the server for live LLM responses',
             run: () => navigate('/help'),
           },
@@ -472,14 +472,14 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             label: 'Fleet health dashboard',
             path: '/health',
             icon: HeartPulse,
-            meta: 'Review Zeus AI fleet summary',
+            meta: 'Review Zyra AI fleet summary',
           },
         ]
       }
       return [
         {
           kind: 'nav',
-          label: 'Help · Zeus AI',
+          label: 'Help · Zyra AI',
           path: '/help',
           icon: HelpCircle,
           meta: aiStatus.isLoading ? 'Loading AI status…' : 'View configuration guide',
@@ -511,7 +511,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Federated catalog',
           path: '/federated',
           icon: Globe,
-          meta: federatedInsight.isLoading ? 'Loading Zeus AI federation insight…' : 'View peer clusters',
+          meta: federatedInsight.isLoading ? 'Loading Zyra AI federation insight…' : 'View peer clusters',
         },
       ]
     }
@@ -540,7 +540,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Activity log',
           path: '/activity',
           icon: History,
-          meta: activityInsight.isLoading ? 'Loading Zeus AI activity insight…' : 'View audit events',
+          meta: activityInsight.isLoading ? 'Loading Zyra AI activity insight…' : 'View audit events',
         },
       ]
     }
@@ -567,7 +567,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Fleet health dashboard',
           path: '/health',
           icon: HeartPulse,
-          meta: fleetInsight.isLoading ? 'Loading Zeus AI fleet insight…' : 'View cluster health',
+          meta: fleetInsight.isLoading ? 'Loading Zyra AI fleet insight…' : 'View cluster health',
         },
       ]
     }
@@ -850,14 +850,14 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     if (command?.type === 'attention') return 'Commands · Attention'
     if (command?.type === 'routes') return 'Commands · Navigation'
     if (command?.type === 'open' || command?.type === 'diagnose' || command?.type === 'why') return 'Commands · Services'
-    if (command?.type === 'explain') return 'Zeus AI · Fleet'
-    if (command?.type === 'suggest_publish') return 'Zeus AI · Discovery'
-    if (command?.type === 'ns_insight') return 'Zeus AI · Namespace'
-    if (command?.type === 'graph_insight') return 'Zeus AI · Topology'
-    if (command?.type === 'owner_insight') return 'Zeus AI · Team'
-    if (command?.type === 'ai_status') return 'Zeus AI · Status'
-    if (command?.type === 'federated_insight') return 'Zeus AI · Federation'
-    if (command?.type === 'activity_insight') return 'Zeus AI · Activity'
+    if (command?.type === 'explain') return 'Zyra AI · Fleet'
+    if (command?.type === 'suggest_publish') return 'Zyra AI · Discovery'
+    if (command?.type === 'ns_insight') return 'Zyra AI · Namespace'
+    if (command?.type === 'graph_insight') return 'Zyra AI · Topology'
+    if (command?.type === 'owner_insight') return 'Zyra AI · Team'
+    if (command?.type === 'ai_status') return 'Zyra AI · Status'
+    if (command?.type === 'federated_insight') return 'Zyra AI · Federation'
+    if (command?.type === 'activity_insight') return 'Zyra AI · Activity'
     if (query === 'broken') return 'Health'
     if (isTeamQuery) return 'Team picks'
     if (envQuery) return 'Workspace'

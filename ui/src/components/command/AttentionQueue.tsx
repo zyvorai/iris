@@ -7,7 +7,7 @@ import { HeartPulse, Sparkles } from 'lucide-react'
 import ServiceCard from '../nebula/ServiceCard'
 import GlassPanel from '../nebula/GlassPanel'
 import EmptyState from '../nebula/EmptyState'
-import { useFleetInsight } from '../../hooks/useZeusAiInsight'
+import { useFleetInsight } from '../../hooks/useZyraAiInsight'
 import type { HermesApp } from '../../types'
 
 interface AttentionQueueProps {
@@ -54,7 +54,7 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
         ) : null}
       </div>
       {fleetInsight.data?.summary ? (
-        <p className="body-text zeus-ai-explanation attention-queue-ai" data-testid="attention-queue-ai">
+        <p className="body-text zyra-ai-explanation attention-queue-ai" data-testid="attention-queue-ai">
           <Sparkles size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
           {fleetInsight.data.summary}
         </p>

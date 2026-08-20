@@ -4,7 +4,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { hermesApi } from '../services/hermesApi'
 
-export function useZeusAiInsight(appId: string | null, enabled = true) {
+export function useZyraAiInsight(appId: string | null, enabled = true) {
   const insight = useQuery({
     queryKey: ['app-insight', appId],
     queryFn: () => hermesApi.getAppInsight(appId!),
@@ -17,7 +17,7 @@ export function useZeusAiInsight(appId: string | null, enabled = true) {
     summary: insight.data?.summary ?? '',
     explanation:
       insight.data?.explanation ??
-      (insight.isLoading ? 'Zeus AI is analyzing this service…' : 'No insight available yet.'),
+      (insight.isLoading ? 'Zyra AI is analyzing this service…' : 'No insight available yet.'),
     remediation: insight.data?.remediation ?? [],
     suggestedActions: insight.data?.suggestedActions ?? [],
     source: insight.data?.source,

@@ -9,12 +9,12 @@ import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
-import AskZeusButton from '../components/nebula/AskZeusButton'
-import ZeusAiPanel from '../components/nebula/ZeusAiPanel'
-import ZeusAiFocusChips from '../components/nebula/ZeusAiFocusChips'
+import AskZyraButton from '../components/nebula/AskZyraButton'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import type { HermesApp } from '../types'
 import { hermesApi } from '../services/hermesApi'
-import { useOwnerInsight } from '../hooks/useZeusAiInsight'
+import { useOwnerInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 
 export default function TeamsPage() {
@@ -65,10 +65,10 @@ export default function TeamsPage() {
     >
       <div className="page-grid">
         {focusOwner && (ownerInsight.data || ownerInsight.isLoading) ? (
-          <ZeusAiPanel
+          <ZyraAiPanel
             title={focusLabel ? `Team · ${focusLabel}` : 'Team insight'}
             summary={ownerInsight.data?.summary}
-            explanation={ownerInsight.data?.explanation ?? 'Zeus AI is analyzing team ownership health…'}
+            explanation={ownerInsight.data?.explanation ?? 'Zyra AI is analyzing team ownership health…'}
             source={ownerInsight.data?.source}
             remediation={ownerInsight.data?.highlights}
             loading={ownerInsight.isLoading}
@@ -76,7 +76,7 @@ export default function TeamsPage() {
             onRefresh={() => void ownerInsight.refetch()}
             refreshing={ownerInsight.isFetching && !ownerInsight.isLoading}
             action={
-              <ZeusAiFocusChips
+              <ZyraAiFocusChips
                 appIds={ownerInsight.data?.focusAppIds ?? []}
                 catalog={catalog.data ?? []}
                 onSelect={openDiagnose}
@@ -97,7 +97,7 @@ export default function TeamsPage() {
               </p>
             </div>
             {focusOwner ? (
-              <AskZeusButton compact command={`owner insight ${focusOwner}`} />
+              <AskZyraButton compact command={`owner insight ${focusOwner}`} />
             ) : null}
           </div>
         </GlassPanel>
