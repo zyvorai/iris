@@ -53,6 +53,9 @@ server:
     clientId: ""
     clientSecret: ""
     redirectUrl: ""
+  # Empty = auto-generated (random, 64 chars) on first install, preserved across upgrades
+  # (see templates/session-secret.yaml). Never set this to a fixed value checked into
+  # source control — it's the session-signing key, not a login credential.
   sessionSecret: ""
   defaultUser: local
   allowedNamespaces: []

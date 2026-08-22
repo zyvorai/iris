@@ -77,10 +77,11 @@ spec:
             - name: HERMES_API_KEY
               value: {{ .Values.server.auth.apiKey | quote }}
             {{- end }}
-            {{- if .Values.server.sessionSecret }}
             - name: HERMES_SESSION_SECRET
-              value: {{ .Values.server.sessionSecret | quote }}
-            {{- end }}
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-session-secret
+                  key: session-secret
             {{- if eq .Values.server.auth.mode "oidc" }}
             - name: HERMES_OIDC_ISSUER
               value: {{ .Values.server.auth.oidc.issuer | quote }}
