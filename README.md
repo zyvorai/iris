@@ -60,10 +60,14 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 ```bash
 git clone https://github.com/ssahani/hermes.git && cd hermes
 
-# Helm install
+# Helm install (images are private — build/push your own, or use a registry
+# credential your Zyvor contact provides; the defaults in values.yaml won't
+# be pullable otherwise)
 helm install hermes ./charts/hermes \
   -n hermes-system --create-namespace \
-  --set global.domain=zeus.local
+  --set global.domain=zeus.local \
+  --set image.controller.repository=<your-registry>/hermes-controller \
+  --set image.server.repository=<your-registry>/hermes-server
 
 # Remote lab deploy
 make deploy-remote

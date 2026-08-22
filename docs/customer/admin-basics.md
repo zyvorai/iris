@@ -9,7 +9,29 @@
 
 ## Auth
 
-OIDC + API key.
+OIDC + API key. `server.auth.mode` defaults to **`none`** — no login required at all —
+**set it to `api_key` or `oidc` before any internet-facing or production install.**
+
+```bash
+helm upgrade --install hermes charts/hermes -n hermes-system \
+  --set server.auth.mode=api_key --set server.auth.apiKey="a-real-key"
+```
+
+### Session secret
+
+Sessions are signed with `HERMES_SESSION_SECRET`. This is auto-generated (random, 64
+chars) by the chart on first install and preserved across upgrades — never set it to a
+fixed value checked into source control, since it's the token-signing key, not a login
+credential. Retrieve it if needed:
+
+```bash
+kubectl -n hermes-system get secret hermes-session-secret -o jsonpath='{.data.session-secret}' | base64 -d; echo
+```
+
+If you run `hermes-server` **outside this chart** (standalone binary, `docker run`,
+`docker-compose`), you must set `HERMES_SESSION_SECRET` yourself — without it, the binary
+falls back to a hardcoded development default and logs a warning; that fallback value is
+public (it's in the source), so relying on it is not safe for anything other than local dev.
 
 ## Install sketch
 
