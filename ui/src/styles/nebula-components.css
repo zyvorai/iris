@@ -87,8 +87,8 @@
 }
 
 .glyph-tile-brand {
-  background: linear-gradient(135deg, #f0583a 0%, #f89e8a 100%);
-  box-shadow: 0 8px 20px -4px rgba(240, 88, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #cc420a 0%, #ff5a15 60%, #ffb27a 130%);
+  box-shadow: 0 6px 16px -4px rgba(204, 66, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .glyph-tile-ai {
@@ -217,15 +217,15 @@
 }
 
 .nebula-btn-ai {
-  border-color: rgba(168, 85, 247, 0.28);
-  background: rgba(168, 85, 247, 0.1);
-  color: #c4b5fd;
+  border-color: rgba(204, 66, 10, 0.28);
+  background: rgba(204, 66, 10, 0.1);
+  color: #f89e8a;
 }
 
 .nebula-btn-ai:hover:not(:disabled) {
-  border-color: rgba(168, 85, 247, 0.4);
-  background: rgba(168, 85, 247, 0.16);
-  color: #ddd6fe;
+  border-color: rgba(204, 66, 10, 0.4);
+  background: rgba(204, 66, 10, 0.16);
+  color: #ffb27a;
 }
 
 .nebula-btn-compact {
@@ -477,14 +477,19 @@
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   min-height: 72px;
   background:
-    radial-gradient(circle at 90% 10%, rgba(96, 165, 250, 0.14), transparent 38%),
+    radial-gradient(circle at 90% 10%, rgba(204, 66, 10, 0.16), transparent 38%),
     var(--panel-surface-strong) !important;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
   border-color: rgba(240, 88, 58, 0.22) !important;
-  box-shadow: var(--shadow-glow-blue);
+  box-shadow: 0 14px 30px -16px rgba(204, 66, 10, 0.35);
+}
+
+.metric-card .metric-card-icon {
+  background: linear-gradient(135deg, #cc420a 0%, #ff5a15 60%, #ffb27a 130%);
+  --tile-glow: rgba(204, 66, 10, 0.45);
 }
 
 .metric-card-warn {
@@ -494,54 +499,6 @@
   border-color: rgba(251, 191, 36, 0.22) !important;
 }
 .metric-card-warn .metric-card-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
-
-.metric-card-tone-blue {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(240, 88, 58, 0.18), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(240, 88, 58, 0.24) !important;
-}
-.metric-card-tone-blue .metric-card-icon { background: linear-gradient(135deg, #f0583a 0%, #f9a58c 100%); --tile-glow: rgba(240, 88, 58, 0.4); }
-
-.metric-card-tone-green {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.2), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(16, 185, 129, 0.26) !important;
-}
-.metric-card-tone-green .metric-card-icon { background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%); --tile-glow: rgba(16, 185, 129, 0.4); }
-
-.metric-card-tone-purple {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(168, 85, 247, 0.2), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(168, 85, 247, 0.26) !important;
-}
-.metric-card-tone-purple .metric-card-icon { background: linear-gradient(135deg, #a855f7 0%, #d8b4fe 100%); --tile-glow: rgba(168, 85, 247, 0.4); }
-
-.metric-card-tone-cyan {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(6, 182, 212, 0.2), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(6, 182, 212, 0.26) !important;
-}
-.metric-card-tone-cyan .metric-card-icon { background: linear-gradient(135deg, #06b6d4 0%, #67e8f9 100%); --tile-glow: rgba(6, 182, 212, 0.4); }
-
-.metric-card-tone-pink {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(236, 72, 153, 0.2), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(236, 72, 153, 0.26) !important;
-}
-.metric-card-tone-pink .metric-card-icon { background: linear-gradient(135deg, #ec4899 0%, #f9a8d4 100%); --tile-glow: rgba(236, 72, 153, 0.4); }
-
-.metric-card-tone-orange {
-  background:
-    radial-gradient(circle at 90% 10%, rgba(249, 115, 22, 0.2), transparent 38%),
-    var(--panel-surface-strong) !important;
-  border-color: rgba(249, 115, 22, 0.26) !important;
-}
-.metric-card-tone-orange .metric-card-icon { background: linear-gradient(135deg, #f97316 0%, #fdba74 100%); --tile-glow: rgba(249, 115, 22, 0.4); }
 
 .metric-card-icon {
   display: inline-flex;
@@ -577,8 +534,11 @@
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  background: linear-gradient(90deg, var(--text-primary), var(--aether-primary-deep) 140%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .metric-card-sub {
@@ -2022,7 +1982,7 @@
 }
 
 .zyra-ai-panel {
-  border-color: rgba(168, 85, 247, 0.18);
+  border-color: rgba(204, 66, 10, 0.18);
   background: var(--panel-surface-ai);
 }
 
@@ -2055,10 +2015,10 @@
 }
 
 .diagnosis-drawer-ai {
-  border: 1px solid rgba(168, 85, 247, 0.16);
+  border: 1px solid rgba(204, 66, 10, 0.16);
   border-radius: var(--radius-lg);
   padding: 0.85rem 1rem;
-  background: rgba(168, 85, 247, 0.06);
+  background: rgba(204, 66, 10, 0.06);
 }
 
 /* ── Light theme — pastel text tuned for dark surfaces, needs deeper ink on light tints ── */
@@ -2086,11 +2046,11 @@
 }
 
 :root[data-theme='light'] .nebula-btn-ai {
-  color: #7c3aed;
+  color: #b23705;
 }
 
 :root[data-theme='light'] .nebula-btn-ai:hover:not(:disabled) {
-  color: #6d28d9;
+  color: #8a2a04;
 }
 
 :root[data-theme='light'] .service-error,

@@ -60,7 +60,7 @@
   /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
   --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
   --panel-surface-strong: linear-gradient(165deg, rgba(18, 22, 28, 0.92) 0%, rgba(10, 10, 10, 0.96) 100%);
-  --panel-surface-ai: linear-gradient(165deg, rgba(35, 24, 54, 0.92) 0%, rgba(10, 10, 10, 0.94) 100%);
+  --panel-surface-ai: linear-gradient(165deg, rgba(42, 24, 16, 0.92) 0%, rgba(10, 10, 10, 0.94) 100%);
   --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.12));
   --overlay-faint: rgba(255, 255, 255, 0.02);
   --overlay-soft: rgba(255, 255, 255, 0.03);
@@ -187,7 +187,7 @@
 
   --panel-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 246, 248, 0.98) 100%);
   --panel-surface-strong: linear-gradient(165deg, #ffffff 0%, #f5f6f8 100%);
-  --panel-surface-ai: linear-gradient(165deg, rgba(246, 240, 255, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
+  --panel-surface-ai: linear-gradient(165deg, rgba(255, 241, 233, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
   --hero-overlay: linear-gradient(180deg, rgba(20, 22, 26, 0.05), rgba(20, 22, 26, 0.015));
   --overlay-faint: rgba(20, 22, 26, 0.025);
   --overlay-soft: rgba(20, 22, 26, 0.035);

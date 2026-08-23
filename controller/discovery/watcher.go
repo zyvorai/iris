@@ -471,6 +471,18 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 	}, true
 }
 
+// healthCheckClient never follows redirects: some backends (e.g. Grafana with
+// root_url set to the public gateway URL) 301 an internal-DNS request out to
+// the public HTTPS endpoint, which then fails TLS verification against the
+// gateway's self-signed cert — a false "degraded" reading that has nothing to
+// do with the backend's own health. A redirect response means the backend
+// answered, so it's treated as reachable without following it.
+var healthCheckClient = &http.Client{
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
+
 func (w *Watcher) healthStatus(app model.App) (string, string) {
 	if app.ReadyCount == 0 {
 		return model.StatusBroken, "Service has no ready endpoints"
@@ -483,7 +495,7 @@ func (w *Watcher) healthStatus(app model.App) (string, string) {
 	if err != nil {
 		return model.StatusUnknown, err.Error()
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := healthCheckClient.Do(req)
 	if err != nil {
 		return model.StatusDegraded, err.Error()
 	}

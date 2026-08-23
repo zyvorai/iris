@@ -43,19 +43,19 @@ interface HermesNavbarProps {
 }
 
 const primaryNav = [
-  { to: '/', label: 'Overview', icon: Home, end: true, tone: 'brand' as const },
-  { to: '/apps', label: 'Catalog', icon: Grid3X3, tone: 'pink' as const },
-  { to: '/cluster', label: 'Cluster', icon: Server, tone: 'info' as const },
-  { to: '/health', label: 'Health', icon: HeartPulse, tone: 'ok' as const },
-  { to: '/spaces', label: 'Spaces', icon: Layers, tone: 'cyan' as const },
+  { to: '/', label: 'Overview', icon: Home, end: true },
+  { to: '/apps', label: 'Catalog', icon: Grid3X3 },
+  { to: '/cluster', label: 'Cluster', icon: Server },
+  { to: '/health', label: 'Health', icon: HeartPulse },
+  { to: '/spaces', label: 'Spaces', icon: Layers },
 ]
 
 const moreNav = [
-  { to: '/graph', label: 'Graph', icon: GitBranch, tone: 'ai' as const },
-  { to: '/discovery', label: 'Discovery', icon: Compass, tone: 'warn' as const },
-  { to: '/federated', label: 'Federated', icon: Globe, tone: 'cyan' as const },
-  { to: '/teams', label: 'Teams', icon: Users, tone: 'pink' as const },
-  { to: '/activity', label: 'Activity', icon: Activity, tone: 'ok' as const },
+  { to: '/graph', label: 'Graph', icon: GitBranch },
+  { to: '/discovery', label: 'Discovery', icon: Compass },
+  { to: '/federated', label: 'Federated', icon: Globe },
+  { to: '/teams', label: 'Teams', icon: Users },
+  { to: '/activity', label: 'Activity', icon: Activity },
 ]
 
 function HelpMenu({ onOpenShortcuts }: { onOpenShortcuts: () => void }) {
@@ -108,7 +108,7 @@ function HelpMenu({ onOpenShortcuts }: { onOpenShortcuts: () => void }) {
   )
 }
 
-function MoreMenu({ toneFor }: { toneFor: (path: string) => GlyphTileTone }) {
+function MoreMenu({ activeToneFor }: { activeToneFor: (path: string) => GlyphTileTone }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -135,11 +135,11 @@ function MoreMenu({ toneFor }: { toneFor: (path: string) => GlyphTileTone }) {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) => `hermes-nb-dropdown-item${isActive ? ' active' : ''}`}
-              data-tone={toneFor(item.to)}
+              data-tone={activeToneFor(item.to)}
               role="menuitem"
               onClick={() => setOpen(false)}
             >
-              <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={12} />} size="sm" /> {item.label}
+              <GlyphTile tone="brand" icon={<item.icon size={12} />} size="sm" /> {item.label}
             </NavLink>
           ))}
         </div>
@@ -167,8 +167,10 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
     : (degraded > 0 || (healthPct ?? 0) < 80) ? 'warn'
     : 'ok'
   const healthTileTone: GlyphTileTone = statusTone === 'bad' ? 'critical' : statusTone === 'warn' ? 'warn' : 'ok'
-  const toneFor = (path: string): GlyphTileTone =>
-    path === '/health' ? healthTileTone : ([...primaryNav, ...moreNav].find((n) => n.to === path)?.tone ?? 'brand')
+  // Every nav item's icon tile is the single brand accent; only the Health tab's
+  // *active-state* tint reflects live cluster status — a dashboard's primary nav
+  // should still say "something's wrong" via color, same as the status badges do.
+  const activeToneFor = (path: string): GlyphTileTone => (path === '/health' ? healthTileTone : 'brand')
 
   const handleRefresh = () => {
     setSpinning(true)
@@ -286,13 +288,13 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               to={item.to}
               end={item.end}
               className={({ isActive }) => `hermes-nb-nav-pill${isActive ? ' active' : ''}`}
-              data-tone={toneFor(item.to)}
+              data-tone={activeToneFor(item.to)}
             >
-              <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={12} />} size="sm" />
+              <GlyphTile tone="brand" icon={<item.icon size={12} />} size="sm" />
               {item.label}
             </NavLink>
           ))}
-          <MoreMenu toneFor={toneFor} />
+          <MoreMenu activeToneFor={activeToneFor} />
         </div>
       </div>
 
@@ -324,10 +326,10 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
                     to={item.to}
                     end={item.to === '/'}
                     className={({ isActive }) => `hermes-nb-drawer-item${isActive ? ' active' : ''}`}
-                    data-tone={toneFor(item.to)}
+                    data-tone={activeToneFor(item.to)}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={14} />} size="sm" /> {item.label}
+                    <GlyphTile tone="brand" icon={<item.icon size={14} />} size="sm" /> {item.label}
                   </NavLink>
                 ))}
               </div>

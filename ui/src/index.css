@@ -236,12 +236,6 @@ button {
   color: #f47a60;
   border-color: rgba(240, 88, 58, 0.35);
 }
-.chip-env[data-tone='brand'] { color: #f89e8a; border-color: rgba(240, 88, 58, 0.35); background: rgba(240, 88, 58, 0.1); }
-.chip-env[data-tone='pink'] { color: #f9a8d4; border-color: rgba(219, 39, 119, 0.35); background: rgba(219, 39, 119, 0.1); }
-.chip-env[data-tone='info'] { color: #7dd3fc; border-color: rgba(10, 132, 255, 0.35); background: rgba(10, 132, 255, 0.1); }
-.chip-env[data-tone='cyan'] { color: #67e8f9; border-color: rgba(8, 145, 178, 0.35); background: rgba(8, 145, 178, 0.1); }
-.chip-env[data-tone='warn'] { color: #fde68a; border-color: rgba(234, 179, 8, 0.35); background: rgba(234, 179, 8, 0.1); }
-.chip-env[data-tone='critical'] { color: #fda4af; border-color: rgba(225, 29, 72, 0.35); background: rgba(225, 29, 72, 0.1); }
 
 .app-card-top {
   display: flex;
@@ -1400,39 +1394,6 @@ a:hover > .space-tile-icon {
   background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
   color: #ffd4c2;
 }
-
-.workspace-tone-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-.workspace-tone-dot[data-tone='brand'] { background: #f0583a; }
-.workspace-tone-dot[data-tone='pink'] { background: #db2777; }
-.workspace-tone-dot[data-tone='info'] { background: #0a84ff; }
-.workspace-tone-dot[data-tone='ok'] { background: #10b981; }
-.workspace-tone-dot[data-tone='cyan'] { background: #0891b2; }
-.workspace-tone-dot[data-tone='ai'] { background: #a78bfa; }
-.workspace-tone-dot[data-tone='warn'] { background: #eab308; }
-.workspace-tone-dot[data-tone='critical'] { background: #e11d48; }
-
-.workspace-chip.active[data-tone='brand'],
-.workspace-dropdown-item.active[data-tone='brand'] { border-color: rgba(240, 88, 58, 0.35); background: rgba(240, 88, 58, 0.12); color: #f89e8a; }
-.workspace-chip.active[data-tone='pink'],
-.workspace-dropdown-item.active[data-tone='pink'] { border-color: rgba(219, 39, 119, 0.35); background: rgba(219, 39, 119, 0.12); color: #f9a8d4; }
-.workspace-chip.active[data-tone='info'],
-.workspace-dropdown-item.active[data-tone='info'] { border-color: rgba(10, 132, 255, 0.35); background: rgba(10, 132, 255, 0.12); color: #7dd3fc; }
-.workspace-chip.active[data-tone='ok'],
-.workspace-dropdown-item.active[data-tone='ok'] { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
-.workspace-chip.active[data-tone='cyan'],
-.workspace-dropdown-item.active[data-tone='cyan'] { border-color: rgba(8, 145, 178, 0.35); background: rgba(8, 145, 178, 0.12); color: #67e8f9; }
-.workspace-chip.active[data-tone='ai'],
-.workspace-dropdown-item.active[data-tone='ai'] { border-color: rgba(167, 139, 250, 0.35); background: rgba(167, 139, 250, 0.12); color: #c4b5fd; }
-.workspace-chip.active[data-tone='warn'],
-.workspace-dropdown-item.active[data-tone='warn'] { border-color: rgba(234, 179, 8, 0.35); background: rgba(234, 179, 8, 0.12); color: #fde68a; }
-.workspace-chip.active[data-tone='critical'],
-.workspace-dropdown-item.active[data-tone='critical'] { border-color: rgba(225, 29, 72, 0.35); background: rgba(225, 29, 72, 0.12); color: #fda4af; }
 
 .workspace-count {
   opacity: 0.75;
@@ -2730,35 +2691,11 @@ a:hover > .space-tile-icon {
   color: #f89e8a;
   background: rgba(240, 88, 58, 0.12);
 }
-.hermes-nb-nav-pill.active[data-tone='pink'],
-.hermes-nb-dropdown-item.active[data-tone='pink'],
-.hermes-nb-drawer-item.active[data-tone='pink'] {
-  color: #f9a8d4;
-  background: rgba(219, 39, 119, 0.12);
-}
-.hermes-nb-nav-pill.active[data-tone='info'],
-.hermes-nb-dropdown-item.active[data-tone='info'],
-.hermes-nb-drawer-item.active[data-tone='info'] {
-  color: #7dd3fc;
-  background: rgba(10, 132, 255, 0.12);
-}
 .hermes-nb-nav-pill.active[data-tone='ok'],
 .hermes-nb-dropdown-item.active[data-tone='ok'],
 .hermes-nb-drawer-item.active[data-tone='ok'] {
   color: #6ee7b7;
   background: rgba(16, 185, 129, 0.12);
-}
-.hermes-nb-nav-pill.active[data-tone='cyan'],
-.hermes-nb-dropdown-item.active[data-tone='cyan'],
-.hermes-nb-drawer-item.active[data-tone='cyan'] {
-  color: #67e8f9;
-  background: rgba(8, 145, 178, 0.12);
-}
-.hermes-nb-nav-pill.active[data-tone='ai'],
-.hermes-nb-dropdown-item.active[data-tone='ai'],
-.hermes-nb-drawer-item.active[data-tone='ai'] {
-  color: #c4b5fd;
-  background: rgba(167, 139, 250, 0.12);
 }
 .hermes-nb-nav-pill.active[data-tone='warn'],
 .hermes-nb-dropdown-item.active[data-tone='warn'],
