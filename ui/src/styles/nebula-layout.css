@@ -182,3 +182,48 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.toast-host {
+  position: fixed;
+  right: 16px;
+  bottom: 60px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: var(--board-3);
+  border: 1px solid var(--edge);
+  box-shadow: var(--shadow-panel);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  pointer-events: auto;
+  animation: toast-in 180ms ease;
+}
+
+.toast-ok svg {
+  color: var(--go);
+}
+
+.toast-error svg {
+  color: var(--stop);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -16,15 +16,21 @@ import { hermesApi } from '../services/hermesApi'
 import { useDiscoveryInsight } from '../hooks/useZyraAiInsight'
 import { refreshHermesData } from '../utils/refreshCatalog'
 import { useStatusFlip } from '../hooks/useStatusFlip'
+import { useToast } from '../components/Toast'
 
 export default function DiscoveryPage() {
   const qc = useQueryClient()
+  const toast = useToast()
   const discovery = useQuery({ queryKey: ['discovery'], queryFn: hermesApi.listDiscovery, refetchInterval: 15000 })
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary })
 
   const publish = useMutation({
     mutationFn: hermesApi.publish,
-    onSuccess: () => void refreshHermesData(qc),
+    onSuccess: () => {
+      void refreshHermesData(qc)
+      toast('Service published')
+    },
+    onError: () => toast('Could not publish service', 'error'),
   })
 
   const loading = discovery.isLoading && !discovery.data
@@ -38,7 +44,11 @@ export default function DiscoveryPage() {
       }
       return apps.length
     },
-    onSuccess: () => void refreshHermesData(qc),
+    onSuccess: (count) => {
+      void refreshHermesData(qc)
+      toast(`Published ${count} service${count === 1 ? '' : 's'}`)
+    },
+    onError: () => toast('Could not publish services', 'error'),
   })
 
   const publishZyraPicks = useMutation({
@@ -49,12 +59,20 @@ export default function DiscoveryPage() {
       }
       return ids.length
     },
-    onSuccess: () => void refreshHermesData(qc),
+    onSuccess: (count) => {
+      void refreshHermesData(qc)
+      toast(`Published ${count} Zyra-picked service${count === 1 ? '' : 's'}`)
+    },
+    onError: () => toast('Could not publish Zyra picks', 'error'),
   })
 
   const hide = useMutation({
     mutationFn: hermesApi.hide,
-    onSuccess: () => void refreshHermesData(qc),
+    onSuccess: () => {
+      void refreshHermesData(qc)
+      toast('Hidden from discovery')
+    },
+    onError: () => toast('Could not hide service', 'error'),
   })
 
   const flipped = useStatusFlip(discovery.data ?? [])

@@ -16,11 +16,13 @@ import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
 import { useFederatedInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
+import { useToast } from '../components/Toast'
 import type { FederatedApp } from '../types'
 
 export default function FederatedPage() {
   const queryClient = useQueryClient()
   const { openDiagnose } = useInspector()
+  const toast = useToast()
   const federated = useQuery({
     queryKey: ['catalog-federated'],
     queryFn: hermesApi.listFederatedCatalog,
@@ -42,7 +44,9 @@ export default function FederatedPage() {
       hermesApi.federationPublish(clusterId, id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['catalog-federated'] })
+      toast('Published on remote cluster')
     },
+    onError: () => toast('Could not publish on remote cluster', 'error'),
   })
 
   const rbacCheck = useMutation({

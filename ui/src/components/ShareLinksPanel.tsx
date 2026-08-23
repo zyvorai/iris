@@ -8,6 +8,7 @@ import Button from './nebula/Button'
 import EmptyState from './nebula/EmptyState'
 import type { HermesApp } from '../types'
 import { copyShareUrl, hermesApi, sharePublicUrl } from '../services/hermesApi'
+import { useToast } from './Toast'
 
 const TTL_OPTIONS = [
   { label: '30 min', minutes: 30 },
@@ -23,17 +24,26 @@ function formatExpiry(iso: string): string {
 
 export default function ShareLinksPanel({ app }: { app: HermesApp }) {
   const qc = useQueryClient()
+  const toast = useToast()
   const shares = useQuery({ queryKey: ['shares'], queryFn: hermesApi.listShares })
   const appShares = (shares.data ?? []).filter((s) => s.appId === app.id)
 
   const createMutation = useMutation({
     mutationFn: (ttlMinutes: number) => hermesApi.createShare({ appId: app.id, ttlMinutes }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['shares'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['shares'] })
+      toast('Share link created')
+    },
+    onError: () => toast('Could not create share link', 'error'),
   })
 
   const revokeMutation = useMutation({
     mutationFn: (token: string) => hermesApi.revokeShare(token),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['shares'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['shares'] })
+      toast('Share link revoked')
+    },
+    onError: () => toast('Could not revoke share link', 'error'),
   })
 
   return (

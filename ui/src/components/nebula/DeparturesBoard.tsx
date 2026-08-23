@@ -10,6 +10,7 @@ import ActionMenu from './ActionMenu'
 import { buildServiceMenuItems, canOpenApp, isUnhealthy } from './serviceActions'
 import { appDetailPath, appLaunchPath, hermesApi, openApp, statusTone } from '../../services/hermesApi'
 import { useInspector } from '../../utils/inspectorContext'
+import { useToast } from '../Toast'
 import type { HermesApp } from '../../types'
 
 interface DeparturesRowProps {
@@ -27,13 +28,16 @@ interface DeparturesRowProps {
 export default function DeparturesRow({ app, favorite = false, onPublish, onHide, compact = false, flipped = false }: DeparturesRowProps) {
   const { openDiagnose, openInspector } = useInspector()
   const qc = useQueryClient()
+  const toast = useToast()
   const publish = useMutation({
     mutationFn: () => hermesApi.publish(app.id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['catalog'] })
       void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
       void qc.invalidateQueries({ queryKey: ['apps'] })
+      toast(`${app.displayName} published`)
     },
+    onError: () => toast(`Could not publish ${app.displayName}`, 'error'),
   })
   const favMutation = useMutation({
     mutationFn: () => (favorite ? hermesApi.removeFavorite(app.id) : hermesApi.addFavorite(app.id)),

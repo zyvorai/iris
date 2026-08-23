@@ -19,6 +19,7 @@ import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { InspectorProvider } from './utils/inspectorContext'
 import { SpotlightProvider } from './utils/spotlightContext'
+import { ToastProvider } from './components/Toast'
 import { useGlobalNavShortcuts } from './hooks/useGlobalNavShortcuts'
 
 function AppRoutes() {
@@ -48,12 +49,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <InspectorProvider>
-      <SpotlightProvider>
-        <Layout>
-          <AppRoutes />
-        </Layout>
-      </SpotlightProvider>
-    </InspectorProvider>
+    <ToastProvider>
+      <InspectorProvider>
+        <SpotlightProvider>
+          <Layout>
+            <AppRoutes />
+          </Layout>
+        </SpotlightProvider>
+      </InspectorProvider>
+    </ToastProvider>
   )
 }

@@ -25,6 +25,7 @@ import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import { groupBy } from '../utils/groupBy'
 import { useStatusFlip } from '../hooks/useStatusFlip'
+import { useToast } from '../components/Toast'
 
 export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
@@ -34,6 +35,7 @@ export default function ClusterPage() {
   const { workspaceId, setWorkspaceId, matchesWorkspace } = useWorkspace()
   const [searchParams] = useSearchParams()
   const { openDiagnose } = useInspector()
+  const toast = useToast()
 
   useEffect(() => {
     const ns = searchParams.get('ns')
@@ -53,7 +55,9 @@ export default function ClusterPage() {
       void qc.invalidateQueries({ queryKey: ['discovery'] })
       void qc.invalidateQueries({ queryKey: ['apps'] })
       void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+      toast('Service published')
     },
+    onError: () => toast('Could not publish service', 'error'),
   })
 
   const namespaces = useMemo(() => {
@@ -63,12 +67,14 @@ export default function ClusterPage() {
 
   const publishNs = useMutation({
     mutationFn: hermesApi.publishNamespace,
-    onSuccess: () => {
+    onSuccess: (_data, ns) => {
       void qc.invalidateQueries({ queryKey: ['catalog'] })
       void qc.invalidateQueries({ queryKey: ['discovery'] })
       void qc.invalidateQueries({ queryKey: ['apps'] })
       void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+      toast(`Published all services in ${ns}`)
     },
+    onError: () => toast('Could not publish namespace', 'error'),
   })
 
   const filtered = useMemo(() => {
