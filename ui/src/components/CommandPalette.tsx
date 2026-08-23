@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, Server, Users } from 'lucide-react'
+import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, LayoutGrid, Server, Settings as SettingsIcon, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import GlyphTile from './nebula/GlyphTile'
@@ -25,11 +25,13 @@ const navItems = [
   { label: 'Spaces', path: '/spaces', icon: Layers },
   { label: 'Cluster services', path: '/cluster', icon: Server },
   { label: 'Federated', path: '/federated', icon: Globe },
-  { label: 'Graph', path: '/graph', icon: GitBranch },
+  { label: 'Topology', path: '/graph', icon: GitBranch },
+  { label: 'Mission control', path: '/mission-control', icon: LayoutGrid },
   { label: 'Teams', path: '/teams', icon: Users },
   { label: 'Discovery', path: '/discovery', icon: Compass },
   { label: 'Health', path: '/health', icon: HeartPulse },
   { label: 'Activity', path: '/activity', icon: History },
+  { label: 'Settings', path: '/settings', icon: SettingsIcon },
   { label: 'Help', path: '/help', icon: HelpCircle },
 ]
 
@@ -296,8 +298,8 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
       const navRow = {
         kind: 'nav' as const,
         label: 'Open Mission Control',
-        path: '/#mission-control',
-        icon: Layers,
+        path: '/mission-control',
+        icon: LayoutGrid,
         meta: `${catalogUnhealthy.length} services need attention`,
       }
       return [

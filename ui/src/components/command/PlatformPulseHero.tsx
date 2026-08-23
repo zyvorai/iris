@@ -63,7 +63,7 @@ export default function PlatformPulseHero({
           </p>
           {aiHint ? <p className="hero-command-ai-hint">{aiHint}</p> : null}
           <div className="hero-command-ctas">
-            <Button variant="primary" href="#mission-control">
+            <Button variant="primary" to="/mission-control">
               Open Mission Control <ChevronRight size={14} />
             </Button>
             <Button variant="secondary" to="/cluster">

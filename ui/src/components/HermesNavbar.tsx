@@ -17,11 +17,13 @@ import {
   Home,
   Keyboard,
   Layers,
+  LayoutGrid,
   Menu,
   Moon,
   RefreshCw,
   Search,
   Server,
+  Settings as SettingsIcon,
   Sparkles,
   Sun,
   Users,
@@ -48,10 +50,12 @@ const primaryNav = [
   { to: '/cluster', label: 'Cluster', icon: Server },
   { to: '/health', label: 'Health', icon: HeartPulse },
   { to: '/spaces', label: 'Spaces', icon: Layers },
+  { to: '/graph', label: 'Topology', icon: GitBranch },
+  { to: '/mission-control', label: 'Mission control', icon: LayoutGrid },
+  { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]
 
 const moreNav = [
-  { to: '/graph', label: 'Graph', icon: GitBranch },
   { to: '/discovery', label: 'Discovery', icon: Compass },
   { to: '/federated', label: 'Federated', icon: Globe },
   { to: '/teams', label: 'Teams', icon: Users },

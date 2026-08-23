@@ -14,6 +14,8 @@ import GraphPage from './pages/GraphPage'
 import FederatedPage from './pages/FederatedPage'
 import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
+import MissionControlPage from './pages/MissionControlPage'
+import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { InspectorProvider } from './utils/inspectorContext'
 import { SpotlightProvider } from './utils/spotlightContext'
@@ -36,6 +38,8 @@ function AppRoutes() {
       <Route path="/discovery" element={<DiscoveryPage />} />
       <Route path="/health" element={<HealthPage />} />
       <Route path="/activity" element={<ActivityPage />} />
+      <Route path="/mission-control" element={<MissionControlPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
       <Route path="/help" element={<HelpPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

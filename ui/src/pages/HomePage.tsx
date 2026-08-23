@@ -2,14 +2,18 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { LayoutGrid } from 'lucide-react'
 import PlatformPulseHero from '../components/command/PlatformPulseHero'
 import QuickLaunchBar from '../components/command/QuickLaunchBar'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
-import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import ServiceGalaxy from '../components/command/ServiceGalaxy'
 import PageFrame from '../components/nebula/PageFrame'
 import ContextBanner from '../components/nebula/ContextBanner'
+import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
+import Button from '../components/nebula/Button'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
@@ -57,6 +61,7 @@ export default function HomePage() {
   const { matchesWorkspace, workspaceId, setWorkspaceId } = useWorkspace()
   const { openDiagnose } = useInspector()
   const { openSpotlight } = useSpotlight()
+  const navigate = useNavigate()
 
   const filterWs = (list: HermesApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
   const catalogApps = filterWs(catalog.data)
@@ -106,7 +111,7 @@ export default function HomePage() {
 
   const onResolveIssues = () => {
     if (unhealthy[0]) openDiagnose(unhealthy[0].id)
-    else document.getElementById('mission-control')?.scrollIntoView({ behavior: 'smooth' })
+    else navigate('/mission-control')
   }
 
   const onRetry = () => {
@@ -177,7 +182,21 @@ export default function HomePage() {
           />
         ) : null}
 
-        <MissionControlSpaces apps={catalogApps} />
+        <GlassPanel className="glass-panel-section">
+          <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<LayoutGrid size={14} />} size="sm" />
+            <div>
+              <p className="section-label">Mission Control</p>
+              <h2 className="section-title">
+                {issueCount > 0 ? `${issueCount} of ${serviceCount} services need attention` : 'Every space is healthy'}
+              </h2>
+              <p className="body-text">The live departures board across every space in the cluster.</p>
+            </div>
+            <Button variant="primary" to="/mission-control">
+              Open Mission Control
+            </Button>
+          </div>
+        </GlassPanel>
 
         <ServiceGalaxy
           onNodeClick={(id) => openDiagnose(id)}
