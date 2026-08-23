@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Layers } from 'lucide-react'
 import QuickLaunchTile from '../components/nebula/QuickLaunchTile'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -14,6 +14,7 @@ import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../utils/spaces'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 
 export default function SpacesPage() {
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
@@ -104,6 +105,7 @@ export function SpaceDetailPage() {
     : []
 
   const loading = catalog.isLoading && !catalog.data
+  const flipped = useStatusFlip(apps)
 
   return (
     <PageFrame
@@ -123,9 +125,9 @@ export function SpaceDetailPage() {
         <GlassPanel className="glass-panel-section" data-testid={`space-${spaceId}`}>
           <p className="section-label">{apps.length} published app{apps.length === 1 ? '' : 's'}</p>
           {apps.length ? (
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="board" style={{ marginTop: '1rem' }}>
               {apps.map((app) => (
-                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+                <DeparturesRow key={app.id} app={app} favorite={favIds.has(app.id)} flipped={flipped.has(app.id)} />
               ))}
             </div>
           ) : (

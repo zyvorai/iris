@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch, Users } from 'lucide-react'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -19,6 +19,7 @@ import { hermesApi } from '../services/hermesApi'
 import { useOwnerInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import { iconColorFor } from '../utils/iconColor'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 
 function ownerInitials(label: string): string {
   const parts = label.replace(/[-_]/g, ' ').trim().split(/\s+/)
@@ -73,6 +74,7 @@ export default function TeamsPage() {
   }
 
   const focusLabel = owners.data?.find((o) => o.id === focusOwner)?.label ?? focusOwner
+  const flipped = useStatusFlip(catalog.data ?? [])
 
   return (
     <PageFrame
@@ -145,9 +147,9 @@ export default function TeamsPage() {
                   </div>
                 </div>
                 {apps.length ? (
-                  <div className="app-grid" style={{ marginTop: '1rem' }}>
+                  <div className="board" style={{ marginTop: '1rem' }}>
                     {apps.map((app) => (
-                      <AppCard key={app.id} app={app} />
+                      <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />
                     ))}
                   </div>
                 ) : (

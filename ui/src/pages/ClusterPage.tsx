@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layers, Rocket, Server, Compass } from 'lucide-react'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -24,6 +24,7 @@ import { useFleetInsight, useNamespaceInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import { groupBy } from '../utils/groupBy'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 
 export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
@@ -83,6 +84,8 @@ export default function ClusterPage() {
     const map = groupBy(filtered, (a) => a.namespace)
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
   }, [filtered])
+
+  const flipped = useStatusFlip(filtered)
 
   const loading = catalog.isLoading && !catalog.data
   const error = catalog.isError
@@ -273,12 +276,13 @@ export default function ClusterPage() {
         {view === 'grid' ? (
           <GlassPanel className="glass-panel-section">
             <p className="section-label">All services</p>
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="board" style={{ marginTop: '1rem' }}>
               {filtered.map((app) => (
-                <AppCard
+                <DeparturesRow
                   key={app.id}
                   app={app}
                   favorite={favIds.has(app.id)}
+                  flipped={flipped.has(app.id)}
                   onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
                 />
               ))}
@@ -292,11 +296,12 @@ export default function ClusterPage() {
               apps={nsApps}
               wrap
               renderApp={(app) => (
-                <AppCard
+                <DeparturesRow
                   key={app.id}
                   app={app}
                   compact
                   favorite={favIds.has(app.id)}
+                  flipped={flipped.has(app.id)}
                   onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
                 />
               )}

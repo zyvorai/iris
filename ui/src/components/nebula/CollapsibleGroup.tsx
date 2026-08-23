@@ -59,7 +59,7 @@ export default function CollapsibleGroup({
         {headerExtra}
         <ChevronDown size={16} className={open ? 'rotated' : ''} aria-hidden />
       </button>
-      {open ? <div className="mission-control-group-body">{sorted.map(renderApp)}</div> : null}
+      {open ? <div className="board">{sorted.map(renderApp)}</div> : null}
     </>
   )
 

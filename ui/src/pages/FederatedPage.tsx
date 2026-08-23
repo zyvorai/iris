@@ -3,8 +3,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Globe, ShieldCheck, Upload } from 'lucide-react'
-import AppCard from '../components/AppCard'
+import { Globe, ShieldCheck } from 'lucide-react'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -141,21 +141,17 @@ export default function FederatedPage() {
                       {rbacCheck.data.detail ?? (rbacCheck.data.ok ? 'Publish allowed' : 'Publish denied')}
                     </p>
                   ) : null}
-                  <div className="app-grid" style={{ marginTop: '0.75rem' }}>
+                  <div className="board" style={{ marginTop: '0.75rem' }}>
                     {entries.map((entry) => (
-                      <div key={`${entry.clusterId}-${entry.id}`} className="federated-app-wrap">
-                        <AppCard app={entry} />
-                        {canWrite && !entry.id.includes('__offline__') ? (
-                          <Button
-                            variant="secondary"
-                            className="nebula-btn-compact federated-publish-btn"
-                            disabled={publishRemote.isPending}
-                            onClick={() => publishRemote.mutate({ clusterId: entry.clusterId, id: entry.id })}
-                          >
-                            <Upload size={14} /> Publish on remote
-                          </Button>
-                        ) : null}
-                      </div>
+                      <DeparturesRow
+                        key={`${entry.clusterId}-${entry.id}`}
+                        app={entry}
+                        onPublish={
+                          canWrite && !entry.id.includes('__offline__')
+                            ? () => publishRemote.mutate({ clusterId: entry.clusterId, id: entry.id })
+                            : undefined
+                        }
+                      />
                     ))}
                   </div>
                 </div>

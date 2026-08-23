@@ -6,7 +6,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import AttentionQueue from '../components/command/AttentionQueue'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
@@ -26,6 +26,7 @@ import ShareLinksPanel from '../components/ShareLinksPanel'
 import MeshPolicyPanel from '../components/MeshPolicyPanel'
 import { AppGraphPanel } from '../pages/GraphPage'
 import { useInspector } from '../utils/inspectorContext'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 import {
   appDetailPath,
   appLaunchPath,
@@ -297,6 +298,8 @@ export function HealthPage() {
       .sort((a, b) => rank(a.status) - rank(b.status) || a.displayName.localeCompare(b.displayName))
   }, [catalog.data])
 
+  const publishedFlipped = useStatusFlip(publishedHealth.data?.apps ?? [])
+
   const serviceCount = cluster.data?.total ?? catalog.data?.length ?? 0
   const healthy = cluster.data?.healthy ?? catalog.data?.filter((a) => a.status === 'healthy').length ?? 0
   const degraded = cluster.data?.degraded ?? catalog.data?.filter((a) => a.status === 'degraded').length ?? 0
@@ -380,9 +383,9 @@ export function HealthPage() {
             Gateway probes only apps published to the launchpad ({publishedHealth.data?.total ?? 0} published).
           </p>
           {publishedHealth.data?.apps.length ? (
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="board" style={{ marginTop: '1rem' }}>
               {publishedHealth.data.apps.map((app) => (
-                <AppCard key={app.id} app={app} />
+                <DeparturesRow key={app.id} app={app} flipped={publishedFlipped.has(app.id)} />
               ))}
             </div>
           ) : (

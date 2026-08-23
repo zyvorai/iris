@@ -5,8 +5,9 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutGrid, Radar } from 'lucide-react'
 import GlassPanel from '../nebula/GlassPanel'
-import ServiceCard from '../nebula/ServiceCard'
+import DeparturesRow from '../nebula/DeparturesBoard'
 import CollapsibleGroup from '../nebula/CollapsibleGroup'
+import { useStatusFlip } from '../../hooks/useStatusFlip'
 import EmptyState from '../nebula/EmptyState'
 import Button from '../nebula/Button'
 import { HERMES_SPACES, groupAppsBySpace } from '../../utils/spaces'
@@ -36,6 +37,7 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
 
   const spacesWithApps = HERMES_SPACES.filter((s) => (filteredGrouped.get(s.id)?.length ?? 0) > 0)
   const attentionTotal = apps.filter((a) => a.status !== 'healthy').length
+  const flipped = useStatusFlip(apps)
 
   if (!apps.length) {
     return (
@@ -96,7 +98,7 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
             key={space.id}
             label={space.label}
             apps={filteredGrouped.get(space.id) ?? []}
-            renderApp={(app) => <ServiceCard key={app.id} app={app} />}
+            renderApp={(app) => <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />}
             headerExtra={
               <Link to={`/spaces/${space.id}`} className="section-link-nebula" onClick={(e) => e.stopPropagation()}>
                 View all

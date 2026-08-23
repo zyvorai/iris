@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Grid3X3 } from 'lucide-react'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -21,6 +21,7 @@ import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import { groupBy } from '../utils/groupBy'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 import type { HermesApp } from '../types'
 
 type CatalogMode = 'published' | 'all'
@@ -137,6 +138,7 @@ export default function AppsPage() {
   const hiddenCategoryCount = Math.max(0, categories.length - visibleCategories.length)
   const showFleetAi = Boolean(statusFilter && statusFilter !== 'healthy')
   const fleetInsight = useFleetInsight(hasData && showFleetAi)
+  const flipped = useStatusFlip(filtered)
 
   return (
     <PageFrame
@@ -291,14 +293,16 @@ export default function AppsPage() {
                   key={id}
                   label={groupLabel(groupKey, id)}
                   apps={apps}
-                  renderApp={(app) => <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />}
+                  renderApp={(app) => (
+                    <DeparturesRow key={app.id} app={app} favorite={favIds.has(app.id)} flipped={flipped.has(app.id)} />
+                  )}
                 />
               ))}
             </div>
           ) : (
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="board" style={{ marginTop: '1rem' }}>
               {filtered.map((app) => (
-                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+                <DeparturesRow key={app.id} app={app} favorite={favIds.has(app.id)} flipped={flipped.has(app.id)} />
               ))}
             </div>
           )}

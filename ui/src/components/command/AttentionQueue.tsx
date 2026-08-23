@@ -4,7 +4,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HeartPulse, Sparkles } from 'lucide-react'
-import ServiceCard from '../nebula/ServiceCard'
+import DeparturesRow from '../nebula/DeparturesBoard'
+import { useStatusFlip } from '../../hooks/useStatusFlip'
 import GlassPanel from '../nebula/GlassPanel'
 import EmptyState from '../nebula/EmptyState'
 import { useFleetInsight } from '../../hooks/useZyraAiInsight'
@@ -26,6 +27,7 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
   const visible = filtered.slice(0, 12)
   const brokenCount = apps.filter((a) => a.status === 'broken').length
   const degradedCount = apps.filter((a) => a.status === 'degraded').length
+  const flipped = useStatusFlip(visible)
 
   if (!apps.length) {
     return (
@@ -78,9 +80,9 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
           description={`No ${filter === 'all' ? '' : filter} services in this filter.`}
         />
       ) : (
-        <div className="mission-control-group-body">
+        <div className="board">
           {visible.map((app) => (
-            <ServiceCard key={app.id} app={app} />
+            <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />
           ))}
         </div>
       )}

@@ -3,7 +3,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Compass, Rocket } from 'lucide-react'
-import AppCard from '../components/AppCard'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -15,6 +15,7 @@ import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import { hermesApi } from '../services/hermesApi'
 import { useDiscoveryInsight } from '../hooks/useZyraAiInsight'
 import { refreshHermesData } from '../utils/refreshCatalog'
+import { useStatusFlip } from '../hooks/useStatusFlip'
 
 export default function DiscoveryPage() {
   const qc = useQueryClient()
@@ -55,6 +56,8 @@ export default function DiscoveryPage() {
     mutationFn: hermesApi.hide,
     onSuccess: () => void refreshHermesData(qc),
   })
+
+  const flipped = useStatusFlip(discovery.data ?? [])
 
   return (
     <PageFrame
@@ -129,11 +132,12 @@ export default function DiscoveryPage() {
               tone="ok"
             />
           ) : (
-            <div className="app-grid" style={{ marginTop: '1rem' }}>
+            <div className="board" style={{ marginTop: '1rem' }}>
               {discovery.data.map((app) => (
-                <AppCard
+                <DeparturesRow
                   key={app.id}
                   app={app}
+                  flipped={flipped.has(app.id)}
                   onPublish={() => publish.mutate(app.id)}
                   onHide={() => hide.mutate(app.id)}
                 />
