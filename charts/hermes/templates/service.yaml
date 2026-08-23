@@ -9,9 +9,9 @@ spec:
   selector:
     app.kubernetes.io/name: hermes
   ports:
-    - name: http
+    - name: https
       port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: https
       {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}

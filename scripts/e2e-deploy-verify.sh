@@ -2,10 +2,14 @@
 # Hermes — post-deploy E2E verification
 set -euo pipefail
 
-BASE="${1:-${HERMES_E2E_BASE:-http://127.0.0.1:31847}}"
+BASE="${1:-${HERMES_E2E_BASE:-https://127.0.0.1:31847}}"
 BASE="${BASE%/}"
 NS="${HERMES_NAMESPACE:-hermes-system}"
 START=$SECONDS
+
+# hermes-server terminates TLS with a self-signed cert unless HERMES_TLS_CERT/
+# HERMES_TLS_KEY point at a real one — skip verification for this script's own checks.
+curl() { command curl -k "$@"; }
 
 pass=0; fail=0
 FAILED=()

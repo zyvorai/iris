@@ -10,7 +10,7 @@
 #   HERMES_TEST_TIERS   Comma list, or preset: quick | full
 #     quick → smoke
 #     full  → smoke,verify-remote
-#   HERMES_E2E_BASE     Base URL (default http://HOST:31847)
+#   HERMES_E2E_BASE     Base URL (default https://HOST:31847)
 #   HERMES_E2E_REPORT_JSON  Optional path for JSON summary
 # ============================================================================
 
@@ -34,7 +34,7 @@ case "${TIERS_RAW}" in
   *) TIERS="${TIERS_RAW}" ;;
 esac
 
-export HERMES_E2E_BASE="${HERMES_E2E_BASE:-http://${HOST}:${NODE_PORT}}"
+export HERMES_E2E_BASE="${HERMES_E2E_BASE:-https://${HOST}:${NODE_PORT}}"
 export HERMES_REMOTE_HOST="${HOST}"
 export HERMES_REMOTE_USER="${USER}"
 export DEPLOY_HOST="${HOST}"

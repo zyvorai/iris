@@ -277,6 +277,7 @@ async fn login(State(auth): State<AuthConfig>) -> Result<Response, AppAuthError>
     let return_to = Cookie::build(("hermes_auth_return", "/"))
         .path("/")
         .http_only(true)
+        .secure(true)
         .same_site(SameSite::Lax)
         .build();
     response.headers_mut().append(
@@ -330,6 +331,7 @@ async fn callback(
     let cookie = Cookie::build((SESSION_COOKIE, session))
         .path("/")
         .http_only(true)
+        .secure(true)
         .same_site(SameSite::Lax)
         .max_age(time::Duration::seconds(86400))
         .build();
@@ -350,6 +352,7 @@ async fn logout(State(_auth): State<AuthConfig>) -> Response {
     let cleared = Cookie::build((SESSION_COOKIE, ""))
         .path("/")
         .http_only(true)
+        .secure(true)
         .same_site(SameSite::Lax)
         .max_age(time::Duration::seconds(0))
         .build();

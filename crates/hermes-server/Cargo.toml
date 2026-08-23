@@ -16,6 +16,9 @@ hermes-api = { path = "../hermes-api" }
 hermes-gateway = { path = "../hermes-gateway" }
 axum = { workspace = true }
 axum-extra = { version = "0.10", features = ["cookie"] }
+axum-server = { version = "0.8", default-features = false, features = ["tls-rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rcgen = "0.14"
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

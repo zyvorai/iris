@@ -14,7 +14,7 @@ cd "${REMOTE_DIR}"
 if [ -z "${HERMES_PUBLIC_HOST}" ]; then
     HERMES_PUBLIC_HOST="$(hostname -I 2>/dev/null | awk '{print $1}')"
 fi
-PUBLIC_BASE="http://${HERMES_PUBLIC_HOST}:${HERMES_NODE_PORT}"
+PUBLIC_BASE="https://${HERMES_PUBLIC_HOST}:${HERMES_NODE_PORT}"
 
 SYS_K3S="/etc/rancher/k3s/k3s.yaml"
 if [ -f "${SYS_K3S}" ]; then

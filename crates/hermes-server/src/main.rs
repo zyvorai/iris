@@ -3,11 +3,13 @@
 
 mod auth;
 mod metrics;
+mod tls;
 
 use std::env;
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Context;
 use axum::{
@@ -15,6 +17,7 @@ use axum::{
     routing::get,
     Router,
 };
+use axum_server::Handle;
 use hermes_api::ApiState;
 use hermes_core::store::Store;
 use hermes_gateway::GatewayState;
@@ -32,8 +35,26 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
 
+    if rustls::crypto::ring::default_provider()
+        .install_default()
+        .is_err()
+    {
+        tracing::debug!("rustls crypto provider already installed");
+    }
+
     let bind = env::var("HERMES_BIND").unwrap_or_else(|_| "0.0.0.0:31847".into());
     let db_path = env::var("HERMES_DB_PATH").unwrap_or_else(|_| "/data/hermes/hermes.db".into());
+    let tls_cert = env::var("HERMES_TLS_CERT").ok();
+    let tls_key = env::var("HERMES_TLS_KEY").ok();
+    let tls_dir = env::var("HERMES_TLS_DIR").unwrap_or_else(|_| {
+        Path::new(&db_path)
+            .parent()
+            .map(|p| p.join("tls"))
+            .unwrap_or_else(|| PathBuf::from("/data/hermes/tls"))
+            .to_string_lossy()
+            .into_owned()
+    });
+    let tls_san_hosts = auth::split_csv(&env::var("HERMES_TLS_SAN_HOSTS").unwrap_or_default());
     let ui_dir = env::var("HERMES_UI_DIR").unwrap_or_else(|_| "./ui/dist".into());
     let default_user = env::var("HERMES_DEFAULT_USER").unwrap_or_else(|_| "local".into());
     let allowed_namespaces = auth::split_csv(&env::var("HERMES_ALLOWED_NAMESPACES").unwrap_or_default());
@@ -92,10 +113,21 @@ async fn main() -> anyhow::Result<()> {
         .layer(TraceLayer::new_for_http());
 
     let addr: SocketAddr = bind.parse().context("parse bind address")?;
-    tracing::info!("hermes-server listening on {addr} (auth={})", auth_cfg.mode);
-    let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
+    let tls_config = tls::resolve(tls_cert, tls_key, Path::new(&tls_dir), &tls_san_hosts)
+        .await
+        .context("configure TLS")?;
+
+    let handle = Handle::new();
+    let shutdown_handle = handle.clone();
+    tokio::spawn(async move {
+        shutdown_signal().await;
+        shutdown_handle.graceful_shutdown(Some(Duration::from_secs(20)));
+    });
+
+    tracing::info!("hermes-server listening on https://{addr} (auth={})", auth_cfg.mode);
+    axum_server::bind_rustls(addr, tls_config)
+        .handle(handle)
+        .serve(app.into_make_service())
         .await?;
     tracing::info!("hermes-server stopped");
     Ok(())

@@ -467,7 +467,7 @@ run_e2e() {
     [ -f "$e2e" ] || return 0
     chmod +x "$e2e"
     echo ""
-    HERMES_E2E_BASE="http://${TARGET_HOST}:${HERMES_NODE_PORT}" \
+    HERMES_E2E_BASE="https://${TARGET_HOST}:${HERMES_NODE_PORT}" \
         HERMES_NAMESPACE="${HERMES_NAMESPACE}" \
         "$e2e" || warn "E2E reported issues — see above"
 }
@@ -488,7 +488,7 @@ REMOTE
 
 print_summary() {
     local total=$((SECONDS - DEPLOY_START))
-    local url="http://${TARGET_HOST}:${HERMES_NODE_PORT}"
+    local url="https://${TARGET_HOST}:${HERMES_NODE_PORT}"
     # shellcheck source=lib/resolve-zyvor-sibling.sh
     source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh" 2>/dev/null || true
     local smoke="./scripts/test-all-features-remote.sh ${TARGET_HOST} ${TARGET_USER}"
@@ -504,8 +504,8 @@ print_summary() {
     printf "  ${C_OK}✓${C_RST}  ${C_BOLD}Deploy complete${C_RST}  ${C_DIM}%ds total${C_RST}\n\n" "$total"
     printf "  ${C_BOLD}┌──────────────────────────────────────────────────────────┐${C_RST}\n"
     printf "  ${C_BOLD}│${C_RST}  ${C_BOLD}%-14s${C_RST}  %s/%-30s${C_BOLD}│${C_RST}\n"  "Hermes"    "${url}" ""
-    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -sf %s/healthz%-20s${C_RST}${C_BOLD}│${C_RST}\n"  "Health"    "${url}" ""
-    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -sf %s/api/v1/apps%-14s${C_RST}${C_BOLD}│${C_RST}\n" "API"       "${url}" ""
+    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -skf %s/healthz%-19s${C_RST}${C_BOLD}│${C_RST}\n"  "Health"    "${url}" ""
+    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -skf %s/api/v1/apps%-13s${C_RST}${C_BOLD}│${C_RST}\n" "API"       "${url}" ""
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Namespace" "${HERMES_NAMESPACE}"
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Log"       "${DEPLOY_LOG}"
     printf "  ${C_BOLD}└──────────────────────────────────────────────────────────┘${C_RST}\n\n"

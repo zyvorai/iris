@@ -1,7 +1,7 @@
 {{- $publicBase := .Values.controller.publicBaseUrl -}}
 {{- if not $publicBase -}}
 {{- if eq .Values.service.type "NodePort" -}}
-{{- $publicBase = printf "http://%s:%v" .Values.global.domain (.Values.service.nodePort | default .Values.global.hermesPort) -}}
+{{- $publicBase = printf "https://%s:%v" .Values.global.domain (.Values.service.nodePort | default .Values.global.hermesPort) -}}
 {{- else -}}
 {{- $publicBase = printf "https://%s" .Values.ingress.host -}}
 {{- end -}}
@@ -62,11 +62,13 @@ spec:
           image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag }}"
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
-            - name: http
+            - name: https
               containerPort: {{ .Values.global.hermesPort }}
           env:
             - name: HERMES_BIND
               value: {{ .Values.server.bind | quote }}
+            - name: HERMES_TLS_SAN_HOSTS
+              value: {{ .Values.global.domain | quote }}
             - name: HERMES_DB_PATH
               value: {{ .Values.database.path | quote }}
             - name: HERMES_DEFAULT_USER
@@ -161,12 +163,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: https
+              scheme: HTTPS
             initialDelaySeconds: 8
           readinessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: https
+              scheme: HTTPS
             initialDelaySeconds: 4
           volumeMounts:
             - name: data
