@@ -953,19 +953,27 @@ a:hover > .app-icon,
   place-items: center;
   font-weight: 700;
   flex-shrink: 0;
+  color: #fff;
+  box-shadow: 0 8px 20px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.18s ease;
 }
 
-.space-infrastructure .space-tile-icon { background: rgba(251, 191, 36, 0.18); color: #fde68a; }
-.space-zeus-os .space-tile-icon { background: rgba(240, 88, 58, 0.2); color: #f47a60; }
-.space-consolehub .space-tile-icon { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; }
-.space-databases .space-tile-icon { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
-.space-monitoring .space-tile-icon { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
-.space-security .space-tile-icon { background: rgba(52, 211, 153, 0.18); color: #6ee7b7; }
-.space-storage .space-tile-icon { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
-.space-developer .space-tile-icon { background: rgba(251, 191, 36, 0.18); color: #fde68a; }
-.space-virtualization .space-tile-icon { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; }
-.space-ai .space-tile-icon { background: rgba(232, 121, 249, 0.18); color: #f0abfc; }
-.space-other .space-tile-icon { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+.hub-link-card:hover .space-tile-icon,
+a:hover > .space-tile-icon {
+  transform: scale(1.06) rotate(-1deg);
+}
+
+.space-infrastructure .space-tile-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
+.space-zeus-os .space-tile-icon { background: linear-gradient(135deg, #c2410c 0%, #f97316 100%); --tile-glow: rgba(194, 65, 12, 0.4); }
+.space-consolehub .space-tile-icon { background: linear-gradient(135deg, #7c3aed 0%, #c4b5fd 100%); --tile-glow: rgba(124, 58, 237, 0.4); }
+.space-databases .space-tile-icon { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
+.space-monitoring .space-tile-icon { background: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); --tile-glow: rgba(234, 88, 12, 0.4); }
+.space-security .space-tile-icon { background: linear-gradient(135deg, #059669 0%, #6ee7b7 100%); --tile-glow: rgba(5, 150, 105, 0.4); }
+.space-storage .space-tile-icon { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
+.space-developer .space-tile-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
+.space-virtualization .space-tile-icon { background: linear-gradient(135deg, #7c3aed 0%, #c4b5fd 100%); --tile-glow: rgba(124, 58, 237, 0.4); }
+.space-ai .space-tile-icon { background: linear-gradient(135deg, #c026d3 0%, #f0abfc 100%); --tile-glow: rgba(192, 38, 211, 0.4); }
+.space-other .space-tile-icon { background: linear-gradient(135deg, #475569 0%, #94a3b8 100%); --tile-glow: rgba(71, 85, 105, 0.4); }
 
 .space-list {
   display: grid;
@@ -2507,33 +2515,6 @@ a:hover > .app-icon,
   opacity: 0.85;
 }
 
-.hermes-nb-brand-icon {
-  position: relative;
-  width: 2.25rem;
-  height: 2.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.625rem;
-  border: 1px solid rgba(240, 88, 58, 0.25);
-  background: linear-gradient(135deg, rgba(240, 88, 58, 0.15), rgba(168, 85, 247, 0.10));
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.hermes-nb-brand-icon-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.10) via transparent, rgba(59,130,246,0.10));
-}
-
-.hermes-nb-hex-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  color: #60A5FA;
-  position: relative;
-}
-
 .hermes-nb-brand-text {
   min-width: 0;
 }
@@ -2966,10 +2947,6 @@ a:hover > .app-icon,
   color: #b23705 !important;
 }
 
-:root[data-theme='light'] .hermes-nb-hex-icon {
-  color: #cc420a;
-}
-
 :root[data-theme='light'] .app-menu-danger,
 :root[data-theme='light'] .federated-action-error {
   color: #b3261e;
@@ -3002,40 +2979,8 @@ a:hover > .app-icon,
   background: var(--chrome-72);
 }
 
-:root[data-theme='light'] .activity-icon,
-:root[data-theme='light'] .space-zeus-os .space-tile-icon {
+:root[data-theme='light'] .activity-icon {
   color: #b23705;
-}
-
-:root[data-theme='light'] .space-infrastructure .space-tile-icon,
-:root[data-theme='light'] .space-developer .space-tile-icon {
-  color: #b45309;
-}
-
-:root[data-theme='light'] .space-consolehub .space-tile-icon,
-:root[data-theme='light'] .space-virtualization .space-tile-icon {
-  color: #7c3aed;
-}
-
-:root[data-theme='light'] .space-databases .space-tile-icon,
-:root[data-theme='light'] .space-storage .space-tile-icon {
-  color: #0369a1;
-}
-
-:root[data-theme='light'] .space-monitoring .space-tile-icon {
-  color: #c2410c;
-}
-
-:root[data-theme='light'] .space-security .space-tile-icon {
-  color: #0f7b4f;
-}
-
-:root[data-theme='light'] .space-ai .space-tile-icon {
-  color: #a21caf;
-}
-
-:root[data-theme='light'] .space-other .space-tile-icon {
-  color: #475569;
 }
 
 /* Reset old left-rail layout */

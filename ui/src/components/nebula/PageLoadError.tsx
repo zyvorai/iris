@@ -19,7 +19,9 @@ export default function PageLoadError({
   return (
     <GlassPanel className="glass-panel-section page-load-error" data-testid="page-load-error">
       <div className="page-load-error-inner">
-        <AlertTriangle size={28} className="page-load-error-icon" aria-hidden />
+        <span className="page-load-error-icon" aria-hidden>
+          <AlertTriangle size={22} />
+        </span>
         <h2 className="section-title">{title}</h2>
         <p className="body-text">{description}</p>
         <Button variant="primary" onClick={onRetry}>

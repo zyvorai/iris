@@ -14,7 +14,6 @@ import {
   Grid3X3,
   HeartPulse,
   HelpCircle,
-  Hexagon,
   Home,
   Keyboard,
   Layers,
@@ -30,6 +29,8 @@ import {
 } from 'lucide-react'
 import { NavLink, Link } from 'react-router-dom'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
+import GlyphTile from './nebula/GlyphTile'
+import PulseGlyph from './icons/PulseGlyph'
 import { hermesApi } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
 import { useAiStatus } from '../hooks/useZyraAiInsight'
@@ -191,10 +192,7 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
         <div className="hermes-nb-row1">
           <div className="hermes-nb-brand-area">
             <Link to="/" className="hermes-nb-brand" onClick={() => setMobileOpen(false)}>
-              <div className="hermes-nb-brand-icon">
-                <div className="hermes-nb-brand-icon-bg" />
-                <Hexagon className="hermes-nb-hex-icon" />
-              </div>
+              <GlyphTile tone="brand" icon={<PulseGlyph />} size="md" />
               <div className="hermes-nb-brand-text">
                 <span className="hermes-nb-brand-name">Hermes</span>
                 <span className="hermes-nb-brand-sub">Service Launchpad</span>

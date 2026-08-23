@@ -22,7 +22,9 @@ export default function MetricCard({ icon: Icon, label, value, sub, to, warn, to
   const panel = (
     <GlassPanel className={`metric-card${toneClass ? ` ${toneClass}` : ''}`}>
       <div className="metric-card-head">
-        <Icon size={14} aria-hidden />
+        <span className="metric-card-icon" aria-hidden>
+          <Icon size={13} />
+        </span>
         <span>{label}</span>
       </div>
       <p className="metric-card-value">{value}</p>

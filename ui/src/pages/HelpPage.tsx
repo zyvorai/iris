@@ -29,7 +29,7 @@ export default function HelpPage() {
 
           <div className="help-grid" style={{ marginTop: '1.25rem' }}>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Search size={18} />
+              <span className="hub-icon-tile hub-icon-tile-1"><Search size={18} /></span>
               <h3>Spotlight</h3>
               <p>
                 Press <kbd>⌘K</kbd> to search apps, routes, and navigation. Prefixes: <code>owner:</code>, <code>env:</code>, <code>depends:</code>, <code>ai:</code>
@@ -42,7 +42,7 @@ export default function HelpPage() {
               </p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Sparkles size={18} />
+              <span className="hub-icon-tile hub-icon-tile-2"><Sparkles size={18} /></span>
               <h3>Zyra AI insights</h3>
               <p>
                 {aiStatus.data?.llmConfigured
@@ -56,17 +56,17 @@ export default function HelpPage() {
               </p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Rocket size={18} />
+              <span className="hub-icon-tile hub-icon-tile-3"><Rocket size={18} /></span>
               <h3>Launch apps</h3>
               <p>Published apps open through the gateway at /launchpad/…</p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Compass size={18} />
+              <span className="hub-icon-tile hub-icon-tile-4"><Compass size={18} /></span>
               <h3>Discovery</h3>
               <p>Annotate services with hermes.zyvor.dev/* labels or let Hermes infer routes.</p>
             </article>
             <article className="hub-link-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Globe size={18} />
+              <span className="hub-icon-tile hub-icon-tile-5"><Globe size={18} /></span>
               <h3>Federation</h3>
               <p>Configure HERMES_FEDERATED_CLUSTERS to merge remote catalogs.</p>
             </article>

@@ -144,7 +144,7 @@ export default function ActivityPage() {
               <p className="section-label">Activity</p>
               <p className="body-text">Audit log of launches, discovery, shares, and pins</p>
             </div>
-            <span className="nebula-status-badge status-unknown">{events.length} events</span>
+            <span className="nebula-status-badge status-unknown">{events.length} loaded</span>
             <AskZyraButton compact command="activity insight" />
             <Button variant="ghost" className="nebula-btn-compact" onClick={() => exportAuditCsv(events)} disabled={!events.length}>
               <Download size={12} /> Export

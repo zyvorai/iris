@@ -44,6 +44,88 @@
   padding: 1rem 1.25rem;
 }
 
+/* Glyph Tile — glossy gradient icon badge (App Store-tile style) */
+.glyph-tile {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.glyph-tile-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+}
+
+.glyph-tile-sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.glyph-tile-md {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+}
+
+.glyph-tile-md svg {
+  width: 18px;
+  height: 18px;
+}
+
+.glyph-tile-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+}
+
+.glyph-tile-lg svg {
+  width: 24px;
+  height: 24px;
+}
+
+.glyph-tile-brand {
+  background: linear-gradient(135deg, #f0583a 0%, #f89e8a 100%);
+  box-shadow: 0 8px 20px -4px rgba(240, 88, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-ai {
+  background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+  box-shadow: 0 8px 20px -4px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-ok {
+  background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%);
+  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-warn {
+  background: linear-gradient(135deg, #eab308 0%, #fde68a 100%);
+  box-shadow: 0 8px 20px -4px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-critical {
+  background: linear-gradient(135deg, #e11d48 0%, #fda4af 100%);
+  box-shadow: 0 8px 20px -4px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-info {
+  background: linear-gradient(135deg, #0a84ff 0%, #7dd3fc 100%);
+  box-shadow: 0 8px 20px -4px rgba(10, 132, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-cyan {
+  background: linear-gradient(135deg, #0891b2 0%, #67e8f9 100%);
+  box-shadow: 0 8px 20px -4px rgba(8, 145, 178, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glyph-tile-pink {
+  background: linear-gradient(135deg, #db2777 0%, #f9a8d4 100%);
+  box-shadow: 0 8px 20px -4px rgba(219, 39, 119, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
 /* Buttons — Aether btn-primary + quick-link-chip */
 .nebula-btn {
   display: inline-flex;
@@ -411,6 +493,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(251, 191, 36, 0.22) !important;
 }
+.metric-card-warn .metric-card-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
 
 .metric-card-tone-blue {
   background:
@@ -418,7 +501,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(240, 88, 58, 0.24) !important;
 }
-.metric-card-tone-blue .metric-card-head svg { color: #f0583a; }
+.metric-card-tone-blue .metric-card-icon { background: linear-gradient(135deg, #f0583a 0%, #f9a58c 100%); --tile-glow: rgba(240, 88, 58, 0.4); }
 
 .metric-card-tone-green {
   background:
@@ -426,7 +509,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(16, 185, 129, 0.26) !important;
 }
-.metric-card-tone-green .metric-card-head svg { color: #10b981; }
+.metric-card-tone-green .metric-card-icon { background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%); --tile-glow: rgba(16, 185, 129, 0.4); }
 
 .metric-card-tone-purple {
   background:
@@ -434,7 +517,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(168, 85, 247, 0.26) !important;
 }
-.metric-card-tone-purple .metric-card-head svg { color: #a855f7; }
+.metric-card-tone-purple .metric-card-icon { background: linear-gradient(135deg, #a855f7 0%, #d8b4fe 100%); --tile-glow: rgba(168, 85, 247, 0.4); }
 
 .metric-card-tone-cyan {
   background:
@@ -442,7 +525,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(6, 182, 212, 0.26) !important;
 }
-.metric-card-tone-cyan .metric-card-head svg { color: #06b6d4; }
+.metric-card-tone-cyan .metric-card-icon { background: linear-gradient(135deg, #06b6d4 0%, #67e8f9 100%); --tile-glow: rgba(6, 182, 212, 0.4); }
 
 .metric-card-tone-pink {
   background:
@@ -450,7 +533,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(236, 72, 153, 0.26) !important;
 }
-.metric-card-tone-pink .metric-card-head svg { color: #ec4899; }
+.metric-card-tone-pink .metric-card-icon { background: linear-gradient(135deg, #ec4899 0%, #f9a8d4 100%); --tile-glow: rgba(236, 72, 153, 0.4); }
 
 .metric-card-tone-orange {
   background:
@@ -458,7 +541,25 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(249, 115, 22, 0.26) !important;
 }
-.metric-card-tone-orange .metric-card-head svg { color: #f97316; }
+.metric-card-tone-orange .metric-card-icon { background: linear-gradient(135deg, #f97316 0%, #fdba74 100%); --tile-glow: rgba(249, 115, 22, 0.4); }
+
+.metric-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 0.55rem;
+  flex-shrink: 0;
+  color: #fff;
+  background: var(--bg-chip);
+  box-shadow: 0 6px 16px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.18s ease;
+}
+
+.metric-card-link:hover .metric-card-icon {
+  transform: scale(1.08) rotate(-2deg);
+}
 
 .metric-card-head {
   display: flex;
@@ -1217,7 +1318,7 @@
   flex-wrap: wrap;
 }
 
-.section-head-nebula > div:first-child {
+.section-head-nebula > div {
   flex: 1 1 12rem;
   min-width: 0;
 }
@@ -1322,7 +1423,16 @@
 }
 
 .page-load-error-icon {
-  color: #fbbf24;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-md);
+  color: #fff;
+  background: linear-gradient(135deg, #dc2626 0%, #fca5a5 100%);
+  box-shadow: 0 8px 20px -6px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* Empty state */
@@ -1541,6 +1651,30 @@
   border-color: rgba(240, 88, 58, 0.3);
   box-shadow: var(--shadow-glow-blue);
 }
+
+.hub-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  flex-shrink: 0;
+  color: #fff;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 8px 20px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.18s ease;
+}
+
+.hub-link-card:hover .hub-icon-tile {
+  transform: scale(1.06) rotate(-2deg);
+}
+
+.hub-icon-tile-1 { background: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%); --tile-glow: rgba(37, 99, 235, 0.4); }
+.hub-icon-tile-2 { background: linear-gradient(135deg, #9333ea 0%, #d8b4fe 100%); --tile-glow: rgba(147, 51, 234, 0.4); }
+.hub-icon-tile-3 { background: linear-gradient(135deg, #059669 0%, #6ee7b7 100%); --tile-glow: rgba(5, 150, 105, 0.4); }
+.hub-icon-tile-4 { background: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); --tile-glow: rgba(234, 88, 12, 0.4); }
+.hub-icon-tile-5 { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
 
 .hub-link-card h3 {
   margin: 0 0 0.25rem;
@@ -1969,8 +2103,7 @@
 }
 
 :root[data-theme='light'] .service-error,
-:root[data-theme='light'] .service-status-summary,
-:root[data-theme='light'] .page-load-error-icon {
+:root[data-theme='light'] .service-status-summary {
   color: #8a5a00;
 }
 

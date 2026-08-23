@@ -124,7 +124,9 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
 
           {error && !loading ? (
             <div className="diagnosis-drawer-error" data-testid="diagnosis-error">
-              <AlertTriangle size={22} aria-hidden />
+              <span className="page-load-error-icon" aria-hidden>
+                <AlertTriangle size={18} />
+              </span>
               <p className="body-text">Could not load diagnosis for this service.</p>
               <Button variant="primary" onClick={retry}>
                 Retry
