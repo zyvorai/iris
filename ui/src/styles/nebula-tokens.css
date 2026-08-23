@@ -4,8 +4,10 @@
 :root {
   color-scheme: dark;
 
-  /* Departures Hall palette — the only colours this app uses; status is the sole
-     signal allowed to deviate from void/board/chalk/slate. */
+  /* Zyvor palette — matches the hypersdk-web marketing site: a single
+     rust-orange brand accent (text-safe, used for labels/links) plus a
+     brighter fixed fill-accent reserved for icon-tile gradients/glow only,
+     never for text. Status colours (go/hold/stop) are independent. */
   --void: #050505;
   --board: #0a0a0a;
   --board-2: #14171c;
@@ -14,8 +16,9 @@
   --edge-2: rgba(255, 255, 255, 0.14);
   --chalk: #f1f5f9;
   --slate: #93a1b3;
-  --sodium: #f5a524;
-  --sodium-deep: #c9860e;
+  --sodium: #f0583a;
+  --sodium-deep: #d94b32;
+  --accent-fill: #ff5a15;
   --relay: #7c8cff;
   --go: #34d399;
   --go-bg: rgba(52, 211, 153, 0.12);
@@ -33,7 +36,7 @@
   --bg-chip: rgba(11, 15, 20, 0.65);
 
   --border-soft: var(--edge);
-  --border-strong: rgba(245, 165, 36, 0.28);
+  --border-strong: rgba(240, 88, 58, 0.28);
   --border-muted: rgba(255, 255, 255, 0.045);
 
   --text-primary: var(--chalk);
@@ -64,7 +67,7 @@
     0 16px 50px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.20), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-glow-orange: 0 0 0 1px rgba(245, 165, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-orange: 0 0 0 1px rgba(240, 88, 58, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 
@@ -76,7 +79,7 @@
 
   --font-display: 'Archivo Variable', 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
-  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
   --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
@@ -111,7 +114,7 @@
   --hermes-muted: var(--text-muted);
   --hermes-border: var(--border-soft);
   --hermes-accent: var(--aether-primary);
-  --hermes-accent-soft: rgba(245, 165, 36, 0.12);
+  --hermes-accent-soft: rgba(240, 88, 58, 0.12);
   --hermes-green: var(--accent-green);
   --hermes-amber: var(--accent-yellow);
   --hermes-red: var(--accent-red);
@@ -124,8 +127,8 @@
   --zeus-bg-base: var(--bg-root);
   --zeus-bg-slate: var(--bg-elevated);
   --zeus-primary: var(--aether-primary);
-  --zeus-primary-soft: rgba(245, 165, 36, 0.18);
-  --zeus-primary-border: rgba(245, 165, 36, 0.35);
+  --zeus-primary-soft: rgba(240, 88, 58, 0.18);
+  --zeus-primary-border: rgba(240, 88, 58, 0.35);
   --zeus-success: var(--accent-green);
   --zeus-warning: var(--accent-yellow);
   --zeus-danger: var(--accent-red);
@@ -175,8 +178,8 @@
   --edge-2: rgba(20, 22, 26, 0.16);
   --chalk: #14161a;
   --slate: #5b6472;
-  --sodium: #b45309;
-  --sodium-deep: #92400e;
+  --sodium: #cc420a;
+  --sodium-deep: #b23705;
   --relay: #4c5fe0;
   --go: #0f7b4f;
   --go-bg: #e8f5ef;
@@ -192,7 +195,7 @@
   --bg-chip: rgba(20, 22, 26, 0.045);
 
   --border-soft: var(--edge);
-  --border-strong: rgba(180, 83, 9, 0.24);
+  --border-strong: rgba(204, 66, 10, 0.24);
   --border-muted: rgba(20, 22, 26, 0.07);
 
   --text-primary: var(--chalk);
@@ -216,7 +219,7 @@
     0 8px 24px rgba(20, 22, 26, 0.08),
     0 2px 6px rgba(20, 22, 26, 0.04);
   --shadow-glow-blue: 0 0 0 1px rgba(76, 95, 224, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-orange: 0 0 0 1px rgba(180, 83, 9, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-orange: 0 0 0 1px rgba(204, 66, 10, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
 
@@ -252,10 +255,10 @@
 
   /* Bridge tokens — surfaces/borders some legacy components still read directly */
   --hermes-surface: var(--bg-panel);
-  --hermes-accent-soft: rgba(180, 83, 9, 0.10);
+  --hermes-accent-soft: rgba(204, 66, 10, 0.10);
   --hermes-glass-chrome-bg: var(--dropdown-bg);
   --zeus-bg-slate: var(--bg-elevated);
-  --zeus-primary-soft: rgba(180, 83, 9, 0.14);
+  --zeus-primary-soft: rgba(204, 66, 10, 0.14);
   --zeus-primary-border: var(--border-strong);
   --zeus-info: #0284c7;
   --zeus-border: var(--border-soft);

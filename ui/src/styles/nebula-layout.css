@@ -16,18 +16,18 @@ body {
   color: var(--text-primary);
   background-color: var(--bg-root);
   background-image:
-    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(245, 165, 36, 0.14), transparent 42%),
+    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(240, 88, 58, 0.14), transparent 42%),
     radial-gradient(ellipse 60% 40% at 88% 4%, rgba(255, 90, 21, 0.08), transparent 38%),
-    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(245, 165, 36, 0.06), transparent 48%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(240, 88, 58, 0.06), transparent 48%),
     linear-gradient(180deg, #050505 0%, #08090b 38%, #0a0a0a 100%);
   -webkit-font-smoothing: antialiased;
 }
 
 :root[data-theme='hall'] body {
   background-image:
-    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(180, 83, 9, 0.07), transparent 42%),
+    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(204, 66, 10, 0.07), transparent 42%),
     radial-gradient(ellipse 60% 40% at 88% 4%, rgba(255, 90, 21, 0.04), transparent 38%),
-    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(180, 83, 9, 0.03), transparent 48%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(204, 66, 10, 0.03), transparent 48%),
     linear-gradient(180deg, #ffffff 0%, #f8f9fa 38%, #f5f6f8 100%);
 }
 

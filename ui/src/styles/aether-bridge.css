@@ -34,13 +34,13 @@
 .glass-hero {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.12)),
-    radial-gradient(circle at top right, rgba(245, 165, 36, 0.10), transparent 42%),
+    radial-gradient(circle at top right, rgba(240, 88, 58, 0.10), transparent 42%),
     linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(11, 15, 20, 0.94) 100%) !important;
 }
 
 .zeus-card:hover,
 .space-row.zeus-card:hover {
-  border-color: rgba(245, 165, 36, 0.18) !important;
+  border-color: rgba(240, 88, 58, 0.18) !important;
 }
 
 .section-head h2 {
@@ -49,13 +49,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--aether-primary, #f5a524) !important;
+  color: var(--aether-primary, #f0583a) !important;
 }
 
 .hero-kicker {
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
-  color: var(--aether-primary, #f5a524) !important;
+  color: var(--aether-primary, #f0583a) !important;
 }
 
 .hero-title {
@@ -83,14 +83,14 @@
 .app-card:hover,
 .space-row.zeus-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px -14px rgba(180, 83, 9, 0.35);
+  box-shadow: 0 14px 30px -14px rgba(204, 66, 10, 0.35);
 }
 
 .metric-tile,
 .stat-pill {
   border: 1px solid var(--border-soft) !important;
   background:
-    radial-gradient(circle at 90% 10%, rgba(245, 165, 36, 0.12), transparent 38%),
+    radial-gradient(circle at 90% 10%, rgba(240, 88, 58, 0.12), transparent 38%),
     linear-gradient(165deg, rgba(18, 22, 28, 0.92) 0%, rgba(11, 15, 20, 0.96) 100%) !important;
   border-radius: var(--radius-md, 12px) !important;
 }
@@ -117,9 +117,9 @@
 }
 
 .chip-accent {
-  color: #f5a524;
-  border-color: rgba(245, 165, 36, 0.28);
-  background: rgba(245, 165, 36, 0.1);
+  color: #f0583a;
+  border-color: rgba(240, 88, 58, 0.28);
+  background: rgba(240, 88, 58, 0.1);
 }
 
 .chip-ok,
@@ -170,15 +170,15 @@
 
 .view-toggle button.active {
   color: #fff !important;
-  border-color: rgba(245, 165, 36, 0.38) !important;
-  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08)) !important;
-  box-shadow: 0 0 0 1px rgba(245, 165, 36, 0.12);
+  border-color: rgba(240, 88, 58, 0.38) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
+  box-shadow: 0 0 0 1px rgba(240, 88, 58, 0.12);
 }
 
 .filter-bar button.active {
   color: #fff !important;
-  border-color: rgba(245, 165, 36, 0.38) !important;
-  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08)) !important;
+  border-color: rgba(240, 88, 58, 0.38) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
 }
 
 .filter-bar input,
@@ -206,7 +206,7 @@
 .cluster-filters select:focus,
 .graph-filters select:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.18);
+  box-shadow: 0 0 0 2px rgba(240, 88, 58, 0.18);
 }
 
 /* ── Tables & lists ── */
@@ -221,7 +221,7 @@
 }
 
 .cluster-row:hover:not(.cluster-head) {
-  background: rgba(245, 165, 36, 0.06);
+  background: rgba(240, 88, 58, 0.06);
 }
 
 .cluster-head {
@@ -245,7 +245,7 @@
 }
 
 .section-link:hover {
-  color: #f5a524;
+  color: #f0583a;
 }
 
 /* ── Workspace & health chips ── */
@@ -271,8 +271,8 @@
 
 .workspace-chip.active {
   color: #ffd4c2 !important;
-  border-color: rgba(245, 165, 36, 0.28) !important;
-  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08)) !important;
+  border-color: rgba(240, 88, 58, 0.28) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
 }
 
 .zeus-health-chip {
@@ -310,8 +310,8 @@
 }
 
 .hermes-help-link:hover {
-  color: #f5a524;
-  background: rgba(245, 165, 36, 0.08);
+  color: #f0583a;
+  background: rgba(240, 88, 58, 0.08);
 }
 
 /* ── Palette & modals ── */
@@ -337,8 +337,8 @@
 
 .hermes-nb-dropdown-item.active,
 .hermes-nb-drawer-item.active {
-  color: var(--aether-primary, #f5a524) !important;
-  background: rgba(245, 165, 36, 0.1) !important;
+  color: var(--aether-primary, #f0583a) !important;
+  background: rgba(240, 88, 58, 0.1) !important;
 }
 
 /* ── Detail pages ── */
@@ -457,11 +457,11 @@
 /* ── Active/selected pill text — hardcoded near-white, invisible on light bg ── */
 :root[data-theme='hall'] .view-toggle button.active,
 :root[data-theme='hall'] .filter-bar button.active {
-  color: #92400e !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='hall'] .workspace-chip.active {
-  color: #92400e !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='hall'] .attention-filters button.active,
@@ -471,7 +471,7 @@
 :root[data-theme='hall'] .hermes-nb-drawer-item.active,
 :root[data-theme='hall'] .mission-control-filters button.active,
 :root[data-theme='hall'] .filter-chip.active {
-  color: #92400e;
+  color: #b23705;
 }
 
 /* ── Remaining pastel chip/link text tuned for dark surfaces ── */
@@ -479,7 +479,7 @@
 :root[data-theme='hall'] .section-link:hover,
 :root[data-theme='hall'] .workspace-chip:hover:not(:disabled),
 :root[data-theme='hall'] .hermes-help-link:hover {
-  color: #92400e;
+  color: #b23705;
 }
 
 :root[data-theme='hall'] .chip-ok,
@@ -493,7 +493,7 @@
 :root[data-theme='hall'] .status-chip.status-degraded,
 :root[data-theme='hall'] .zeus-health-chip[data-tone='warn'],
 :root[data-theme='hall'] .app-problem {
-  color: #b45309;
+  color: #cc420a;
 }
 
 :root[data-theme='hall'] .status-chip.status-critical,

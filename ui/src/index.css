@@ -89,10 +89,10 @@ button {
 }
 
 .zeus-card-active {
-  border-color: rgba(245, 165, 36, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow:
-    0 0 0 1px rgba(245, 165, 36, 0.12) inset,
-    0 12px 32px -16px rgba(245, 165, 36, 0.25);
+    0 0 0 1px rgba(240, 88, 58, 0.12) inset,
+    0 12px 32px -16px rgba(240, 88, 58, 0.25);
 }
 
 .hermes-topbar,
@@ -132,8 +132,8 @@ button {
 .hermes-nav a.active,
 .hermes-nav a:hover {
   color: var(--hermes-text);
-  background: rgba(245, 165, 36, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(245, 165, 36, 0.2);
+  background: rgba(240, 88, 58, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(240, 88, 58, 0.2);
 }
 
 .hermes-search-btn {
@@ -188,7 +188,7 @@ button {
 
 .app-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(245, 165, 36, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -200,8 +200,8 @@ button {
 }
 
 .chip-env {
-  color: #f5a524;
-  border-color: rgba(245, 165, 36, 0.35);
+  color: #f0583a;
+  border-color: rgba(240, 88, 58, 0.35);
 }
 
 .app-card-top {
@@ -284,14 +284,14 @@ a:hover > .app-icon,
 }
 
 .btn-primary {
-  background: linear-gradient(145deg, rgba(245, 165, 36, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border-color: rgba(245, 165, 36, 0.4);
-  color: #f5a524;
+  background: linear-gradient(145deg, rgba(240, 88, 58, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(240, 88, 58, 0.4);
+  color: #f0583a;
 }
 
 .btn-primary:hover {
-  border-color: rgba(245, 165, 36, 0.55);
-  background: linear-gradient(145deg, rgba(245, 165, 36, 0.32) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(240, 88, 58, 0.55);
+  background: linear-gradient(145deg, rgba(240, 88, 58, 0.32) 0%, rgba(15, 23, 42, 0.9) 100%);
 }
 
 .hero-stats {
@@ -368,7 +368,7 @@ a:hover > .app-icon,
 
 .palette-item:hover,
 .palette-item.selected {
-  background: rgba(245, 165, 36, 0.12);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .detail-grid {
@@ -644,7 +644,7 @@ a:hover > .app-icon,
 
 .view-toggle button.active {
   background: var(--hermes-accent-soft);
-  color: #f5a524;
+  color: #f0583a;
 }
 
 .filter-count {
@@ -727,7 +727,7 @@ a:hover > .app-icon,
 }
 
 .chip-accent {
-  color: #f5a524;
+  color: #f0583a;
   border-color: rgba(147, 197, 253, 0.35);
 }
 
@@ -877,7 +877,7 @@ a:hover > .app-icon,
 
 .space-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(245, 165, 36, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -910,8 +910,8 @@ a:hover > .app-icon,
   font-weight: 700;
   flex-shrink: 0;
   color: #fff;
-  background: linear-gradient(135deg, #b45309 0%, #ff5a15 60%, #ffb27a 130%);
-  box-shadow: 0 6px 16px -4px rgba(180, 83, 9, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #cc420a 0%, #ff5a15 60%, #ffb27a 130%);
+  box-shadow: 0 6px 16px -4px rgba(204, 66, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.18s ease;
 }
 
@@ -1071,9 +1071,9 @@ a:hover > .space-tile-icon {
 }
 
 .btn-accent {
-  background: rgba(245, 165, 36, 0.18);
-  border-color: rgba(245, 165, 36, 0.4);
-  color: #f5a524;
+  background: rgba(240, 88, 58, 0.18);
+  border-color: rgba(240, 88, 58, 0.4);
+  color: #f0583a;
 }
 
 .share-panel h3 {
@@ -1137,7 +1137,7 @@ a:hover > .space-tile-icon {
 }
 
 .dep-links a {
-  color: #f5a524;
+  color: #f0583a;
   text-decoration: none;
 }
 
@@ -1177,7 +1177,7 @@ a:hover > .space-tile-icon {
 
 .mission-control-space-head a {
   font-size: 0.72rem;
-  color: #f5a524;
+  color: #f0583a;
   text-decoration: none;
 }
 
@@ -1274,7 +1274,7 @@ a:hover > .space-tile-icon {
 }
 
 .app-graph-node:hover {
-  border-color: rgba(245, 165, 36, 0.45);
+  border-color: rgba(240, 88, 58, 0.45);
   transform: translateY(-1px);
 }
 
@@ -1283,8 +1283,8 @@ a:hover > .space-tile-icon {
 }
 
 .graph-node-focus {
-  border-color: rgba(245, 165, 36, 0.65);
-  box-shadow: 0 0 0 1px rgba(245, 165, 36, 0.25);
+  border-color: rgba(240, 88, 58, 0.65);
+  box-shadow: 0 0 0 1px rgba(240, 88, 58, 0.25);
 }
 
 .graph-node-ns {
@@ -1337,8 +1337,8 @@ a:hover > .space-tile-icon {
 }
 
 .workspace-chip.active {
-  border-color: rgba(245, 165, 36, 0.28);
-  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08));
+  border-color: rgba(240, 88, 58, 0.28);
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
   color: #ffd4c2;
 }
 
@@ -1348,7 +1348,7 @@ a:hover > .space-tile-icon {
 }
 
 .workspace-banner {
-  border-color: rgba(245, 165, 36, 0.25);
+  border-color: rgba(240, 88, 58, 0.25);
 }
 
 .activity-filters {
@@ -1379,8 +1379,8 @@ a:hover > .space-tile-icon {
   border-radius: 0.55rem;
   display: grid;
   place-items: center;
-  background: rgba(245, 165, 36, 0.12);
-  color: #f5a524;
+  background: rgba(240, 88, 58, 0.12);
+  color: #f0583a;
 }
 
 .activity-head {
@@ -1403,7 +1403,7 @@ a:hover > .space-tile-icon {
 }
 
 .activity-meta a {
-  color: #f5a524;
+  color: #f0583a;
   text-decoration: none;
 }
 
@@ -1454,8 +1454,8 @@ a:hover > .space-tile-icon {
 }
 
 .mesh-istio .mesh-route-kind {
-  background: rgba(245, 165, 36, 0.18);
-  color: #f5a524;
+  background: rgba(240, 88, 58, 0.18);
+  color: #f0583a;
 }
 
 .mesh-linkerd .mesh-route-kind {
@@ -1671,7 +1671,7 @@ a:hover > .space-tile-icon {
 }
 
 .palette-footer-link {
-  color: #f5a524;
+  color: #f0583a;
   text-decoration: none;
 }
 
@@ -1784,11 +1784,11 @@ a:hover > .space-tile-icon {
   display: block;
   margin-top: 0.25rem;
   font-size: 0.72rem;
-  color: #f5a524;
+  color: #f0583a;
 }
 
 .diagnose-action-list a {
-  color: #f5a524;
+  color: #f0583a;
 }
 
 .diagnose-copy-row {
@@ -1900,7 +1900,7 @@ a:hover > .space-tile-icon {
 }
 
 .platform-pulse-hero .hero-title em {
-  color: #f5a524;
+  color: #f0583a;
   font-style: normal;
 }
 
@@ -2026,8 +2026,8 @@ a:hover > .space-tile-icon {
 
 .service-tile:hover:not(.service-tile-disabled) {
   transform: translateY(-1px);
-  border-color: rgba(245, 165, 36, 0.25);
-  background: rgba(245, 165, 36, 0.06);
+  border-color: rgba(240, 88, 58, 0.25);
+  background: rgba(240, 88, 58, 0.06);
 }
 
 .service-tile.compact {
@@ -2115,9 +2115,9 @@ a:hover > .space-tile-icon {
 }
 
 .attention-filters button.active {
-  color: #f5a524;
-  border-color: rgba(245, 165, 36, 0.35);
-  background: rgba(245, 165, 36, 0.12);
+  color: #f0583a;
+  border-color: rgba(240, 88, 58, 0.35);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .attention-card {
@@ -2126,7 +2126,7 @@ a:hover > .space-tile-icon {
 }
 
 .attention-card:hover {
-  border-color: rgba(245, 165, 36, 0.22);
+  border-color: rgba(240, 88, 58, 0.22);
 }
 
 .attention-card-head {
@@ -2275,7 +2275,7 @@ a:hover > .space-tile-icon {
 
 .quick-launch-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(245, 165, 36, 0.3);
+  border-color: rgba(240, 88, 58, 0.3);
 }
 
 .quick-launch-tile span {
@@ -2317,7 +2317,7 @@ a:hover > .space-tile-icon {
 
 .quick-actions-menu button:hover,
 .quick-actions-link:hover {
-  background: rgba(245, 165, 36, 0.1);
+  background: rgba(240, 88, 58, 0.1);
 }
 
 
@@ -2339,9 +2339,9 @@ a:hover > .space-tile-icon {
 }
 
 .inspector-tabs button.active {
-  color: #f5a524;
-  border-color: rgba(245, 165, 36, 0.35);
-  background: rgba(245, 165, 36, 0.12);
+  color: #f0583a;
+  border-color: rgba(240, 88, 58, 0.35);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .inspector-facts {
@@ -2396,7 +2396,7 @@ a:hover > .space-tile-icon {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(180, 83, 9, 0.06), transparent 70%);
+  background: linear-gradient(90deg, rgba(204, 66, 10, 0.06), transparent 70%);
 }
 
 .hermes-nb-content {
@@ -2522,9 +2522,9 @@ a:hover > .space-tile-icon {
 }
 
 .hermes-nb-pill-primary {
-  border-color: rgba(245, 165, 36, 0.35) !important;
-  background: rgba(245, 165, 36, 0.12) !important;
-  color: #f5a524 !important;
+  border-color: rgba(240, 88, 58, 0.35) !important;
+  background: rgba(240, 88, 58, 0.12) !important;
+  color: #f0583a !important;
 }
 
 .hermes-nb-icon-pill {
@@ -2550,7 +2550,7 @@ a:hover > .space-tile-icon {
 .hermes-nb-icon-pill-refresh:hover,
 .hermes-nb-icon-pill-refresh:focus-visible {
   color: #f89e8a;
-  background: rgba(245, 165, 36, 0.14);
+  background: rgba(240, 88, 58, 0.14);
 }
 
 .hermes-nb-icon-pill-theme.is-sun:hover,
@@ -2626,7 +2626,7 @@ a:hover > .space-tile-icon {
 .hermes-nb-dropdown-item.active[data-tone='brand'],
 .hermes-nb-drawer-item.active[data-tone='brand'] {
   color: #f89e8a;
-  background: rgba(245, 165, 36, 0.12);
+  background: rgba(240, 88, 58, 0.12);
 }
 .hermes-nb-nav-pill.active[data-tone='ok'],
 .hermes-nb-dropdown-item.active[data-tone='ok'],
@@ -2697,8 +2697,8 @@ a:hover > .space-tile-icon {
 }
 
 .hermes-nb-dropdown-item.active {
-  color: #f5a524;
-  background: rgba(245, 165, 36, 0.12);
+  color: #f0583a;
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .hermes-nb-dropdown-item .hermes-nb-kbd {
@@ -2780,9 +2780,9 @@ a:hover > .space-tile-icon {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.875rem;
-  border: 1px solid rgba(245, 165, 36, 0.28);
-  background: rgba(245, 165, 36, 0.10);
-  color: #f5a524;
+  border: 1px solid rgba(240, 88, 58, 0.28);
+  background: rgba(240, 88, 58, 0.10);
+  color: #f0583a;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -2817,8 +2817,8 @@ a:hover > .space-tile-icon {
 }
 
 .hermes-nb-drawer-item.active {
-  background: rgba(245, 165, 36, 0.12);
-  color: #f5a524;
+  background: rgba(240, 88, 58, 0.12);
+  color: #f0583a;
 }
 
 /* Light theme — navbar chrome (hardcoded dark surfaces, not token-driven above) */
@@ -2831,7 +2831,7 @@ a:hover > .space-tile-icon {
 }
 
 :root[data-theme='hall'] .hermes-navbar::after {
-  background: linear-gradient(90deg, rgba(180, 83, 9, 0.04), transparent 70%);
+  background: linear-gradient(90deg, rgba(204, 66, 10, 0.04), transparent 70%);
 }
 
 :root[data-theme='hall'] .hermes-nb-pill,
@@ -2903,11 +2903,11 @@ a:hover > .space-tile-icon {
 :root[data-theme='hall'] .diagnose-action-list a,
 :root[data-theme='hall'] .platform-pulse-hero .hero-title em,
 :root[data-theme='hall'] .hermes-nb-drawer-cmd {
-  color: #92400e;
+  color: #b23705;
 }
 
 :root[data-theme='hall'] .hermes-nb-pill-primary {
-  color: #92400e !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='hall'] .app-menu-danger,
@@ -2916,7 +2916,7 @@ a:hover > .space-tile-icon {
 }
 
 :root[data-theme='hall'] .btn-warn {
-  color: #b45309;
+  color: #cc420a;
 }
 
 :root[data-theme='hall'] .mesh-linkerd .mesh-route-kind,
@@ -2943,7 +2943,7 @@ a:hover > .space-tile-icon {
 }
 
 :root[data-theme='hall'] .activity-icon {
-  color: #92400e;
+  color: #b23705;
 }
 
 /* Reset old left-rail layout */
