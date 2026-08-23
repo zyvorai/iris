@@ -63,7 +63,9 @@ export default function SpacesPage() {
                   <h3>{space.label}</h3>
                   <p>{space.description}</p>
                 </div>
-                <span className="nebula-status-badge status-healthy">{spaceCounts(published)[space.id]} apps</span>
+                <span className="nebula-status-badge status-healthy">
+                  {spaceCounts(published)[space.id]} app{spaceCounts(published)[space.id] === 1 ? '' : 's'}
+                </span>
               </Link>
             ))}
           </div>

@@ -201,7 +201,7 @@ async fn llm_app_insight(app: &App, diagnosis: &AppDiagnosis, cfg: &LlmConfig) -
         "cause": diagnosis.cause,
         "chain": chain,
     });
-    let system = "You are Zyra AI for Hermes Kubernetes app platform. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences for operators\",\"remediation\":[\"actionable step\"]}. Be concise and practical.";
+    let system = "You are Zyra AI for Hermes Kubernetes app platform. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences for operators\",\"remediation\":[\"actionable step\"]}. Be concise and practical. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Diagnose this service:\n{}", serde_json::to_string_pretty(&context).ok()?);
     let llm: LlmAppInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() && llm.explanation.trim().is_empty() {
@@ -317,7 +317,7 @@ async fn llm_fleet_insight(apps: &[App], summary: &ClusterSummary, cfg: &LlmConf
         "cluster": summary,
         "unhealthySample": unhealthy,
     });
-    let system = "You are Zyra AI fleet analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken services and shared namespaces.";
+    let system = "You are Zyra AI fleet analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken services and shared namespaces. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Summarize fleet health:\n{}", serde_json::to_string_pretty(&context).ok()?);
     let llm: LlmFleetInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() {
@@ -439,7 +439,7 @@ async fn llm_discovery_insight(discovery: &[App], cfg: &LlmConfig) -> Option<Dis
             })
         })
         .collect();
-    let system = "You are Zyra AI for Hermes discovery queue. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"suggestPublishIds\":[\"app-id\"]}. Prefer healthy observability and platform services.";
+    let system = "You are Zyra AI for Hermes discovery queue. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"suggestPublishIds\":[\"app-id\"]}. Prefer healthy observability and platform services. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Rank unpublished services to publish:\n{}", serde_json::to_string_pretty(&sample).ok()?);
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -556,7 +556,7 @@ async fn llm_namespace_insight(namespace: &str, apps: &[App], cfg: &LlmConfig) -
     if in_ns.is_empty() {
         return None;
     }
-    let system = "You are Zyra AI namespace analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}.";
+    let system = "You are Zyra AI namespace analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!(
         "Summarize namespace {namespace}:\n{}",
         serde_json::to_string_pretty(&in_ns).ok()?
@@ -673,7 +673,7 @@ async fn llm_graph_insight(graph: &AppGraph, cfg: &LlmConfig) -> Option<GraphIns
         .map(|n| serde_json::json!({"id": n.id, "label": n.label, "status": n.status, "namespace": n.namespace}))
         .collect();
     let context = serde_json::json!({ "unresolvedEdges": unresolved, "unhealthyNodes": broken });
-    let system = "You are Zyra AI topology analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken downstream dependencies.";
+    let system = "You are Zyra AI topology analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken downstream dependencies. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Analyze dependency graph:\n{}", serde_json::to_string_pretty(&context).ok()?);
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -788,7 +788,7 @@ async fn llm_owner_insight(owner: &str, apps: &[App], cfg: &LlmConfig) -> Option
     if sample.is_empty() {
         return None;
     }
-    let system = "You are Zyra AI team analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}.";
+    let system = "You are Zyra AI team analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Summarize owner team {owner}:\n{}", serde_json::to_string_pretty(&sample).ok()?);
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -864,7 +864,7 @@ pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
 
     let mut highlights: Vec<String> = unhealthy
         .iter()
-        .map(|e| format!("{} · {} ({})", e.app.display_name, e.cluster_name, e.app.status))
+        .map(|e| format!("{} ({}) · {} ({})", e.app.display_name, e.app.namespace, e.cluster_name, e.app.status))
         .take(4)
         .collect();
     if highlights.is_empty() {
@@ -901,7 +901,7 @@ async fn llm_federated_insight(entries: &[FederatedApp], cfg: &LlmConfig) -> Opt
             })
         })
         .collect();
-    let system = "You are Zyra AI federation analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize unhealthy remote services.";
+    let system = "You are Zyra AI federation analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize unhealthy remote services. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Federated catalog:\n{}", serde_json::to_string_pretty(&sample).ok()?);
     let llm: LlmFleetInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() {
@@ -1009,7 +1009,7 @@ async fn llm_activity_insight(events: &[AuditEvent], cfg: &LlmConfig) -> Option<
             })
         })
         .collect();
-    let system = "You are Zyra AI platform activity analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"]}. Surface operator patterns and anomalies.";
+    let system = "You are Zyra AI platform activity analyst for Hermes. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"]}. Surface operator patterns and anomalies. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
     let user = format!("Recent audit events:\n{}", serde_json::to_string_pretty(&sample).ok()?);
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]

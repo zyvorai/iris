@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, Server, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
+import GlyphTile, { type GlyphTileTone } from './nebula/GlyphTile'
 import { hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
@@ -16,6 +17,14 @@ import type { HermesApp } from '../types'
 interface CommandPaletteProps {
   onClose: () => void
   initialQuery?: string
+}
+
+const ROW_TONES: GlyphTileTone[] = ['brand', 'pink', 'cyan', 'info', 'ai', 'ok', 'warn', 'critical']
+
+function toneFor(seed: string): GlyphTileTone {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0
+  return ROW_TONES[Math.abs(h) % ROW_TONES.length]
 }
 
 const navItems = [
@@ -899,7 +908,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
                 className={`palette-item ${i === selected ? 'selected' : ''}`}
                 onClick={() => activate(row)}
               >
-                <row.icon size={16} />
+                <GlyphTile tone={toneFor(row.label)} icon={<row.icon size={14} />} size="sm" />
                 <div>
                   <strong>{row.label}</strong>
                   <div className="app-meta">{row.meta ?? 'Navigate'}</div>
@@ -912,7 +921,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
                 className={`palette-item ${i === selected ? 'selected' : ''}`}
                 onClick={() => activate(row)}
               >
-                <Layers size={16} />
+                <GlyphTile tone={toneFor(row.label)} icon={<Layers size={14} />} size="sm" />
                 <div>
                   <strong>{row.label}</strong>
                   <div className="app-meta">{row.meta}</div>

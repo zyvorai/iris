@@ -1,6 +1,7 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import type { CSSProperties } from 'react'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch, Users } from 'lucide-react'
@@ -17,6 +18,23 @@ import type { HermesApp } from '../types'
 import { hermesApi } from '../services/hermesApi'
 import { useOwnerInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
+import { iconColorFor } from '../utils/iconColor'
+
+function ownerInitials(label: string): string {
+  const parts = label.replace(/[-_]/g, ' ').trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return label.slice(0, 2).toUpperCase()
+}
+
+function OwnerAvatar({ label }: { label: string }) {
+  const { gradient, glow } = iconColorFor(label)
+  const style = { '--icon-bg': gradient, '--icon-glow': glow } as CSSProperties
+  return (
+    <span className="app-icon app-icon-sm owner-avatar" style={style} aria-hidden>
+      {ownerInitials(label)}
+    </span>
+  )
+}
 
 export default function TeamsPage() {
   const { openDiagnose } = useInspector()
@@ -116,6 +134,7 @@ export default function TeamsPage() {
             return (
               <GlassPanel key={owner.id} className="glass-panel-section">
                 <div className="section-head-nebula">
+                  <OwnerAvatar label={owner.label} />
                   <div>
                     <h2 className="section-title">{owner.label}</h2>
                     <p className="body-text">
