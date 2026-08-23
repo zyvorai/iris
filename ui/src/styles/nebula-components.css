@@ -18,6 +18,8 @@
 
 .glass-panel:hover {
   border-color: rgba(240, 88, 58, 0.18);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-panel), 0 8px 28px rgba(240, 88, 58, 0.10);
 }
 
 .glass-panel-tone-healthy {
@@ -69,6 +71,11 @@
   transform: translateY(-1px);
 }
 
+.nebula-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.08s;
+}
+
 .nebula-btn:focus-visible {
   outline: 2px solid rgba(240, 88, 58, 0.45);
   outline-offset: 2px;
@@ -91,6 +98,11 @@
   transform: translateY(-1px);
   color: #fff;
   background: linear-gradient(to right, var(--accent-blue), var(--accent-blue-deep));
+}
+
+.nebula-btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  opacity: 1;
 }
 
 .nebula-btn-secondary {
@@ -590,7 +602,22 @@
   flex-direction: column;
   gap: 0.5rem;
   height: 100%;
+  animation: service-card-in var(--duration-normal) var(--ease-spring) backwards;
 }
+
+@keyframes service-card-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.service-card:nth-child(n+1) { animation-delay: 0ms; }
+.service-card:nth-child(n+2) { animation-delay: 20ms; }
+.service-card:nth-child(n+3) { animation-delay: 40ms; }
+.service-card:nth-child(n+4) { animation-delay: 60ms; }
+.service-card:nth-child(n+5) { animation-delay: 80ms; }
+.service-card:nth-child(n+6) { animation-delay: 100ms; }
+.service-card:nth-child(n+7) { animation-delay: 120ms; }
+.service-card:nth-child(n+8) { animation-delay: 140ms; }
 
 .service-card .action-row {
   margin-top: auto;
@@ -619,16 +646,15 @@
   display: block;
   font-size: 0.95rem;
   color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
 }
 
+.service-card-meta strong,
 .service-card-meta .app-title-link {
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .service-card-meta span {
@@ -1308,7 +1334,7 @@
   text-align: center;
   padding: 2.5rem 1.5rem;
   border-radius: var(--radius-xl);
-  border: 1px dashed rgba(148, 163, 184, 0.18);
+  border: 1px dashed var(--border-soft);
   background: var(--chrome-45);
 }
 
@@ -1320,8 +1346,14 @@
   margin-bottom: 0.75rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  background: var(--chrome-65);
+  background: radial-gradient(circle, var(--hermes-accent-soft) 0%, transparent 72%), var(--chrome-65);
   color: var(--text-muted);
+  animation: glass-empty-state-icon-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes glass-empty-state-icon-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
 }
 
 .glass-empty-state-title {
@@ -1413,6 +1445,34 @@
   background: var(--chrome-72);
   color: var(--text-primary);
   font-size: 0.8125rem;
+}
+
+.graph-broken-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem 0.45rem 0.6rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: var(--chrome-72);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.graph-broken-toggle:has(input:checked) {
+  border-color: rgba(240, 88, 58, 0.4);
+  color: var(--text-primary);
+}
+
+.graph-broken-toggle input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--aether-primary);
+  cursor: pointer;
 }
 
 .filter-chip {
