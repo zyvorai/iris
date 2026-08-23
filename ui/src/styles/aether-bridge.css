@@ -17,7 +17,7 @@
   overflow: hidden;
   border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.12)) !important;
   background:
-    linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%) !important;
+    linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(11, 15, 20, 0.94) 100%) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-xl, 28px) !important;
@@ -33,14 +33,14 @@
 
 .glass-hero {
   background:
-    linear-gradient(180deg, rgba(2, 6, 23, 0.38), rgba(2, 6, 23, 0.12)),
-    radial-gradient(circle at top right, rgba(99, 164, 255, 0.10), transparent 42%),
-    linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%) !important;
+    linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.12)),
+    radial-gradient(circle at top right, rgba(240, 88, 58, 0.10), transparent 42%),
+    linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(11, 15, 20, 0.94) 100%) !important;
 }
 
 .zeus-card:hover,
 .space-row.zeus-card:hover {
-  border-color: rgba(59, 130, 246, 0.18) !important;
+  border-color: rgba(240, 88, 58, 0.18) !important;
 }
 
 .section-head h2 {
@@ -49,13 +49,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--aether-primary, #3b82f6) !important;
+  color: var(--aether-primary, #f0583a) !important;
 }
 
 .hero-kicker {
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
-  color: var(--aether-primary, #3b82f6) !important;
+  color: var(--aether-primary, #f0583a) !important;
 }
 
 .hero-title {
@@ -90,8 +90,8 @@
 .stat-pill {
   border: 1px solid var(--border-soft) !important;
   background:
-    radial-gradient(circle at 90% 10%, rgba(96, 165, 250, 0.12), transparent 38%),
-    linear-gradient(165deg, rgba(22, 27, 36, 0.92) 0%, rgba(17, 21, 28, 0.96) 100%) !important;
+    radial-gradient(circle at 90% 10%, rgba(240, 88, 58, 0.12), transparent 38%),
+    linear-gradient(165deg, rgba(18, 22, 28, 0.92) 0%, rgba(11, 15, 20, 0.96) 100%) !important;
   border-radius: var(--radius-md, 12px) !important;
 }
 
@@ -117,9 +117,9 @@
 }
 
 .chip-accent {
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.28);
-  background: rgba(59, 130, 246, 0.1);
+  color: #f47a60;
+  border-color: rgba(240, 88, 58, 0.28);
+  background: rgba(240, 88, 58, 0.1);
 }
 
 .chip-ok,
@@ -156,7 +156,7 @@
   padding: 0.2rem;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: rgba(17, 21, 28, 0.55);
+  background: rgba(11, 15, 20, 0.55);
 }
 
 .view-toggle button {
@@ -170,22 +170,22 @@
 
 .view-toggle button.active {
   color: #fff !important;
-  border-color: rgba(59, 130, 246, 0.38) !important;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12);
+  border-color: rgba(240, 88, 58, 0.38) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
+  box-shadow: 0 0 0 1px rgba(240, 88, 58, 0.12);
 }
 
 .filter-bar button.active {
   color: #fff !important;
-  border-color: rgba(59, 130, 246, 0.38) !important;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+  border-color: rgba(240, 88, 58, 0.38) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
 }
 
 .filter-bar input,
 .activity-search,
 .catalog-toolbar input {
   border: 1px solid var(--border-soft) !important;
-  background: rgba(10, 13, 18, 0.72) !important;
+  background: rgba(5, 5, 5, 0.72) !important;
   border-radius: var(--radius-md, 12px) !important;
   color: var(--text-primary, #f1f5f9);
 }
@@ -195,7 +195,7 @@
 .graph-filters select,
 .activity-filters select {
   border: 1px solid var(--border-soft);
-  background: rgba(10, 13, 18, 0.72);
+  background: rgba(5, 5, 5, 0.72);
   border-radius: var(--radius-md, 12px);
   color: var(--text-primary, #f1f5f9);
   padding: 0.45rem 0.65rem;
@@ -206,7 +206,7 @@
 .cluster-filters select:focus,
 .graph-filters select:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  box-shadow: 0 0 0 2px rgba(240, 88, 58, 0.18);
 }
 
 /* ── Tables & lists ── */
@@ -221,7 +221,7 @@
 }
 
 .cluster-row:hover:not(.cluster-head) {
-  background: rgba(59, 130, 246, 0.06);
+  background: rgba(240, 88, 58, 0.06);
 }
 
 .cluster-head {
@@ -237,7 +237,7 @@
   text-align: center;
   border-radius: var(--radius-lg, 20px);
   border: 1px dashed rgba(148, 163, 184, 0.18);
-  background: rgba(17, 21, 28, 0.45);
+  background: rgba(11, 15, 20, 0.45);
 }
 
 .section-link {
@@ -245,13 +245,13 @@
 }
 
 .section-link:hover {
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 /* ── Workspace & health chips ── */
 .workspace-switcher {
   border: 1px solid var(--border-soft);
-  background: rgba(17, 21, 28, 0.55);
+  background: rgba(11, 15, 20, 0.55);
   border-radius: var(--radius-md, 12px);
   padding: 0.2rem 0.35rem;
 }
@@ -270,14 +270,14 @@
 }
 
 .workspace-chip.active {
-  color: #dbeafe !important;
-  border-color: rgba(59, 130, 246, 0.28) !important;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08)) !important;
+  color: #ffd4c2 !important;
+  border-color: rgba(240, 88, 58, 0.28) !important;
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08)) !important;
 }
 
 .zeus-health-chip {
   border: 1px solid var(--border-soft);
-  background: rgba(17, 21, 28, 0.65);
+  background: rgba(11, 15, 20, 0.65);
   border-radius: 999px;
   font-size: 0.72rem;
   color: var(--text-muted, #94a3b8);
@@ -310,15 +310,15 @@
 }
 
 .hermes-help-link:hover {
-  color: #93c5fd;
-  background: rgba(59, 130, 246, 0.08);
+  color: #f47a60;
+  background: rgba(240, 88, 58, 0.08);
 }
 
 /* ── Palette & modals ── */
 .palette-backdrop,
 .diagnosis-drawer-backdrop,
 .hermes-nb-backdrop {
-  background: rgba(10, 13, 18, 0.82) !important;
+  background: rgba(5, 5, 5, 0.82) !important;
   backdrop-filter: blur(8px);
 }
 
@@ -326,14 +326,14 @@
 .hermes-nb-dropdown,
 .hermes-nb-drawer {
   border: 1px solid var(--border-soft) !important;
-  background: rgba(17, 21, 28, 0.92) !important;
-  box-shadow: 0 16px 48px rgba(2, 6, 23, 0.36) !important;
+  background: rgba(11, 15, 20, 0.92) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.36) !important;
 }
 
 .hermes-nb-dropdown-item.active,
 .hermes-nb-drawer-item.active {
-  color: var(--aether-primary, #3b82f6) !important;
-  background: rgba(59, 130, 246, 0.1) !important;
+  color: var(--aether-primary, #f0583a) !important;
+  background: rgba(240, 88, 58, 0.1) !important;
 }
 
 /* ── Detail pages ── */
@@ -452,11 +452,11 @@
 /* ── Active/selected pill text — hardcoded near-white, invisible on light bg ── */
 :root[data-theme='light'] .view-toggle button.active,
 :root[data-theme='light'] .filter-bar button.active {
-  color: #1d4ed8 !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='light'] .workspace-chip.active {
-  color: #1d4ed8 !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='light'] .attention-filters button.active,
@@ -466,7 +466,7 @@
 :root[data-theme='light'] .hermes-nb-drawer-item.active,
 :root[data-theme='light'] .mission-control-filters button.active,
 :root[data-theme='light'] .filter-chip.active {
-  color: #1d4ed8;
+  color: #b23705;
 }
 
 /* ── Remaining pastel chip/link text tuned for dark surfaces ── */
@@ -474,7 +474,7 @@
 :root[data-theme='light'] .section-link:hover,
 :root[data-theme='light'] .workspace-chip:hover:not(:disabled),
 :root[data-theme='light'] .hermes-help-link:hover {
-  color: #1d4ed8;
+  color: #b23705;
 }
 
 :root[data-theme='light'] .chip-ok,

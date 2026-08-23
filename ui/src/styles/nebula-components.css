@@ -17,21 +17,24 @@
 }
 
 .glass-panel:hover {
-  border-color: rgba(59, 130, 246, 0.18);
+  border-color: rgba(240, 88, 58, 0.18);
 }
 
 .glass-panel-tone-healthy {
   border-color: rgba(52, 211, 153, 0.22);
+  background: var(--tone-ok-tint);
   box-shadow: var(--shadow-glow-green);
 }
 
 .glass-panel-tone-warning {
   border-color: rgba(251, 191, 36, 0.22);
+  background: var(--tone-warn-tint);
   box-shadow: var(--shadow-glow-orange);
 }
 
 .glass-panel-tone-critical {
   border-color: rgba(248, 113, 113, 0.24);
+  background: var(--tone-err-tint);
   box-shadow: var(--shadow-glow-red);
 }
 
@@ -60,14 +63,14 @@
 }
 
 .nebula-btn:hover:not(:disabled) {
-  border-color: rgba(59, 130, 246, 0.32);
-  background: rgba(59, 130, 246, 0.08);
-  color: #dbeafe;
+  border-color: rgba(240, 88, 58, 0.32);
+  background: rgba(240, 88, 58, 0.08);
+  color: #ffd4c2;
   transform: translateY(-1px);
 }
 
 .nebula-btn:focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.45);
+  outline: 2px solid rgba(240, 88, 58, 0.45);
   outline-offset: 2px;
 }
 
@@ -78,16 +81,16 @@
 
 .nebula-btn-primary {
   border: none;
-  background: linear-gradient(to right, var(--aether-primary), var(--aether-primary-deep));
+  background: linear-gradient(to right, var(--accent-blue), var(--accent-blue-deep));
   color: #fff;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.25);
 }
 
 .nebula-btn-primary:hover:not(:disabled) {
   opacity: 0.92;
   transform: translateY(-1px);
   color: #fff;
-  background: linear-gradient(to right, var(--aether-primary), var(--aether-primary-deep));
+  background: linear-gradient(to right, var(--accent-blue), var(--accent-blue-deep));
 }
 
 .nebula-btn-secondary {
@@ -195,8 +198,8 @@
 }
 
 .action-menu-item:hover {
-  color: #dbeafe;
-  background: rgba(59, 130, 246, 0.1);
+  color: #ffd4c2;
+  background: rgba(240, 88, 58, 0.1);
 }
 
 /* Status Badge */
@@ -216,23 +219,23 @@
 }
 
 .nebula-status-badge.status-healthy {
-  color: #6ee7b7;
+  color: var(--accent-green);
   border-color: rgba(52, 211, 153, 0.25);
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--tone-ok-tint);
 }
 
 .nebula-status-badge.status-degraded,
 .nebula-status-badge.status-warn {
-  color: #fde68a;
+  color: var(--accent-yellow);
   border-color: rgba(251, 191, 36, 0.25);
-  background: rgba(251, 191, 36, 0.1);
+  background: var(--tone-warn-tint);
 }
 
 .nebula-status-badge.status-broken,
 .nebula-status-badge.status-critical {
-  color: #fca5a5;
+  color: var(--accent-red);
   border-color: rgba(248, 113, 113, 0.25);
-  background: rgba(248, 113, 113, 0.1);
+  background: var(--tone-err-tint);
 }
 
 .nebula-status-badge.status-unknown {
@@ -319,15 +322,10 @@
   text-transform: uppercase;
 }
 
-.health-ring.tone-excellent .health-ring-label { color: #6ee7b7; }
-.health-ring.tone-stable .health-ring-label { color: #93c5fd; }
-.health-ring.tone-warning .health-ring-label { color: #fde68a; }
-.health-ring.tone-critical .health-ring-label { color: #fca5a5; }
-
-:root[data-theme='light'] .health-ring.tone-excellent .health-ring-label { color: #0f7b4f; }
-:root[data-theme='light'] .health-ring.tone-stable .health-ring-label { color: #0369a1; }
-:root[data-theme='light'] .health-ring.tone-warning .health-ring-label { color: #b45309; }
-:root[data-theme='light'] .health-ring.tone-critical .health-ring-label { color: #b3261e; }
+.health-ring.tone-excellent .health-ring-label { color: var(--accent-green); }
+.health-ring.tone-stable .health-ring-label { color: var(--accent-cyan); }
+.health-ring.tone-warning .health-ring-label { color: var(--accent-yellow); }
+.health-ring.tone-critical .health-ring-label { color: var(--accent-red); }
 
 .health-ring-pct {
   display: block;
@@ -391,7 +389,7 @@
 
 .metric-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.22) !important;
+  border-color: rgba(240, 88, 58, 0.22) !important;
   box-shadow: var(--shadow-glow-blue);
 }
 
@@ -404,11 +402,11 @@
 
 .metric-card-tone-blue {
   background:
-    radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.18), transparent 38%),
+    radial-gradient(circle at 90% 10%, rgba(240, 88, 58, 0.18), transparent 38%),
     var(--panel-surface-strong) !important;
-  border-color: rgba(59, 130, 246, 0.24) !important;
+  border-color: rgba(240, 88, 58, 0.24) !important;
 }
-.metric-card-tone-blue .metric-card-head svg { color: #3b82f6; }
+.metric-card-tone-blue .metric-card-head svg { color: #f0583a; }
 
 .metric-card-tone-green {
   background:
@@ -545,7 +543,7 @@
 }
 
 .quick-launch-tile-nebula:focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.45);
+  outline: 2px solid rgba(240, 88, 58, 0.45);
   outline-offset: 2px;
 }
 
@@ -672,7 +670,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #93c5fd;
+  color: #f47a60;
   font-size: 0.75rem;
   cursor: pointer;
 }
@@ -728,7 +726,7 @@
   margin: 0;
   font-size: 0.72rem;
   font-family: var(--font-mono);
-  color: #93c5fd;
+  color: #f47a60;
   opacity: 0.9;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -771,15 +769,15 @@
   min-width: 0;
   padding: 0.45rem 0.65rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  background: rgba(59, 130, 246, 0.08);
-  color: #dbeafe;
+  border: 1px solid rgba(240, 88, 58, 0.2);
+  background: rgba(240, 88, 58, 0.08);
+  color: #ffd4c2;
   text-decoration: none;
 }
 
 .route-display-link:hover {
-  border-color: rgba(59, 130, 246, 0.35);
-  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(240, 88, 58, 0.35);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .route-display-path {
@@ -888,9 +886,9 @@
 }
 
 .mission-control-filters button.active {
-  color: #dbeafe;
-  border-color: rgba(59, 130, 246, 0.28);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08));
+  color: #ffd4c2;
+  border-color: rgba(240, 88, 58, 0.28);
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
 }
 
 /* Hero Command Panel */
@@ -1070,7 +1068,7 @@
   border: 1px solid var(--border-soft);
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  color: #93c5fd;
+  color: #f47a60;
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -1213,7 +1211,7 @@
 }
 
 .section-link-nebula:hover {
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 .sr-only {
@@ -1353,7 +1351,7 @@
   flex-wrap: wrap;
   padding: 0.65rem 1rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(240, 88, 58, 0.2);
   background: var(--chrome-72);
   color: var(--text-secondary);
   font-size: 0.8125rem;
@@ -1405,7 +1403,7 @@
 
 .page-toolbar-search:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  box-shadow: 0 0 0 2px rgba(240, 88, 58, 0.18);
 }
 
 .page-toolbar-select {
@@ -1429,8 +1427,8 @@
 
 .filter-chip.active {
   color: #fff;
-  border-color: rgba(59, 130, 246, 0.38);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08));
+  border-color: rgba(240, 88, 58, 0.38);
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
 }
 
 /* Flat mission control groups */
@@ -1480,7 +1478,7 @@
 
 .hub-link-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(240, 88, 58, 0.3);
   box-shadow: var(--shadow-glow-blue);
 }
 
@@ -1586,8 +1584,8 @@
 
 .workspace-dropdown-item.active,
 .workspace-dropdown-item:hover {
-  color: #dbeafe;
-  background: rgba(59, 130, 246, 0.1);
+  color: #ffd4c2;
+  background: rgba(240, 88, 58, 0.1);
 }
 
 .zeus-health-chip-compact .zeus-health-label {
@@ -1692,7 +1690,7 @@
 }
 
 .app-card-nebula .app-title-link:hover {
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 /* App detail (nebula) */
@@ -1815,7 +1813,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid rgba(148, 163, 184, 0.35);
-  border-top-color: #60a5fa;
+  border-top-color: #f0583a;
   animation: palette-spin 0.8s linear infinite;
 }
 
@@ -1889,12 +1887,10 @@
 :root[data-theme='light'] .section-link-nebula:hover,
 :root[data-theme='light'] .app-card-nebula .app-title-link:hover,
 :root[data-theme='light'] .diagnosis-drawer-commands {
-  color: #1d4ed8;
+  color: #b23705;
 }
 
 :root[data-theme='light'] .nebula-btn-danger,
-:root[data-theme='light'] .nebula-status-badge.status-broken,
-:root[data-theme='light'] .nebula-status-badge.status-critical,
 :root[data-theme='light'] .service-error-critical,
 :root[data-theme='light'] .service-status-message-critical .service-status-summary {
   color: #b3261e;
@@ -1912,16 +1908,10 @@
   color: #6d28d9;
 }
 
-:root[data-theme='light'] .nebula-status-badge.status-healthy {
-  color: #0f7b4f;
-}
-
-:root[data-theme='light'] .nebula-status-badge.status-degraded,
-:root[data-theme='light'] .nebula-status-badge.status-warn,
 :root[data-theme='light'] .service-error,
 :root[data-theme='light'] .service-status-summary,
 :root[data-theme='light'] .page-load-error-icon {
-  color: #b45309;
+  color: #8a5a00;
 }
 
 :root[data-theme='light'] .service-status-endpoint {

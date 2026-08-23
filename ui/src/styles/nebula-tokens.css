@@ -1,87 +1,96 @@
 /*
- * Hermes design tokens — aligned with Aether Liquid Glass palette
+ * Hermes design tokens — Apple-inspired palette (Zyvor Design System v2)
  */
 :root {
   color-scheme: dark;
 
-  /* Aether base surfaces */
-  --bg-root: #0a0d12;
-  --bg-elevated: #11151c;
-  --bg-panel: rgba(17, 21, 28, 0.82);
-  --bg-panel-strong: rgba(22, 27, 36, 0.94);
-  --bg-chip: rgba(17, 21, 28, 0.65);
+  /* Base surfaces */
+  --bg-root: #050505;
+  --bg-elevated: #0a0a0a;
+  --bg-panel: rgba(11, 15, 20, 0.82);
+  --bg-panel-strong: rgba(18, 22, 28, 0.94);
+  --bg-chip: rgba(11, 15, 20, 0.65);
 
-  --border-soft: rgba(148, 163, 184, 0.12);
-  --border-strong: rgba(59, 130, 246, 0.28);
-  --border-muted: rgba(148, 163, 184, 0.10);
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(240, 88, 58, 0.28);
+  --border-muted: rgba(255, 255, 255, 0.045);
 
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
+  --text-muted: #aeb9c8;
+  --text-faint: #9fb3c8;
 
-  /* Aether brand */
-  --aether-primary: #3b82f6;
-  --aether-primary-deep: #2563eb;
-  --aether-ai: #a855f7;
-  --accent-blue: var(--aether-primary);
-  --accent-cyan: #63a4ff;
-  --accent-orange: #f97316;
-  --accent-red: #f87171;
-  --accent-green: #34d399;
+  /* Brand */
+  --aether-primary: #f0583a;
+  --aether-primary-deep: #d94b32;
+  --aether-ai: #a78bfa;
+  --accent-blue: #0a84ff;
+  --accent-blue-deep: #0066cc;
+  --accent-cyan: #7dd3fc;
+  --accent-orange: #f47a60;
+  --accent-red: #fca5a5;
+  --accent-green: #6ee7b7;
   --accent-yellow: #fbbf24;
-  --accent-purple: #a855f7;
+  --accent-purple: #c084fc;
 
   --radius-xl: 28px;
   --radius-lg: 20px;
   --radius-md: 12px;
+  --radius-sm: 6px;
+  --radius-pill: 999px;
 
   --shadow-panel:
-    0 18px 50px rgba(2, 6, 23, 0.32),
+    0 16px 50px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-glow-blue: 0 0 0 1px rgba(99, 164, 255, 0.14), 0 16px 42px rgba(59, 130, 246, 0.14);
-  --shadow-glow-orange: 0 0 0 1px rgba(249, 115, 22, 0.18), 0 16px 42px rgba(249, 115, 22, 0.12);
-  --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.18), 0 16px 42px rgba(239, 68, 68, 0.12);
-  --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.18), 0 16px 42px rgba(16, 185, 129, 0.12);
+  --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.20), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-orange: 0 0 0 1px rgba(251, 191, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-red: 0 0 0 1px rgba(252, 165, 165, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-green: 0 0 0 1px rgba(110, 231, 183, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 
-  --font-display: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+  /* Semantic tint pairs — status banners/badges, distinct from the solid --accent-* colors */
+  --tone-ok-tint: rgba(110, 231, 183, 0.12);
+  --tone-warn-tint: rgba(251, 191, 36, 0.12);
+  --tone-err-tint: rgba(252, 165, 165, 0.12);
+  --tone-info-tint: rgba(125, 211, 252, 0.12);
+
+  --font-display: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
-  --panel-surface: linear-gradient(165deg, rgba(22, 27, 36, 0.90) 0%, rgba(17, 21, 28, 0.94) 100%);
-  --panel-surface-strong: linear-gradient(165deg, rgba(22, 27, 36, 0.92) 0%, rgba(17, 21, 28, 0.96) 100%);
-  --panel-surface-ai: linear-gradient(165deg, rgba(30, 22, 46, 0.92) 0%, rgba(17, 21, 28, 0.94) 100%);
-  --hero-overlay: linear-gradient(180deg, rgba(2, 6, 23, 0.42), rgba(2, 6, 23, 0.12));
+  --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
+  --panel-surface-strong: linear-gradient(165deg, rgba(18, 22, 28, 0.92) 0%, rgba(10, 10, 10, 0.96) 100%);
+  --panel-surface-ai: linear-gradient(165deg, rgba(35, 24, 54, 0.92) 0%, rgba(10, 10, 10, 0.94) 100%);
+  --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.12));
   --overlay-faint: rgba(255, 255, 255, 0.02);
   --overlay-soft: rgba(255, 255, 255, 0.03);
   --overlay-chip: rgba(255, 255, 255, 0.04);
   --overlay-med: rgba(255, 255, 255, 0.06);
   --overlay-strong: rgba(255, 255, 255, 0.08);
   --ring-track: rgba(255, 255, 255, 0.08);
-  --chrome-45: rgba(17, 21, 28, 0.45);
-  --chrome-55: rgba(17, 21, 28, 0.55);
-  --chrome-65: rgba(17, 21, 28, 0.65);
-  --chrome-72: rgba(10, 13, 18, 0.72);
-  --dropdown-bg: rgba(17, 21, 28, 0.94);
-  --dropdown-shadow: 0 16px 48px rgba(2, 6, 23, 0.36);
+  --chrome-45: rgba(11, 15, 20, 0.45);
+  --chrome-55: rgba(11, 15, 20, 0.55);
+  --chrome-65: rgba(11, 15, 20, 0.65);
+  --chrome-72: rgba(5, 5, 5, 0.72);
+  --dropdown-bg: rgba(11, 15, 20, 0.94);
+  --dropdown-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
   --skeleton-gradient: linear-gradient(
     90deg,
-    rgba(22, 27, 36, 0.6) 0%,
-    rgba(30, 41, 59, 0.45) 50%,
-    rgba(22, 27, 36, 0.6) 100%
+    rgba(18, 22, 28, 0.6) 0%,
+    rgba(28, 33, 41, 0.45) 50%,
+    rgba(18, 22, 28, 0.6) 100%
   );
-  --scrollbar-thumb: #334155;
-  --scrollbar-thumb-hover: #475569;
+  --scrollbar-thumb: #2a2f36;
+  --scrollbar-thumb-hover: #3d434c;
 
   /* Bridge to existing zeus/hermes tokens */
   --hermes-bg: var(--bg-root);
-  --hermes-surface: rgba(15, 23, 42, 0.72);
+  --hermes-surface: rgba(11, 15, 20, 0.72);
   --hermes-text: var(--text-primary);
   --hermes-muted: var(--text-muted);
   --hermes-border: var(--border-soft);
   --hermes-accent: var(--aether-primary);
-  --hermes-accent-soft: rgba(59, 130, 246, 0.12);
+  --hermes-accent-soft: rgba(240, 88, 58, 0.12);
   --hermes-green: var(--accent-green);
   --hermes-amber: var(--accent-yellow);
   --hermes-red: var(--accent-red);
@@ -89,17 +98,17 @@
   --hermes-glass-chrome-blur: 24px;
   --hermes-glass-card-blur: 40px;
   --hermes-glass-popover-blur: 20px;
-  --hermes-glass-chrome-bg: rgba(17, 21, 28, 0.88);
+  --hermes-glass-chrome-bg: rgba(10, 10, 10, 0.88);
 
   --zeus-bg-base: var(--bg-root);
-  --zeus-bg-slate: #0f172a;
+  --zeus-bg-slate: var(--bg-elevated);
   --zeus-primary: var(--aether-primary);
-  --zeus-primary-soft: rgba(59, 130, 246, 0.18);
-  --zeus-primary-border: rgba(59, 130, 246, 0.35);
+  --zeus-primary-soft: rgba(240, 88, 58, 0.18);
+  --zeus-primary-border: rgba(240, 88, 58, 0.35);
   --zeus-success: var(--accent-green);
   --zeus-warning: var(--accent-yellow);
   --zeus-danger: var(--accent-red);
-  --zeus-info: #38bdf8;
+  --zeus-info: #7dd3fc;
   --zeus-violet: var(--accent-purple);
   --zeus-text: var(--text-primary);
   --zeus-text-muted: var(--text-secondary);
@@ -130,8 +139,8 @@
 }
 
 /*
- * Light theme — "lite" palette adapted from the Zyvor Design System v2
- * (soft neutral surfaces, saturated ink, pastel accent tints).
+ * Light theme — Zyvor Design System v2 "lite" palette
+ * (soft neutral surfaces, saturated ink, restrained orange accent).
  */
 :root[data-theme='light'] {
   color-scheme: light;
@@ -143,32 +152,38 @@
   --bg-chip: rgba(20, 22, 26, 0.045);
 
   --border-soft: rgba(20, 22, 26, 0.10);
-  --border-strong: rgba(37, 99, 235, 0.24);
+  --border-strong: rgba(204, 66, 10, 0.24);
   --border-muted: rgba(20, 22, 26, 0.07);
 
   --text-primary: #14161a;
-  --text-secondary: #3f4650;
-  --text-muted: #5b6472;
-  --text-faint: #6e7684;
+  --text-secondary: #5b6472;
+  --text-muted: #6e7684;
+  --text-faint: #9aa2ac;
 
-  --aether-primary: #2563eb;
-  --aether-primary-deep: #1d4ed8;
+  --aether-primary: #cc420a;
+  --aether-primary-deep: #b23705;
   --aether-ai: #9333ea;
-  --accent-blue: var(--aether-primary);
+  --accent-blue: #0071e3;
+  --accent-blue-deep: #0058b8;
   --accent-cyan: #0284c7;
   --accent-orange: #ea580c;
-  --accent-red: #dc2626;
-  --accent-green: #059669;
-  --accent-yellow: #b45309;
+  --accent-red: #b3261e;
+  --accent-green: #0f7b4f;
+  --accent-yellow: #8a5a00;
   --accent-purple: #9333ea;
 
   --shadow-panel:
     0 8px 24px rgba(20, 22, 26, 0.08),
     0 2px 6px rgba(20, 22, 26, 0.04);
-  --shadow-glow-blue: 0 0 0 1px rgba(37, 99, 235, 0.16), 0 10px 28px rgba(37, 99, 235, 0.10);
-  --shadow-glow-orange: 0 0 0 1px rgba(234, 88, 12, 0.18), 0 10px 28px rgba(234, 88, 12, 0.10);
-  --shadow-glow-red: 0 0 0 1px rgba(220, 38, 38, 0.18), 0 10px 28px rgba(220, 38, 38, 0.10);
-  --shadow-glow-green: 0 0 0 1px rgba(5, 150, 105, 0.18), 0 10px 28px rgba(5, 150, 105, 0.10);
+  --shadow-glow-blue: 0 0 0 1px rgba(2, 132, 199, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-orange: 0 0 0 1px rgba(138, 90, 0, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+
+  --tone-ok-tint: #e8f5ef;
+  --tone-warn-tint: #fdf3df;
+  --tone-err-tint: #fdecea;
+  --tone-info-tint: #e8f1fb;
 
   --panel-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 246, 248, 0.98) 100%);
   --panel-surface-strong: linear-gradient(165deg, #ffffff 0%, #f5f6f8 100%);
@@ -197,8 +212,12 @@
 
   /* Bridge tokens — surfaces/borders some legacy components still read directly */
   --hermes-surface: var(--bg-panel);
+  --hermes-accent-soft: rgba(204, 66, 10, 0.10);
   --hermes-glass-chrome-bg: var(--dropdown-bg);
   --zeus-bg-slate: var(--bg-elevated);
+  --zeus-primary-soft: rgba(204, 66, 10, 0.14);
+  --zeus-primary-border: var(--border-strong);
+  --zeus-info: #0284c7;
   --zeus-border: var(--border-soft);
   --zeus-border-strong: var(--border-strong);
 }

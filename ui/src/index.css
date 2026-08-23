@@ -15,7 +15,7 @@
   --duration-fast: 120ms;
   --duration-normal: 220ms;
   --duration-slow: 420ms;
-  font-family: Inter, 'SF Pro Display', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   color: var(--hermes-text);
   background: var(--hermes-bg);
 }
@@ -78,10 +78,10 @@ button {
 }
 
 .zeus-card-active {
-  border-color: rgba(59, 130, 246, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.12) inset,
-    0 12px 32px -16px rgba(59, 130, 246, 0.25);
+    0 0 0 1px rgba(240, 88, 58, 0.12) inset,
+    0 12px 32px -16px rgba(240, 88, 58, 0.25);
 }
 
 .hermes-topbar,
@@ -117,7 +117,7 @@ button {
   height: 2rem;
   border-radius: 0.65rem;
   background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 45%, #818cf8 100%);
-  box-shadow: 0 0 24px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 24px rgba(240, 88, 58, 0.35);
 }
 
 .hermes-brand h1 {
@@ -147,8 +147,8 @@ button {
 .hermes-nav a.active,
 .hermes-nav a:hover {
   color: var(--hermes-text);
-  background: rgba(59, 130, 246, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+  background: rgba(240, 88, 58, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(240, 88, 58, 0.2);
 }
 
 .hermes-search-btn {
@@ -210,7 +210,7 @@ button {
 
 .app-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -222,8 +222,8 @@ button {
 }
 
 .chip-env {
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.35);
+  color: #f47a60;
+  border-color: rgba(240, 88, 58, 0.35);
 }
 
 .app-card-top {
@@ -308,14 +308,14 @@ a:hover > .app-icon,
 }
 
 .btn-primary {
-  background: linear-gradient(145deg, rgba(59, 130, 246, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: #93c5fd;
+  background: linear-gradient(145deg, rgba(240, 88, 58, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(240, 88, 58, 0.4);
+  color: #f47a60;
 }
 
 .btn-primary:hover {
-  border-color: rgba(59, 130, 246, 0.55);
-  background: linear-gradient(145deg, rgba(59, 130, 246, 0.32) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(240, 88, 58, 0.55);
+  background: linear-gradient(145deg, rgba(240, 88, 58, 0.32) 0%, rgba(15, 23, 42, 0.9) 100%);
 }
 
 .hero-stats {
@@ -392,7 +392,7 @@ a:hover > .app-icon,
 
 .palette-item:hover,
 .palette-item.selected {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .detail-grid {
@@ -668,7 +668,7 @@ a:hover > .app-icon,
 
 .view-toggle button.active {
   background: var(--hermes-accent-soft);
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 .filter-count {
@@ -756,11 +756,11 @@ a:hover > .app-icon,
 }
 
 .app-title-link:hover {
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 .chip-accent {
-  color: #93c5fd;
+  color: #f47a60;
   border-color: rgba(147, 197, 253, 0.35);
 }
 
@@ -910,7 +910,7 @@ a:hover > .app-icon,
 
 .space-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.35);
+  border-color: rgba(240, 88, 58, 0.35);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -945,7 +945,7 @@ a:hover > .app-icon,
 }
 
 .space-infrastructure .space-tile-icon { background: rgba(251, 191, 36, 0.18); color: #fde68a; }
-.space-zeus-os .space-tile-icon { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+.space-zeus-os .space-tile-icon { background: rgba(240, 88, 58, 0.2); color: #f47a60; }
 .space-consolehub .space-tile-icon { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; }
 .space-databases .space-tile-icon { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
 .space-monitoring .space-tile-icon { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
@@ -1105,9 +1105,9 @@ a:hover > .app-icon,
 }
 
 .btn-accent {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: #93c5fd;
+  background: rgba(240, 88, 58, 0.18);
+  border-color: rgba(240, 88, 58, 0.4);
+  color: #f47a60;
 }
 
 .share-panel h3 {
@@ -1171,7 +1171,7 @@ a:hover > .app-icon,
 }
 
 .dep-links a {
-  color: #93c5fd;
+  color: #f47a60;
   text-decoration: none;
 }
 
@@ -1211,7 +1211,7 @@ a:hover > .app-icon,
 
 .mission-control-space-head a {
   font-size: 0.72rem;
-  color: #93c5fd;
+  color: #f47a60;
   text-decoration: none;
 }
 
@@ -1308,7 +1308,7 @@ a:hover > .app-icon,
 }
 
 .app-graph-node:hover {
-  border-color: rgba(59, 130, 246, 0.45);
+  border-color: rgba(240, 88, 58, 0.45);
   transform: translateY(-1px);
 }
 
@@ -1317,8 +1317,8 @@ a:hover > .app-icon,
 }
 
 .graph-node-focus {
-  border-color: rgba(59, 130, 246, 0.65);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+  border-color: rgba(240, 88, 58, 0.65);
+  box-shadow: 0 0 0 1px rgba(240, 88, 58, 0.25);
 }
 
 .graph-node-ns {
@@ -1371,9 +1371,9 @@ a:hover > .app-icon,
 }
 
 .workspace-chip.active {
-  border-color: rgba(59, 130, 246, 0.28);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08));
-  color: #dbeafe;
+  border-color: rgba(240, 88, 58, 0.28);
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
+  color: #ffd4c2;
 }
 
 .workspace-count {
@@ -1382,7 +1382,7 @@ a:hover > .app-icon,
 }
 
 .workspace-banner {
-  border-color: rgba(59, 130, 246, 0.25);
+  border-color: rgba(240, 88, 58, 0.25);
 }
 
 .activity-filters {
@@ -1413,8 +1413,8 @@ a:hover > .app-icon,
   border-radius: 0.55rem;
   display: grid;
   place-items: center;
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
+  background: rgba(240, 88, 58, 0.12);
+  color: #f47a60;
 }
 
 .activity-head {
@@ -1437,7 +1437,7 @@ a:hover > .app-icon,
 }
 
 .activity-meta a {
-  color: #93c5fd;
+  color: #f47a60;
   text-decoration: none;
 }
 
@@ -1488,8 +1488,8 @@ a:hover > .app-icon,
 }
 
 .mesh-istio .mesh-route-kind {
-  background: rgba(59, 130, 246, 0.18);
-  color: #93c5fd;
+  background: rgba(240, 88, 58, 0.18);
+  color: #f47a60;
 }
 
 .mesh-linkerd .mesh-route-kind {
@@ -1715,7 +1715,7 @@ a:hover > .app-icon,
 }
 
 .palette-footer-link {
-  color: #93c5fd;
+  color: #f47a60;
   text-decoration: none;
 }
 
@@ -1828,11 +1828,11 @@ a:hover > .app-icon,
   display: block;
   margin-top: 0.25rem;
   font-size: 0.72rem;
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 .diagnose-action-list a {
-  color: #93c5fd;
+  color: #f47a60;
 }
 
 .diagnose-copy-row {
@@ -1944,7 +1944,7 @@ a:hover > .app-icon,
 }
 
 .platform-pulse-hero .hero-title em {
-  color: #93c5fd;
+  color: #f47a60;
   font-style: normal;
 }
 
@@ -2070,8 +2070,8 @@ a:hover > .app-icon,
 
 .service-tile:hover:not(.service-tile-disabled) {
   transform: translateY(-1px);
-  border-color: rgba(59, 130, 246, 0.25);
-  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(240, 88, 58, 0.25);
+  background: rgba(240, 88, 58, 0.06);
 }
 
 .service-tile.compact {
@@ -2159,9 +2159,9 @@ a:hover > .app-icon,
 }
 
 .attention-filters button.active {
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.35);
-  background: rgba(59, 130, 246, 0.12);
+  color: #f47a60;
+  border-color: rgba(240, 88, 58, 0.35);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .attention-card {
@@ -2170,7 +2170,7 @@ a:hover > .app-icon,
 }
 
 .attention-card:hover {
-  border-color: rgba(59, 130, 246, 0.22);
+  border-color: rgba(240, 88, 58, 0.22);
 }
 
 .attention-card-head {
@@ -2319,7 +2319,7 @@ a:hover > .app-icon,
 
 .quick-launch-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(240, 88, 58, 0.3);
 }
 
 .quick-launch-tile span {
@@ -2361,7 +2361,7 @@ a:hover > .app-icon,
 
 .quick-actions-menu button:hover,
 .quick-actions-link:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(240, 88, 58, 0.1);
 }
 
 
@@ -2383,9 +2383,9 @@ a:hover > .app-icon,
 }
 
 .inspector-tabs button.active {
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.35);
-  background: rgba(59, 130, 246, 0.12);
+  color: #f47a60;
+  border-color: rgba(240, 88, 58, 0.35);
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .inspector-facts {
@@ -2428,13 +2428,11 @@ a:hover > .app-icon,
   top: 0;
   z-index: 40;
   overflow: visible;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.10);
-  background: rgba(17, 21, 28, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow:
-    0 8px 32px rgba(2, 6, 23, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(9, 9, 11, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--shadow-panel);
 }
 
 .hermes-navbar::after {
@@ -2442,7 +2440,7 @@ a:hover > .app-icon,
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.06), transparent 40%, rgba(168, 85, 247, 0.04));
+  background: linear-gradient(90deg, rgba(240, 88, 58, 0.06), transparent 40%, rgba(167, 139, 250, 0.04));
 }
 
 .hermes-nb-content {
@@ -2506,8 +2504,8 @@ a:hover > .app-icon,
   align-items: center;
   justify-content: center;
   border-radius: 0.625rem;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.10));
+  border: 1px solid rgba(240, 88, 58, 0.25);
+  background: linear-gradient(135deg, rgba(240, 88, 58, 0.15), rgba(168, 85, 247, 0.10));
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -2602,13 +2600,13 @@ a:hover > .app-icon,
 
 .hermes-nb-search-pill:hover {
   background: rgba(30, 41, 59, 0.8) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
+  border-color: rgba(240, 88, 58, 0.3) !important;
 }
 
 .hermes-nb-pill-primary {
-  border-color: rgba(59, 130, 246, 0.35) !important;
-  background: rgba(59, 130, 246, 0.12) !important;
-  color: #93c5fd !important;
+  border-color: rgba(240, 88, 58, 0.35) !important;
+  background: rgba(240, 88, 58, 0.12) !important;
+  color: #f47a60 !important;
 }
 
 .hermes-nb-icon-pill {
@@ -2669,9 +2667,9 @@ a:hover > .app-icon,
 }
 
 .hermes-nb-nav-pill.active {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.08));
-  color: #dbeafe;
-  border-color: rgba(59, 130, 246, 0.28);
+  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
+  color: #ffd4c2;
+  border-color: rgba(240, 88, 58, 0.28);
 }
 
 /* Dropdown */
@@ -2728,8 +2726,8 @@ a:hover > .app-icon,
 }
 
 .hermes-nb-dropdown-item.active {
-  color: #93c5fd;
-  background: rgba(59, 130, 246, 0.12);
+  color: #f47a60;
+  background: rgba(240, 88, 58, 0.12);
 }
 
 .hermes-nb-dropdown-item .hermes-nb-kbd {
@@ -2811,9 +2809,9 @@ a:hover > .app-icon,
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.875rem;
-  border: 1px solid rgba(59, 130, 246, 0.28);
-  background: rgba(59, 130, 246, 0.10);
-  color: #93c5fd;
+  border: 1px solid rgba(240, 88, 58, 0.28);
+  background: rgba(240, 88, 58, 0.10);
+  color: #f47a60;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -2848,20 +2846,20 @@ a:hover > .app-icon,
 }
 
 .hermes-nb-drawer-item.active {
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
+  background: rgba(240, 88, 58, 0.12);
+  color: #f47a60;
 }
 
 /* Light theme — navbar chrome (hardcoded dark surfaces, not token-driven above) */
 :root[data-theme='light'] .hermes-navbar {
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow:
-    0 8px 32px rgba(20, 22, 26, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--shadow-panel);
 }
 
 :root[data-theme='light'] .hermes-navbar::after {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.04), transparent 40%, rgba(147, 51, 234, 0.03));
+  background: linear-gradient(90deg, rgba(204, 66, 10, 0.04), transparent 40%, rgba(147, 51, 234, 0.03));
 }
 
 :root[data-theme='light'] .hermes-nb-brand-name {
@@ -2950,15 +2948,15 @@ a:hover > .app-icon,
 :root[data-theme='light'] .diagnose-action-list a,
 :root[data-theme='light'] .platform-pulse-hero .hero-title em,
 :root[data-theme='light'] .hermes-nb-drawer-cmd {
-  color: #1d4ed8;
+  color: #b23705;
 }
 
 :root[data-theme='light'] .hermes-nb-pill-primary {
-  color: #1d4ed8 !important;
+  color: #b23705 !important;
 }
 
 :root[data-theme='light'] .hermes-nb-hex-icon {
-  color: #2563eb;
+  color: #cc420a;
 }
 
 :root[data-theme='light'] .app-menu-danger,
@@ -2995,7 +2993,7 @@ a:hover > .app-icon,
 
 :root[data-theme='light'] .activity-icon,
 :root[data-theme='light'] .space-zeus-os .space-tile-icon {
-  color: #1d4ed8;
+  color: #b23705;
 }
 
 :root[data-theme='light'] .space-infrastructure .space-tile-icon,
