@@ -117,32 +117,6 @@ button {
 }
 
 
-.hermes-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.hermes-brand-mark {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.65rem;
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 45%, #818cf8 100%);
-  box-shadow: 0 0 24px rgba(240, 88, 58, 0.35);
-}
-
-.hermes-brand h1 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.hermes-brand p {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--hermes-muted);
-}
-
 .hermes-nav {
   display: flex;
   gap: 0.35rem;
@@ -954,7 +928,8 @@ a:hover > .app-icon,
   font-weight: 700;
   flex-shrink: 0;
   color: #fff;
-  box-shadow: 0 8px 20px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #cc420a 0%, #ff5a15 60%, #ffb27a 130%);
+  box-shadow: 0 6px 16px -4px rgba(204, 66, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.18s ease;
 }
 
@@ -963,17 +938,7 @@ a:hover > .space-tile-icon {
   transform: scale(1.06) rotate(-1deg);
 }
 
-.space-infrastructure .space-tile-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
-.space-zeus-os .space-tile-icon { background: linear-gradient(135deg, #c2410c 0%, #f97316 100%); --tile-glow: rgba(194, 65, 12, 0.4); }
-.space-consolehub .space-tile-icon { background: linear-gradient(135deg, #7c3aed 0%, #c4b5fd 100%); --tile-glow: rgba(124, 58, 237, 0.4); }
-.space-databases .space-tile-icon { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
-.space-monitoring .space-tile-icon { background: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); --tile-glow: rgba(234, 88, 12, 0.4); }
-.space-security .space-tile-icon { background: linear-gradient(135deg, #059669 0%, #6ee7b7 100%); --tile-glow: rgba(5, 150, 105, 0.4); }
-.space-storage .space-tile-icon { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
-.space-developer .space-tile-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
-.space-virtualization .space-tile-icon { background: linear-gradient(135deg, #7c3aed 0%, #c4b5fd 100%); --tile-glow: rgba(124, 58, 237, 0.4); }
-.space-ai .space-tile-icon { background: linear-gradient(135deg, #c026d3 0%, #f0abfc 100%); --tile-glow: rgba(192, 38, 211, 0.4); }
-.space-other .space-tile-icon { background: linear-gradient(135deg, #475569 0%, #94a3b8 100%); --tile-glow: rgba(71, 85, 105, 0.4); }
+.space-other .space-tile-icon { background: linear-gradient(135deg, #475569 0%, #94a3b8 100%); }
 
 .space-list {
   display: grid;
@@ -2459,7 +2424,7 @@ a:hover > .space-tile-icon {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(240, 88, 58, 0.06), transparent 40%, rgba(167, 139, 250, 0.04));
+  background: linear-gradient(90deg, rgba(204, 66, 10, 0.06), transparent 70%);
 }
 
 .hermes-nb-content {
@@ -2894,7 +2859,7 @@ a:hover > .space-tile-icon {
 }
 
 :root[data-theme='light'] .hermes-navbar::after {
-  background: linear-gradient(90deg, rgba(204, 66, 10, 0.04), transparent 40%, rgba(147, 51, 234, 0.03));
+  background: linear-gradient(90deg, rgba(204, 66, 10, 0.04), transparent 70%);
 }
 
 :root[data-theme='light'] .hermes-nb-pill,

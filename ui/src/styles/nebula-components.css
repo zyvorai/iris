@@ -1035,7 +1035,7 @@
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: var(--text-faint);
-  border-left: 2px solid rgba(168, 85, 247, 0.35);
+  border-left: 2px solid rgba(204, 66, 10, 0.35);
   padding-left: 0.65rem;
 }
 
@@ -1599,8 +1599,8 @@
 
 .hub-link-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(240, 88, 58, 0.3);
-  box-shadow: var(--shadow-glow-blue);
+  border-color: rgba(204, 66, 10, 0.3);
+  box-shadow: 0 14px 30px -14px rgba(204, 66, 10, 0.35);
 }
 
 .hub-icon-tile {
@@ -1613,19 +1613,14 @@
   flex-shrink: 0;
   color: #fff;
   margin-bottom: 0.6rem;
-  box-shadow: 0 8px 20px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #cc420a 0%, #ff5a15 60%, #ffb27a 130%);
+  box-shadow: 0 6px 16px -4px rgba(204, 66, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.18s ease;
 }
 
 .hub-link-card:hover .hub-icon-tile {
   transform: scale(1.06) rotate(-2deg);
 }
-
-.hub-icon-tile-1 { background: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%); --tile-glow: rgba(37, 99, 235, 0.4); }
-.hub-icon-tile-2 { background: linear-gradient(135deg, #9333ea 0%, #d8b4fe 100%); --tile-glow: rgba(147, 51, 234, 0.4); }
-.hub-icon-tile-3 { background: linear-gradient(135deg, #059669 0%, #6ee7b7 100%); --tile-glow: rgba(5, 150, 105, 0.4); }
-.hub-icon-tile-4 { background: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); --tile-glow: rgba(234, 88, 12, 0.4); }
-.hub-icon-tile-5 { background: linear-gradient(135deg, #0284c7 0%, #7dd3fc 100%); --tile-glow: rgba(2, 132, 199, 0.4); }
 
 .hub-link-card h3 {
   margin: 0 0 0.25rem;
