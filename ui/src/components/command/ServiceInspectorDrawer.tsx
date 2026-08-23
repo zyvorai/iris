@@ -114,9 +114,9 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
   ]
 
   return (
-    <div className="inspector-backdrop diagnosis-drawer-backdrop" onClick={onClose} role="presentation">
+    <div className="diagnosis-drawer-backdrop" onClick={onClose} role="presentation">
       <aside
-        className="service-inspector-drawer diagnosis-drawer"
+        className="diagnosis-drawer"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Service inspector"

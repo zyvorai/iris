@@ -2180,31 +2180,6 @@ a:hover > .space-tile-icon {
   border-color: rgba(255, 77, 109, 0.35);
 }
 
-.inspector-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-}
-
-.service-inspector-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(460px, 92vw);
-  padding: var(--space-5);
-  overflow: auto;
-  border-radius: 24px 0 0 24px;
-  animation: drawer-in var(--duration-slow) var(--ease-spring);
-}
-
-@keyframes drawer-in {
-  from { transform: translateX(100%); opacity: 0.6; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
 .inspector-header {
   display: flex;
   align-items: flex-start;
@@ -2326,6 +2301,7 @@ a:hover > .space-tile-icon {
   flex-wrap: wrap;
   gap: 0.35rem;
   margin: var(--space-3) 0;
+  padding: 0 1.5rem;
 }
 
 .inspector-tabs button {

@@ -1014,8 +1014,8 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
+  background: rgba(4, 6, 10, 0.62);
+  backdrop-filter: blur(3px);
 }
 
 .diagnosis-drawer {
@@ -1023,14 +1023,23 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(480px, 92vw);
+  width: min(460px, 94vw);
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-soft);
   background: var(--bg-panel-strong);
   backdrop-filter: blur(22px);
   z-index: 61;
-  animation: drawer-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: drawer-in 0.3s cubic-bezier(0.3, 0.8, 0.2, 1);
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(102%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .diagnosis-drawer-header {
