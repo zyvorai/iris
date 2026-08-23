@@ -17,9 +17,9 @@
 }
 
 .glass-panel:hover {
-  border-color: rgba(240, 88, 58, 0.18);
+  border-color: rgba(245, 165, 36, 0.18);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-panel), 0 8px 28px rgba(240, 88, 58, 0.10);
+  box-shadow: var(--shadow-panel), 0 8px 28px rgba(245, 165, 36, 0.10);
 }
 
 .glass-panel-tone-healthy {
@@ -88,8 +88,8 @@
 }
 
 .glyph-tile-brand {
-  background: linear-gradient(135deg, var(--sodium) 0%, var(--accent-fill) 60%, #ffb27a 130%);
-  box-shadow: 0 6px 16px -4px rgba(240, 88, 58, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(150deg, var(--sodium), #d2761a);
+  box-shadow: 0 6px 16px -4px rgba(245, 165, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .glyph-tile-ai {
@@ -148,8 +148,8 @@
 }
 
 .nebula-btn:hover:not(:disabled) {
-  border-color: rgba(240, 88, 58, 0.32);
-  background: rgba(240, 88, 58, 0.08);
+  border-color: rgba(245, 165, 36, 0.32);
+  background: rgba(245, 165, 36, 0.08);
   color: #ffd4c2;
   transform: translateY(-1px);
 }
@@ -160,7 +160,7 @@
 }
 
 .nebula-btn:focus-visible {
-  outline: 2px solid rgba(240, 88, 58, 0.45);
+  outline: 2px solid rgba(245, 165, 36, 0.45);
   outline-offset: 2px;
 }
 
@@ -218,14 +218,14 @@
 }
 
 .nebula-btn-ai {
-  border-color: rgba(204, 66, 10, 0.28);
-  background: rgba(204, 66, 10, 0.1);
+  border-color: rgba(179, 106, 0, 0.28);
+  background: rgba(179, 106, 0, 0.1);
   color: var(--sodium);
 }
 
 .nebula-btn-ai:hover:not(:disabled) {
-  border-color: rgba(204, 66, 10, 0.4);
-  background: rgba(204, 66, 10, 0.16);
+  border-color: rgba(179, 106, 0, 0.4);
+  background: rgba(179, 106, 0, 0.16);
   color: #ffb27a;
 }
 
@@ -294,7 +294,7 @@
 
 .action-menu-item:hover {
   color: #ffd4c2;
-  background: rgba(240, 88, 58, 0.1);
+  background: rgba(245, 165, 36, 0.1);
 }
 
 /* Status Badge */
@@ -478,19 +478,19 @@
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   min-height: 72px;
   background:
-    radial-gradient(circle at 90% 10%, rgba(204, 66, 10, 0.16), transparent 38%),
+    radial-gradient(circle at 90% 10%, rgba(179, 106, 0, 0.16), transparent 38%),
     var(--panel-surface-strong) !important;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(204, 66, 10, 0.28) !important;
-  box-shadow: 0 14px 30px -14px rgba(204, 66, 10, 0.35);
+  border-color: rgba(179, 106, 0, 0.28) !important;
+  box-shadow: 0 14px 30px -14px rgba(179, 106, 0, 0.35);
 }
 
 .metric-card .metric-card-icon {
-  background: linear-gradient(135deg, var(--sodium) 0%, var(--accent-fill) 60%, #ffb27a 130%);
-  --tile-glow: rgba(240, 88, 58, 0.45);
+  background: linear-gradient(150deg, var(--sodium), #d2761a);
+  --tile-glow: rgba(245, 165, 36, 0.45);
 }
 
 .metric-card-warn {
@@ -536,7 +536,7 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  background: linear-gradient(90deg, var(--text-primary), #b23705 140%);
+  background: linear-gradient(90deg, var(--text-primary), #92400e 140%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -617,7 +617,7 @@
 }
 
 .quick-launch-tile-nebula:focus-visible {
-  outline: 2px solid rgba(240, 88, 58, 0.45);
+  outline: 2px solid rgba(245, 165, 36, 0.45);
   outline-offset: 2px;
 }
 
@@ -692,7 +692,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #f0583a;
+  color: #f5a524;
   font-size: 0.75rem;
   cursor: pointer;
 }
@@ -748,7 +748,7 @@
   margin: 0;
   font-size: 0.72rem;
   font-family: var(--font-mono);
-  color: #f0583a;
+  color: #f5a524;
   opacity: 0.9;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -791,15 +791,15 @@
   min-width: 0;
   padding: 0.45rem 0.65rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(240, 88, 58, 0.2);
-  background: rgba(240, 88, 58, 0.08);
+  border: 1px solid rgba(245, 165, 36, 0.2);
+  background: rgba(245, 165, 36, 0.08);
   color: #ffd4c2;
   text-decoration: none;
 }
 
 .route-display-link:hover {
-  border-color: rgba(240, 88, 58, 0.35);
-  background: rgba(240, 88, 58, 0.12);
+  border-color: rgba(245, 165, 36, 0.35);
+  background: rgba(245, 165, 36, 0.12);
 }
 
 .route-display-path {
@@ -903,8 +903,8 @@
 
 .mission-control-filters button.active {
   color: #ffd4c2;
-  border-color: rgba(240, 88, 58, 0.28);
-  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
+  border-color: rgba(245, 165, 36, 0.28);
+  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08));
 }
 
 /* Hero Command Panel */
@@ -959,7 +959,7 @@
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: var(--text-faint);
-  border-left: 2px solid rgba(204, 66, 10, 0.35);
+  border-left: 2px solid rgba(179, 106, 0, 0.35);
   padding-left: 0.65rem;
 }
 
@@ -1084,7 +1084,7 @@
   border: 1px solid var(--border-soft);
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  color: #f0583a;
+  color: #f5a524;
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -1227,7 +1227,7 @@
 }
 
 .section-link-nebula:hover {
-  color: #f0583a;
+  color: #f5a524;
 }
 
 .sr-only {
@@ -1368,7 +1368,7 @@
   flex-wrap: wrap;
   padding: 0.65rem 1rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(240, 88, 58, 0.2);
+  border: 1px solid rgba(245, 165, 36, 0.2);
   background: var(--chrome-72);
   color: var(--text-secondary);
   font-size: 0.8125rem;
@@ -1420,7 +1420,7 @@
 
 .page-toolbar-search:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(240, 88, 58, 0.18);
+  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.18);
 }
 
 .page-toolbar-select {
@@ -1448,7 +1448,7 @@
 }
 
 .graph-broken-toggle:has(input:checked) {
-  border-color: rgba(240, 88, 58, 0.4);
+  border-color: rgba(245, 165, 36, 0.4);
   color: var(--text-primary);
 }
 
@@ -1472,8 +1472,8 @@
 
 .filter-chip.active {
   color: #fff;
-  border-color: rgba(240, 88, 58, 0.38);
-  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
+  border-color: rgba(245, 165, 36, 0.38);
+  background: linear-gradient(180deg, rgba(245, 165, 36, 0.18), rgba(245, 165, 36, 0.08));
 }
 
 /* Flat mission control groups */
@@ -1523,8 +1523,8 @@
 
 .hub-link-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(204, 66, 10, 0.3);
-  box-shadow: 0 14px 30px -14px rgba(204, 66, 10, 0.35);
+  border-color: rgba(179, 106, 0, 0.3);
+  box-shadow: 0 14px 30px -14px rgba(179, 106, 0, 0.35);
 }
 
 .hub-icon-tile {
@@ -1537,8 +1537,8 @@
   flex-shrink: 0;
   color: #fff;
   margin-bottom: 0.6rem;
-  background: linear-gradient(135deg, var(--sodium) 0%, var(--accent-fill) 60%, #ffb27a 130%);
-  box-shadow: 0 6px 16px -4px rgba(240, 88, 58, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(150deg, var(--sodium), #d2761a);
+  box-shadow: 0 6px 16px -4px rgba(245, 165, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.18s ease;
 }
 
@@ -1649,7 +1649,7 @@
 .workspace-dropdown-item.active,
 .workspace-dropdown-item:hover {
   color: #ffd4c2;
-  background: rgba(240, 88, 58, 0.1);
+  background: rgba(245, 165, 36, 0.1);
 }
 
 .zeus-health-chip-compact .zeus-health-label {
@@ -1862,7 +1862,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid rgba(148, 163, 184, 0.35);
-  border-top-color: #f0583a;
+  border-top-color: #f5a524;
   animation: palette-spin 0.8s linear infinite;
 }
 
@@ -1886,7 +1886,7 @@
 }
 
 .zyra-ai-panel {
-  border-color: rgba(204, 66, 10, 0.18);
+  border-color: rgba(179, 106, 0, 0.18);
   background: var(--panel-surface-ai);
 }
 
@@ -1919,10 +1919,10 @@
 }
 
 .diagnosis-drawer-ai {
-  border: 1px solid rgba(204, 66, 10, 0.16);
+  border: 1px solid rgba(179, 106, 0, 0.16);
   border-radius: var(--radius-lg);
   padding: 0.85rem 1rem;
-  background: rgba(204, 66, 10, 0.06);
+  background: rgba(179, 106, 0, 0.06);
 }
 
 /* ── Light theme — pastel text tuned for dark surfaces, needs deeper ink on light tints ── */
@@ -1935,7 +1935,7 @@
 :root[data-theme='hall'] .service-route-hint,
 :root[data-theme='hall'] .section-link-nebula:hover,
 :root[data-theme='hall'] .diagnosis-drawer-commands {
-  color: #b23705;
+  color: #92400e;
 }
 
 :root[data-theme='hall'] .nebula-btn-danger,
@@ -1949,7 +1949,7 @@
 }
 
 :root[data-theme='hall'] .nebula-btn-ai {
-  color: #b23705;
+  color: #92400e;
 }
 
 :root[data-theme='hall'] .nebula-btn-ai:hover:not(:disabled) {
@@ -2080,7 +2080,7 @@
 }
 
 .dep-action-btn:hover {
-  border-color: rgba(240, 88, 58, 0.4);
+  border-color: rgba(245, 165, 36, 0.4);
   color: var(--sodium);
   background: var(--hold-bg);
 }

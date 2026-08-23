@@ -1,9 +1,9 @@
 /*
- * Self-hosted Archivo Variable (wght 100-900, wdth 62-125%) + IBM Plex Mono
- * (400/500) — matches hypersdk-web's actual current typography (Archivo
- * for display, IBM Plex Mono as the primary mono), downloaded once from
- * Google Fonts and served locally like every other asset here (no CDN
- * dependency at runtime). Static Archivo weights below stay as the
+ * Self-hosted Archivo Variable (wght 100-900, wdth 62-125%) + Azeret Mono
+ * (wght 100-900) — matches the reference "departures hall" mockup's exact
+ * typography, downloaded once from Google Fonts and served locally like
+ * every other asset here (Hermes has a firm zero-CDN rule regardless of
+ * which font is chosen). Static Archivo weights below stay as the
  * fallback for browsers without variable-font support.
  */
 @font-face {
@@ -16,21 +16,11 @@
 }
 
 @font-face {
-  font-family: 'IBM Plex Mono';
+  font-family: 'Azeret Mono';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/ibm-plex-mono-latin-400.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/fonts/ibm-plex-mono-latin-500.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  src: url('/fonts/azeret-mono-variable.woff2') format('woff2-variations');
 }
 
 @font-face {

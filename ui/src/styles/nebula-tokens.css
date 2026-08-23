@@ -4,28 +4,30 @@
 :root {
   color-scheme: dark;
 
-  /* Zyvor palette — matches the hypersdk-web marketing site: a single
-     rust-orange brand accent (text-safe, used for labels/links) plus a
-     brighter fixed fill-accent reserved for icon-tile gradients/glow only,
-     never for text. Status colours (go/hold/stop) are independent. */
-  --void: #050505;
-  --board: #0a0a0a;
-  --board-2: #14171c;
-  --board-3: #1b1f26;
-  --edge: rgba(255, 255, 255, 0.08);
-  --edge-2: rgba(255, 255, 255, 0.14);
-  --chalk: #f1f5f9;
-  --slate: #93a1b3;
-  --sodium: #f0583a;
-  --sodium-deep: #d94b32;
-  --accent-fill: #ff5a15;
+  /* Departures Hall palette — matches the reference mockup exactly: sodium
+     amber is both the brand accent and the "hold/degraded" status colour
+     (the mockup couples them deliberately), status is otherwise the only
+     signal allowed to carry colour. */
+  --void: #0a0d13;
+  --board: #111722;
+  --board-2: #161d2a;
+  --board-3: #1d2634;
+  --edge: #232d3e;
+  --edge-2: #1a2230;
+  --chalk: #e7ebf2;
+  --chalk-2: #b4becd;
+  --slate: #7f8a9c;
+  --slate-2: #5c6778;
+  --sodium: #f5a524;
+  --sodium-deep: #c9860e;
   --relay: #7c8cff;
-  --go: #34d399;
-  --go-bg: rgba(52, 211, 153, 0.12);
+  --relay-ink: #ffffff;
+  --go: #37d399;
+  --go-bg: rgba(55, 211, 153, 0.12);
   --hold: #f5a524;
   --hold-bg: rgba(245, 165, 36, 0.12);
-  --stop: #f87171;
-  --stop-bg: rgba(248, 113, 113, 0.12);
+  --stop: #f2606e;
+  --stop-bg: rgba(242, 96, 110, 0.12);
 
   /* Base surfaces — repointed to the palette above; every legacy alias below
      inherits automatically. */
@@ -36,7 +38,7 @@
   --bg-chip: rgba(11, 15, 20, 0.65);
 
   --border-soft: var(--edge);
-  --border-strong: rgba(240, 88, 58, 0.28);
+  --border-strong: rgba(245, 165, 36, 0.28);
   --border-muted: rgba(255, 255, 255, 0.045);
 
   --text-primary: var(--chalk);
@@ -67,7 +69,7 @@
     0 16px 50px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.20), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-glow-orange: 0 0 0 1px rgba(240, 88, 58, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-orange: 0 0 0 1px rgba(245, 165, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 
@@ -79,7 +81,7 @@
 
   --font-display: 'Archivo Variable', 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
   --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
@@ -114,7 +116,7 @@
   --hermes-muted: var(--text-muted);
   --hermes-border: var(--border-soft);
   --hermes-accent: var(--aether-primary);
-  --hermes-accent-soft: rgba(240, 88, 58, 0.12);
+  --hermes-accent-soft: rgba(245, 165, 36, 0.12);
   --hermes-green: var(--accent-green);
   --hermes-amber: var(--accent-yellow);
   --hermes-red: var(--accent-red);
@@ -127,8 +129,8 @@
   --zeus-bg-base: var(--bg-root);
   --zeus-bg-slate: var(--bg-elevated);
   --zeus-primary: var(--aether-primary);
-  --zeus-primary-soft: rgba(240, 88, 58, 0.18);
-  --zeus-primary-border: rgba(240, 88, 58, 0.35);
+  --zeus-primary-soft: rgba(245, 165, 36, 0.18);
+  --zeus-primary-border: rgba(245, 165, 36, 0.35);
   --zeus-success: var(--accent-green);
   --zeus-warning: var(--accent-yellow);
   --zeus-danger: var(--accent-red);
@@ -170,23 +172,25 @@
   color-scheme: light;
 
   /* Departures Hall palette — "hall" (light) variant */
-  --void: #f4f5f7;
+  --void: #edebe4;
   --board: #ffffff;
-  --board-2: #f5f6f8;
-  --board-3: #eceef1;
-  --edge: rgba(20, 22, 26, 0.10);
-  --edge-2: rgba(20, 22, 26, 0.16);
-  --chalk: #14161a;
-  --slate: #5b6472;
-  --sodium: #cc420a;
-  --sodium-deep: #b23705;
-  --relay: #4c5fe0;
-  --go: #0f7b4f;
-  --go-bg: #e8f5ef;
-  --hold: #b45309;
-  --hold-bg: #fdf3df;
-  --stop: #b3261e;
-  --stop-bg: #fdecea;
+  --board-2: #f6f5f0;
+  --board-3: #edebe3;
+  --edge: #dcd9ce;
+  --edge-2: #e6e3d9;
+  --chalk: #15181d;
+  --chalk-2: #3b434f;
+  --slate: #6d7789;
+  --slate-2: #8a93a2;
+  --sodium: #b36a00;
+  --sodium-deep: #92400e;
+  --relay: #3b4fd8;
+  --go: #0f8a5f;
+  --go-bg: rgba(15, 138, 95, 0.10);
+  --hold: #9a6206;
+  --hold-bg: rgba(154, 98, 6, 0.10);
+  --stop: #c0392e;
+  --stop-bg: rgba(192, 57, 46, 0.10);
 
   --bg-root: var(--void);
   --bg-elevated: var(--board-2);
@@ -195,7 +199,7 @@
   --bg-chip: rgba(20, 22, 26, 0.045);
 
   --border-soft: var(--edge);
-  --border-strong: rgba(204, 66, 10, 0.24);
+  --border-strong: rgba(179, 106, 0, 0.24);
   --border-muted: rgba(20, 22, 26, 0.07);
 
   --text-primary: var(--chalk);
@@ -219,7 +223,7 @@
     0 8px 24px rgba(20, 22, 26, 0.08),
     0 2px 6px rgba(20, 22, 26, 0.04);
   --shadow-glow-blue: 0 0 0 1px rgba(76, 95, 224, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-orange: 0 0 0 1px rgba(204, 66, 10, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-orange: 0 0 0 1px rgba(179, 106, 0, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
 
@@ -255,10 +259,10 @@
 
   /* Bridge tokens — surfaces/borders some legacy components still read directly */
   --hermes-surface: var(--bg-panel);
-  --hermes-accent-soft: rgba(204, 66, 10, 0.10);
+  --hermes-accent-soft: rgba(179, 106, 0, 0.10);
   --hermes-glass-chrome-bg: var(--dropdown-bg);
   --zeus-bg-slate: var(--bg-elevated);
-  --zeus-primary-soft: rgba(204, 66, 10, 0.14);
+  --zeus-primary-soft: rgba(179, 106, 0, 0.14);
   --zeus-primary-border: var(--border-strong);
   --zeus-info: #0284c7;
   --zeus-border: var(--border-soft);
@@ -270,6 +274,16 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Widened variable-font headline treatment — the Archivo Variable file
+   already declares the font-stretch axis this varies; applied alongside
+   (not instead of) .page-title's gradient-clip text. */
+.sign {
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 112;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .page-kicker {
