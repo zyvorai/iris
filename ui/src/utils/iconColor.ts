@@ -1,25 +1,25 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-// Vivid, distinct hues for app icons without a curated brand color — an
-// "app tray" palette so a catalog of many services reads as colorful
-// rather than one repeated accent tone.
-const ICON_PALETTE: readonly [number, number, number][] = [
-  [240, 88, 58], // coral
-  [245, 158, 11], // amber
-  [234, 179, 8], // gold
-  [132, 204, 22], // lime
-  [16, 185, 129], // green
-  [20, 184, 166], // teal
-  [6, 182, 212], // cyan
-  [14, 165, 233], // sky
-  [59, 130, 246], // blue
-  [99, 102, 241], // indigo
-  [139, 92, 246], // violet
-  [168, 85, 247], // purple
-  [217, 70, 239], // fuchsia
-  [236, 72, 153], // pink
-  [244, 63, 94], // rose
+// Glossy gradient-tile icon palette — App Store-tray style (accent →
+// accentLight diagonal gradient + colored glow + white glyph), matching the
+// zyvor.dev product-badge treatment rather than a flat tinted swatch.
+const ICON_PALETTE: readonly [string, string][] = [
+  ['#f0583a', '#f89e8a'], // coral
+  ['#ff8f3f', '#ffc48a'], // orange
+  ['#eab308', '#fde68a'], // gold
+  ['#65a30d', '#bef264'], // lime
+  ['#10b981', '#6ee7b7'], // green
+  ['#0d9488', '#5eead4'], // teal
+  ['#0891b2', '#67e8f9'], // cyan
+  ['#0284c7', '#7dd3fc'], // sky
+  ['#2563eb', '#93c5fd'], // blue
+  ['#4f46e5', '#a5b4fc'], // indigo
+  ['#7c3aed', '#c4b5fd'], // violet
+  ['#9333ea', '#d8b4fe'], // purple
+  ['#c026d3', '#f0abfc'], // fuchsia
+  ['#db2777', '#f9a8d4'], // pink
+  ['#e11d48', '#fda4af'], // rose
 ]
 
 function hashString(seed: string): number {
@@ -30,40 +30,53 @@ function hashString(seed: string): number {
   return Math.abs(h)
 }
 
-export interface IconColor {
-  bg: string
-  fg: string
+function hexToRgb(hex: string): string {
+  const n = parseInt(hex.slice(1), 16)
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
 }
 
-export function iconColorFor(seed: string): IconColor {
-  const [r, g, b] = ICON_PALETTE[hashString(seed || 'app') % ICON_PALETTE.length]
+function gradientFor([accent, accentLight]: readonly [string, string]) {
   return {
-    bg: `rgba(${r}, ${g}, ${b}, 0.22)`,
-    fg: `rgb(${r}, ${g}, ${b})`,
+    gradient: `linear-gradient(135deg, ${accent} 0%, ${accentLight} 100%)`,
+    glow: `rgba(${hexToRgb(accent)}, 0.35)`,
+    accent,
   }
 }
 
-// Icon keys with a curated brand color (see .icon-<key> in nebula-components.css /
-// index.css, including their light-theme overrides). Kept in sync with those CSS
-// rules so anything reading a "card accent" color matches the icon glyph exactly.
-export const CURATED_ICON_FG: Record<string, string> = {
-  grafana: '#fb923c',
-  prometheus: '#f87171',
-  zeus: '#93c5fd',
-  argocd: '#fca5a5',
-  jenkins: '#facc15',
-  gitlab: '#fb923c',
-  loki: '#93c5fd',
-  keycloak: '#cbd5e1',
-  vault: '#5eead4',
-  harbor: '#7dd3fc',
-  minio: '#f87171',
+export interface IconColor {
+  gradient: string
+  glow: string
+  accent: string
 }
 
-/** The accent color an app's icon actually renders in — curated brand color when
- * one exists, otherwise the same deterministic hash used by AppIcon. Use this for
- * any other UI element (e.g. a card's top accent bar) that should match the icon. */
-export function accentColorFor(name: string, iconKey?: string): string {
-  const curated = iconKey ? CURATED_ICON_FG[iconKey] : undefined
-  return curated ?? iconColorFor(name || iconKey || 'app').fg
+export function iconColorFor(seed: string): IconColor {
+  const pair = ICON_PALETTE[hashString(seed || 'app') % ICON_PALETTE.length]
+  return gradientFor(pair)
+}
+
+// Icon keys with a curated brand-matched gradient (kept in the same
+// accent/accentLight, same-hue-family shape as the hashed palette above).
+const CURATED_ICON_PALETTE: Record<string, [string, string]> = {
+  grafana: ['#ea580c', '#fdba74'],
+  prometheus: ['#dc2626', '#fca5a5'],
+  zeus: ['#2563eb', '#93c5fd'],
+  argocd: ['#dc2626', '#fca5a5'],
+  jenkins: ['#ca8a04', '#fde047'],
+  gitlab: ['#ea580c', '#fdba74'],
+  loki: ['#2563eb', '#93c5fd'],
+  keycloak: ['#475569', '#cbd5e1'],
+  vault: ['#0d9488', '#5eead4'],
+  harbor: ['#0284c7', '#7dd3fc'],
+  minio: ['#dc2626', '#fca5a5'],
+}
+
+export function curatedIconColor(iconKey: string): IconColor | undefined {
+  const pair = CURATED_ICON_PALETTE[iconKey]
+  return pair ? gradientFor(pair) : undefined
+}
+
+/** The gradient an app's icon actually renders — curated brand gradient when
+ * one exists, otherwise the same deterministic hash used by AppIcon. */
+export function accentColorFor(name: string, iconKey?: string): IconColor {
+  return (iconKey ? curatedIconColor(iconKey) : undefined) ?? iconColorFor(name || iconKey || 'app')
 }

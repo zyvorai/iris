@@ -2,7 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import type { CSSProperties } from 'react'
-import { CURATED_ICON_FG, iconColorFor } from '../utils/iconColor'
+import { accentColorFor } from '../utils/iconColor'
 
 interface AppIconProps {
   icon: string
@@ -39,16 +39,11 @@ const labels: Record<string, string> = {
 export default function AppIcon({ icon, name, size = 'md' }: AppIconProps) {
   const key = icon && icon !== 'app' ? icon : 'app'
   const label = labels[key] ?? name.slice(0, 2).toUpperCase()
-  const curated = key in CURATED_ICON_FG
-  const style: CSSProperties | undefined = curated
-    ? undefined
-    : (() => {
-        const { bg, fg } = iconColorFor(name || key)
-        return { '--icon-bg': bg, '--icon-fg': fg } as CSSProperties
-      })()
+  const { gradient, glow } = accentColorFor(name, key)
+  const style = { '--icon-bg': gradient, '--icon-glow': glow } as CSSProperties
 
   return (
-    <div className={`app-icon icon-${key} app-icon-${size}`} style={style} aria-hidden>
+    <div className={`app-icon app-icon-${size}`} style={style} aria-hidden>
       {label}
     </div>
   )

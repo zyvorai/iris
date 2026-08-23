@@ -221,34 +221,6 @@ button {
   margin-bottom: 0;
 }
 
-.app-icon.icon-grafana { background: rgba(255, 120, 0, 0.18); color: #fb923c; }
-.app-icon.icon-prometheus { background: rgba(230, 82, 44, 0.18); color: #f87171; }
-.app-icon.icon-zeus { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-.app-icon.icon-argocd { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
-.app-icon.icon-jenkins { background: rgba(210, 180, 50, 0.18); color: #facc15; }
-.app-icon.icon-gitlab { background: rgba(252, 109, 38, 0.18); color: #fb923c; }
-.app-icon.icon-loki { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
-.app-icon.icon-keycloak { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
-.app-icon.icon-vault { background: rgba(20, 184, 166, 0.18); color: #5eead4; }
-.app-icon.icon-harbor { background: rgba(14, 165, 233, 0.18); color: #7dd3fc; }
-.app-icon.icon-minio { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-
-:root[data-theme='light'] .app-icon {
-  color: color-mix(in srgb, var(--icon-fg, var(--hermes-accent)) 62%, black);
-}
-
-:root[data-theme='light'] .app-icon.icon-grafana { color: #c2410c; }
-:root[data-theme='light'] .app-icon.icon-prometheus { color: #b91c1c; }
-:root[data-theme='light'] .app-icon.icon-zeus { color: #1d4ed8; }
-:root[data-theme='light'] .app-icon.icon-argocd { color: #b91c1c; }
-:root[data-theme='light'] .app-icon.icon-jenkins { color: #a16207; }
-:root[data-theme='light'] .app-icon.icon-gitlab { color: #c2410c; }
-:root[data-theme='light'] .app-icon.icon-loki { color: #1d4ed8; }
-:root[data-theme='light'] .app-icon.icon-keycloak { color: #475569; }
-:root[data-theme='light'] .app-icon.icon-vault { color: #0f766e; }
-:root[data-theme='light'] .app-icon.icon-harbor { color: #0369a1; }
-:root[data-theme='light'] .app-icon.icon-minio { color: #b91c1c; }
-
 .chip-env {
   color: #93c5fd;
   border-color: rgba(59, 130, 246, 0.35);
@@ -281,8 +253,19 @@ button {
   font-weight: 700;
   font-size: 1.1rem;
   background: var(--icon-bg, var(--hermes-accent-soft));
-  color: var(--icon-fg, var(--hermes-accent));
+  color: #fff;
+  box-shadow:
+    0 8px 20px -6px var(--icon-glow, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
   margin-bottom: 0.75rem;
+  transition: transform 0.18s ease;
+}
+
+a:hover > .app-icon,
+.service-card:hover .app-icon,
+.app-card-nebula:hover .app-icon,
+.quick-launch-tile-nebula:hover .app-icon {
+  transform: scale(1.06) rotate(-1deg);
 }
 
 .app-card h3 {

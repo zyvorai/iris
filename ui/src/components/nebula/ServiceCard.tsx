@@ -52,7 +52,7 @@ export default function ServiceCard({ app }: ServiceCardProps) {
     onPublish: !app.visibility.published ? () => void publish.mutate() : undefined,
   })
 
-  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon).gradient } as CSSProperties
 
   return (
     <GlassPanel tone={panelTone(app.status)} className="service-card card-accent" style={accentStyle}>

@@ -26,7 +26,7 @@ export default function QuickLaunchTile({ app }: QuickLaunchTileProps) {
     if (e.key === 'Enter') void openApp(app)
   }
 
-  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon).gradient } as CSSProperties
 
   return (
     <GlassPanel

@@ -70,7 +70,7 @@ export default function AppCard({ app, favorite = false, onPublish, onHide, comp
     favorite,
   })
 
-  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon).gradient } as CSSProperties
 
   return (
     <GlassPanel
