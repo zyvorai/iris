@@ -323,7 +323,12 @@
 }
 
 .palette-panel,
-.hermes-nb-dropdown,
+.hermes-nb-dropdown {
+  border: 1px solid var(--border-soft) !important;
+  background: var(--dropdown-bg) !important;
+  box-shadow: var(--dropdown-shadow) !important;
+}
+
 .hermes-nb-drawer {
   border: 1px solid var(--border-soft) !important;
   background: rgba(11, 15, 20, 0.92) !important;

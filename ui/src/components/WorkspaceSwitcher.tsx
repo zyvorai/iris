@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, Layers, Lock } from 'lucide-react'
 import { hermesApi, environmentLabel } from '../services/hermesApi'
 import { useWorkspace } from '../utils/workspaceContext'
+import { environmentTone as workspaceTone } from '../utils/environmentTone'
 
 export default function WorkspaceSwitcher() {
   const { workspaceId, setWorkspaceId } = useWorkspace()
@@ -66,10 +67,12 @@ export default function WorkspaceSwitcher() {
           key={ws.id}
           type="button"
           className={`workspace-chip ${workspaceId === ws.id ? 'active' : ''} ${isRestricted(ws.id) ? 'workspace-locked' : ''}`}
+          data-tone={workspaceTone(ws.label)}
           onClick={() => setWorkspaceId(ws.id)}
           title={`${ws.appCount} apps · ${ws.healthy} healthy${isRestricted(ws.id) ? ' · restricted' : ''}`}
           disabled={isRestricted(ws.id)}
         >
+          <span className="workspace-tone-dot" data-tone={workspaceTone(ws.label)} aria-hidden />
           {environmentLabel(ws.label)}
           {isRestricted(ws.id) ? <Lock size={10} aria-hidden /> : null}
           <span className="workspace-count">{ws.appCount}</span>
@@ -115,9 +118,11 @@ export default function WorkspaceSwitcher() {
                 key={ws.id}
                 type="button"
                 className={`workspace-dropdown-item ${workspaceId === ws.id ? 'active' : ''}`}
+                data-tone={workspaceTone(ws.label)}
                 disabled={isRestricted(ws.id)}
                 onClick={() => { setWorkspaceId(ws.id); setDropdownOpen(false) }}
               >
+                <span className="workspace-tone-dot" data-tone={workspaceTone(ws.label)} aria-hidden />
                 {environmentLabel(ws.label)} ({ws.appCount})
               </button>
             ))}

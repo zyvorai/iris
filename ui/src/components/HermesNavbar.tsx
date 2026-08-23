@@ -29,7 +29,7 @@ import {
 } from 'lucide-react'
 import { NavLink, Link } from 'react-router-dom'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
-import GlyphTile from './nebula/GlyphTile'
+import GlyphTile, { type GlyphTileTone } from './nebula/GlyphTile'
 import PulseGlyph from './icons/PulseGlyph'
 import { hermesApi } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
@@ -43,19 +43,19 @@ interface HermesNavbarProps {
 }
 
 const primaryNav = [
-  { to: '/', label: 'Overview', icon: Home, end: true },
-  { to: '/apps', label: 'Catalog', icon: Grid3X3 },
-  { to: '/cluster', label: 'Cluster', icon: Server },
-  { to: '/health', label: 'Health', icon: HeartPulse },
-  { to: '/spaces', label: 'Spaces', icon: Layers },
+  { to: '/', label: 'Overview', icon: Home, end: true, tone: 'brand' as const },
+  { to: '/apps', label: 'Catalog', icon: Grid3X3, tone: 'pink' as const },
+  { to: '/cluster', label: 'Cluster', icon: Server, tone: 'info' as const },
+  { to: '/health', label: 'Health', icon: HeartPulse, tone: 'ok' as const },
+  { to: '/spaces', label: 'Spaces', icon: Layers, tone: 'cyan' as const },
 ]
 
 const moreNav = [
-  { to: '/graph', label: 'Graph', icon: GitBranch },
-  { to: '/discovery', label: 'Discovery', icon: Compass },
-  { to: '/federated', label: 'Federated', icon: Globe },
-  { to: '/teams', label: 'Teams', icon: Users },
-  { to: '/activity', label: 'Activity', icon: Activity },
+  { to: '/graph', label: 'Graph', icon: GitBranch, tone: 'ai' as const },
+  { to: '/discovery', label: 'Discovery', icon: Compass, tone: 'warn' as const },
+  { to: '/federated', label: 'Federated', icon: Globe, tone: 'cyan' as const },
+  { to: '/teams', label: 'Teams', icon: Users, tone: 'pink' as const },
+  { to: '/activity', label: 'Activity', icon: Activity, tone: 'ok' as const },
 ]
 
 function HelpMenu({ onOpenShortcuts }: { onOpenShortcuts: () => void }) {
@@ -108,7 +108,7 @@ function HelpMenu({ onOpenShortcuts }: { onOpenShortcuts: () => void }) {
   )
 }
 
-function MoreMenu() {
+function MoreMenu({ toneFor }: { toneFor: (path: string) => GlyphTileTone }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -135,10 +135,11 @@ function MoreMenu() {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) => `hermes-nb-dropdown-item${isActive ? ' active' : ''}`}
+              data-tone={toneFor(item.to)}
               role="menuitem"
               onClick={() => setOpen(false)}
             >
-              <item.icon size={14} /> {item.label}
+              <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={12} />} size="sm" /> {item.label}
             </NavLink>
           ))}
         </div>
@@ -165,6 +166,9 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
     : broken > 0 ? 'bad'
     : (degraded > 0 || (healthPct ?? 0) < 80) ? 'warn'
     : 'ok'
+  const healthTileTone: GlyphTileTone = statusTone === 'bad' ? 'critical' : statusTone === 'warn' ? 'warn' : 'ok'
+  const toneFor = (path: string): GlyphTileTone =>
+    path === '/health' ? healthTileTone : ([...primaryNav, ...moreNav].find((n) => n.to === path)?.tone ?? 'brand')
 
   const handleRefresh = () => {
     setSpinning(true)
@@ -231,7 +235,7 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
             </button>
             <button
               type="button"
-              className="hermes-nb-icon-pill"
+              className="hermes-nb-icon-pill hermes-nb-icon-pill-refresh"
               onClick={handleRefresh}
               title="Refresh data"
             >
@@ -239,7 +243,7 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
             </button>
             <button
               type="button"
-              className="hermes-nb-icon-pill"
+              className={`hermes-nb-icon-pill hermes-nb-icon-pill-theme${theme === 'dark' ? ' is-sun' : ' is-moon'}`}
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
               aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
@@ -282,12 +286,13 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               to={item.to}
               end={item.end}
               className={({ isActive }) => `hermes-nb-nav-pill${isActive ? ' active' : ''}`}
+              data-tone={toneFor(item.to)}
             >
-              <item.icon size={14} />
+              <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={12} />} size="sm" />
               {item.label}
             </NavLink>
           ))}
-          <MoreMenu />
+          <MoreMenu toneFor={toneFor} />
         </div>
       </div>
 
@@ -319,9 +324,10 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
                     to={item.to}
                     end={item.to === '/'}
                     className={({ isActive }) => `hermes-nb-drawer-item${isActive ? ' active' : ''}`}
+                    data-tone={toneFor(item.to)}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <item.icon size={16} /> {item.label}
+                    <GlyphTile tone={toneFor(item.to)} icon={<item.icon size={14} />} size="sm" /> {item.label}
                   </NavLink>
                 ))}
               </div>

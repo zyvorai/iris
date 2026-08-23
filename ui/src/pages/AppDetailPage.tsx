@@ -8,6 +8,7 @@ import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AppCard from '../components/AppCard'
 import AttentionQueue from '../components/command/AttentionQueue'
+import { environmentTone } from '../utils/environmentTone'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
@@ -149,7 +150,9 @@ export default function AppDetailPage() {
               <div className="app-meta-row">
                 <StatusBadge status={a.status} />
                 {a.meta?.environment ? (
-                  <span className="chip chip-env">{environmentLabel(a.meta.environment)}</span>
+                  <span className="chip chip-env" data-tone={environmentTone(a.meta.environment)}>
+                    {environmentLabel(a.meta.environment)}
+                  </span>
                 ) : null}
               </div>
               {broken && a.statusMessage ? (

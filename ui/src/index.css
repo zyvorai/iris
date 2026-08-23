@@ -236,6 +236,12 @@ button {
   color: #f47a60;
   border-color: rgba(240, 88, 58, 0.35);
 }
+.chip-env[data-tone='brand'] { color: #f89e8a; border-color: rgba(240, 88, 58, 0.35); background: rgba(240, 88, 58, 0.1); }
+.chip-env[data-tone='pink'] { color: #f9a8d4; border-color: rgba(219, 39, 119, 0.35); background: rgba(219, 39, 119, 0.1); }
+.chip-env[data-tone='info'] { color: #7dd3fc; border-color: rgba(10, 132, 255, 0.35); background: rgba(10, 132, 255, 0.1); }
+.chip-env[data-tone='cyan'] { color: #67e8f9; border-color: rgba(8, 145, 178, 0.35); background: rgba(8, 145, 178, 0.1); }
+.chip-env[data-tone='warn'] { color: #fde68a; border-color: rgba(234, 179, 8, 0.35); background: rgba(234, 179, 8, 0.1); }
+.chip-env[data-tone='critical'] { color: #fda4af; border-color: rgba(225, 29, 72, 0.35); background: rgba(225, 29, 72, 0.1); }
 
 .app-card-top {
   display: flex;
@@ -1395,6 +1401,39 @@ a:hover > .space-tile-icon {
   color: #ffd4c2;
 }
 
+.workspace-tone-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.workspace-tone-dot[data-tone='brand'] { background: #f0583a; }
+.workspace-tone-dot[data-tone='pink'] { background: #db2777; }
+.workspace-tone-dot[data-tone='info'] { background: #0a84ff; }
+.workspace-tone-dot[data-tone='ok'] { background: #10b981; }
+.workspace-tone-dot[data-tone='cyan'] { background: #0891b2; }
+.workspace-tone-dot[data-tone='ai'] { background: #a78bfa; }
+.workspace-tone-dot[data-tone='warn'] { background: #eab308; }
+.workspace-tone-dot[data-tone='critical'] { background: #e11d48; }
+
+.workspace-chip.active[data-tone='brand'],
+.workspace-dropdown-item.active[data-tone='brand'] { border-color: rgba(240, 88, 58, 0.35); background: rgba(240, 88, 58, 0.12); color: #f89e8a; }
+.workspace-chip.active[data-tone='pink'],
+.workspace-dropdown-item.active[data-tone='pink'] { border-color: rgba(219, 39, 119, 0.35); background: rgba(219, 39, 119, 0.12); color: #f9a8d4; }
+.workspace-chip.active[data-tone='info'],
+.workspace-dropdown-item.active[data-tone='info'] { border-color: rgba(10, 132, 255, 0.35); background: rgba(10, 132, 255, 0.12); color: #7dd3fc; }
+.workspace-chip.active[data-tone='ok'],
+.workspace-dropdown-item.active[data-tone='ok'] { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+.workspace-chip.active[data-tone='cyan'],
+.workspace-dropdown-item.active[data-tone='cyan'] { border-color: rgba(8, 145, 178, 0.35); background: rgba(8, 145, 178, 0.12); color: #67e8f9; }
+.workspace-chip.active[data-tone='ai'],
+.workspace-dropdown-item.active[data-tone='ai'] { border-color: rgba(167, 139, 250, 0.35); background: rgba(167, 139, 250, 0.12); color: #c4b5fd; }
+.workspace-chip.active[data-tone='warn'],
+.workspace-dropdown-item.active[data-tone='warn'] { border-color: rgba(234, 179, 8, 0.35); background: rgba(234, 179, 8, 0.12); color: #fde68a; }
+.workspace-chip.active[data-tone='critical'],
+.workspace-dropdown-item.active[data-tone='critical'] { border-color: rgba(225, 29, 72, 0.35); background: rgba(225, 29, 72, 0.12); color: #fda4af; }
+
 .workspace-count {
   opacity: 0.75;
   font-size: 0.68rem;
@@ -2447,8 +2486,8 @@ a:hover > .space-tile-icon {
   top: 0;
   z-index: 40;
   overflow: visible;
-  border-bottom: 1px solid var(--border-soft);
-  background: rgba(9, 9, 11, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 9, 11, 0.72);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   box-shadow: var(--shadow-panel);
@@ -2463,9 +2502,9 @@ a:hover > .space-tile-icon {
 }
 
 .hermes-nb-content {
-  max-width: min(120rem, calc(100vw - 1.5rem));
+  max-width: min(120rem, calc(100vw - 1.375rem));
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1.375rem;
   position: relative;
   z-index: 1;
 }
@@ -2475,7 +2514,7 @@ a:hover > .space-tile-icon {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.625rem 0;
+  padding: 0.4375rem 0;
   min-width: 0;
 }
 
@@ -2521,13 +2560,11 @@ a:hover > .space-tile-icon {
 
 .hermes-nb-brand-name {
   display: block;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #f8fafc, #94a3b8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
 }
 
 .hermes-nb-brand-sub {
@@ -2556,23 +2593,24 @@ a:hover > .space-tile-icon {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid transparent;
+  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  border: 0;
   background: transparent;
-  color: #94a3b8;
-  font-size: 0.875rem;
+  color: rgba(241, 245, 249, 0.82);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -0.005em;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
 .hermes-nb-pill:hover {
-  color: #e2e8f0;
-  background: rgba(30, 41, 59, 0.68);
-  border-color: rgba(148, 163, 184, 0.12);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .hermes-nb-pill-label {
@@ -2585,16 +2623,6 @@ a:hover > .space-tile-icon {
   }
 }
 
-.hermes-nb-search-pill {
-  border: 1px solid rgba(148, 163, 184, 0.14) !important;
-  background: rgba(15, 23, 42, 0.5) !important;
-}
-
-.hermes-nb-search-pill:hover {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border-color: rgba(240, 88, 58, 0.3) !important;
-}
-
 .hermes-nb-pill-primary {
   border-color: rgba(240, 88, 58, 0.35) !important;
   background: rgba(240, 88, 58, 0.12) !important;
@@ -2605,21 +2633,53 @@ a:hover > .space-tile-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid transparent;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 0;
   background: transparent;
-  color: #94a3b8;
+  color: rgba(241, 245, 249, 0.82);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.18s ease, color 0.18s ease;
   flex-shrink: 0;
 }
 
 .hermes-nb-icon-pill:hover {
-  color: #e2e8f0;
-  background: rgba(30, 41, 59, 0.68);
-  border-color: rgba(148, 163, 184, 0.12);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hermes-nb-icon-pill-refresh:hover,
+.hermes-nb-icon-pill-refresh:focus-visible {
+  color: #f89e8a;
+  background: rgba(240, 88, 58, 0.14);
+}
+
+.hermes-nb-icon-pill-theme.is-sun:hover,
+.hermes-nb-icon-pill-theme.is-sun:focus-visible {
+  color: #fde68a;
+  background: rgba(234, 179, 8, 0.16);
+}
+
+.hermes-nb-icon-pill-theme.is-moon:hover,
+.hermes-nb-icon-pill-theme.is-moon:focus-visible {
+  color: #c4b5fd;
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.hermes-nb-search-pill {
+  border: 1px solid rgba(10, 132, 255, 0.16) !important;
+  background: rgba(10, 132, 255, 0.05) !important;
+}
+
+.hermes-nb-search-pill:hover {
+  background: rgba(10, 132, 255, 0.1) !important;
+  border-color: rgba(10, 132, 255, 0.4) !important;
+  color: #7dd3fc;
+}
+
+.hermes-nb-search-pill svg:first-child {
+  color: #0a84ff;
 }
 
 .hermes-nb-kbd {
@@ -2640,28 +2700,77 @@ a:hover > .space-tile-icon {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid transparent;
+  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  border: 0;
   background: transparent;
-  color: #94a3b8;
-  font-size: 0.875rem;
+  color: rgba(241, 245, 249, 0.82);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -0.005em;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.18s ease, color 0.18s ease;
   cursor: pointer;
 }
 
 .hermes-nb-nav-pill:hover {
-  color: #e2e8f0;
-  background: rgba(30, 41, 59, 0.68);
-  border-color: rgba(148, 163, 184, 0.12);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .hermes-nb-nav-pill.active {
-  background: linear-gradient(180deg, rgba(240, 88, 58, 0.18), rgba(240, 88, 58, 0.08));
-  color: #ffd4c2;
-  border-color: rgba(240, 88, 58, 0.28);
+  background: transparent;
+  color: var(--aether-primary);
+}
+
+.hermes-nb-nav-pill.active[data-tone='brand'],
+.hermes-nb-dropdown-item.active[data-tone='brand'],
+.hermes-nb-drawer-item.active[data-tone='brand'] {
+  color: #f89e8a;
+  background: rgba(240, 88, 58, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='pink'],
+.hermes-nb-dropdown-item.active[data-tone='pink'],
+.hermes-nb-drawer-item.active[data-tone='pink'] {
+  color: #f9a8d4;
+  background: rgba(219, 39, 119, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='info'],
+.hermes-nb-dropdown-item.active[data-tone='info'],
+.hermes-nb-drawer-item.active[data-tone='info'] {
+  color: #7dd3fc;
+  background: rgba(10, 132, 255, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='ok'],
+.hermes-nb-dropdown-item.active[data-tone='ok'],
+.hermes-nb-drawer-item.active[data-tone='ok'] {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='cyan'],
+.hermes-nb-dropdown-item.active[data-tone='cyan'],
+.hermes-nb-drawer-item.active[data-tone='cyan'] {
+  color: #67e8f9;
+  background: rgba(8, 145, 178, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='ai'],
+.hermes-nb-dropdown-item.active[data-tone='ai'],
+.hermes-nb-drawer-item.active[data-tone='ai'] {
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='warn'],
+.hermes-nb-dropdown-item.active[data-tone='warn'],
+.hermes-nb-drawer-item.active[data-tone='warn'] {
+  color: #fde68a;
+  background: rgba(234, 179, 8, 0.12);
+}
+.hermes-nb-nav-pill.active[data-tone='critical'],
+.hermes-nb-dropdown-item.active[data-tone='critical'],
+.hermes-nb-drawer-item.active[data-tone='critical'] {
+  color: #fda4af;
+  background: rgba(225, 29, 72, 0.12);
 }
 
 /* Dropdown */
@@ -2677,14 +2786,10 @@ a:hover > .space-tile-icon {
   z-index: 60;
   min-width: 13rem;
   padding: 0.35rem;
-  border-radius: 0.875rem;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(148, 163, 184, 0.12);
-  background: linear-gradient(165deg, rgba(22, 27, 36, 0.96) 0%, rgba(15, 21, 32, 0.98) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow:
-    0 20px 50px rgba(2, 6, 23, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   animation: hermes-nb-scale-in 0.15s ease-out;
 }
 
@@ -2844,7 +2949,8 @@ a:hover > .space-tile-icon {
 
 /* Light theme — navbar chrome (hardcoded dark surfaces, not token-driven above) */
 :root[data-theme='light'] .hermes-navbar {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom-color: rgba(20, 22, 26, 0.08);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   box-shadow: var(--shadow-panel);
@@ -2852,13 +2958,6 @@ a:hover > .space-tile-icon {
 
 :root[data-theme='light'] .hermes-navbar::after {
   background: linear-gradient(90deg, rgba(204, 66, 10, 0.04), transparent 40%, rgba(147, 51, 234, 0.03));
-}
-
-:root[data-theme='light'] .hermes-nb-brand-name {
-  background: linear-gradient(90deg, #14161a, #5b6472);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 :root[data-theme='light'] .hermes-nb-pill,
@@ -2872,15 +2971,6 @@ a:hover > .space-tile-icon {
 :root[data-theme='light'] .hermes-nb-nav-pill:hover {
   color: var(--text-primary);
   background: var(--overlay-chip);
-}
-
-:root[data-theme='light'] .hermes-nb-search-pill {
-  background: var(--chrome-72) !important;
-  border-color: var(--border-soft) !important;
-}
-
-:root[data-theme='light'] .hermes-nb-search-pill:hover {
-  background: var(--chrome-65) !important;
 }
 
 :root[data-theme='light'] .hermes-nb-kbd {
