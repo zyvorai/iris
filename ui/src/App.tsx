@@ -14,6 +14,7 @@ import GraphPage from './pages/GraphPage'
 import FederatedPage from './pages/FederatedPage'
 import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
+import NotFoundPage from './pages/NotFoundPage'
 import { InspectorProvider } from './utils/inspectorContext'
 import { SpotlightProvider } from './utils/spotlightContext'
 import { useGlobalNavShortcuts } from './hooks/useGlobalNavShortcuts'
@@ -36,6 +37,7 @@ function AppRoutes() {
       <Route path="/health" element={<HealthPage />} />
       <Route path="/activity" element={<ActivityPage />} />
       <Route path="/help" element={<HelpPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

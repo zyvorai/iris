@@ -82,7 +82,7 @@ export default function AppCard({ app, favorite = false, onPublish, onHide, comp
         <AppIcon icon={app.icon} name={app.displayName} size="sm" />
         <div className="service-card-meta">
           <strong>
-            <Link to={appDetailPath(app)} className="app-title-link">
+            <Link to={appDetailPath(app)} className="app-title-link" title={app.displayName}>
               {app.displayName}
             </Link>
           </strong>

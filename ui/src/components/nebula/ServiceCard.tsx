@@ -59,7 +59,7 @@ export default function ServiceCard({ app }: ServiceCardProps) {
       <div className="service-card-head">
         <AppIcon icon={app.icon} name={app.displayName} size="sm" />
         <div className="service-card-meta">
-          <strong>{app.displayName}</strong>
+          <strong title={app.displayName}>{app.displayName}</strong>
           <span>
             {app.namespace}
             {probed ? ` · ${probed}` : ''}
