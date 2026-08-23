@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch, Users } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -147,11 +148,11 @@ export default function TeamsPage() {
                   </div>
                 </div>
                 {apps.length ? (
-                  <div className="board" style={{ marginTop: '1rem' }}>
+                  <Board style={{ marginTop: '1rem' }}>
                     {apps.map((app) => (
                       <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />
                     ))}
-                  </div>
+                  </Board>
                 ) : (
                   <EmptyState icon={<Users size={22} />} title="No linked apps" description="No apps linked to this owner in the current catalog." />
                 )}

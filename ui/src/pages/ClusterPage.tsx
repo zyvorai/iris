@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layers, Rocket, Server, Compass } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -282,7 +283,7 @@ export default function ClusterPage() {
         {view === 'grid' ? (
           <GlassPanel className="glass-panel-section">
             <p className="section-label">All services</p>
-            <div className="board" style={{ marginTop: '1rem' }}>
+            <Board style={{ marginTop: '1rem' }}>
               {filtered.map((app) => (
                 <DeparturesRow
                   key={app.id}
@@ -292,7 +293,7 @@ export default function ClusterPage() {
                   onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
                 />
               ))}
-            </div>
+            </Board>
           </GlassPanel>
         ) : (
           byNamespace.map(([ns, nsApps]) => (

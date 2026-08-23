@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Globe, ShieldCheck } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -145,7 +146,7 @@ export default function FederatedPage() {
                       {rbacCheck.data.detail ?? (rbacCheck.data.ok ? 'Publish allowed' : 'Publish denied')}
                     </p>
                   ) : null}
-                  <div className="board" style={{ marginTop: '0.75rem' }}>
+                  <Board style={{ marginTop: '0.75rem' }}>
                     {entries.map((entry) => (
                       <DeparturesRow
                         key={`${entry.clusterId}-${entry.id}`}
@@ -157,7 +158,7 @@ export default function FederatedPage() {
                         }
                       />
                     ))}
-                  </div>
+                  </Board>
                 </div>
               )
             })

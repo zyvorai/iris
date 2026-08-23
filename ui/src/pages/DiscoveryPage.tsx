@@ -4,6 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Compass, Rocket } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -150,7 +151,7 @@ export default function DiscoveryPage() {
               tone="ok"
             />
           ) : (
-            <div className="board" style={{ marginTop: '1rem' }}>
+            <Board style={{ marginTop: '1rem' }}>
               {discovery.data.map((app) => (
                 <DeparturesRow
                   key={app.id}
@@ -160,7 +161,7 @@ export default function DiscoveryPage() {
                   onHide={() => hide.mutate(app.id)}
                 />
               ))}
-            </div>
+            </Board>
           )}
         </GlassPanel>
       </div>

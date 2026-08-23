@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Layers } from 'lucide-react'
 import QuickLaunchTile from '../components/nebula/QuickLaunchTile'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -125,11 +126,11 @@ export function SpaceDetailPage() {
         <GlassPanel className="glass-panel-section" data-testid={`space-${spaceId}`}>
           <p className="section-label">{apps.length} published app{apps.length === 1 ? '' : 's'}</p>
           {apps.length ? (
-            <div className="board" style={{ marginTop: '1rem' }}>
+            <Board style={{ marginTop: '1rem' }}>
               {apps.map((app) => (
                 <DeparturesRow key={app.id} app={app} favorite={favIds.has(app.id)} flipped={flipped.has(app.id)} />
               ))}
-            </div>
+            </Board>
           ) : (
             <EmptyState icon={<Layers size={22} />} title="No apps in this space" description="Publish apps that match this category to see them here." />
           )}

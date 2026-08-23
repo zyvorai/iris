@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HeartPulse, Sparkles } from 'lucide-react'
 import DeparturesRow from '../nebula/DeparturesBoard'
+import Board from '../nebula/Board'
 import { useStatusFlip } from '../../hooks/useStatusFlip'
 import GlassPanel from '../nebula/GlassPanel'
 import EmptyState from '../nebula/EmptyState'
@@ -80,11 +81,11 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
           description={`No ${filter === 'all' ? '' : filter} services in this filter.`}
         />
       ) : (
-        <div className="board">
+        <Board>
           {visible.map((app) => (
             <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />
           ))}
-        </div>
+        </Board>
       )}
     </GlassPanel>
   )

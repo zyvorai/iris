@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import AttentionQueue from '../components/command/AttentionQueue'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
@@ -383,11 +384,11 @@ export function HealthPage() {
             Gateway probes only apps published to the launchpad ({publishedHealth.data?.total ?? 0} published).
           </p>
           {publishedHealth.data?.apps.length ? (
-            <div className="board" style={{ marginTop: '1rem' }}>
+            <Board style={{ marginTop: '1rem' }}>
               {publishedHealth.data.apps.map((app) => (
                 <DeparturesRow key={app.id} app={app} flipped={publishedFlipped.has(app.id)} />
               ))}
-            </div>
+            </Board>
           ) : (
             <EmptyState icon={<HeartPulse size={22} />} title="All published apps are healthy" tone="ok" />
           )}

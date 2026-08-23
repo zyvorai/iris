@@ -4,6 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import GlassPanel from './GlassPanel'
+import { BoardHead } from './Board'
 import type { HermesApp } from '../../types'
 
 function statusRank(status: string): number {
@@ -59,7 +60,12 @@ export default function CollapsibleGroup({
         {headerExtra}
         <ChevronDown size={16} className={open ? 'rotated' : ''} aria-hidden />
       </button>
-      {open ? <div className="board">{sorted.map(renderApp)}</div> : null}
+      {open ? (
+        <div className="board">
+          <BoardHead />
+          {sorted.map(renderApp)}
+        </div>
+      ) : null}
     </>
   )
 

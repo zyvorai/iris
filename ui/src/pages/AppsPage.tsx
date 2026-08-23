@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Grid3X3 } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
@@ -300,11 +301,11 @@ export default function AppsPage() {
               ))}
             </div>
           ) : (
-            <div className="board" style={{ marginTop: '1rem' }}>
+            <Board style={{ marginTop: '1rem' }}>
               {filtered.map((app) => (
                 <DeparturesRow key={app.id} app={app} favorite={favIds.has(app.id)} flipped={flipped.has(app.id)} />
               ))}
-            </div>
+            </Board>
           )}
         </GlassPanel>
       </div>
