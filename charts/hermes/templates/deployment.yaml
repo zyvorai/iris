@@ -89,8 +89,16 @@ spec:
               value: {{ .Values.server.auth.oidc.issuer | quote }}
             - name: HERMES_OIDC_CLIENT_ID
               value: {{ .Values.server.auth.oidc.clientId | quote }}
+            {{- if .Values.server.auth.oidc.existingSecret }}
+            - name: HERMES_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.server.auth.oidc.existingSecret | quote }}
+                  key: {{ .Values.server.auth.oidc.secretKey | default "clientSecret" | quote }}
+            {{- else }}
             - name: HERMES_OIDC_CLIENT_SECRET
               value: {{ .Values.server.auth.oidc.clientSecret | quote }}
+            {{- end }}
             - name: HERMES_OIDC_REDIRECT_URL
               value: {{ .Values.server.auth.oidc.redirectUrl | quote }}
             {{- end }}

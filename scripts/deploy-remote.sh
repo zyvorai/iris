@@ -68,9 +68,15 @@ usage() {
     HERMES_LLM_API_URL OpenAI-compatible chat completions base URL
     HERMES_LLM_API_KEY Bearer token (stored in K8s secret hermes-llm on remote)
     HERMES_LLM_MODEL   Model name         (default: gpt-4o-mini)
+    HERMES_OIDC_ISSUER        OIDC issuer URL (sets server.auth.mode=oidc when non-empty)
+    HERMES_OIDC_CLIENT_ID     OIDC client id
+    HERMES_OIDC_CLIENT_SECRET OIDC client secret (stored in K8s secret hermes-oidc on remote)
+    HERMES_OIDC_REDIRECT_URL  OIDC redirect URL (default: <public-url>/auth/callback)
 
   Examples:
     HERMES_LLM_API_URL=https://api.openai.com/v1 HERMES_LLM_API_KEY=sk-... deploy-remote.sh 212.8.252.194 sus
+    HERMES_OIDC_ISSUER=http://212.8.252.194:30180/realms/hermes \
+      HERMES_OIDC_CLIENT_ID=hermes HERMES_OIDC_CLIENT_SECRET=... deploy-remote.sh 212.8.252.194 sus
     deploy-remote.sh 212.8.252.194 sus
     deploy-remote.sh sus@212.8.252.194 --k8s --skip-build
     deploy-remote.sh 212.8.252.194 sus --quick --skip-e2e
@@ -397,6 +403,10 @@ deploy_helm() {
         HERMES_LLM_API_URL="${HERMES_LLM_API_URL:-}" \
         HERMES_LLM_API_KEY="${HERMES_LLM_API_KEY:-}" \
         HERMES_LLM_MODEL="${HERMES_LLM_MODEL:-}" \
+        HERMES_OIDC_ISSUER="${HERMES_OIDC_ISSUER:-}" \
+        HERMES_OIDC_CLIENT_ID="${HERMES_OIDC_CLIENT_ID:-}" \
+        HERMES_OIDC_CLIENT_SECRET="${HERMES_OIDC_CLIENT_SECRET:-}" \
+        HERMES_OIDC_REDIRECT_URL="${HERMES_OIDC_REDIRECT_URL:-}" \
         bash <<'REMOTE' || { _spin_stop; fail "Helm deploy failed"; }
 set -euo pipefail
 cd "${REMOTE_DIR}"

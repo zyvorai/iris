@@ -52,6 +52,8 @@ server:
     issuer: ""
     clientId: ""
     clientSecret: ""
+    existingSecret: ""
+    secretKey: clientSecret
     redirectUrl: ""
   # Empty = auto-generated (random, 64 chars) on first install, preserved across upgrades
   # (see templates/session-secret.yaml). Never set this to a fixed value checked into

@@ -80,6 +80,23 @@ if [ -n "${HERMES_LLM_API_KEY:-}" ]; then
     helm_args+=(--set "server.llm.apiKey=")
 fi
 
+if [ -n "${HERMES_OIDC_ISSUER:-}" ]; then
+    OIDC_REDIRECT_URL="${HERMES_OIDC_REDIRECT_URL:-${PUBLIC_BASE}/auth/callback}"
+    helm_args+=(
+        --set "server.auth.mode=oidc"
+        --set "server.auth.oidc.issuer=${HERMES_OIDC_ISSUER}"
+        --set "server.auth.oidc.clientId=${HERMES_OIDC_CLIENT_ID:-}"
+        --set "server.auth.oidc.redirectUrl=${OIDC_REDIRECT_URL}"
+    )
+    if [ -n "${HERMES_OIDC_CLIENT_SECRET:-}" ]; then
+        kubectl create secret generic hermes-oidc \
+            --from-literal=clientSecret="${HERMES_OIDC_CLIENT_SECRET}" \
+            -n "${HELM_NS}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+        helm_args+=(--set "server.auth.oidc.existingSecret=hermes-oidc")
+    fi
+fi
+
 helm "${helm_args[@]}"
 
 echo ""
