@@ -4,33 +4,54 @@
 :root {
   color-scheme: dark;
 
-  /* Base surfaces */
-  --bg-root: #050505;
-  --bg-elevated: #0a0a0a;
+  /* Departures Hall palette — the only colours this app uses; status is the sole
+     signal allowed to deviate from void/board/chalk/slate. */
+  --void: #050505;
+  --board: #0a0a0a;
+  --board-2: #14171c;
+  --board-3: #1b1f26;
+  --edge: rgba(255, 255, 255, 0.08);
+  --edge-2: rgba(255, 255, 255, 0.14);
+  --chalk: #f1f5f9;
+  --slate: #93a1b3;
+  --sodium: #f5a524;
+  --sodium-deep: #c9860e;
+  --relay: #7c8cff;
+  --go: #34d399;
+  --go-bg: rgba(52, 211, 153, 0.12);
+  --hold: #f5a524;
+  --hold-bg: rgba(245, 165, 36, 0.12);
+  --stop: #f87171;
+  --stop-bg: rgba(248, 113, 113, 0.12);
+
+  /* Base surfaces — repointed to the palette above; every legacy alias below
+     inherits automatically. */
+  --bg-root: var(--void);
+  --bg-elevated: var(--board);
   --bg-panel: rgba(11, 15, 20, 0.82);
   --bg-panel-strong: rgba(18, 22, 28, 0.94);
   --bg-chip: rgba(11, 15, 20, 0.65);
 
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(240, 88, 58, 0.28);
+  --border-soft: var(--edge);
+  --border-strong: rgba(245, 165, 36, 0.28);
   --border-muted: rgba(255, 255, 255, 0.045);
 
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
+  --text-primary: var(--chalk);
+  --text-secondary: var(--slate);
   --text-muted: #aeb9c8;
   --text-faint: #9fb3c8;
 
   /* Brand */
-  --aether-primary: #f0583a;
-  --aether-primary-deep: #d94b32;
-  --aether-ai: #a78bfa;
-  --accent-blue: #0a84ff;
-  --accent-blue-deep: #0066cc;
+  --aether-primary: var(--sodium);
+  --aether-primary-deep: var(--sodium-deep);
+  --aether-ai: var(--relay);
+  --accent-blue: var(--relay);
+  --accent-blue-deep: #5a68d6;
   --accent-cyan: #7dd3fc;
-  --accent-orange: #f47a60;
-  --accent-red: #fca5a5;
-  --accent-green: #6ee7b7;
-  --accent-yellow: #fbbf24;
+  --accent-orange: var(--sodium);
+  --accent-red: var(--stop);
+  --accent-green: var(--go);
+  --accent-yellow: var(--hold);
   --accent-purple: #c084fc;
 
   --radius-xl: 28px;
@@ -43,15 +64,15 @@
     0 16px 50px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.20), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-glow-orange: 0 0 0 1px rgba(251, 191, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-glow-red: 0 0 0 1px rgba(252, 165, 165, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-glow-green: 0 0 0 1px rgba(110, 231, 183, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-orange: 0 0 0 1px rgba(245, 165, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 
   /* Semantic tint pairs — status banners/badges, distinct from the solid --accent-* colors */
-  --tone-ok-tint: rgba(110, 231, 183, 0.12);
-  --tone-warn-tint: rgba(251, 191, 36, 0.12);
-  --tone-err-tint: rgba(252, 165, 165, 0.12);
-  --tone-info-tint: rgba(125, 211, 252, 0.12);
+  --tone-ok-tint: var(--go-bg);
+  --tone-warn-tint: var(--hold-bg);
+  --tone-err-tint: var(--stop-bg);
+  --tone-info-tint: rgba(124, 140, 255, 0.12);
 
   --font-display: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
@@ -90,7 +111,7 @@
   --hermes-muted: var(--text-muted);
   --hermes-border: var(--border-soft);
   --hermes-accent: var(--aether-primary);
-  --hermes-accent-soft: rgba(240, 88, 58, 0.12);
+  --hermes-accent-soft: rgba(245, 165, 36, 0.12);
   --hermes-green: var(--accent-green);
   --hermes-amber: var(--accent-yellow);
   --hermes-red: var(--accent-red);
@@ -103,8 +124,8 @@
   --zeus-bg-base: var(--bg-root);
   --zeus-bg-slate: var(--bg-elevated);
   --zeus-primary: var(--aether-primary);
-  --zeus-primary-soft: rgba(240, 88, 58, 0.18);
-  --zeus-primary-border: rgba(240, 88, 58, 0.35);
+  --zeus-primary-soft: rgba(245, 165, 36, 0.18);
+  --zeus-primary-border: rgba(245, 165, 36, 0.35);
   --zeus-success: var(--accent-green);
   --zeus-warning: var(--accent-yellow);
   --zeus-danger: var(--accent-red);
@@ -145,45 +166,64 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg-root: #ffffff;
-  --bg-elevated: #f5f6f8;
+  /* Departures Hall palette — "hall" (light) variant */
+  --void: #f4f5f7;
+  --board: #ffffff;
+  --board-2: #f5f6f8;
+  --board-3: #eceef1;
+  --edge: rgba(20, 22, 26, 0.10);
+  --edge-2: rgba(20, 22, 26, 0.16);
+  --chalk: #14161a;
+  --slate: #5b6472;
+  --sodium: #b45309;
+  --sodium-deep: #92400e;
+  --relay: #4c5fe0;
+  --go: #0f7b4f;
+  --go-bg: #e8f5ef;
+  --hold: #b45309;
+  --hold-bg: #fdf3df;
+  --stop: #b3261e;
+  --stop-bg: #fdecea;
+
+  --bg-root: var(--void);
+  --bg-elevated: var(--board-2);
   --bg-panel: rgba(255, 255, 255, 0.86);
   --bg-panel-strong: rgba(255, 255, 255, 0.96);
   --bg-chip: rgba(20, 22, 26, 0.045);
 
-  --border-soft: rgba(20, 22, 26, 0.10);
-  --border-strong: rgba(204, 66, 10, 0.24);
+  --border-soft: var(--edge);
+  --border-strong: rgba(180, 83, 9, 0.24);
   --border-muted: rgba(20, 22, 26, 0.07);
 
-  --text-primary: #14161a;
-  --text-secondary: #5b6472;
+  --text-primary: var(--chalk);
+  --text-secondary: var(--slate);
   --text-muted: #6e7684;
   --text-faint: #9aa2ac;
 
-  --aether-primary: #cc420a;
-  --aether-primary-deep: #b23705;
-  --aether-ai: #9333ea;
-  --accent-blue: #0071e3;
-  --accent-blue-deep: #0058b8;
+  --aether-primary: var(--sodium);
+  --aether-primary-deep: var(--sodium-deep);
+  --aether-ai: var(--relay);
+  --accent-blue: var(--relay);
+  --accent-blue-deep: #3a49c2;
   --accent-cyan: #0284c7;
-  --accent-orange: #ea580c;
-  --accent-red: #b3261e;
-  --accent-green: #0f7b4f;
-  --accent-yellow: #8a5a00;
+  --accent-orange: var(--sodium);
+  --accent-red: var(--stop);
+  --accent-green: var(--go);
+  --accent-yellow: var(--hold);
   --accent-purple: #9333ea;
 
   --shadow-panel:
     0 8px 24px rgba(20, 22, 26, 0.08),
     0 2px 6px rgba(20, 22, 26, 0.04);
-  --shadow-glow-blue: 0 0 0 1px rgba(2, 132, 199, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-orange: 0 0 0 1px rgba(138, 90, 0, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-blue: 0 0 0 1px rgba(76, 95, 224, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-orange: 0 0 0 1px rgba(180, 83, 9, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
   --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
 
-  --tone-ok-tint: #e8f5ef;
-  --tone-warn-tint: #fdf3df;
-  --tone-err-tint: #fdecea;
-  --tone-info-tint: #e8f1fb;
+  --tone-ok-tint: var(--go-bg);
+  --tone-warn-tint: var(--hold-bg);
+  --tone-err-tint: var(--stop-bg);
+  --tone-info-tint: #e8eaff;
 
   --panel-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 246, 248, 0.98) 100%);
   --panel-surface-strong: linear-gradient(165deg, #ffffff 0%, #f5f6f8 100%);
@@ -212,10 +252,10 @@
 
   /* Bridge tokens — surfaces/borders some legacy components still read directly */
   --hermes-surface: var(--bg-panel);
-  --hermes-accent-soft: rgba(204, 66, 10, 0.10);
+  --hermes-accent-soft: rgba(180, 83, 9, 0.10);
   --hermes-glass-chrome-bg: var(--dropdown-bg);
   --zeus-bg-slate: var(--bg-elevated);
-  --zeus-primary-soft: rgba(204, 66, 10, 0.14);
+  --zeus-primary-soft: rgba(180, 83, 9, 0.14);
   --zeus-primary-border: var(--border-strong);
   --zeus-info: #0284c7;
   --zeus-border: var(--border-soft);
