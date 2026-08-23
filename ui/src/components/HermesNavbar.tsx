@@ -143,7 +143,7 @@ function MoreMenu({ activeToneFor }: { activeToneFor: (path: string) => GlyphTil
               role="menuitem"
               onClick={() => setOpen(false)}
             >
-              <GlyphTile tone="brand" icon={<item.icon size={12} />} size="sm" /> {item.label}
+              {item.label}
             </NavLink>
           ))}
         </div>
@@ -294,7 +294,6 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               className={({ isActive }) => `hermes-nb-nav-pill${isActive ? ' active' : ''}`}
               data-tone={activeToneFor(item.to)}
             >
-              <GlyphTile tone="brand" icon={<item.icon size={12} />} size="sm" />
               {item.label}
             </NavLink>
           ))}
@@ -333,7 +332,7 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
                     data-tone={activeToneFor(item.to)}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <GlyphTile tone="brand" icon={<item.icon size={14} />} size="sm" /> {item.label}
+                    {item.label}
                   </NavLink>
                 ))}
               </div>
