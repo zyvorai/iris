@@ -177,13 +177,6 @@ button {
   letter-spacing: 0.06em;
 }
 
-.app-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 1rem;
-  align-items: start;
-}
-
 .app-card {
   position: relative;
   padding: 0.85rem;
@@ -247,8 +240,6 @@ button {
 }
 
 a:hover > .app-icon,
-.service-card:hover .app-icon,
-.app-card-nebula:hover .app-icon,
 .quick-launch-tile-nebula:hover .app-icon {
   transform: scale(1.06) rotate(-1deg);
 }
@@ -733,15 +724,6 @@ a:hover > .app-icon,
   border: 1px solid var(--hermes-border);
   background: var(--overlay-chip);
   color: var(--hermes-text);
-}
-
-.app-title-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.app-title-link:hover {
-  color: #f5a524;
 }
 
 .chip-accent {
@@ -1537,16 +1519,6 @@ a:hover > .space-tile-icon {
 
 .federated-cluster-head h3 {
   margin: 0;
-}
-
-.federated-app-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.federated-publish-btn {
-  align-self: flex-start;
 }
 
 .federated-action-error {
@@ -2920,7 +2892,6 @@ a:hover > .space-tile-icon {
 :root[data-theme='hall'] .chip-env,
 :root[data-theme='hall'] .btn-primary,
 :root[data-theme='hall'] .view-toggle button.active,
-:root[data-theme='hall'] .app-title-link:hover,
 :root[data-theme='hall'] .chip-accent,
 :root[data-theme='hall'] .btn-accent,
 :root[data-theme='hall'] .dep-links a,

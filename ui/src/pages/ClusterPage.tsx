@@ -193,10 +193,10 @@ export default function ClusterPage() {
             <AskZyraButton compact command={askCommand} />
           </div>
           <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
-            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" tone="cyan" />
-            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" tone="purple" />
-            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" tone="green" />
-            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" tone="orange" />
+            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
+            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" />
+            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" />
+            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
           </div>
         </GlassPanel>
 

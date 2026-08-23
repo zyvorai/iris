@@ -220,13 +220,13 @@
 .nebula-btn-ai {
   border-color: rgba(180, 83, 9, 0.28);
   background: rgba(180, 83, 9, 0.1);
-  color: #f89e8a;
+  color: var(--sodium);
 }
 
 .nebula-btn-ai:hover:not(:disabled) {
   border-color: rgba(180, 83, 9, 0.4);
   background: rgba(180, 83, 9, 0.16);
-  color: #ffb27a;
+  color: #ffcf7a;
 }
 
 .nebula-btn-compact {
@@ -489,8 +489,9 @@
 }
 
 .metric-card .metric-card-icon {
-  background: linear-gradient(135deg, #b45309 0%, #ff5a15 60%, #ffb27a 130%);
-  --tile-glow: rgba(180, 83, 9, 0.45);
+  background: var(--board-3);
+  border: 1px solid rgba(245, 165, 36, 0.35);
+  color: var(--sodium);
 }
 
 .metric-card-warn {
@@ -499,7 +500,7 @@
     var(--panel-surface-strong) !important;
   border-color: rgba(251, 191, 36, 0.22) !important;
 }
-.metric-card-warn .metric-card-icon { background: linear-gradient(135deg, #d97706 0%, #fcd34d 100%); --tile-glow: rgba(217, 119, 6, 0.4); }
+.metric-card-warn .metric-card-icon { background: var(--board-3); border-color: rgba(245, 165, 36, 0.35); color: var(--hold); }
 
 .metric-card-icon {
   display: inline-flex;
@@ -509,9 +510,9 @@
   height: 1.65rem;
   border-radius: 0.55rem;
   flex-shrink: 0;
-  color: #fff;
-  background: var(--bg-chip);
-  box-shadow: 0 6px 16px -6px var(--tile-glow, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--board-3);
+  border: 1px solid var(--edge);
+  color: var(--sodium);
   transition: transform 0.18s ease;
 }
 
@@ -658,77 +659,6 @@
 
 .card-accent:hover::before {
   opacity: 1;
-}
-
-/* Service Card */
-.service-card {
-  min-width: 0;
-  overflow: hidden;
-  padding: 0.85rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  height: 100%;
-  animation: service-card-in var(--duration-normal) var(--ease-spring) backwards;
-}
-
-@keyframes service-card-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.service-card:nth-child(n+1) { animation-delay: 0ms; }
-.service-card:nth-child(n+2) { animation-delay: 20ms; }
-.service-card:nth-child(n+3) { animation-delay: 40ms; }
-.service-card:nth-child(n+4) { animation-delay: 60ms; }
-.service-card:nth-child(n+5) { animation-delay: 80ms; }
-.service-card:nth-child(n+6) { animation-delay: 100ms; }
-.service-card:nth-child(n+7) { animation-delay: 120ms; }
-.service-card:nth-child(n+8) { animation-delay: 140ms; }
-
-.service-card .action-row {
-  margin-top: auto;
-  padding-top: 0.15rem;
-}
-
-.service-card-head {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  row-gap: 0.35rem;
-  gap: 0.5rem 0.75rem;
-}
-
-.service-card-head .nebula-status-badge {
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.service-card-meta {
-  flex: 1 1 8rem;
-  min-width: 0;
-}
-
-.service-card-meta strong {
-  display: block;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-
-.service-card-meta strong,
-.service-card-meta .app-title-link {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.service-card-meta span {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-top: 0.15rem;
 }
 
 .service-error {
@@ -953,12 +883,6 @@
   flex-shrink: 0;
   margin-left: 0;
   margin-right: 0;
-}
-
-.mission-control-group-body {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 0.65rem;
 }
 
 .mission-control-filters {
@@ -1612,10 +1536,10 @@
   height: 2.5rem;
   border-radius: 0.85rem;
   flex-shrink: 0;
-  color: #fff;
+  color: var(--sodium);
   margin-bottom: 0.6rem;
-  background: linear-gradient(135deg, #b45309 0%, #ff5a15 60%, #ffb27a 130%);
-  box-shadow: 0 6px 16px -4px rgba(180, 83, 9, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--board-3);
+  border: 1px solid rgba(245, 165, 36, 0.35);
   transition: transform 0.18s ease;
 }
 
@@ -1819,21 +1743,6 @@
   color: var(--text-secondary);
 }
 
-.app-card-desc {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.45;
-}
-
-.app-card-nebula .app-title-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.app-card-nebula .app-title-link:hover {
-  color: #f5a524;
-}
-
 /* App detail (nebula) */
 .app-detail-hero-nebula .app-detail-head {
   display: flex;
@@ -2026,7 +1935,6 @@
 :root[data-theme='hall'] .service-error-toggle,
 :root[data-theme='hall'] .service-route-hint,
 :root[data-theme='hall'] .section-link-nebula:hover,
-:root[data-theme='hall'] .app-card-nebula .app-title-link:hover,
 :root[data-theme='hall'] .diagnosis-drawer-commands {
   color: #92400e;
 }
@@ -2063,6 +1971,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
+  margin-top: 0.65rem;
   background: var(--edge);
   border: 1px solid var(--edge);
   border-radius: var(--radius-md);
