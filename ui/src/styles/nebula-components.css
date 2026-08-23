@@ -483,8 +483,8 @@
 
 .metric-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(240, 88, 58, 0.22) !important;
-  box-shadow: 0 14px 30px -16px rgba(204, 66, 10, 0.35);
+  border-color: rgba(204, 66, 10, 0.28) !important;
+  box-shadow: 0 14px 30px -14px rgba(204, 66, 10, 0.35);
 }
 
 .metric-card .metric-card-icon {
@@ -535,7 +535,7 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  background: linear-gradient(90deg, var(--text-primary), var(--aether-primary-deep) 140%);
+  background: linear-gradient(90deg, var(--text-primary), #b23705 140%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
