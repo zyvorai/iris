@@ -2,14 +2,14 @@
  * Hermes Nebula Command Deck — component styles
  */
 
-/* Glass Panel — Aether dash-card */
+/* Glass Panel — matte board surface (Departures Hall: opaque, not frosted) */
 .glass-panel {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--border-soft);
-  background: var(--panel-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--edge);
+  background: var(--board-2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-panel);
   color: var(--text-primary);
@@ -44,13 +44,14 @@
   padding: 1rem 1.25rem;
 }
 
-/* Glyph Tile — glossy gradient icon badge (App Store-tile style) */
+/* Glyph Tile — flat matte icon badge (Departures Hall style: board fill, hairline edge, tone-colored icon) */
 .glyph-tile {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  background: var(--board-3);
+  border: 1px solid var(--edge);
 }
 
 .glyph-tile-sm {
@@ -87,43 +88,43 @@
 }
 
 .glyph-tile-brand {
-  background: linear-gradient(135deg, #b45309 0%, #ff5a15 60%, #ffb27a 130%);
-  box-shadow: 0 6px 16px -4px rgba(180, 83, 9, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--sodium);
+  border-color: rgba(245, 165, 36, 0.35);
 }
 
 .glyph-tile-ai {
-  background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
-  box-shadow: 0 8px 20px -4px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--relay);
+  border-color: rgba(124, 140, 255, 0.35);
 }
 
 .glyph-tile-ok {
-  background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%);
-  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--go);
+  border-color: rgba(52, 211, 153, 0.35);
 }
 
 .glyph-tile-warn {
-  background: linear-gradient(135deg, #eab308 0%, #fde68a 100%);
-  box-shadow: 0 8px 20px -4px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--hold);
+  border-color: rgba(245, 165, 36, 0.35);
 }
 
 .glyph-tile-critical {
-  background: linear-gradient(135deg, #e11d48 0%, #fda4af 100%);
-  box-shadow: 0 8px 20px -4px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--stop);
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .glyph-tile-info {
-  background: linear-gradient(135deg, #0a84ff 0%, #7dd3fc 100%);
-  box-shadow: 0 8px 20px -4px rgba(10, 132, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: var(--relay);
+  border-color: rgba(124, 140, 255, 0.35);
 }
 
 .glyph-tile-cyan {
-  background: linear-gradient(135deg, #0891b2 0%, #67e8f9 100%);
-  box-shadow: 0 8px 20px -4px rgba(8, 145, 178, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: #7dd3fc;
+  border-color: rgba(125, 211, 252, 0.35);
 }
 
 .glyph-tile-pink {
-  background: linear-gradient(135deg, #db2777 0%, #f9a8d4 100%);
-  box-shadow: 0 8px 20px -4px rgba(219, 39, 119, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: #f9a8d4;
+  border-color: rgba(249, 168, 212, 0.35);
 }
 
 /* Buttons — Aether btn-primary + quick-link-chip */
@@ -172,7 +173,7 @@
   border: none;
   background: linear-gradient(to right, var(--accent-blue), var(--accent-blue-deep));
   color: #fff;
-  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(124, 140, 255, 0.25);
 }
 
 .nebula-btn-primary:hover:not(:disabled) {

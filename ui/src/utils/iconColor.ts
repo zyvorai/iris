@@ -1,9 +1,9 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-// Glossy gradient-tile icon palette — App Store-tray style (accent →
-// accentLight diagonal gradient + colored glow + white glyph), matching the
-// zyvor.dev product-badge treatment rather than a flat tinted swatch.
+// Flat "chit" icon palette — deterministic per-service wayfinding colour
+// (81 services need to stay visually distinguishable). Each pair is
+// [flat fill, glow accent]; the tile itself renders as a solid swatch.
 const ICON_PALETTE: readonly [string, string][] = [
   ['#f0583a', '#f89e8a'], // coral
   ['#ff8f3f', '#ffc48a'], // orange
@@ -35,9 +35,9 @@ function hexToRgb(hex: string): string {
   return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
 }
 
-function gradientFor([accent, accentLight]: readonly [string, string]) {
+function gradientFor([accent]: readonly [string, string]) {
   return {
-    gradient: `linear-gradient(135deg, ${accent} 0%, ${accentLight} 100%)`,
+    gradient: accent,
     glow: `rgba(${hexToRgb(accent)}, 0.35)`,
     accent,
   }

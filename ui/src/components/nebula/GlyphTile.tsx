@@ -13,8 +13,7 @@ interface GlyphTileProps {
   className?: string
 }
 
-/** Glossy gradient icon badge — App Store-tile style, matching the accent
- * color/glow/inset-sheen treatment used for app icons and product glyphs. */
+/** Flat matte icon badge — board fill, hairline edge, tone-colored icon. */
 export default function GlyphTile({ icon, tone = 'brand', size = 'md', className = '' }: GlyphTileProps) {
   return (
     <span
