@@ -8,6 +8,7 @@ import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
 import Board from '../components/nebula/Board'
+import Pips from '../components/nebula/Pips'
 import AttentionQueue from '../components/command/AttentionQueue'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
@@ -357,6 +358,16 @@ export function HealthPage() {
           issueCount={issueCount}
           brokenCount={broken}
         />
+
+        {catalog.data?.length ? (
+          <GlassPanel className="glass-panel-section">
+            <p className="section-label">Fleet</p>
+            <p className="body-text">One pip per service. Hover for the name.</p>
+            <div style={{ marginTop: '0.85rem' }}>
+              <Pips apps={catalog.data} />
+            </div>
+          </GlassPanel>
+        ) : null}
 
         {hasData ? (
           <ZyraAiPanel

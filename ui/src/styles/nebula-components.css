@@ -2164,3 +2164,42 @@
     display: none;
   }
 }
+
+/* Pips — compact fleet-glance strip, one square per service */
+.pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pips span {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--board-3);
+}
+
+.pips span[data-s='healthy'] {
+  background: var(--go);
+}
+
+.pips span[data-s='degraded'] {
+  background: var(--hold);
+}
+
+.pips span[data-s='broken'] {
+  background: var(--stop);
+}
+
+.board-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.65rem 1rem;
+  background: var(--board-2);
+  border-top: 1px solid var(--edge-2);
+}
+
+.board-footer .gap {
+  flex: 1;
+}

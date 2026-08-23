@@ -14,6 +14,7 @@ import ContextBanner from '../components/nebula/ContextBanner'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
 import Button from '../components/nebula/Button'
+import Pips from '../components/nebula/Pips'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
@@ -195,6 +196,13 @@ export default function HomePage() {
             <Button variant="primary" to="/mission-control">
               Open Mission Control
             </Button>
+          </div>
+          <div className="board-footer">
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-faint)' }}>
+              Fleet at a glance
+            </span>
+            <span className="gap" />
+            <Pips apps={catalogApps} />
           </div>
         </GlassPanel>
 
