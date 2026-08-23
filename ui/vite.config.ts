@@ -2,14 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const hermesPort = process.env.HERMES_PORT ?? '31847'
-const hermesOrigin = `http://localhost:${hermesPort}`
+const hermesOrigin = process.env.HERMES_ORIGIN ?? `http://localhost:${hermesPort}`
 
-const proxyRoutes: Record<string, string> = {
-  '/api': hermesOrigin,
-  '/a/': hermesOrigin,
-  '/auth': hermesOrigin,
-  '/metrics': hermesOrigin,
-  '/healthz': hermesOrigin,
+const proxyTarget = {
+  target: hermesOrigin,
+  changeOrigin: true,
+  secure: false,
+}
+
+const proxyRoutes = {
+  '/api': proxyTarget,
+  '/a/': proxyTarget,
+  '/auth': proxyTarget,
+  '/metrics': proxyTarget,
+  '/healthz': proxyTarget,
 }
 
 export default defineConfig({
