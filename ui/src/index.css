@@ -2850,7 +2850,7 @@ a:hover > .space-tile-icon {
 }
 
 /* Light theme — navbar chrome (hardcoded dark surfaces, not token-driven above) */
-:root[data-theme='light'] .hermes-navbar {
+:root[data-theme='hall'] .hermes-navbar {
   background: rgba(255, 255, 255, 0.72);
   border-bottom-color: rgba(20, 22, 26, 0.08);
   backdrop-filter: saturate(180%) blur(20px);
@@ -2858,120 +2858,120 @@ a:hover > .space-tile-icon {
   box-shadow: var(--shadow-panel);
 }
 
-:root[data-theme='light'] .hermes-navbar::after {
+:root[data-theme='hall'] .hermes-navbar::after {
   background: linear-gradient(90deg, rgba(180, 83, 9, 0.04), transparent 70%);
 }
 
-:root[data-theme='light'] .hermes-nb-pill,
-:root[data-theme='light'] .hermes-nb-icon-pill,
-:root[data-theme='light'] .hermes-nb-nav-pill {
+:root[data-theme='hall'] .hermes-nb-pill,
+:root[data-theme='hall'] .hermes-nb-icon-pill,
+:root[data-theme='hall'] .hermes-nb-nav-pill {
   color: var(--text-muted);
 }
 
-:root[data-theme='light'] .hermes-nb-pill:hover,
-:root[data-theme='light'] .hermes-nb-icon-pill:hover,
-:root[data-theme='light'] .hermes-nb-nav-pill:hover {
+:root[data-theme='hall'] .hermes-nb-pill:hover,
+:root[data-theme='hall'] .hermes-nb-icon-pill:hover,
+:root[data-theme='hall'] .hermes-nb-nav-pill:hover {
   color: var(--text-primary);
   background: var(--overlay-chip);
 }
 
-:root[data-theme='light'] .hermes-nb-kbd {
+:root[data-theme='hall'] .hermes-nb-kbd {
   background: var(--overlay-chip);
   color: var(--text-muted);
 }
 
-:root[data-theme='light'] .hermes-nb-dropdown {
+:root[data-theme='hall'] .hermes-nb-dropdown {
   background: var(--dropdown-bg);
   box-shadow: var(--dropdown-shadow);
 }
 
-:root[data-theme='light'] .hermes-nb-dropdown-item {
+:root[data-theme='hall'] .hermes-nb-dropdown-item {
   color: var(--text-muted);
 }
 
-:root[data-theme='light'] .hermes-nb-dropdown-item:hover {
+:root[data-theme='hall'] .hermes-nb-dropdown-item:hover {
   background: var(--overlay-chip);
   color: var(--text-primary);
 }
 
-:root[data-theme='light'] .hermes-nb-backdrop {
+:root[data-theme='hall'] .hermes-nb-backdrop {
   background: rgba(20, 22, 26, 0.28);
 }
 
-:root[data-theme='light'] .hermes-nb-drawer {
+:root[data-theme='hall'] .hermes-nb-drawer {
   background: var(--panel-surface-strong);
 }
 
-:root[data-theme='light'] .hermes-nb-drawer-head {
+:root[data-theme='hall'] .hermes-nb-drawer-head {
   color: var(--text-primary);
   border-bottom-color: var(--border-soft);
 }
 
-:root[data-theme='light'] .hermes-nb-drawer-item {
+:root[data-theme='hall'] .hermes-nb-drawer-item {
   color: var(--text-muted);
 }
 
-:root[data-theme='light'] .hermes-nb-drawer-item:hover {
+:root[data-theme='hall'] .hermes-nb-drawer-item:hover {
   background: var(--overlay-chip);
   color: var(--text-primary);
 }
 
 /* Light theme — remaining pastel text tuned for dark surfaces, needs deeper ink */
-:root[data-theme='light'] .chip-env,
-:root[data-theme='light'] .btn-primary,
-:root[data-theme='light'] .view-toggle button.active,
-:root[data-theme='light'] .app-title-link:hover,
-:root[data-theme='light'] .chip-accent,
-:root[data-theme='light'] .btn-accent,
-:root[data-theme='light'] .dep-links a,
-:root[data-theme='light'] .mission-control-space-head a,
-:root[data-theme='light'] .activity-meta a,
-:root[data-theme='light'] .mesh-istio .mesh-route-kind,
-:root[data-theme='light'] .palette-footer-link,
-:root[data-theme='light'] .mesh-kubectl,
-:root[data-theme='light'] .diagnose-action-list a,
-:root[data-theme='light'] .platform-pulse-hero .hero-title em,
-:root[data-theme='light'] .hermes-nb-drawer-cmd {
+:root[data-theme='hall'] .chip-env,
+:root[data-theme='hall'] .btn-primary,
+:root[data-theme='hall'] .view-toggle button.active,
+:root[data-theme='hall'] .app-title-link:hover,
+:root[data-theme='hall'] .chip-accent,
+:root[data-theme='hall'] .btn-accent,
+:root[data-theme='hall'] .dep-links a,
+:root[data-theme='hall'] .mission-control-space-head a,
+:root[data-theme='hall'] .activity-meta a,
+:root[data-theme='hall'] .mesh-istio .mesh-route-kind,
+:root[data-theme='hall'] .palette-footer-link,
+:root[data-theme='hall'] .mesh-kubectl,
+:root[data-theme='hall'] .diagnose-action-list a,
+:root[data-theme='hall'] .platform-pulse-hero .hero-title em,
+:root[data-theme='hall'] .hermes-nb-drawer-cmd {
   color: #92400e;
 }
 
-:root[data-theme='light'] .hermes-nb-pill-primary {
+:root[data-theme='hall'] .hermes-nb-pill-primary {
   color: #92400e !important;
 }
 
-:root[data-theme='light'] .app-menu-danger,
-:root[data-theme='light'] .federated-action-error {
+:root[data-theme='hall'] .app-menu-danger,
+:root[data-theme='hall'] .federated-action-error {
   color: #b3261e;
 }
 
-:root[data-theme='light'] .btn-warn {
+:root[data-theme='hall'] .btn-warn {
   color: #b45309;
 }
 
-:root[data-theme='light'] .mesh-linkerd .mesh-route-kind,
-:root[data-theme='light'] .chip-ok,
-:root[data-theme='light'] .federated-action-ok {
+:root[data-theme='hall'] .mesh-linkerd .mesh-route-kind,
+:root[data-theme='hall'] .chip-ok,
+:root[data-theme='hall'] .federated-action-ok {
   color: #0f7b4f;
 }
 
-:root[data-theme='light'] .mesh-generic .mesh-route-kind {
+:root[data-theme='hall'] .mesh-generic .mesh-route-kind {
   color: #475569;
 }
 
-:root[data-theme='light'] .zyvor-link,
-:root[data-theme='light'] .zyvor-copy {
+:root[data-theme='hall'] .zyvor-link,
+:root[data-theme='hall'] .zyvor-copy {
   color: #c2410c;
 }
 
-:root[data-theme='light'] .zyvor-link:hover {
+:root[data-theme='hall'] .zyvor-link:hover {
   color: #ea580c;
 }
 
-:root[data-theme='light'] .app-graph-node {
+:root[data-theme='hall'] .app-graph-node {
   background: var(--chrome-72);
 }
 
-:root[data-theme='light'] .activity-icon {
+:root[data-theme='hall'] .activity-icon {
   color: #92400e;
 }
 

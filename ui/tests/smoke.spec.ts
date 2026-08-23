@@ -27,8 +27,8 @@ test('home loads nebula command deck shell and hero', async ({ page }) => {
   }
 })
 
-test('home mission control accordion present', async ({ page }) => {
-  await page.goto('/')
+test('mission control page shows the departures board by space', async ({ page }) => {
+  await page.goto('/mission-control')
   await waitForPageReady(page)
   const mission = page.getByTestId('mission-control-strip')
   const loadError = page.getByTestId('page-load-error')
@@ -52,7 +52,7 @@ test('footer visible after scroll', async ({ page }) => {
   await page.goto('/')
   await page.locator('.main-scroll-area').evaluate((el) => { el.scrollTop = el.scrollHeight })
   await expect(page.locator('.hermes-page-footer')).toBeVisible()
-  await expect(page.locator('.hermes-page-footer')).toContainText('Hermes')
+  await expect(page.locator('.hermes-page-footer')).toContainText('Help')
 })
 
 test('catalog page renders toolbar', async ({ page }) => {
@@ -96,7 +96,7 @@ test('app detail opens global diagnose drawer', async ({ page }) => {
   await waitForPageReady(page)
 
   const loadError = page.getByTestId('page-load-error')
-  const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
+  const firstAppLink = page.locator('.dep .dep-name').first()
   if (await loadError.isVisible() || !(await firstAppLink.count())) {
     test.skip()
     return
@@ -237,7 +237,7 @@ test('spotlight graph insight shows topology summary', async ({ page }) => {
 test('app detail shows zyra ai service insight', async ({ page }) => {
   await page.goto('/apps')
   await waitForPageReady(page)
-  const firstAppLink = page.locator('.app-card-nebula .app-title-link').first()
+  const firstAppLink = page.locator('.dep .dep-name').first()
   if (!(await firstAppLink.count())) {
     test.skip()
     return
@@ -293,7 +293,7 @@ test('cluster page ask zyra opens spotlight', async ({ page }) => {
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
   await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()
-  await expect(page.locator('.zyvor-footer')).toContainText('zyvor.dev')
+  await expect(page.locator('.zyvor-inline')).toContainText('zyvor.dev')
 })
 
 test('mobile viewport home loads', async ({ page }) => {

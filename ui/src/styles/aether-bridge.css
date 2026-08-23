@@ -375,129 +375,129 @@
 }
 
 /* ── Light theme overrides — legacy surfaces don't read tokens for backgrounds ── */
-:root[data-theme='light'] .zeus-glass,
-:root[data-theme='light'] .glass-hero,
-:root[data-theme='light'] .zeus-card,
-:root[data-theme='light'] .space-row.zeus-card,
-:root[data-theme='light'] .help-card,
-:root[data-theme='light'] .team-section,
-:root[data-theme='light'] .namespace-section,
-:root[data-theme='light'] .share-admin-panel,
-:root[data-theme='light'] .federated-cluster-block {
+:root[data-theme='hall'] .zeus-glass,
+:root[data-theme='hall'] .glass-hero,
+:root[data-theme='hall'] .zeus-card,
+:root[data-theme='hall'] .space-row.zeus-card,
+:root[data-theme='hall'] .help-card,
+:root[data-theme='hall'] .team-section,
+:root[data-theme='hall'] .namespace-section,
+:root[data-theme='hall'] .share-admin-panel,
+:root[data-theme='hall'] .federated-cluster-block {
   background: var(--panel-surface) !important;
 }
 
-:root[data-theme='light'] .glass-hero {
+:root[data-theme='hall'] .glass-hero {
   background:
     var(--hero-overlay),
     radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 42%),
     var(--panel-surface) !important;
 }
 
-:root[data-theme='light'] .hero-title {
+:root[data-theme='hall'] .hero-title {
   background: linear-gradient(90deg, #14161a, #5b6472);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-:root[data-theme='light'] .metric-tile,
-:root[data-theme='light'] .stat-pill {
+:root[data-theme='hall'] .metric-tile,
+:root[data-theme='hall'] .stat-pill {
   background:
     radial-gradient(circle at 90% 10%, rgba(37, 99, 235, 0.08), transparent 38%),
     var(--panel-surface-strong) !important;
 }
 
-:root[data-theme='light'] .chip,
-:root[data-theme='light'] .status-chip {
+:root[data-theme='hall'] .chip,
+:root[data-theme='hall'] .status-chip {
   background: var(--overlay-chip);
 }
 
-:root[data-theme='light'] .view-toggle,
-:root[data-theme='light'] .workspace-switcher {
+:root[data-theme='hall'] .view-toggle,
+:root[data-theme='hall'] .workspace-switcher {
   background: var(--chrome-55);
 }
 
-:root[data-theme='light'] .filter-bar input,
-:root[data-theme='light'] .activity-search,
-:root[data-theme='light'] .catalog-toolbar input,
-:root[data-theme='light'] .catalog-toolbar select,
-:root[data-theme='light'] .cluster-filters select,
-:root[data-theme='light'] .graph-filters select,
-:root[data-theme='light'] .activity-filters select {
+:root[data-theme='hall'] .filter-bar input,
+:root[data-theme='hall'] .activity-search,
+:root[data-theme='hall'] .catalog-toolbar input,
+:root[data-theme='hall'] .catalog-toolbar select,
+:root[data-theme='hall'] .cluster-filters select,
+:root[data-theme='hall'] .graph-filters select,
+:root[data-theme='hall'] .activity-filters select {
   background: var(--chrome-72) !important;
 }
 
-:root[data-theme='light'] .empty {
+:root[data-theme='hall'] .empty {
   background: var(--chrome-45);
 }
 
-:root[data-theme='light'] .workspace-chip:hover:not(:disabled) {
+:root[data-theme='hall'] .workspace-chip:hover:not(:disabled) {
   color: var(--text-primary);
   background: var(--overlay-chip);
 }
 
-:root[data-theme='light'] .zeus-health-chip {
+:root[data-theme='hall'] .zeus-health-chip {
   background: var(--chrome-65);
 }
 
-:root[data-theme='light'] .palette-backdrop,
-:root[data-theme='light'] .diagnosis-drawer-backdrop,
-:root[data-theme='light'] .hermes-nb-backdrop {
+:root[data-theme='hall'] .palette-backdrop,
+:root[data-theme='hall'] .diagnosis-drawer-backdrop,
+:root[data-theme='hall'] .hermes-nb-backdrop {
   background: rgba(20, 22, 26, 0.28) !important;
 }
 
-:root[data-theme='light'] .palette-panel,
-:root[data-theme='light'] .hermes-nb-dropdown,
-:root[data-theme='light'] .hermes-nb-drawer {
+:root[data-theme='hall'] .palette-panel,
+:root[data-theme='hall'] .hermes-nb-dropdown,
+:root[data-theme='hall'] .hermes-nb-drawer {
   background: var(--dropdown-bg) !important;
   box-shadow: var(--dropdown-shadow) !important;
 }
 
 /* ── Active/selected pill text — hardcoded near-white, invisible on light bg ── */
-:root[data-theme='light'] .view-toggle button.active,
-:root[data-theme='light'] .filter-bar button.active {
+:root[data-theme='hall'] .view-toggle button.active,
+:root[data-theme='hall'] .filter-bar button.active {
   color: #92400e !important;
 }
 
-:root[data-theme='light'] .workspace-chip.active {
+:root[data-theme='hall'] .workspace-chip.active {
   color: #92400e !important;
 }
 
-:root[data-theme='light'] .attention-filters button.active,
-:root[data-theme='light'] .inspector-tabs button.active,
-:root[data-theme='light'] .hermes-nb-nav-pill.active,
-:root[data-theme='light'] .hermes-nb-dropdown-item.active,
-:root[data-theme='light'] .hermes-nb-drawer-item.active,
-:root[data-theme='light'] .mission-control-filters button.active,
-:root[data-theme='light'] .filter-chip.active {
+:root[data-theme='hall'] .attention-filters button.active,
+:root[data-theme='hall'] .inspector-tabs button.active,
+:root[data-theme='hall'] .hermes-nb-nav-pill.active,
+:root[data-theme='hall'] .hermes-nb-dropdown-item.active,
+:root[data-theme='hall'] .hermes-nb-drawer-item.active,
+:root[data-theme='hall'] .mission-control-filters button.active,
+:root[data-theme='hall'] .filter-chip.active {
   color: #92400e;
 }
 
 /* ── Remaining pastel chip/link text tuned for dark surfaces ── */
-:root[data-theme='light'] .chip-accent,
-:root[data-theme='light'] .section-link:hover,
-:root[data-theme='light'] .workspace-chip:hover:not(:disabled),
-:root[data-theme='light'] .hermes-help-link:hover {
+:root[data-theme='hall'] .chip-accent,
+:root[data-theme='hall'] .section-link:hover,
+:root[data-theme='hall'] .workspace-chip:hover:not(:disabled),
+:root[data-theme='hall'] .hermes-help-link:hover {
   color: #92400e;
 }
 
-:root[data-theme='light'] .chip-ok,
-:root[data-theme='light'] .status-chip.status-healthy,
-:root[data-theme='light'] .zeus-health-chip[data-tone='ok'] {
+:root[data-theme='hall'] .chip-ok,
+:root[data-theme='hall'] .status-chip.status-healthy,
+:root[data-theme='hall'] .zeus-health-chip[data-tone='ok'] {
   color: #0f7b4f;
 }
 
-:root[data-theme='light'] .chip-warn,
-:root[data-theme='light'] .status-chip.status-warn,
-:root[data-theme='light'] .status-chip.status-degraded,
-:root[data-theme='light'] .zeus-health-chip[data-tone='warn'],
-:root[data-theme='light'] .app-problem {
+:root[data-theme='hall'] .chip-warn,
+:root[data-theme='hall'] .status-chip.status-warn,
+:root[data-theme='hall'] .status-chip.status-degraded,
+:root[data-theme='hall'] .zeus-health-chip[data-tone='warn'],
+:root[data-theme='hall'] .app-problem {
   color: #b45309;
 }
 
-:root[data-theme='light'] .status-chip.status-critical,
-:root[data-theme='light'] .status-chip.status-broken,
-:root[data-theme='light'] .zeus-health-chip[data-tone='bad'] {
+:root[data-theme='hall'] .status-chip.status-critical,
+:root[data-theme='hall'] .status-chip.status-broken,
+:root[data-theme='hall'] .zeus-health-chip[data-tone='bad'] {
   color: #b3261e;
 }

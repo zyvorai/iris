@@ -163,7 +163,7 @@
  * Light theme — Zyvor Design System v2 "lite" palette
  * (soft neutral surfaces, saturated ink, restrained orange accent).
  */
-:root[data-theme='light'] {
+:root[data-theme='hall'] {
   color-scheme: light;
 
   /* Departures Hall palette — "hall" (light) variant */
@@ -262,7 +262,7 @@
   --zeus-border-strong: var(--border-strong);
 }
 
-:root[data-theme='light'] .page-title {
+:root[data-theme='hall'] .page-title {
   background: linear-gradient(90deg, #14161a 0%, #3f4650 45%, #6e7684 100%);
   -webkit-background-clip: text;
   background-clip: text;

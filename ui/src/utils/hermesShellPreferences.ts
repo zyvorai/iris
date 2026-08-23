@@ -111,13 +111,21 @@ export function loadTheme(): HermesTheme {
   return 'dark'
 }
 
+/** DOM attribute value for a given theme — 'board' (dark) / 'hall' (light),
+ * matching the departures-hall CSS selectors. The stored/JS-facing
+ * HermesTheme type stays 'dark'|'light' so existing persisted preferences
+ * and the navbar's sun/moon toggle logic don't need to change. */
+function themeAttr(theme: HermesTheme): 'board' | 'hall' {
+  return theme === 'light' ? 'hall' : 'board'
+}
+
 export function saveTheme(theme: HermesTheme) {
   try {
     localStorage.setItem(THEME_KEY, theme)
   } catch {
     /* ignore */
   }
-  document.documentElement.dataset.theme = theme
+  document.documentElement.dataset.theme = themeAttr(theme)
   window.dispatchEvent(new CustomEvent(SHELL_PREFS_EVENT, { detail: { theme } }))
 }
 
@@ -125,5 +133,5 @@ export function applyShellPreferencesOnBoot() {
   document.documentElement.dataset.hermesDockPosition = loadDockPosition()
   document.documentElement.dataset.hermesDockSize = loadDockSize()
   document.documentElement.dataset.hermesDockAutoHide = loadDockAutoHide() ? '1' : '0'
-  document.documentElement.dataset.theme = loadTheme()
+  document.documentElement.dataset.theme = themeAttr(loadTheme())
 }

@@ -16,7 +16,10 @@ import type { HermesApp } from '../../types'
 interface DeparturesRowProps {
   app: HermesApp
   favorite?: boolean
-  onPublish?: () => void
+  /** Omit to use the row's own local-publish mutation (the default for most
+   * pages); pass a function to override it (e.g. federation publish); pass
+   * `null` to hide the Publish button entirely (e.g. a read-only remote). */
+  onPublish?: (() => void) | null
   onHide?: () => void
   compact?: boolean
   flipped?: boolean
@@ -46,12 +49,13 @@ export default function DeparturesRow({ app, favorite = false, onPublish, onHide
 
   const canOpen = canOpenApp(app)
   const unhealthy = isUnhealthy(app)
+  const publishHidden = onPublish === null
   const handlePublish = onPublish ?? (() => void publish.mutate())
 
   const menuItems = buildServiceMenuItems(app, {
     onDiagnose: () => openDiagnose(app.id),
     onInspector: () => openInspector(app.id, 'ai'),
-    onPublish: !app.visibility.published ? handlePublish : undefined,
+    onPublish: !app.visibility.published && !publishHidden ? handlePublish : undefined,
     onHide,
     onPin: () => void favMutation.mutate(),
     favorite,
@@ -101,13 +105,13 @@ export default function DeparturesRow({ app, favorite = false, onPublish, onHide
             <ExternalLink size={13} />
           </button>
         )}
-        {!app.visibility.published ? (
+        {!app.visibility.published && !publishHidden ? (
           <button
             type="button"
             className="dep-action-btn dep-action-btn-publish"
             title="Publish"
             disabled={publish.isPending}
-            onClick={onPublish ?? (() => void publish.mutate())}
+            onClick={handlePublish}
           >
             Publish
           </button>

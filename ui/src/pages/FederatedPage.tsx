@@ -153,7 +153,7 @@ export default function FederatedPage() {
                         onPublish={
                           canWrite && !entry.id.includes('__offline__')
                             ? () => publishRemote.mutate({ clusterId: entry.clusterId, id: entry.id })
-                            : undefined
+                            : null
                         }
                       />
                     ))}

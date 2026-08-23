@@ -2018,43 +2018,43 @@
 }
 
 /* ── Light theme — pastel text tuned for dark surfaces, needs deeper ink on light tints ── */
-:root[data-theme='light'] .nebula-btn:hover:not(:disabled),
-:root[data-theme='light'] .action-menu-item:hover,
-:root[data-theme='light'] .route-display-link,
-:root[data-theme='light'] .workspace-dropdown-item.active,
-:root[data-theme='light'] .workspace-dropdown-item:hover,
-:root[data-theme='light'] .service-error-toggle,
-:root[data-theme='light'] .service-route-hint,
-:root[data-theme='light'] .section-link-nebula:hover,
-:root[data-theme='light'] .app-card-nebula .app-title-link:hover,
-:root[data-theme='light'] .diagnosis-drawer-commands {
+:root[data-theme='hall'] .nebula-btn:hover:not(:disabled),
+:root[data-theme='hall'] .action-menu-item:hover,
+:root[data-theme='hall'] .route-display-link,
+:root[data-theme='hall'] .workspace-dropdown-item.active,
+:root[data-theme='hall'] .workspace-dropdown-item:hover,
+:root[data-theme='hall'] .service-error-toggle,
+:root[data-theme='hall'] .service-route-hint,
+:root[data-theme='hall'] .section-link-nebula:hover,
+:root[data-theme='hall'] .app-card-nebula .app-title-link:hover,
+:root[data-theme='hall'] .diagnosis-drawer-commands {
   color: #92400e;
 }
 
-:root[data-theme='light'] .nebula-btn-danger,
-:root[data-theme='light'] .service-error-critical,
-:root[data-theme='light'] .service-status-message-critical .service-status-summary {
+:root[data-theme='hall'] .nebula-btn-danger,
+:root[data-theme='hall'] .service-error-critical,
+:root[data-theme='hall'] .service-status-message-critical .service-status-summary {
   color: #b3261e;
 }
 
-:root[data-theme='light'] .nebula-btn-danger:hover:not(:disabled) {
+:root[data-theme='hall'] .nebula-btn-danger:hover:not(:disabled) {
   color: #991b1b;
 }
 
-:root[data-theme='light'] .nebula-btn-ai {
+:root[data-theme='hall'] .nebula-btn-ai {
   color: #92400e;
 }
 
-:root[data-theme='light'] .nebula-btn-ai:hover:not(:disabled) {
+:root[data-theme='hall'] .nebula-btn-ai:hover:not(:disabled) {
   color: #8a2a04;
 }
 
-:root[data-theme='light'] .service-error,
-:root[data-theme='light'] .service-status-summary {
+:root[data-theme='hall'] .service-error,
+:root[data-theme='hall'] .service-status-summary {
   color: #8a5a00;
 }
 
-:root[data-theme='light'] .service-status-endpoint {
+:root[data-theme='hall'] .service-status-endpoint {
   background: var(--chrome-72);
 }
 
