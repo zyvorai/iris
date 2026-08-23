@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import CommandPalette from './CommandPalette'
 import HermesNavbar from './HermesNavbar'
 import HermesPageFooter from './HermesPageFooter'
+import HermesStatusStrip from './HermesStatusStrip'
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import DiagnosisDrawer from './nebula/DiagnosisDrawer'
 import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
@@ -47,6 +48,7 @@ export default function Layout({ children }: LayoutProps) {
         {children}
         <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       </div>
+      <HermesStatusStrip />
       {open ? <CommandPalette onClose={closeSpotlight} initialQuery={seed} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
       <DiagnosisDrawer appId={diagnoseAppId} onClose={closeDiagnose} />

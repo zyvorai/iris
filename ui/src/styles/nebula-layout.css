@@ -65,12 +65,80 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 18px 20px;
-  padding-bottom: 48px;
+  padding-bottom: 76px;
   max-width: min(120rem, calc(100vw - 1.5rem));
   width: 100%;
   margin: 0 auto;
   position: relative;
   z-index: 1;
+}
+
+.hermes-status-strip {
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.4rem 1rem;
+  background: var(--board);
+  border-top: 1px solid var(--edge);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.hermes-strip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--go);
+  flex-shrink: 0;
+}
+
+.hermes-strip-dot[data-tone='warn'] {
+  background: var(--hold);
+}
+
+.hermes-strip-dot[data-tone='bad'] {
+  background: var(--stop);
+}
+
+.hermes-strip-item {
+  white-space: nowrap;
+}
+
+.hermes-strip-bad {
+  color: var(--stop);
+}
+
+.hermes-strip-warn {
+  color: var(--hold);
+}
+
+.hermes-strip-muted {
+  color: var(--text-faint);
+}
+
+.hermes-strip-spacer {
+  flex: 1 1 auto;
+}
+
+.hermes-strip-link {
+  color: var(--sodium);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.hermes-strip-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .hermes-strip-muted {
+    display: none;
+  }
 }
 
 .main-scroll-area::-webkit-scrollbar {
