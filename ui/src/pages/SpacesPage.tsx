@@ -7,6 +7,7 @@ import { Layers } from 'lucide-react'
 import QuickLaunchTile from '../components/nebula/QuickLaunchTile'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
@@ -46,10 +47,12 @@ export default function SpacesPage() {
 
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<Layers size={14} />} size="sm" />
             <div>
               <p className="section-label">Spaces</p>
+              <h2 className="section-title">Browse by category</h2>
               <p className="body-text">
-                Browse published apps by category. Mission Control shows all discovered services; spaces show published apps only.
+                Mission Control shows all discovered services; spaces show published apps only.
               </p>
             </div>
           </div>

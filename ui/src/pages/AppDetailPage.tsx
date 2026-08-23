@@ -386,7 +386,7 @@ export function HealthPage() {
               ))}
             </div>
           ) : (
-            <EmptyState icon={<HeartPulse size={22} />} title="All published apps are healthy" />
+            <EmptyState icon={<HeartPulse size={22} />} title="All published apps are healthy" tone="ok" />
           )}
         </GlassPanel>
       </div>

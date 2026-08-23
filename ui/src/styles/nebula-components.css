@@ -690,8 +690,13 @@
   inset: 0 0 auto 0;
   height: 3px;
   background: var(--card-accent, transparent);
-  opacity: 0.9;
+  opacity: 0.75;
   z-index: 1;
+  transition: opacity 160ms ease;
+}
+
+.card-accent:hover::before {
+  opacity: 1;
 }
 
 /* Service Card */
@@ -1449,21 +1454,7 @@
 }
 
 .glass-empty-state-icon {
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
   margin-bottom: 0.75rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-soft);
-  background: radial-gradient(circle, var(--hermes-accent-soft) 0%, transparent 72%), var(--chrome-65);
-  color: var(--text-muted);
-  animation: glass-empty-state-icon-breathe 3.2s ease-in-out infinite;
-}
-
-@keyframes glass-empty-state-icon-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
 }
 
 .glass-empty-state-title {

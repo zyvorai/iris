@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { GitBranch, Users } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import Button from '../components/nebula/Button'
@@ -87,11 +88,10 @@ export default function TeamsPage() {
 
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<Users size={14} />} size="sm" />
             <div>
-              <p className="section-label">
-                <Users size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Team ownership
-              </p>
+              <p className="section-label">Team ownership</p>
+              <h2 className="section-title">Who owns what</h2>
               <p className="body-text">
                 Owners from service annotations — a lightweight org map over your catalog.
               </p>

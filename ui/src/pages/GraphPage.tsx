@@ -8,6 +8,7 @@ import { GitBranch } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
@@ -116,11 +117,10 @@ export default function GraphPage() {
 
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<GitBranch size={14} />} size="sm" />
             <div>
-              <p className="section-label">
-                <GitBranch size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Application graph
-              </p>
+              <p className="section-label">Application graph</p>
+              <h2 className="section-title">Dependency map</h2>
               <p className="body-text">Dependency links between published catalog apps</p>
             </div>
             {filtered ? (

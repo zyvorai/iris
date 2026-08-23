@@ -18,6 +18,7 @@ import {
   Users,
 } from 'lucide-react'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
@@ -140,9 +141,11 @@ export default function ActivityPage() {
 
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<Activity size={14} />} size="sm" />
             <div>
               <p className="section-label">Activity</p>
-              <p className="body-text">Audit log of launches, discovery, shares, and pins</p>
+              <h2 className="section-title">Audit log</h2>
+              <p className="body-text">Launches, discovery, shares, and pins</p>
             </div>
             <span className="nebula-status-badge status-unknown">{events.length} loaded</span>
             <AskZyraButton compact command="activity insight" />

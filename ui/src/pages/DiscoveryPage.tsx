@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Compass, Rocket } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import AskZyraButton from '../components/nebula/AskZyraButton'
@@ -66,6 +67,7 @@ export default function DiscoveryPage() {
       <div className="page-grid">
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<Compass size={14} />} size="sm" />
             <div>
               <p className="section-label">Discovery</p>
               <h2 className="section-title">Discovery queue</h2>
@@ -124,6 +126,7 @@ export default function DiscoveryPage() {
               icon={<Compass size={22} />}
               title="Queue is empty"
               description="All discovered services are published. Check Cluster for the full inventory."
+              tone="ok"
             />
           ) : (
             <div className="app-grid" style={{ marginTop: '1rem' }}>

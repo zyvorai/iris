@@ -3,6 +3,7 @@
 
 import { BookOpen, Compass, Globe, Rocket, Search, Sparkles } from 'lucide-react'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import Button from '../components/nebula/Button'
 import { ZyraAiBadge } from '../components/nebula/ZyraAiPanel'
@@ -17,6 +18,7 @@ export default function HelpPage() {
       <div className="page-grid">
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<BookOpen size={14} />} size="sm" />
             <div>
               <p className="section-label">Help</p>
               <h2 className="section-title">Hermes guide</h2>

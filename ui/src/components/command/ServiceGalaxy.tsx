@@ -85,7 +85,7 @@ export default function ServiceGalaxy({
       ) : null}
 
       {graph.error ? (
-        <EmptyState icon={<Network size={22} />} title="Could not load topology" description="Try refreshing the page." />
+        <EmptyState icon={<Network size={22} />} title="Could not load topology" description="Try refreshing the page." tone="critical" />
       ) : null}
 
       {!graph.isLoading && !graph.error && nodes === 0 ? (

@@ -88,6 +88,7 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
           icon={<Radar size={22} />}
           title="All clear"
           description="No services match this filter. Every discovered service in this view is healthy."
+          tone="ok"
         />
       ) : (
         spacesWithApps.map((space) => (

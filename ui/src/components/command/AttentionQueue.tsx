@@ -34,6 +34,7 @@ export default function AttentionQueue({ apps }: AttentionQueueProps) {
           icon={<HeartPulse size={22} />}
           title="All services healthy"
           description="No degraded or broken services in the catalog."
+          tone="ok"
         />
       </GlassPanel>
     )

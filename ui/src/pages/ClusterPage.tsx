@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layers, Rocket, Server, Compass } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import ContextBanner from '../components/nebula/ContextBanner'
@@ -171,13 +172,12 @@ export default function ClusterPage() {
       <div className="page-grid">
         <GlassPanel className="glass-panel-section hero-command-panel">
           <div className="section-head-nebula">
+            <GlyphTile tone="brand" icon={<Server size={14} />} size="sm" />
             <div>
-              <p className="section-label">
-                <Server size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Cluster catalog
-              </p>
+              <p className="section-label">Cluster catalog</p>
+              <h2 className="section-title">Every service, cluster-wide</h2>
               <p className="body-text">
-                Every service Hermes discovers cluster-wide. Publish to add apps to your launchpad.
+                Publish to add apps to your launchpad.
                 {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
               </p>
             </div>

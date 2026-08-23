@@ -51,11 +51,9 @@ export default function ZyraAiPanel({
   return (
     <GlassPanel className={`glass-panel-section zyra-ai-panel${compact ? ' zyra-ai-panel-compact' : ''}`} data-testid="zyra-ai-panel">
       <div className="section-head-nebula">
+        <GlyphTile tone="ai" icon={<Sparkles size={14} />} size="sm" />
         <div>
-          <p className="section-label">
-            <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-            {title}
-          </p>
+          <p className="section-label">{title}</p>
           {summary ? <h3 className="section-title zyra-ai-summary">{summary}</h3> : null}
         </div>
         {source ? (

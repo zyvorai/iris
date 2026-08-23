@@ -218,6 +218,7 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
                 <EmptyState
                   icon={<Route size={22} />}
                   title="Could not load route"
+                  tone="critical"
                   action={
                     <Button variant="secondary" onClick={() => void diagnosis.refetch()}>
                       Retry

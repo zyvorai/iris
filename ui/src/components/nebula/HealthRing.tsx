@@ -1,6 +1,8 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import { useCountUp } from '../../hooks/useCountUp'
+
 export type HealthTier = 'excellent' | 'stable' | 'warning' | 'critical'
 
 export function healthTier(pct: number): HealthTier {
@@ -37,6 +39,7 @@ export default function HealthRing({ healthy, total, attentionCount = 0 }: Healt
   const tier = healthTier(pct)
   const offset = C - (pct / 100) * C
   const needsAttention = attentionCount > 0 ? attentionCount : total - healthy
+  const animatedPct = Math.round(useCountUp(pct, 900))
 
   return (
     <div className="health-ring-wrap">
@@ -58,7 +61,7 @@ export default function HealthRing({ healthy, total, attentionCount = 0 }: Healt
         </svg>
         <div className="health-ring-core">
           <span className="health-ring-label">{healthTierLabel(tier)}</span>
-          <strong className="health-ring-pct">{pct}%</strong>
+          <strong className="health-ring-pct">{animatedPct}%</strong>
           <span className="health-ring-subtitle">cluster health</span>
         </div>
       </div>

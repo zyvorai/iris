@@ -4,6 +4,7 @@
 import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import GlassPanel from './GlassPanel'
+import { useCountUp } from '../../hooks/useCountUp'
 
 export type MetricCardTone = 'blue' | 'green' | 'purple' | 'cyan' | 'pink' | 'orange'
 
@@ -19,6 +20,10 @@ interface MetricCardProps {
 
 export default function MetricCard({ icon: Icon, label, value, sub, to, warn, tone }: MetricCardProps) {
   const toneClass = warn ? 'metric-card-warn' : tone ? `metric-card-tone-${tone}` : ''
+  const numeric = Number(value)
+  const isNumeric = value.trim() !== '' && Number.isFinite(numeric)
+  const animated = useCountUp(isNumeric ? numeric : 0)
+  const display = isNumeric ? String(Math.round(animated)) : value
   const panel = (
     <GlassPanel className={`metric-card${toneClass ? ` ${toneClass}` : ''}`}>
       <div className="metric-card-head">
@@ -27,7 +32,7 @@ export default function MetricCard({ icon: Icon, label, value, sub, to, warn, to
         </span>
         <span>{label}</span>
       </div>
-      <p className="metric-card-value">{value}</p>
+      <p className="metric-card-value">{display}</p>
       {sub ? <p className="metric-card-sub">{sub}</p> : null}
     </GlassPanel>
   )
