@@ -1,7 +1,27 @@
 /*
- * Self-hosted Archivo (display font) — used via var(--font-display).
- * Body text relies on the OS's own SF Pro / system sans, no file needed.
+ * Self-hosted Archivo Variable (wght 100-900, wdth 62-125%) + Azeret Mono
+ * (wght 100-900) — the Departures Hall typography, downloaded once from
+ * Google Fonts and served locally like every other asset here (no CDN
+ * dependency at runtime). Static Archivo weights below stay as the
+ * fallback for browsers without variable-font support.
  */
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('/fonts/archivo-variable.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Azeret Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/azeret-mono-variable.woff2') format('woff2-variations');
+}
+
 @font-face {
   font-family: 'Archivo';
   font-style: normal;

@@ -74,9 +74,9 @@
   --tone-err-tint: var(--stop-bg);
   --tone-info-tint: rgba(124, 140, 255, 0.12);
 
-  --font-display: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  --font-display: 'Archivo Variable', 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
   --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
