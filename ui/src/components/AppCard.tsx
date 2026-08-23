@@ -1,11 +1,13 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Stethoscope } from 'lucide-react'
 import AppIcon from './AppIcon'
 import GlassPanel from './nebula/GlassPanel'
+import { accentColorFor } from '../utils/iconColor'
 import StatusBadge from './nebula/StatusBadge'
 import Button from './nebula/Button'
 import ActionMenu from './nebula/ActionMenu'
@@ -68,8 +70,14 @@ export default function AppCard({ app, favorite = false, onPublish, onHide, comp
     favorite,
   })
 
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+
   return (
-    <GlassPanel tone={panelTone(app.status)} className={`service-card app-card-nebula ${statusTone(app.status)}`}>
+    <GlassPanel
+      tone={panelTone(app.status)}
+      className={`service-card app-card-nebula card-accent ${statusTone(app.status)}`}
+      style={accentStyle}
+    >
       <div className="service-card-head">
         <AppIcon icon={app.icon} name={app.displayName} size="sm" />
         <div className="service-card-meta">

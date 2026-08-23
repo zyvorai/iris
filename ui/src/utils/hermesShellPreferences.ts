@@ -3,6 +3,7 @@
 
 export type DockPosition = 'bottom' | 'left' | 'right'
 export type DockSize = 'compact' | 'regular' | 'large'
+export type HermesTheme = 'dark' | 'light'
 
 export const SHELL_PREFS_EVENT = 'hermes-shell-prefs-changed'
 
@@ -11,6 +12,7 @@ const DOCK_SIZE_KEY = 'hermes-dock-size'
 const DOCK_AUTO_HIDE_KEY = 'hermes-dock-auto-hide'
 const DOCK_MAGNIFY_KEY = 'hermes-dock-magnify'
 const RAIL_EXPANDED_KEY = 'hermes-rail-expanded'
+const THEME_KEY = 'hermes-theme'
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -99,8 +101,29 @@ export function saveRailExpanded(expanded: boolean) {
   window.dispatchEvent(new CustomEvent(SHELL_PREFS_EVENT, { detail: { railExpanded: expanded } }))
 }
 
+export function loadTheme(): HermesTheme {
+  try {
+    const raw = localStorage.getItem(THEME_KEY)
+    if (raw === 'light' || raw === 'dark') return raw
+  } catch {
+    /* ignore */
+  }
+  return 'dark'
+}
+
+export function saveTheme(theme: HermesTheme) {
+  try {
+    localStorage.setItem(THEME_KEY, theme)
+  } catch {
+    /* ignore */
+  }
+  document.documentElement.dataset.theme = theme
+  window.dispatchEvent(new CustomEvent(SHELL_PREFS_EVENT, { detail: { theme } }))
+}
+
 export function applyShellPreferencesOnBoot() {
   document.documentElement.dataset.hermesDockPosition = loadDockPosition()
   document.documentElement.dataset.hermesDockSize = loadDockSize()
   document.documentElement.dataset.hermesDockAutoHide = loadDockAutoHide() ? '1' : '0'
+  document.documentElement.dataset.theme = loadTheme()
 }

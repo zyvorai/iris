@@ -3,9 +3,10 @@
 
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, LayoutGrid, Radar } from 'lucide-react'
+import { LayoutGrid, Radar } from 'lucide-react'
 import GlassPanel from '../nebula/GlassPanel'
 import ServiceCard from '../nebula/ServiceCard'
+import CollapsibleGroup from '../nebula/CollapsibleGroup'
 import EmptyState from '../nebula/EmptyState'
 import Button from '../nebula/Button'
 import { HERMES_SPACES, groupAppsBySpace } from '../../utils/spaces'
@@ -16,58 +17,6 @@ interface MissionControlSpacesProps {
 }
 
 type FilterMode = 'all' | 'attention'
-
-function statusRank(status: string): number {
-  if (status === 'broken') return 0
-  if (status === 'degraded') return 1
-  return 2
-}
-
-function sortApps(apps: HermesApp[]): HermesApp[] {
-  return [...apps].sort(
-    (a, b) => statusRank(a.status) - statusRank(b.status) || a.displayName.localeCompare(b.displayName),
-  )
-}
-
-function SpaceGroup({
-  spaceId,
-  label,
-  apps,
-  defaultOpen,
-}: {
-  spaceId: string
-  label: string
-  apps: HermesApp[]
-  defaultOpen: boolean
-}) {
-  const [open, setOpen] = useState(defaultOpen)
-  const unhealthy = apps.filter((a) => a.status !== 'healthy').length
-
-  if (!apps.length) return null
-
-  return (
-    <div className="mission-control-group-flat">
-      <button type="button" className="mission-control-group-head" onClick={() => setOpen((v) => !v)}>
-        <h3>{label}</h3>
-        <span className="mission-control-group-count">
-          {apps.length} service{apps.length === 1 ? '' : 's'}
-          {unhealthy > 0 ? ` · ${unhealthy} need attention` : ''}
-        </span>
-        <Link to={`/spaces/${spaceId}`} className="section-link-nebula" onClick={(e) => e.stopPropagation()}>
-          View all
-        </Link>
-        <ChevronDown size={16} className={open ? 'rotated' : ''} aria-hidden />
-      </button>
-      {open ? (
-        <div className="mission-control-group-body">
-          {sortApps(apps).map((app) => (
-            <ServiceCard key={app.id} app={app} />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  )
-}
 
 export default function MissionControlSpaces({ apps }: MissionControlSpacesProps) {
   const [filter, setFilter] = useState<FilterMode>('all')
@@ -141,19 +90,19 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
           description="No services match this filter. Every discovered service in this view is healthy."
         />
       ) : (
-        spacesWithApps.map((space) => {
-          const spaceApps = filteredGrouped.get(space.id) ?? []
-          const hasUnhealthy = spaceApps.some((a) => a.status !== 'healthy')
-          return (
-            <SpaceGroup
-              key={space.id}
-              spaceId={space.id}
-              label={space.label}
-              apps={spaceApps}
-              defaultOpen={hasUnhealthy}
-            />
-          )
-        })
+        spacesWithApps.map((space) => (
+          <CollapsibleGroup
+            key={space.id}
+            label={space.label}
+            apps={filteredGrouped.get(space.id) ?? []}
+            renderApp={(app) => <ServiceCard key={app.id} app={app} />}
+            headerExtra={
+              <Link to={`/spaces/${space.id}`} className="section-link-nebula" onClick={(e) => e.stopPropagation()}>
+                View all
+              </Link>
+            }
+          />
+        ))
       )}
     </GlassPanel>
   )

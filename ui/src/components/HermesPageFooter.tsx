@@ -3,7 +3,6 @@
 
 import { Link } from 'react-router-dom'
 import { BookOpen, Keyboard, LifeBuoy } from 'lucide-react'
-import ZyvorFooter from './ZyvorBrand'
 
 interface HermesPageFooterProps {
   onOpenShortcuts?: () => void
@@ -29,8 +28,6 @@ export default function HermesPageFooter({ onOpenShortcuts }: HermesPageFooterPr
           API
         </a>
       </nav>
-      <ZyvorFooter />
-      <p className="hermes-product-line">Hermes · Zeus Application Operating Layer</p>
     </div>
   )
 }

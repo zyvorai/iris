@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import GlassPanel from './GlassPanel'
 
+export type MetricCardTone = 'blue' | 'green' | 'purple' | 'cyan' | 'pink' | 'orange'
+
 interface MetricCardProps {
   icon: LucideIcon
   label: string
@@ -12,11 +14,13 @@ interface MetricCardProps {
   sub?: string
   to?: string
   warn?: boolean
+  tone?: MetricCardTone
 }
 
-export default function MetricCard({ icon: Icon, label, value, sub, to, warn }: MetricCardProps) {
+export default function MetricCard({ icon: Icon, label, value, sub, to, warn, tone }: MetricCardProps) {
+  const toneClass = warn ? 'metric-card-warn' : tone ? `metric-card-tone-${tone}` : ''
   const panel = (
-    <GlassPanel className={`metric-card${warn ? ' metric-card-warn' : ''}`}>
+    <GlassPanel className={`metric-card${toneClass ? ` ${toneClass}` : ''}`}>
       <div className="metric-card-head">
         <Icon size={14} aria-hidden />
         <span>{label}</span>

@@ -13,14 +13,25 @@ import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
+import CollapsibleGroup from '../components/nebula/CollapsibleGroup'
+import GroupBySelect from '../components/nebula/GroupBySelect'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
+import { groupBy } from '../utils/groupBy'
 import type { HermesApp } from '../types'
 
 type CatalogMode = 'published' | 'all'
 type SortKey = 'name' | 'status' | 'namespace' | 'updated'
+type GroupKey = 'none' | 'namespace' | 'status' | 'category'
+
+const GROUP_OPTIONS: { value: GroupKey; label: string }[] = [
+  { value: 'none', label: 'Group: none' },
+  { value: 'namespace', label: 'Group by namespace' },
+  { value: 'status', label: 'Group by status' },
+  { value: 'category', label: 'Group by category' },
+]
 
 function sortApps(apps: HermesApp[], sort: SortKey): HermesApp[] {
   const rank = (s: string) => (s === 'broken' ? 0 : s === 'degraded' ? 1 : 2)
@@ -32,12 +43,38 @@ function sortApps(apps: HermesApp[], sort: SortKey): HermesApp[] {
   })
 }
 
+const STATUS_ORDER = ['broken', 'degraded', 'unknown', 'healthy']
+const STATUS_LABEL: Record<string, string> = {
+  broken: 'Broken',
+  degraded: 'Degraded',
+  unknown: 'Unknown',
+  healthy: 'Healthy',
+}
+
+function groupKeyFn(key: GroupKey): (app: HermesApp) => string {
+  if (key === 'namespace') return (a) => a.namespace
+  if (key === 'status') return (a) => a.status
+  return (a) => a.category || 'Uncategorized'
+}
+
+function groupLabel(key: GroupKey, id: string): string {
+  return key === 'status' ? (STATUS_LABEL[id] ?? id) : id
+}
+
+function groupOrder(key: GroupKey, ids: string[]): string[] {
+  if (key === 'status') {
+    return [...ids].sort((a, b) => STATUS_ORDER.indexOf(a) - STATUS_ORDER.indexOf(b))
+  }
+  return [...ids].sort((a, b) => a.localeCompare(b))
+}
+
 export default function AppsPage() {
   const [filter, setFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [mode, setMode] = useState<CatalogMode>('published')
   const [sort, setSort] = useState<SortKey>('name')
   const [statusFilter, setStatusFilter] = useState('')
+  const [groupKey, setGroupKey] = useState<GroupKey>('none')
   const { matchesWorkspace } = useWorkspace()
   const { openDiagnose } = useInspector()
   const published = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
@@ -72,6 +109,12 @@ export default function AppsPage() {
     const set = new Set((source ?? []).map((a) => a.category))
     return [...set].sort()
   }, [source])
+
+  const grouped = useMemo(() => {
+    if (groupKey === 'none') return null
+    const map = groupBy(filtered, groupKeyFn(groupKey))
+    return groupOrder(groupKey, [...map.keys()]).map((id) => [id, map.get(id) ?? []] as const)
+  }, [filtered, groupKey])
 
   const onRetry = () => {
     void published.refetch()
@@ -199,6 +242,7 @@ export default function AppsPage() {
               <option value="namespace">Sort: namespace</option>
               <option value="updated">Recently updated</option>
             </select>
+            <GroupBySelect value={groupKey} onChange={(v) => setGroupKey(v as GroupKey)} options={GROUP_OPTIONS} />
             <select className="page-toolbar-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Filter by status">
               <option value="">All statuses</option>
               <option value="healthy">Healthy</option>
@@ -237,11 +281,24 @@ export default function AppsPage() {
             {hasActiveFilters && catalogCount > 0 ? ` · ${catalogCount} total` : ''}
           </p>
 
-          <div className="app-grid" style={{ marginTop: '1rem' }}>
-            {filtered.map((app) => (
-              <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
-            ))}
-          </div>
+          {grouped ? (
+            <div className="mission-control-board" style={{ marginTop: '1rem' }}>
+              {grouped.map(([id, apps]) => (
+                <CollapsibleGroup
+                  key={id}
+                  label={groupLabel(groupKey, id)}
+                  apps={apps}
+                  renderApp={(app) => <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="app-grid" style={{ marginTop: '1rem' }}>
+              {filtered.map((app) => (
+                <AppCard key={app.id} app={app} favorite={favIds.has(app.id)} />
+              ))}
+            </div>
+          )}
         </GlassPanel>
       </div>
     </PageFrame>

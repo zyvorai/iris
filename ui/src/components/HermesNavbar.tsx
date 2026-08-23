@@ -19,10 +19,12 @@ import {
   Keyboard,
   Layers,
   Menu,
+  Moon,
   RefreshCw,
   Search,
   Server,
   Sparkles,
+  Sun,
   Users,
   X,
 } from 'lucide-react'
@@ -32,6 +34,7 @@ import { hermesApi } from '../services/hermesApi'
 import { refreshHermesData } from '../utils/refreshCatalog'
 import { useAiStatus } from '../hooks/useZyraAiInsight'
 import { ZyraAiBadge } from './nebula/ZyraAiPanel'
+import { loadTheme, saveTheme, type HermesTheme } from '../utils/hermesShellPreferences'
 
 interface HermesNavbarProps {
   onPaletteOpen: () => void
@@ -146,6 +149,7 @@ function MoreMenu() {
 export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesNavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [spinning, setSpinning] = useState(false)
+  const [theme, setTheme] = useState<HermesTheme>(() => loadTheme())
   const qc = useQueryClient()
   const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
@@ -165,6 +169,12 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
     setSpinning(true)
     void refreshHermesData(qc)
     setTimeout(() => setSpinning(false), 600)
+  }
+
+  const toggleTheme = () => {
+    const next: HermesTheme = theme === 'dark' ? 'light' : 'dark'
+    saveTheme(next)
+    setTheme(next)
   }
 
   useEffect(() => {
@@ -228,6 +238,15 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
               title="Refresh data"
             >
               <RefreshCw size={16} className={spinning ? 'hermes-nb-spin' : ''} />
+            </button>
+            <button
+              type="button"
+              className="hermes-nb-icon-pill"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <HelpMenu onOpenShortcuts={onOpenShortcuts} />
             {auth.data?.mode === 'oidc' && (

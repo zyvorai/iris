@@ -23,6 +23,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+:root[data-theme='light'] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(37, 99, 235, 0.07), transparent 42%),
+    radial-gradient(ellipse 60% 40% at 88% 4%, rgba(147, 51, 234, 0.05), transparent 38%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(37, 99, 235, 0.03), transparent 48%),
+    linear-gradient(180deg, #ffffff 0%, #f8f9fa 38%, #f5f6f8 100%);
+}
+
 .app-shell {
   height: 100dvh;
   display: flex;
@@ -56,7 +64,7 @@ body {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px;
+  padding: 18px 20px;
   padding-bottom: 48px;
   max-width: min(120rem, calc(100vw - 1.5rem));
   width: 100%;
@@ -71,17 +79,17 @@ body {
 }
 
 .main-scroll-area::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
 }
 
 .main-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--scrollbar-thumb-hover);
 }
 
 .page-grid {
   display: grid;
-  gap: 20px;
+  gap: 14px;
 }
 
 @media (max-width: 900px) {

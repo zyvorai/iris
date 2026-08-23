@@ -2,6 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import type { HermesApp } from '../types'
+import { groupBy } from './groupBy'
 
 export type SpaceId =
   | 'monitoring'
@@ -117,12 +118,9 @@ export function spaceForCategory(category: string): SpaceId {
 }
 
 export function groupAppsBySpace(apps: HermesApp[]): Map<SpaceId, HermesApp[]> {
-  const map = new Map<SpaceId, HermesApp[]>()
+  const map = groupBy(apps, spaceForApp)
   for (const space of HERMES_SPACES) {
-    map.set(space.id, [])
-  }
-  for (const app of apps) {
-    map.get(spaceForApp(app))?.push(app)
+    if (!map.has(space.id)) map.set(space.id, [])
   }
   return map
 }

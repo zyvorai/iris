@@ -2,7 +2,7 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { ExternalLink } from 'lucide-react'
-import type { KeyboardEvent } from 'react'
+import type { CSSProperties, KeyboardEvent } from 'react'
 import AppIcon from '../AppIcon'
 import GlassPanel from './GlassPanel'
 import StatusBadge from './StatusBadge'
@@ -10,6 +10,7 @@ import Button from './Button'
 import ActionMenu from './ActionMenu'
 import { appDetailPath, copyAppUrl, openApp } from '../../services/hermesApi'
 import { useInspector } from '../../utils/inspectorContext'
+import { accentColorFor } from '../../utils/iconColor'
 import type { HermesApp } from '../../types'
 
 interface QuickLaunchTileProps {
@@ -25,9 +26,12 @@ export default function QuickLaunchTile({ app }: QuickLaunchTileProps) {
     if (e.key === 'Enter') void openApp(app)
   }
 
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+
   return (
     <GlassPanel
-      className={`quick-launch-tile-nebula ${glowClass}`}
+      className={`quick-launch-tile-nebula card-accent ${glowClass}`}
+      style={accentStyle}
       tabIndex={0}
       role="group"
       aria-label={`${app.displayName} quick launch`}

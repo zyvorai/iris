@@ -368,3 +368,131 @@
   background: rgba(251, 191, 36, 0.06);
   border: 1px solid rgba(251, 191, 36, 0.16);
 }
+
+/* ── Light theme overrides — legacy surfaces don't read tokens for backgrounds ── */
+:root[data-theme='light'] .zeus-glass,
+:root[data-theme='light'] .glass-hero,
+:root[data-theme='light'] .zeus-card,
+:root[data-theme='light'] .space-row.zeus-card,
+:root[data-theme='light'] .help-card,
+:root[data-theme='light'] .team-section,
+:root[data-theme='light'] .namespace-section,
+:root[data-theme='light'] .share-admin-panel,
+:root[data-theme='light'] .federated-cluster-block {
+  background: var(--panel-surface) !important;
+}
+
+:root[data-theme='light'] .glass-hero {
+  background:
+    var(--hero-overlay),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 42%),
+    var(--panel-surface) !important;
+}
+
+:root[data-theme='light'] .hero-title {
+  background: linear-gradient(90deg, #14161a, #5b6472);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme='light'] .metric-tile,
+:root[data-theme='light'] .stat-pill {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(37, 99, 235, 0.08), transparent 38%),
+    var(--panel-surface-strong) !important;
+}
+
+:root[data-theme='light'] .chip,
+:root[data-theme='light'] .status-chip {
+  background: var(--overlay-chip);
+}
+
+:root[data-theme='light'] .view-toggle,
+:root[data-theme='light'] .workspace-switcher {
+  background: var(--chrome-55);
+}
+
+:root[data-theme='light'] .filter-bar input,
+:root[data-theme='light'] .activity-search,
+:root[data-theme='light'] .catalog-toolbar input,
+:root[data-theme='light'] .catalog-toolbar select,
+:root[data-theme='light'] .cluster-filters select,
+:root[data-theme='light'] .graph-filters select,
+:root[data-theme='light'] .activity-filters select {
+  background: var(--chrome-72) !important;
+}
+
+:root[data-theme='light'] .empty {
+  background: var(--chrome-45);
+}
+
+:root[data-theme='light'] .workspace-chip:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--overlay-chip);
+}
+
+:root[data-theme='light'] .zeus-health-chip {
+  background: var(--chrome-65);
+}
+
+:root[data-theme='light'] .palette-backdrop,
+:root[data-theme='light'] .diagnosis-drawer-backdrop,
+:root[data-theme='light'] .hermes-nb-backdrop {
+  background: rgba(20, 22, 26, 0.28) !important;
+}
+
+:root[data-theme='light'] .palette-panel,
+:root[data-theme='light'] .hermes-nb-dropdown,
+:root[data-theme='light'] .hermes-nb-drawer {
+  background: var(--dropdown-bg) !important;
+  box-shadow: var(--dropdown-shadow) !important;
+}
+
+/* ── Active/selected pill text — hardcoded near-white, invisible on light bg ── */
+:root[data-theme='light'] .view-toggle button.active,
+:root[data-theme='light'] .filter-bar button.active {
+  color: #1d4ed8 !important;
+}
+
+:root[data-theme='light'] .workspace-chip.active {
+  color: #1d4ed8 !important;
+}
+
+:root[data-theme='light'] .attention-filters button.active,
+:root[data-theme='light'] .inspector-tabs button.active,
+:root[data-theme='light'] .hermes-nb-nav-pill.active,
+:root[data-theme='light'] .hermes-nb-dropdown-item.active,
+:root[data-theme='light'] .hermes-nb-drawer-item.active,
+:root[data-theme='light'] .mission-control-filters button.active,
+:root[data-theme='light'] .filter-chip.active {
+  color: #1d4ed8;
+}
+
+/* ── Remaining pastel chip/link text tuned for dark surfaces ── */
+:root[data-theme='light'] .chip-accent,
+:root[data-theme='light'] .section-link:hover,
+:root[data-theme='light'] .workspace-chip:hover:not(:disabled),
+:root[data-theme='light'] .hermes-help-link:hover {
+  color: #1d4ed8;
+}
+
+:root[data-theme='light'] .chip-ok,
+:root[data-theme='light'] .status-chip.status-healthy,
+:root[data-theme='light'] .zeus-health-chip[data-tone='ok'] {
+  color: #0f7b4f;
+}
+
+:root[data-theme='light'] .chip-warn,
+:root[data-theme='light'] .status-chip.status-warn,
+:root[data-theme='light'] .status-chip.status-degraded,
+:root[data-theme='light'] .zeus-health-chip[data-tone='warn'],
+:root[data-theme='light'] .app-problem {
+  color: #b45309;
+}
+
+:root[data-theme='light'] .status-chip.status-critical,
+:root[data-theme='light'] .status-chip.status-broken,
+:root[data-theme='light'] .zeus-health-chip[data-tone='bad'] {
+  color: #b3261e;
+}

@@ -1,10 +1,12 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
+import type { CSSProperties } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Stethoscope } from 'lucide-react'
 import AppIcon from '../AppIcon'
 import GlassPanel from './GlassPanel'
+import { accentColorFor } from '../../utils/iconColor'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
 import ActionMenu from './ActionMenu'
@@ -50,8 +52,10 @@ export default function ServiceCard({ app }: ServiceCardProps) {
     onPublish: !app.visibility.published ? () => void publish.mutate() : undefined,
   })
 
+  const accentStyle = { '--card-accent': accentColorFor(app.displayName, app.icon) } as CSSProperties
+
   return (
-    <GlassPanel tone={panelTone(app.status)} className="service-card">
+    <GlassPanel tone={panelTone(app.status)} className="service-card card-accent" style={accentStyle}>
       <div className="service-card-head">
         <AppIcon icon={app.icon} name={app.displayName} size="sm" />
         <div className="service-card-meta">

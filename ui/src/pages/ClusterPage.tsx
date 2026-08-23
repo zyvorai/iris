@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, Layers, Rocket, Server, Compass } from 'lucide-react'
+import { Layers, Rocket, Server, Compass } from 'lucide-react'
 import AppCard from '../components/AppCard'
 import GlassPanel from '../components/nebula/GlassPanel'
 import PageFrame from '../components/nebula/PageFrame'
@@ -17,63 +17,12 @@ import Button from '../components/nebula/Button'
 import ActionMenu from '../components/nebula/ActionMenu'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
+import CollapsibleGroup from '../components/nebula/CollapsibleGroup'
 import { hermesApi } from '../services/hermesApi'
 import { useFleetInsight, useNamespaceInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
-import type { HermesApp } from '../types'
-
-function statusRank(status: string): number {
-  if (status === 'broken') return 0
-  if (status === 'degraded') return 1
-  return 2
-}
-
-function NamespaceGroup({
-  namespace,
-  apps,
-  favIds,
-  onPublish,
-}: {
-  namespace: string
-  apps: HermesApp[]
-  favIds: Set<string>
-  onPublish: (id: string) => void
-}) {
-  const unhealthy = apps.some((a) => a.status === 'broken' || a.status === 'degraded')
-  const [open, setOpen] = useState(unhealthy)
-  const sorted = useMemo(
-    () => [...apps].sort((a, b) => statusRank(a.status) - statusRank(b.status) || a.displayName.localeCompare(b.displayName)),
-    [apps],
-  )
-  const issueCount = apps.filter((a) => a.status !== 'healthy').length
-
-  return (
-    <GlassPanel className="glass-panel-section namespace-section">
-      <button type="button" className="mission-control-group-head namespace-group-head" onClick={() => setOpen((v) => !v)}>
-        <h3>{namespace}</h3>
-        <span className="mission-control-group-count">
-          {apps.length} service{apps.length === 1 ? '' : 's'}
-          {issueCount > 0 ? ` · ${issueCount} need attention` : ''}
-        </span>
-        <ChevronDown size={16} className={open ? 'rotated' : ''} aria-hidden />
-      </button>
-      {open ? (
-        <div className="mission-control-group-body" style={{ marginTop: '0.75rem' }}>
-          {sorted.map((app) => (
-            <AppCard
-              key={app.id}
-              app={app}
-              compact
-              favorite={favIds.has(app.id)}
-              onPublish={!app.visibility.published ? () => onPublish(app.id) : undefined}
-            />
-          ))}
-        </div>
-      ) : null}
-    </GlassPanel>
-  )
-}
+import { groupBy } from '../utils/groupBy'
 
 export default function ClusterPage() {
   const [nsFilter, setNsFilter] = useState('')
@@ -130,12 +79,7 @@ export default function ClusterPage() {
   }, [catalog.data, nsFilter, statusFilter, matchesWorkspace])
 
   const byNamespace = useMemo(() => {
-    const map = new Map<string, typeof filtered>()
-    for (const app of filtered) {
-      const list = map.get(app.namespace) ?? []
-      list.push(app)
-      map.set(app.namespace, list)
-    }
+    const map = groupBy(filtered, (a) => a.namespace)
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
   }, [filtered])
 
@@ -240,10 +184,10 @@ export default function ClusterPage() {
             <AskZyraButton compact command={askCommand} />
           </div>
           <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
-            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
-            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" />
-            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" />
-            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
+            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" tone="cyan" />
+            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" tone="purple" />
+            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" tone="green" />
+            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" tone="orange" />
           </div>
         </GlassPanel>
 
@@ -341,13 +285,21 @@ export default function ClusterPage() {
             </div>
           </GlassPanel>
         ) : (
-          byNamespace.map(([ns, apps]) => (
-            <NamespaceGroup
+          byNamespace.map(([ns, nsApps]) => (
+            <CollapsibleGroup
               key={ns}
-              namespace={ns}
-              apps={apps}
-              favIds={favIds}
-              onPublish={(id) => publish.mutate(id)}
+              label={ns}
+              apps={nsApps}
+              wrap
+              renderApp={(app) => (
+                <AppCard
+                  key={app.id}
+                  app={app}
+                  compact
+                  favorite={favIds.has(app.id)}
+                  onPublish={!app.visibility.published ? () => publish.mutate(app.id) : undefined}
+                />
+              )}
             />
           ))
         )}

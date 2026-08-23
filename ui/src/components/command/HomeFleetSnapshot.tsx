@@ -29,6 +29,7 @@ export default function HomeFleetSnapshot({
         value={String(serviceCount)}
         sub={`${namespaceCount} namespaces`}
         to="/cluster"
+        tone="cyan"
       />
       <MetricCard
         icon={Rocket}
@@ -37,6 +38,7 @@ export default function HomeFleetSnapshot({
         sub={unpublished > 0 ? `${unpublished} awaiting publish` : 'Launchpad ready'}
         to="/cluster"
         warn={unpublished > serviceCount * 0.5 && serviceCount > 0}
+        tone="green"
       />
       <MetricCard
         icon={AlertTriangle}
@@ -45,6 +47,7 @@ export default function HomeFleetSnapshot({
         sub={brokenCount > 0 ? `${brokenCount} broken` : issueCount > 0 ? 'Degraded services' : 'All clear'}
         to="/health"
         warn={issueCount > 0}
+        tone="pink"
       />
     </div>
   )

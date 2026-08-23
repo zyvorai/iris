@@ -68,7 +68,7 @@ export default function ShareLinksPanel({ app }: { app: HermesApp }) {
       ) : null}
 
       {createMutation.error ? (
-        <p className="service-status-summary" style={{ color: '#fca5a5' }}>
+        <p className="service-status-summary" style={{ color: 'var(--accent-red)' }}>
           Could not create share link. App must be published.
         </p>
       ) : null}
