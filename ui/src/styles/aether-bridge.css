@@ -322,7 +322,7 @@
   backdrop-filter: blur(8px);
 }
 
-.palette-panel,
+.palette,
 .hermes-nb-dropdown {
   border: 1px solid var(--border-soft) !important;
   background: var(--dropdown-bg) !important;
@@ -447,7 +447,7 @@
   background: rgba(20, 22, 26, 0.28) !important;
 }
 
-:root[data-theme='hall'] .palette-panel,
+:root[data-theme='hall'] .palette,
 :root[data-theme='hall'] .hermes-nb-dropdown,
 :root[data-theme='hall'] .hermes-nb-drawer {
   background: var(--dropdown-bg) !important;

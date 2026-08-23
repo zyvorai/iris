@@ -920,6 +920,14 @@
     radial-gradient(circle at top right, rgba(99, 164, 255, 0.08), transparent 42%) !important;
 }
 
+.hero-command-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, 0.014) 3px 4px);
+}
+
 .hero-command-panel .hero-aura {
   position: absolute;
   inset: 0;
@@ -972,7 +980,7 @@
 
 .hero-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 24px;
   align-items: center;
 }

@@ -328,7 +328,7 @@ a:hover > .app-icon,
 
 .palette {
   width: min(560px, 92vw);
-  border-radius: 1rem;
+  border-radius: 1.125rem;
   border: 1px solid var(--border-soft);
   background: var(--zeus-glass-chrome-bg);
   backdrop-filter: blur(var(--zeus-glass-chrome-blur)) saturate(1.35);
@@ -350,7 +350,7 @@ a:hover > .app-icon,
 }
 
 .palette-results {
-  max-height: 360px;
+  max-height: min(54vh, 420px);
   overflow: auto;
 }
 
@@ -2418,9 +2418,18 @@ a:hover > .space-tile-icon {
 
 .hermes-nb-row2 {
   display: none;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 0.25rem;
-  padding-bottom: 0.5rem;
+  height: 52px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hermes-nb-row2::-webkit-scrollbar {
+  display: none;
 }
 
 @media (min-width: 768px) {
@@ -2489,6 +2498,7 @@ a:hover > .space-tile-icon {
 /* Nav pill: inactive */
 .hermes-nb-pill {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 0.375rem;
   padding: 8px 11px;
@@ -2596,6 +2606,7 @@ a:hover > .space-tile-icon {
 /* Nav row pills */
 .hermes-nb-nav-pill {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 0.375rem;
   padding: 8px 11px;
