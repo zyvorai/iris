@@ -329,7 +329,7 @@ export function HealthPage() {
           <div className="hero-layout">
             <div className="hero-command-copy">
               <p className="page-kicker">Health dashboard</p>
-              <h1 className="page-title">Cluster health overview</h1>
+              <h1 className="page-title sign">Cluster health overview</h1>
               <p className="hero-command-stats body-text">
                 {serviceCount} discovered · {healthy} healthy · {degraded} degraded · {broken} broken
               </p>

@@ -56,7 +56,7 @@ export default function PlatformPulseHero({
           <p className="page-kicker">
             {greeting}, {who}
           </p>
-          <h1 className="page-title">{headline}</h1>
+          <h1 className="page-title sign">{headline}</h1>
           <p className="hero-command-stats body-text">
             {serviceCount} discovered · {publishedCount} published · {namespaceCount} namespaces ·{' '}
             {attentionCount > 0 ? `${attentionCount} degraded` : `${healthy} healthy`}

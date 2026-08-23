@@ -34,6 +34,11 @@ export default function MetricCard({ icon: Icon, label, value, sub, to, warn, to
       </div>
       <p className="metric-card-value">{display}</p>
       {sub ? <p className="metric-card-sub">{sub}</p> : null}
+      <div className="metric-card-bar" aria-hidden>
+        {Array.from({ length: 6 }, (_, i) => (
+          <span key={i} />
+        ))}
+      </div>
     </GlassPanel>
   )
 

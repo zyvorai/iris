@@ -133,9 +133,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  min-height: 36px;
-  padding: 0.45rem 0.85rem;
-  border-radius: var(--radius-md);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
   border: 1px solid var(--border-soft);
   background: var(--bg-chip);
   color: var(--text-secondary);
@@ -230,10 +230,10 @@
 }
 
 .nebula-btn-compact {
-  min-height: 30px;
-  padding: 0.3rem 0.6rem;
+  height: 30px;
+  padding: 0 11px;
   font-size: 0.72rem;
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .action-row {
@@ -347,8 +347,8 @@
 
 .health-ring {
   position: relative;
-  width: 148px;
-  height: 148px;
+  width: 190px;
+  height: 190px;
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -383,12 +383,12 @@
 .health-ring-track {
   fill: none;
   stroke: var(--ring-track);
-  stroke-width: 8;
+  stroke-width: 9;
 }
 
 .health-ring-progress {
   fill: none;
-  stroke-width: 8;
+  stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -424,7 +424,7 @@
 
 .health-ring-pct {
   display: block;
-  font-size: 1.75rem;
+  font-size: 2.625rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
@@ -547,6 +547,19 @@
   font-size: 0.72rem;
   color: var(--text-muted);
   line-height: 1.4;
+}
+
+.metric-card-bar {
+  display: flex;
+  gap: 2px;
+  margin-top: 0.875rem;
+  height: 4px;
+}
+
+.metric-card-bar span {
+  flex: 1;
+  border-radius: 1px;
+  background: var(--board-3);
 }
 
 /* Quick Launch */

@@ -25,7 +25,7 @@ export function healthTierLabel(tier: HealthTier): string {
   }
 }
 
-const R = 54
+const R = 84
 const C = 2 * Math.PI * R
 
 interface HealthRingProps {
@@ -48,12 +48,12 @@ export default function HealthRing({ healthy, total, attentionCount = 0 }: Healt
         data-testid="cluster-health-orb"
         aria-label={`Cluster health ${pct} percent, ${healthTierLabel(tier)}`}
       >
-        <svg className="health-ring-ring" viewBox="0 0 120 120" aria-hidden>
-          <circle className="health-ring-track" cx="60" cy="60" r={R} />
+        <svg className="health-ring-ring" viewBox="0 0 190 190" aria-hidden>
+          <circle className="health-ring-track" cx="95" cy="95" r={R} />
           <circle
             className="health-ring-progress"
-            cx="60"
-            cy="60"
+            cx="95"
+            cy="95"
             r={R}
             strokeDasharray={C}
             strokeDashoffset={offset}
