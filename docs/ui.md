@@ -50,13 +50,13 @@ When unset, Hermes uses rule-based insight and intent search — no external API
 ```bash
 export HERMES_LLM_API_URL=https://api.openai.com/v1
 export HERMES_LLM_API_KEY=sk-...
-./scripts/deploy-remote.sh 175.110.114.93 sus
+./scripts/deploy-remote.sh <ephemeral-ip> operator
 
 # Or apply LLM settings to an existing deploy (Helm only):
-./scripts/configure-llm-remote.sh 175.110.114.93 sus
+./scripts/configure-llm-remote.sh <ephemeral-ip> operator
 
 # Or install Ollama on the remote host and point Hermes at it (k3s: binds 0.0.0.0, uses node IP):
-./scripts/setup-ollama-remote.sh 175.110.114.93 sus
+./scripts/setup-ollama-remote.sh <ephemeral-ip> operator
 ```
 
 The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not in plain Helm values).

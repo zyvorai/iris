@@ -417,18 +417,18 @@ Open `https://hermes.zeus.local/` (or NodePort if ingress is disabled).
 ### Remote K3s deploy
 
 ```bash
-# Default staging host (212.8.252.194 sus)
+# Default staging host (<ephemeral-ip> operator)
 make deploy-remote
 
 # Or explicit:
-./scripts/deploy-all-remote.sh 212.8.252.194 sus
-./scripts/deploy-remote.sh 212.8.252.194 sus
+./scripts/deploy-all-remote.sh <ephemeral-ip> operator
+./scripts/deploy-remote.sh <ephemeral-ip> operator
 
 # Post-deploy smoke
 make test-remote-smoke
 
 # Full Zyvor stack (VMRogue + PacketWolf + Axiom)
-./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
+./scripts/test-zyvor-stack-remote.sh <ephemeral-ip> 30151 operator
 ```
 
 See [docs/development.md](docs/development.md) for local development workflows.

@@ -71,7 +71,7 @@ helm install hermes ./charts/hermes \
 
 # Remote lab deploy
 make deploy-remote
-./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
+./scripts/test-zyvor-stack-remote.sh <ephemeral-ip> 30151 operator
 
 # Local dev
 make build && ./scripts/smoke-test.sh

@@ -152,7 +152,7 @@ In production, Helm runs both in one pod with a shared PVC at `/data/hermes/herm
 | `make deploy-remote` | Helm deploy to remote k3s |
 | `make test-remote-smoke` | Post-deploy API checks |
 
-Default deploy: `DEPLOY_HOST=212.8.252.194`, `DEPLOY_USER=sus`, `VERSION=0.2.0`.
+Default deploy: `DEPLOY_HOST=<ephemeral-ip>`, `DEPLOY_USER=operator`, `VERSION=0.2.0`.
 
 ---
 
