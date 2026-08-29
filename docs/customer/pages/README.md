@@ -8,6 +8,7 @@ Every route is also listed in the [complete page index](../PAGE_INDEX.md).
 
 | Page | What it covers |
 |------|----------------|
+| [Settings](admin/settings.md) | Settings — appearance and local shell preferences. |
 | [Teams](admin/teams.md) | Teams — Admin surface. |
 
 ## Audit
@@ -32,6 +33,7 @@ Every route is also listed in the [complete page index](../PAGE_INDEX.md).
 | [Cluster](primary/cluster.md) | Cluster — Primary surface. |
 | [Health](primary/health.md) | Health — Primary surface. |
 | [Overview](primary/home.md) | Overview — Primary surface. |
+| [Mission Control](primary/mission-control.md) | Mission Control — live departures board across namespaces and workspaces. |
 | [Spaces](primary/spaces.md) | Spaces — Primary surface. |
 
 ## Support
@@ -42,4 +44,4 @@ Every route is also listed in the [complete page index](../PAGE_INDEX.md).
 
 ---
 
-11 guides. Regenerate: `node scripts/customer-docs/generate-guide-index.mjs`.
+13 guides. Regenerate: `node scripts/customer-docs/generate-guide-index.mjs`.

@@ -8,6 +8,8 @@
   "/discovery": "Discovery \u2014 Explore surface.",
   "/federated": "Federated \u2014 Explore surface.",
   "/teams": "Teams \u2014 Admin surface.",
+  "/mission-control": "Mission Control \u2014 live departures board across namespaces and workspaces.",
+  "/settings": "Settings \u2014 appearance and local shell preferences.",
   "/activity": "Activity \u2014 Audit surface.",
   "/help": "Help \u2014 Support surface."
 }

@@ -38,6 +38,10 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 </tr>
 </thead>
 <tbody><tr>
+<td><a href="admin/settings.md">Settings</a></td>
+<td>Settings — appearance and local shell preferences.</td>
+</tr>
+<tr>
 <td><a href="admin/teams.md">Teams</a></td>
 <td>Teams — Admin surface.</td>
 </tr>
@@ -101,6 +105,10 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <td>Overview — Primary surface.</td>
 </tr>
 <tr>
+<td><a href="primary/mission-control.md">Mission Control</a></td>
+<td>Mission Control — live departures board across namespaces and workspaces.</td>
+</tr>
+<tr>
 <td><a href="primary/spaces.md">Spaces</a></td>
 <td>Spaces — Primary surface.</td>
 </tr>
@@ -119,7 +127,35 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 </tr>
 </tbody></table>
 <hr>
-<p>11 guides. Regenerate: <code>node scripts/customer-docs/generate-guide-index.mjs</code>.</p>
+<p>13 guides. Regenerate: <code>node scripts/customer-docs/generate-guide-index.mjs</code>.</p>
+<hr>
+<h2>Settings</h2>
+<h3>Purpose</h3>
+<p>Settings — appearance and local shell preferences.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/settings</code></li>
+<li>Nav: <strong>Admin → Settings</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>What you can do</h3>
+<ol>
+<li>Open <code>/settings</code> and wait for live data from Hermes.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
 <hr>
 <h2>Teams</h2>
 <h3>Purpose</h3>
@@ -373,6 +409,34 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <li><a href="../../PAGE_INDEX.md">Page index</a></li>
 </ul>
 <hr>
+<h2>Mission Control</h2>
+<h3>Purpose</h3>
+<p>Mission Control — live departures board across namespaces and workspaces.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/mission-control</code></li>
+<li>Nav: <strong>Primary → Mission Control</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>What you can do</h3>
+<ol>
+<li>Open <code>/mission-control</code> and wait for live data from Hermes.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
 <h2>Spaces</h2>
 <h3>Purpose</h3>
 <p>Spaces — Primary surface.</p>
@@ -431,7 +495,7 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <hr>
 <h2>Hermes — Complete page index</h2>
 <p>Every primary navigable dashboard route.</p>
-<p><em>Generated: 2026-08-29 · 11 routes</em></p>
+<p><em>Generated: 2026-08-29 · 13 routes</em></p>
 <p>Regenerate: <code>node scripts/customer-docs/generate-page-index.mjs</code></p>
 <h3>Primary</h3>
 <table>
@@ -472,6 +536,12 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <td><code>/spaces</code></td>
 <td>Spaces — Primary surface.</td>
 <td><a href="pages/primary/spaces.md">Open</a></td>
+</tr>
+<tr>
+<td>Mission Control</td>
+<td><code>/mission-control</code></td>
+<td>Mission Control — live departures board across namespaces and workspaces.</td>
+<td><a href="pages/primary/mission-control.md">Open</a></td>
 </tr>
 </tbody></table>
 <h3>Explore</h3>
@@ -518,6 +588,12 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <td><code>/teams</code></td>
 <td>Teams — Admin surface.</td>
 <td><a href="pages/admin/teams.md">Open</a></td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>/settings</code></td>
+<td>Settings — appearance and local shell preferences.</td>
+<td><a href="pages/admin/settings.md">Open</a></td>
 </tr>
 </tbody></table>
 <h3>Audit</h3>

@@ -31,6 +31,12 @@
       "legacy": false
     },
     {
+      "label": "Mission Control",
+      "path": "/mission-control",
+      "category": "Primary",
+      "legacy": false
+    },
+    {
       "label": "Graph",
       "path": "/graph",
       "category": "Explore",
@@ -51,6 +57,12 @@
     {
       "label": "Teams",
       "path": "/teams",
+      "category": "Admin",
+      "legacy": false
+    },
+    {
+      "label": "Settings",
+      "path": "/settings",
       "category": "Admin",
       "legacy": false
     },
