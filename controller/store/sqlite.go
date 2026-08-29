@@ -10,7 +10,7 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
-	"github.com/ssahani/hermes/controller/model"
+	"github.com/zyvorai/hermes/controller/model"
 )
 
 type Store struct {

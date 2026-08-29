@@ -86,38 +86,43 @@ export default function DiscoveryPage() {
       onRetry={() => void discovery.refetch()}
       errorTitle="Could not load discovery queue"
     >
-      <div className="page-grid">
-        <GlassPanel className="glass-panel-section">
-          <div className="section-head-nebula">
-            <GlyphTile tone="brand" icon={<Compass size={14} />} size="sm" />
-            <div>
-              <p className="section-label">Discovery</p>
-              <h2 className="section-title">Discovery queue</h2>
-              <p className="body-text">
-                {cluster.data?.discovery ?? '—'} unpublished services across {cluster.data?.namespaces ?? '—'} namespaces.
-              </p>
-            </div>
-            {discovery.data?.length ? (
-              <>
-                <AskZyraButton compact command="suggest publish" />
-                {discoveryInsight.data?.suggestPublishIds?.length ? (
-                  <Button
-                    variant="ai"
-                    className="nebula-btn-compact"
-                    disabled={publishZyraPicks.isPending}
-                    onClick={() => void publishZyraPicks.mutate()}
-                    data-testid="publish-zyra-picks"
-                  >
-                    Publish Zyra picks ({Math.min(discoveryInsight.data.suggestPublishIds.length, 10)})
-                  </Button>
-                ) : null}
-                <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>
-                  <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)}
-                </Button>
-              </>
-            ) : null}
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Discovery</p>
+            <h1 className="h-hero" style={{ maxWidth: '14ch' }}>Discovery queue</h1>
+            <p className="hs-lede">
+              {cluster.data?.discovery ?? '—'} unpublished services across {cluster.data?.namespaces ?? '—'} namespaces.
+            </p>
           </div>
-        </GlassPanel>
+        </section>
+      <div className="page-grid">
+        {discovery.data?.length ? (
+          <GlassPanel className="glass-panel-section">
+            <div className="section-head-nebula">
+              <GlyphTile tone="brand" icon={<Compass size={14} />} size="sm" />
+              <div>
+                <p className="hs-eyebrow">Actions</p>
+                <h2 className="h-tile">Publish controls</h2>
+              </div>
+              <AskZyraButton compact command="suggest publish" />
+              {discoveryInsight.data?.suggestPublishIds?.length ? (
+                <Button
+                  variant="ai"
+                  className="nebula-btn-compact"
+                  disabled={publishZyraPicks.isPending}
+                  onClick={() => void publishZyraPicks.mutate()}
+                  data-testid="publish-zyra-picks"
+                >
+                  Publish Zyra picks ({Math.min(discoveryInsight.data.suggestPublishIds.length, 10)})
+                </Button>
+              ) : null}
+              <Button variant="primary" className="nebula-btn-compact" disabled={publishAll.isPending} onClick={() => void publishAll.mutate()}>
+                <Rocket size={14} /> Publish first {Math.min(discovery.data.length, 25)}
+              </Button>
+            </div>
+          </GlassPanel>
+        ) : null}
 
         {discovery.data?.length ? (
           <ZyraAiPanel
@@ -164,6 +169,7 @@ export default function DiscoveryPage() {
             </Board>
           )}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

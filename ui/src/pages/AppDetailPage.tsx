@@ -38,7 +38,6 @@ import {
   hermesApi,
   openApp,
   sourceLabel,
-  statusTone,
 } from '../services/hermesApi'
 
 export default function AppDetailPage() {
@@ -142,38 +141,41 @@ export default function AppDetailPage() {
 
   return (
     <PageFrame loading={false} error={false} hasData onRetry={() => void app.refetch()}>
-      <div className="page-grid">
-        <GlassPanel className={`glass-panel-section app-detail-hero-nebula ${statusTone(a.status)}`}>
-          <div className="app-detail-head">
-            <div>
-              <p className="page-kicker">{a.category}</p>
-              <h1 className="page-title">{a.displayName}</h1>
-              <p className="body-text">{a.description || 'Infrastructure application'}</p>
-              <div className="app-meta-row">
-                <StatusBadge status={a.status} />
-                {a.meta?.environment ? (
-                  <span className="chip chip-env">{environmentLabel(a.meta.environment)}</span>
-                ) : null}
-              </div>
-              {broken && a.statusMessage ? (
-                <ServiceStatusMessage message={a.statusMessage} status={a.status} />
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">{a.category}</p>
+            <h1 className="h-hero">{a.displayName}</h1>
+            <p className="hs-lede">{a.description || 'Infrastructure application'}</p>
+            <div className="app-meta-row" style={{ marginTop: 16 }}>
+              <StatusBadge status={a.status} />
+              {a.meta?.environment ? (
+                <span className="chip chip-env">{environmentLabel(a.meta.environment)}</span>
               ) : null}
             </div>
-            <div className="app-detail-actions-nebula">
+            {broken && a.statusMessage ? (
+              <ServiceStatusMessage message={a.statusMessage} status={a.status} />
+            ) : null}
+            <div className="hs-btnrow">
               {broken ? (
                 <Button variant="danger" onClick={handleOpenDiagnose}>
                   <Stethoscope size={14} /> Diagnose
                 </Button>
               ) : (
-                <Button variant="primary" disabled={!canOpen} onClick={() => void openApp(a)}>
+                <button
+                  type="button"
+                  className="hs-btn-primary"
+                  disabled={!canOpen}
+                  onClick={() => void openApp(a)}
+                >
                   <ExternalLink size={14} /> {canOpen ? 'Open' : 'Cannot open'}
-                </Button>
+                </button>
               )}
               <ActionMenu items={overflowItems} label="App actions" />
             </div>
           </div>
-        </GlassPanel>
-
+        </section>
+      <div className="page-grid">
         <ZyraAiPanel
           title="Zyra AI service insight"
           summary={appInsight.summary || undefined}
@@ -283,6 +285,7 @@ export default function AppDetailPage() {
           </Button>
         </div>
       </div>
+      </div>
     </PageFrame>
   )
 }
@@ -325,17 +328,16 @@ export function HealthPage() {
       }}
       errorTitle="Could not load health data"
     >
-      <div className="page-grid">
-        <GlassPanel className="glass-panel-section hero-command-panel aura-warning">
-          <div className="hero-aura" aria-hidden />
-          <div className="hero-layout">
-            <div className="hero-command-copy">
-              <p className="page-kicker">Health dashboard</p>
-              <h1 className="page-title sign">Cluster health overview</h1>
-              <p className="hero-command-stats body-text">
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap hs-hero-grid">
+            <div>
+              <p className="hs-eyebrow">Health dashboard</p>
+              <h1 className="h-hero">Cluster health overview</h1>
+              <p className="hs-lede">
                 {serviceCount} discovered · {healthy} healthy · {degraded} degraded · {broken} broken
               </p>
-              <div className="hero-command-ctas">
+              <div className="hs-btnrow">
                 <AskZyraButton
                   compact
                   command={issueCount > 0 ? 'explain' : 'ai status'}
@@ -349,8 +351,8 @@ export function HealthPage() {
             </div>
             <HealthRing healthy={healthy} total={serviceCount} attentionCount={issueCount} />
           </div>
-        </GlassPanel>
-
+        </section>
+      <div className="page-grid">
         <HomeFleetSnapshot
           serviceCount={serviceCount}
           publishedCount={publishedCount}
@@ -404,6 +406,7 @@ export function HealthPage() {
             <EmptyState icon={<HeartPulse size={22} />} title="All published apps are healthy" tone="ok" />
           )}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

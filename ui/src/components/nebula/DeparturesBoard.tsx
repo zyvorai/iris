@@ -98,11 +98,11 @@ export default function DeparturesRow({ app, favorite = false, onPublish, onHide
       <div className="dep-actions" onClick={(e) => e.stopPropagation()}>
         {unhealthy || !canOpen ? (
           <button type="button" className="dep-action-btn" title="Diagnose" onClick={() => openDiagnose(app.id)}>
-            <Stethoscope size={13} />
+            <Stethoscope size={16} strokeWidth={1.5} />
           </button>
         ) : (
           <button type="button" className="dep-action-btn" title="Open" onClick={() => void openApp(app)}>
-            <ExternalLink size={13} />
+            <ExternalLink size={16} strokeWidth={1.5} />
           </button>
         )}
         {!app.visibility.published && !publishHidden ? (

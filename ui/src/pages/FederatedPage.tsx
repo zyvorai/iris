@@ -88,6 +88,14 @@ export default function FederatedPage() {
         </GlassPanel>
       }
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Federation</p>
+            <h1 className="h-hero" style={{ maxWidth: '16ch' }}>Federated catalog</h1>
+            <p className="hs-lede">Merged apps from remote clusters — publish when write federation is enabled.</p>
+          </div>
+        </section>
       <div className="page-grid">
         {federated.data?.length ? (
           <ZyraAiPanel
@@ -114,9 +122,8 @@ export default function FederatedPage() {
           <div className="section-head-nebula">
             <GlyphTile tone="brand" icon={<Globe size={14} />} size="sm" />
             <div>
-              <p className="section-label">Federation</p>
-              <h2 className="section-title">Federated catalog</h2>
-              <p className="body-text">Merged apps from remote clusters — publish when write federation is enabled.</p>
+              <p className="hs-eyebrow">Remote clusters</p>
+              <h2 className="h-tile">Merged inventory</h2>
             </div>
             <span className="nebula-status-badge status-unknown">{federated.data?.length ?? 0} apps</span>
             <AskZyraButton compact command="federated insight" />
@@ -164,6 +171,7 @@ export default function FederatedPage() {
             })
           )}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

@@ -153,7 +153,7 @@ export default function AppGraphView({ graph, focusId, onNodeClick, compact, gal
           }
           const inner = (
             <>
-              <AppIcon icon={node.icon ?? 'app'} name={node.label} size="sm" />
+              <AppIcon icon={node.icon ?? 'app'} name={node.label} size="xs" />
               <strong>{node.label}</strong>
               <span className={`status-chip ${statusTone(node.status)}`}>{statusLabel(node.status)}</span>
               <span className="graph-node-ns">{node.namespace}</span>

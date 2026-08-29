@@ -58,7 +58,7 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 ## Quick Start
 
 ```bash
-git clone https://github.com/ssahani/hermes.git && cd hermes
+git clone https://github.com/zyvorai/hermes.git && cd hermes
 
 # Helm install (images are private — build/push your own, or use a registry
 # credential your Zyvor contact provides; the defaults in values.yaml won't
@@ -135,10 +135,10 @@ Hermes answers — without namespace archaeology.
 | **zeus-os** | Cloud / KubeVirt control plane |
 | **hermes** | Application layer for Kubernetes |
 | **forge** | AI infrastructure on Kubernetes |
-| **hypersdk / hyper2kvm** | Multi-cloud VM migration |
+| **transiva / h2kvm** | Multi-cloud VM migration |
 | **guestkit** | Offline VM migration assurance |
 | **packetwolf** | Kernel-native network intelligence |
-| **Aether** | Universal runtime portability |
+| **Axiom** | Universal runtime portability |
 | **Veyron** | KubeVirt VM command center |
 | **IronWolf** | Metal3 bare-metal automation |
 | **zyvor-fabric** | systemd-native private cloud |

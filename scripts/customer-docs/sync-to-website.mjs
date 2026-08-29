@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const CUSTOMER = resolve(ROOT, 'docs/customer')
-const SITE = resolve(process.argv[2] ?? resolve(ROOT, '../hypersdk-web'))
+const SITE = resolve(process.argv[2] ?? resolve(ROOT, '../zyvor-web'))
 const PRODUCT = process.env.CUSTOMER_DOCS_PRODUCT || 'Hermes'
 const SLUG = (process.env.CUSTOMER_DOCS_SLUG || PRODUCT).toLowerCase().replace(/\s+/g, '-')
 const PDF_PREFIX = process.env.CUSTOMER_DOCS_PDF_PREFIX || PRODUCT.replace(/\s+/g, '-')
@@ -14,7 +14,7 @@ const TARGET = join(SITE, `docs/${MANUAL_DIR}`)
 const PDF_TARGET = join(SITE, `static/downloads/${SLUG}-docs`)
 
 if (!existsSync(join(SITE, 'docusaurus.config.ts'))) {
-  console.error(`ERROR: ${SITE} is not hypersdk-web`)
+  console.error(`ERROR: ${SITE} is not zyvor-web`)
   process.exit(1)
 }
 
@@ -32,13 +32,13 @@ const REPO_ONLY = new RegExp(
     '(\\.\\./)+(handbook|guides|architecture|admin-guide|user-guide|getting-started|developer-guide|legal|client)/',
     `${SLUG}-customer-feature-guide`,
     'hypercluster-customer-feature-guide',
-    'hyper2kvm-customer-feature-guide',
+    'h2kvm-customer-feature-guide',
     'guestkit-customer-feature-guide',
     'ragnarok-customer-feature-guide',
-    'aether-customer-feature-guide',
+    'axiom-customer-feature-guide',
     'zyvor-fabric-customer-feature-guide',
     'hermes-customer-feature-guide',
-    'hypersdk-customer-feature-guide',
+    'transiva-customer-feature-guide',
     'DEPLOYMENT_GUIDE',
     'AIRGAP_INSTALL',
     'CLI_GUIDE',

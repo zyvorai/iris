@@ -10,3 +10,5 @@
 bin/
 dist/
 cmd/hermes-controller/hermes-controller
+/hermes-controller
+/hermes-server

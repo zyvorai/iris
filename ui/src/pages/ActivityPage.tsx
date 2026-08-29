@@ -124,6 +124,14 @@ export default function ActivityPage() {
       onRetry={() => void audit.refetch()}
       errorTitle="Could not load activity"
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Activity</p>
+            <h1 className="h-hero" style={{ maxWidth: '12ch' }}>Audit log</h1>
+            <p className="hs-lede">Launches, discovery, shares, and pins</p>
+          </div>
+        </section>
       <div className="page-grid">
         {audit.data ? (
           <ZyraAiPanel
@@ -143,9 +151,8 @@ export default function ActivityPage() {
           <div className="section-head-nebula">
             <GlyphTile tone="brand" icon={<Activity size={14} />} size="sm" />
             <div>
-              <p className="section-label">Activity</p>
-              <h2 className="section-title">Audit log</h2>
-              <p className="body-text">Launches, discovery, shares, and pins</p>
+              <p className="hs-eyebrow">Timeline</p>
+              <h2 className="h-tile">Recent events</h2>
             </div>
             <span className="nebula-status-badge status-unknown">{events.length} loaded</span>
             <AskZyraButton compact command="activity insight" />
@@ -256,6 +263,7 @@ export default function ActivityPage() {
             )}
           </GlassPanel>
         ) : null}
+      </div>
       </div>
     </PageFrame>
   )

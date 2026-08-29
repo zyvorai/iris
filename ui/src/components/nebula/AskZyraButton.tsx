@@ -21,7 +21,7 @@ export default function AskZyraButton({ command, compact, className = '' }: AskZ
       className={`${compact ? 'nebula-btn-compact' : ''} ${className}`.trim()}
       onClick={() => openSpotlight(command)}
     >
-      <Sparkles size={14} /> Ask Zyra
+      <Sparkles size={15} strokeWidth={1.5} /> Ask Zyra
     </Button>
   )
 }

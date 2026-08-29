@@ -1,13 +1,249 @@
 /*
- * Hermes design tokens — Apple-inspired palette (Zyvor Design System v2)
+ * Hermes design tokens — Apple / Zyvor Design System v2 (light-first)
+ * Mirrors zyvor-web --hs-* scale; legacy aliases keep existing CSS working.
  */
 :root {
+  color-scheme: light;
+
+  /* === Zyvor / Apple --hs-* === */
+  /* Single Apple blue accent — orange reserved for rare brand moments only */
+  --hs-accent: #0071e3;
+  --hs-accent-light: #0077ed;
+  --hs-accent-lighter: #2997ff;
+  --hs-accent-fill: #0071e3;
+  --hs-accent-deep: #0077ed;
+  --hs-accent-tint: #f5f5f7;
+  --hs-ink-fixed: #14161a;
+  --hs-deep: #101d2b;
+  --hs-deep-mint: #5be8a8;
+  --hs-bg: #ffffff;
+  --hs-bg-alt: #f5f5f7;
+  --hs-surface: #ffffff;
+  --hs-surface-2: #f5f5f7;
+  --hs-border: #d2d2d7;
+  --hs-border-accent: rgba(0, 113, 227, 0.2);
+  --hs-text-heading: #1d1d1f;
+  --hs-text-body: #1d1d1f;
+  --hs-text-muted: #6e6e73;
+  --hs-text-subtle: #86868b;
+  --hs-text-white: #f8fafc;
+  --hs-ok: #0f7b4f;
+  --hs-ok-tint: #eaf6ef;
+  --hs-warn: #8a5a00;
+  --hs-warn-tint: #fff6e6;
+  --hs-err: #b3261e;
+  --hs-err-tint: #fdecea;
+  --hs-success: #0f7b4f;
+  --hs-error: #b3261e;
+  --hs-warning: #b45309;
+  --hs-info: #0e7490;
+  --hs-gradient-primary: #0071e3;
+  --hs-nav-h: 44px;
+  --hs-subnav-h: 52px;
+  --hs-max-width: 1180px;
+  --hs-gutter: 22px;
+  --hs-radius-sm: 6px;
+  --hs-radius-md: 12px;
+  --hs-radius: 16px;
+  --hs-radius-lg: 20px;
+  --hs-radius-xl: 24px;
+  --hs-radius-pill: 100px;
+  --hs-s1: 4px;
+  --hs-s2: 8px;
+  --hs-s3: 12px;
+  --hs-s4: 16px;
+  --hs-s5: 22px;
+  --hs-s6: 32px;
+  --hs-s7: 44px;
+  --hs-s8: 64px;
+  --hs-s9: 88px;
+  --hs-s10: 120px;
+  --hs-e1: 0 1px 2px rgba(20, 22, 26, 0.06);
+  --hs-e2: 0 6px 20px rgba(20, 22, 26, 0.08);
+  --hs-e3: 0 18px 48px rgba(20, 22, 26, 0.14);
+  --hs-fast: 0.16s;
+  --hs-base: 0.24s;
+  --hs-slow: 0.9s;
+  --hs-font-mono: 'Azeret Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --hs-section-padding: 64px 0;
+
+  /* Legacy Departures aliases → light Apple surfaces */
+  --void: var(--hs-bg);
+  --board: var(--hs-surface);
+  --board-2: var(--hs-bg-alt);
+  --board-3: var(--hs-surface-2);
+  --edge: var(--hs-border);
+  --edge-2: #eceef1;
+  --chalk: var(--hs-text-heading);
+  --chalk-2: #3b434f;
+  --slate: var(--hs-text-muted);
+  --slate-2: var(--hs-text-subtle);
+  --sodium: #0071e3;
+  --sodium-deep: #0077ed;
+  --relay: #0071e3;
+  --relay-ink: #ffffff;
+  --go: var(--hs-ok);
+  --go-bg: var(--hs-ok-tint);
+  --hold: var(--hs-warn);
+  --hold-bg: var(--hs-warn-tint);
+  --stop: var(--hs-err);
+  --stop-bg: var(--hs-err-tint);
+
+  --bg-root: var(--hs-bg);
+  --bg-elevated: var(--hs-bg-alt);
+  --bg-panel: rgba(255, 255, 255, 0.92);
+  --bg-panel-strong: rgba(255, 255, 255, 0.98);
+  --bg-chip: rgba(20, 22, 26, 0.045);
+
+  --border-soft: var(--hs-border);
+  --border-strong: var(--hs-border-accent);
+  --border-muted: rgba(20, 22, 26, 0.07);
+
+  --text-primary: var(--hs-text-heading);
+  --text-secondary: var(--hs-text-muted);
+  --text-muted: var(--hs-text-muted);
+  --text-faint: var(--hs-text-subtle);
+
+  --axiom-primary: var(--hs-accent);
+  --axiom-primary-deep: var(--hs-accent-deep);
+  --axiom-ai: var(--relay);
+  --accent-blue: var(--relay);
+  --accent-blue-deep: #0077ed;
+  --accent-cyan: #0284c7;
+  --accent-orange: var(--hs-accent);
+  --accent-red: var(--hs-err);
+  --accent-green: var(--hs-ok);
+  --accent-yellow: var(--hs-warn);
+  --accent-purple: #9333ea;
+
+  --radius-xl: var(--hs-radius-xl);
+  --radius-lg: var(--hs-radius-lg);
+  --radius-md: var(--hs-radius-md);
+  --radius-sm: var(--hs-radius-sm);
+  --radius-pill: var(--hs-radius-pill);
+
+  --shadow-panel: var(--hs-e2);
+  --shadow-glow-blue: 0 0 0 1px rgba(0, 113, 227, 0.2), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-orange: 0 0 0 1px rgba(204, 66, 10, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+  --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
+
+  --tone-ok-tint: var(--go-bg);
+  --tone-warn-tint: var(--hold-bg);
+  --tone-err-tint: var(--stop-bg);
+  --tone-info-tint: #e8f1fc;
+
+  --font-display: 'Archivo Variable', 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
+  --font-mono: var(--hs-font-mono);
+
+  --panel-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 246, 248, 0.99) 100%);
+  --panel-surface-strong: linear-gradient(165deg, #ffffff 0%, #f5f6f8 100%);
+  --panel-surface-ai: linear-gradient(165deg, rgba(255, 241, 233, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
+  --hero-overlay: linear-gradient(180deg, rgba(20, 22, 26, 0.03), transparent);
+  --overlay-faint: rgba(20, 22, 26, 0.025);
+  --overlay-soft: rgba(20, 22, 26, 0.035);
+  --overlay-chip: rgba(20, 22, 26, 0.045);
+  --overlay-med: rgba(20, 22, 26, 0.06);
+  --overlay-strong: rgba(20, 22, 26, 0.09);
+  --ring-track: rgba(20, 22, 26, 0.08);
+  --chrome-45: rgba(255, 255, 255, 0.72);
+  --chrome-55: rgba(255, 255, 255, 0.82);
+  --chrome-65: rgba(255, 255, 255, 0.9);
+  --chrome-72: #ffffff;
+  --dropdown-bg: rgba(255, 255, 255, 0.98);
+  --dropdown-shadow: var(--hs-e3);
+  --skeleton-gradient: linear-gradient(
+    90deg,
+    rgba(226, 230, 235, 0.7) 0%,
+    rgba(238, 240, 243, 0.9) 50%,
+    rgba(226, 230, 235, 0.7) 100%
+  );
+  --scrollbar-thumb: #cbd1d9;
+  --scrollbar-thumb-hover: #aab2bd;
+
+  --hermes-bg: var(--bg-root);
+  --hermes-surface: var(--bg-panel);
+  --hermes-text: var(--text-primary);
+  --hermes-muted: var(--text-muted);
+  --hermes-border: var(--border-soft);
+  --hermes-accent: var(--axiom-primary);
+  --hermes-accent-soft: rgba(204, 66, 10, 0.1);
+  --hermes-green: var(--accent-green);
+  --hermes-amber: var(--accent-yellow);
+  --hermes-red: var(--accent-red);
+  --hermes-glass-blur: 20px;
+  --hermes-glass-chrome-blur: 20px;
+  --hermes-glass-card-blur: 20px;
+  --hermes-glass-popover-blur: 20px;
+  --hermes-glass-chrome-bg: rgba(255, 255, 255, 0.72);
+
+  --zeus-bg-base: var(--bg-root);
+  --zeus-bg-slate: var(--bg-elevated);
+  --zeus-primary: var(--axiom-primary);
+  --zeus-primary-soft: rgba(204, 66, 10, 0.14);
+  --zeus-primary-border: var(--border-strong);
+  --zeus-success: var(--accent-green);
+  --zeus-warning: var(--accent-yellow);
+  --zeus-danger: var(--accent-red);
+  --zeus-info: #0284c7;
+  --zeus-violet: var(--accent-purple);
+  --zeus-text: var(--text-primary);
+  --zeus-text-muted: var(--text-secondary);
+  --zeus-text-faint: var(--text-muted);
+  --zeus-border: var(--border-soft);
+  --zeus-border-strong: var(--border-strong);
+  --zeus-glass-blur: var(--hermes-glass-blur);
+  --zeus-glass-chrome-blur: var(--hermes-glass-chrome-blur);
+  --zeus-glass-card-blur: var(--hermes-glass-card-blur);
+  --zeus-glass-popover-blur: var(--hermes-glass-popover-blur);
+  --zeus-glass-chrome-bg: var(--hermes-glass-chrome-bg);
+  --zeus-radius-panel: 1rem;
+  --zeus-radius-window: 1.25rem;
+
+  --z-bg: var(--zeus-bg-base);
+  --z-orange: var(--zeus-primary);
+  --z-orange-soft: var(--zeus-primary-soft);
+  --z-green: var(--zeus-success);
+  --z-yellow: var(--zeus-warning);
+  --z-red: var(--zeus-danger);
+  --z-blue: var(--zeus-info);
+  --z-purple: var(--zeus-violet);
+  --z-text: var(--text-primary);
+  --z-text-muted: var(--text-secondary);
+  --z-text-faint: var(--text-muted);
+  --z-border: var(--border-soft);
+  --z-border-strong: var(--zeus-border-strong);
+}
+
+/* Dark personality — carbon / Apple dark gnav */
+html[data-theme='dark'] {
   color-scheme: dark;
 
-  /* Departures Hall palette — matches the reference mockup exactly: sodium
-     amber is both the brand accent and the "hold/degraded" status colour
-     (the mockup couples them deliberately), status is otherwise the only
-     signal allowed to carry colour. */
+  --hs-bg: #050505;
+  --hs-bg-alt: #0a0a0a;
+  --hs-surface: #111114;
+  --hs-surface-2: #1a1a1e;
+  --hs-border: rgba(255, 255, 255, 0.1);
+  --hs-border-accent: rgba(240, 88, 58, 0.28);
+  --hs-text-heading: #f5f5f7;
+  --hs-text-body: #f5f5f7;
+  --hs-text-muted: #a1a1a6;
+  --hs-text-subtle: #86868b;
+  --hs-accent: #f0583a;
+  --hs-accent-fill: #ff5a15;
+  --hs-accent-deep: #ea580c;
+  --hs-accent-tint: rgba(240, 88, 58, 0.12);
+  --hs-ok: #37d399;
+  --hs-ok-tint: rgba(55, 211, 153, 0.12);
+  --hs-warn: #f5a524;
+  --hs-warn-tint: rgba(245, 165, 36, 0.12);
+  --hs-err: #f2606e;
+  --hs-err-tint: rgba(242, 96, 110, 0.12);
+  --hs-e1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --hs-e2: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --hs-e3: 0 18px 48px rgba(0, 0, 0, 0.55);
+
   --void: #0a0d13;
   --board: #111722;
   --board-2: #161d2a;
@@ -21,16 +257,13 @@
   --sodium: #f5a524;
   --sodium-deep: #c9860e;
   --relay: #7c8cff;
-  --relay-ink: #ffffff;
-  --go: #37d399;
-  --go-bg: rgba(55, 211, 153, 0.12);
-  --hold: #f5a524;
-  --hold-bg: rgba(245, 165, 36, 0.12);
-  --stop: #f2606e;
-  --stop-bg: rgba(242, 96, 110, 0.12);
+  --go: var(--hs-ok);
+  --go-bg: var(--hs-ok-tint);
+  --hold: var(--hs-warn);
+  --hold-bg: var(--hs-warn-tint);
+  --stop: var(--hs-err);
+  --stop-bg: var(--hs-err-tint);
 
-  /* Base surfaces — repointed to the palette above; every legacy alias below
-     inherits automatically. */
   --bg-root: var(--void);
   --bg-elevated: var(--board);
   --bg-panel: rgba(11, 15, 20, 0.82);
@@ -46,10 +279,9 @@
   --text-muted: #aeb9c8;
   --text-faint: #9fb3c8;
 
-  /* Brand */
-  --aether-primary: var(--sodium);
-  --aether-primary-deep: var(--sodium-deep);
-  --aether-ai: var(--relay);
+  --axiom-primary: var(--sodium);
+  --axiom-primary-deep: var(--sodium-deep);
+  --axiom-ai: var(--relay);
   --accent-blue: var(--relay);
   --accent-blue-deep: #5a68d6;
   --accent-cyan: #7dd3fc;
@@ -59,32 +291,13 @@
   --accent-yellow: var(--hold);
   --accent-purple: #c084fc;
 
-  --radius-xl: 28px;
-  --radius-lg: 20px;
-  --radius-md: 12px;
-  --radius-sm: 6px;
-  --radius-pill: 999px;
-
-  --shadow-panel:
-    0 16px 50px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.20), 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-panel: 0 16px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-glow-blue: 0 0 0 1px rgba(125, 211, 252, 0.2), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-orange: 0 0 0 1px rgba(245, 165, 36, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-red: 0 0 0 1px rgba(248, 113, 113, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-glow-green: 0 0 0 1px rgba(52, 211, 153, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 
-  /* Semantic tint pairs — status banners/badges, distinct from the solid --accent-* colors */
-  --tone-ok-tint: var(--go-bg);
-  --tone-warn-tint: var(--hold-bg);
-  --tone-err-tint: var(--stop-bg);
-  --tone-info-tint: rgba(124, 140, 255, 0.12);
-
-  --font-display: 'Archivo Variable', 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
-  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  /* Chrome surfaces — panel gradients, overlays, dropdowns (themed) */
-  --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.90) 0%, rgba(10, 10, 10, 0.94) 100%);
+  --panel-surface: linear-gradient(165deg, rgba(18, 22, 28, 0.9) 0%, rgba(10, 10, 10, 0.94) 100%);
   --panel-surface-strong: linear-gradient(165deg, rgba(18, 22, 28, 0.92) 0%, rgba(10, 10, 10, 0.96) 100%);
   --panel-surface-ai: linear-gradient(165deg, rgba(42, 24, 16, 0.92) 0%, rgba(10, 10, 10, 0.94) 100%);
   --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.12));
@@ -109,176 +322,55 @@
   --scrollbar-thumb: #2a2f36;
   --scrollbar-thumb-hover: #3d434c;
 
-  /* Bridge to existing zeus/hermes tokens */
-  --hermes-bg: var(--bg-root);
   --hermes-surface: rgba(11, 15, 20, 0.72);
-  --hermes-text: var(--text-primary);
-  --hermes-muted: var(--text-muted);
-  --hermes-border: var(--border-soft);
-  --hermes-accent: var(--aether-primary);
   --hermes-accent-soft: rgba(245, 165, 36, 0.12);
-  --hermes-green: var(--accent-green);
-  --hermes-amber: var(--accent-yellow);
-  --hermes-red: var(--accent-red);
-  --hermes-glass-blur: 40px;
-  --hermes-glass-chrome-blur: 24px;
-  --hermes-glass-card-blur: 40px;
-  --hermes-glass-popover-blur: 20px;
   --hermes-glass-chrome-bg: rgba(10, 10, 10, 0.88);
-
-  --zeus-bg-base: var(--bg-root);
   --zeus-bg-slate: var(--bg-elevated);
-  --zeus-primary: var(--aether-primary);
   --zeus-primary-soft: rgba(245, 165, 36, 0.18);
   --zeus-primary-border: rgba(245, 165, 36, 0.35);
-  --zeus-success: var(--accent-green);
-  --zeus-warning: var(--accent-yellow);
-  --zeus-danger: var(--accent-red);
   --zeus-info: #7dd3fc;
-  --zeus-violet: var(--accent-purple);
-  --zeus-text: var(--text-primary);
-  --zeus-text-muted: var(--text-secondary);
-  --zeus-text-faint: var(--text-muted);
   --zeus-border: rgba(255, 255, 255, 0.09);
   --zeus-border-strong: rgba(255, 255, 255, 0.14);
-  --zeus-glass-blur: var(--hermes-glass-blur);
-  --zeus-glass-chrome-blur: var(--hermes-glass-chrome-blur);
-  --zeus-glass-card-blur: var(--hermes-glass-card-blur);
-  --zeus-glass-popover-blur: var(--hermes-glass-popover-blur);
-  --zeus-glass-chrome-bg: var(--hermes-glass-chrome-bg);
-  --zeus-radius-panel: 1.25rem;
-  --zeus-radius-window: 1.75rem;
-
-  --z-bg: var(--zeus-bg-base);
-  --z-orange: var(--zeus-primary);
-  --z-orange-soft: var(--zeus-primary-soft);
-  --z-green: var(--zeus-success);
-  --z-yellow: var(--zeus-warning);
-  --z-red: var(--zeus-danger);
-  --z-blue: var(--zeus-info);
-  --z-purple: var(--zeus-violet);
-  --z-text: var(--text-primary);
-  --z-text-muted: var(--text-secondary);
-  --z-text-faint: var(--text-muted);
-  --z-border: var(--border-soft);
-  --z-border-strong: var(--zeus-border-strong);
 }
 
-/*
- * Light theme — Zyvor Design System v2 "lite" palette
- * (soft neutral surfaces, saturated ink, restrained orange accent).
- */
-:root[data-theme='hall'] {
-  color-scheme: light;
-
-  /* Departures Hall palette — "hall" (light) variant */
-  --void: #edebe4;
-  --board: #ffffff;
-  --board-2: #f6f5f0;
-  --board-3: #edebe3;
-  --edge: #dcd9ce;
-  --edge-2: #e6e3d9;
-  --chalk: #15181d;
-  --chalk-2: #3b434f;
-  --slate: #6d7789;
-  --slate-2: #8a93a2;
-  --sodium: #b36a00;
-  --sodium-deep: #92400e;
-  --relay: #3b4fd8;
-  --go: #0f8a5f;
-  --go-bg: rgba(15, 138, 95, 0.10);
-  --hold: #9a6206;
-  --hold-bg: rgba(154, 98, 6, 0.10);
-  --stop: #c0392e;
-  --stop-bg: rgba(192, 57, 46, 0.10);
-
-  --bg-root: var(--void);
-  --bg-elevated: var(--board-2);
-  --bg-panel: rgba(255, 255, 255, 0.86);
-  --bg-panel-strong: rgba(255, 255, 255, 0.96);
-  --bg-chip: rgba(20, 22, 26, 0.045);
-
-  --border-soft: var(--edge);
-  --border-strong: rgba(179, 106, 0, 0.24);
-  --border-muted: rgba(20, 22, 26, 0.07);
-
-  --text-primary: var(--chalk);
-  --text-secondary: var(--slate);
-  --text-muted: #6e7684;
-  --text-faint: #9aa2ac;
-
-  --aether-primary: var(--sodium);
-  --aether-primary-deep: var(--sodium-deep);
-  --aether-ai: var(--relay);
-  --accent-blue: var(--relay);
-  --accent-blue-deep: #3a49c2;
-  --accent-cyan: #0284c7;
-  --accent-orange: var(--sodium);
-  --accent-red: var(--stop);
-  --accent-green: var(--go);
-  --accent-yellow: var(--hold);
-  --accent-purple: #9333ea;
-
-  --shadow-panel:
-    0 8px 24px rgba(20, 22, 26, 0.08),
-    0 2px 6px rgba(20, 22, 26, 0.04);
-  --shadow-glow-blue: 0 0 0 1px rgba(76, 95, 224, 0.20), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-orange: 0 0 0 1px rgba(179, 106, 0, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-red: 0 0 0 1px rgba(179, 38, 30, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
-  --shadow-glow-green: 0 0 0 1px rgba(15, 123, 79, 0.22), 0 8px 20px rgba(20, 22, 26, 0.06);
-
-  --tone-ok-tint: var(--go-bg);
-  --tone-warn-tint: var(--hold-bg);
-  --tone-err-tint: var(--stop-bg);
-  --tone-info-tint: #e8eaff;
-
-  --panel-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 246, 248, 0.98) 100%);
-  --panel-surface-strong: linear-gradient(165deg, #ffffff 0%, #f5f6f8 100%);
-  --panel-surface-ai: linear-gradient(165deg, rgba(255, 241, 233, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
-  --hero-overlay: linear-gradient(180deg, rgba(20, 22, 26, 0.05), rgba(20, 22, 26, 0.015));
-  --overlay-faint: rgba(20, 22, 26, 0.025);
-  --overlay-soft: rgba(20, 22, 26, 0.035);
-  --overlay-chip: rgba(20, 22, 26, 0.045);
-  --overlay-med: rgba(20, 22, 26, 0.06);
-  --overlay-strong: rgba(20, 22, 26, 0.09);
-  --ring-track: rgba(20, 22, 26, 0.08);
-  --chrome-45: rgba(255, 255, 255, 0.72);
-  --chrome-55: rgba(255, 255, 255, 0.82);
-  --chrome-65: rgba(255, 255, 255, 0.9);
-  --chrome-72: #ffffff;
-  --dropdown-bg: #ffffff;
-  --dropdown-shadow: 0 16px 40px rgba(20, 22, 26, 0.14), 0 4px 12px rgba(20, 22, 26, 0.06);
-  --skeleton-gradient: linear-gradient(
-    90deg,
-    rgba(226, 230, 235, 0.7) 0%,
-    rgba(238, 240, 243, 0.9) 50%,
-    rgba(226, 230, 235, 0.7) 100%
-  );
-  --scrollbar-thumb: #cbd1d9;
-  --scrollbar-thumb-hover: #aab2bd;
-
-  /* Bridge tokens — surfaces/borders some legacy components still read directly */
-  --hermes-surface: var(--bg-panel);
-  --hermes-accent-soft: rgba(179, 106, 0, 0.10);
-  --hermes-glass-chrome-bg: var(--dropdown-bg);
-  --zeus-bg-slate: var(--bg-elevated);
-  --zeus-primary-soft: rgba(179, 106, 0, 0.14);
-  --zeus-primary-border: var(--border-strong);
-  --zeus-info: #0284c7;
-  --zeus-border: var(--border-soft);
-  --zeus-border-strong: var(--border-strong);
+/* Compat: old hall/board attrs map to light/dark */
+html[data-theme='light'] {
+  /* light is already default; keep attr harmless */
+}
+:root[data-theme='board'] {
+  /* prefer html[data-theme=dark]; this mirrors if set on :root */
 }
 
-:root[data-theme='hall'] .page-title {
-  background: linear-gradient(90deg, #14161a 0%, #3f4650 45%, #6e7684 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.h-hero {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--hs-text-heading);
+  margin: 0;
 }
 
-/* Widened variable-font headline treatment — the Archivo Variable file
-   already declares the font-stretch axis this varies; applied alongside
-   (not instead of) .page-title's gradient-clip text. */
+.h-sec {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--hs-text-heading);
+  margin: 0;
+}
+
+.h-tile {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--hs-text-heading);
+  margin: 0;
+}
+
 .sign {
   font-family: var(--font-display);
   font-variation-settings: 'wdth' 112;
@@ -287,23 +379,25 @@
 }
 
 .page-kicker {
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--aether-primary);
-  font-weight: 600;
+  color: var(--hs-text-subtle);
+  font-weight: 500;
+  margin: 0 0 0.5rem;
 }
 
 .page-title {
+  font-family: var(--font-display);
   font-size: clamp(28px, 3.5vw, 48px);
   line-height: 1.08;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
-  letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #fff 0%, #e2e8f0 45%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.035em;
+  color: var(--hs-text-heading);
+  background: none;
+  -webkit-text-fill-color: unset;
 }
 
 .section-title {
@@ -315,16 +409,17 @@
 }
 
 .section-label {
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--aether-primary);
+  color: var(--hs-text-subtle);
   margin: 0 0 0.35rem;
 }
 
 .body-text {
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--hs-text-muted);
 }

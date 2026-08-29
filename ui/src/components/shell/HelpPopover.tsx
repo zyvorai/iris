@@ -12,7 +12,7 @@ interface HelpPopoverProps {
 const resources = [
   { label: 'Help center', href: '/help', icon: BookOpen, internal: true },
   { label: 'Catalog API', href: '/api/v1/catalog', icon: BookOpen, internal: false },
-  { label: 'GitHub docs', href: 'https://github.com/ssahani/hermes', icon: BookOpen, internal: false },
+  { label: 'GitHub docs', href: 'https://github.com/zyvorai/hermes', icon: BookOpen, internal: false },
 ]
 
 export default function HelpPopover({ onOpenShortcuts }: HelpPopoverProps) {

@@ -37,7 +37,7 @@ This is the customer-facing onboarding guide — how to access the product, your
 **Your first workflows**
 
 - **Install and open Hermes**
-  1. Install the chart: `helm install hermes oci://ghcr.io/hypersdk/charts/hermes --version 0.2.0 --namespace hermes-system --create-namespace`.
+  1. Install the chart: `helm install hermes oci://ghcr.io/zyvorai/charts/hermes --version 0.2.0 --namespace hermes-system --create-namespace`.
   1. Wait for rollout: `kubectl -n hermes-system rollout status deployment/hermes`.
   1. Open the Nebula UI at `http://:31847` — discovery starts automatically across every namespace.
 - **Review the discovery queue and publish an app**
@@ -59,7 +59,7 @@ This is the customer-facing onboarding guide — how to access the product, your
   1. Read the route lens, friendly probe summary (expand for raw detail), suggested kubectl commands, and Zyra AI remediation narrative (`GET /api/v1/apps/{id}/diagnosis` + `/insight`).
 - **Enable Zyra AI natural-language mode**
   1. Create the LLM secret: `kubectl create secret generic hermes-llm --from-literal=apiKey="sk-..." -n hermes-system`.
-  1. Upgrade with LLM settings: `helm upgrade hermes oci://ghcr.io/hypersdk/charts/hermes --reuse-values --set server.llm.apiUrl="https://api.openai.com/v1" --set server.llm.existingSecret="hermes-llm" --set server.llm.model="gpt-4o-mini" -n hermes-system`.
+  1. Upgrade with LLM settings: `helm upgrade hermes oci://ghcr.io/zyvorai/charts/hermes --reuse-values --set server.llm.apiUrl="https://api.openai.com/v1" --set server.llm.existingSecret="hermes-llm" --set server.llm.model="gpt-4o-mini" -n hermes-system`.
   1. Confirm the active mode: `GET /api/v1/insights/status` (or Spotlight `ai status`) should report `defaultSource: llm`.
 
 ## 1. Continuous Discovery
@@ -243,7 +243,7 @@ _Time-limited share links, a full audit trail, and personal launch memory._
 _Ship Hermes with a Helm chart, monitor it with Prometheus, and run it on a lean stack._
 
 - **Helm Chart Install** — One helm install deploys the Go controller and Rust server, published as an OCI Helm chart. — _Stand up the whole application layer in a single command._
-  - **How:** `helm install hermes oci://ghcr.io/hypersdk/charts/hermes --version 0.2.0 --namespace hermes-system --create-namespace`.
+  - **How:** `helm install hermes oci://ghcr.io/zyvorai/charts/hermes --version 0.2.0 --namespace hermes-system --create-namespace`.
 - **Prometheus Metrics** — Exposes a /metrics endpoint with app totals, audit counters, and uptime, plus a /api/v1/stats summary. — _Wire Hermes straight into your existing monitoring._
   - **How:** Scrape `GET /metrics` (`hermes_apps_total`, audit counters, uptime); catalog summary at `GET /api/v1/stats`.
 - **Lightweight SQLite Catalog** — Controller and server share a single SQLite catalog on a PVC — no external database to run. — _Minimal moving parts and dependencies to operate._

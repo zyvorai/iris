@@ -108,15 +108,12 @@ export function loadTheme(): HermesTheme {
   } catch {
     /* ignore */
   }
-  return 'dark'
+  return 'light'
 }
 
-/** DOM attribute value for a given theme — 'board' (dark) / 'hall' (light),
- * matching the departures-hall CSS selectors. The stored/JS-facing
- * HermesTheme type stays 'dark'|'light' so existing persisted preferences
- * and the navbar's sun/moon toggle logic don't need to change. */
-function themeAttr(theme: HermesTheme): 'board' | 'hall' {
-  return theme === 'light' ? 'hall' : 'board'
+/** DOM attribute — apple.com / zyvor-web style: light default, dark opt-in. */
+function themeAttr(theme: HermesTheme): 'light' | 'dark' {
+  return theme === 'dark' ? 'dark' : 'light'
 }
 
 export function saveTheme(theme: HermesTheme) {

@@ -34,7 +34,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`
 - Command palette pending row while search / AI / intent queries load
 - Playwright smoke tests: health attention queue, discovery page, diagnose drawer, mobile toolbar overflow
-- **Nebula UX overhaul** — unified Liquid Glass design system (`nebula-tokens`, `nebula-layout`, `nebula-components`, `aether-bridge`)
+- **Nebula UX overhaul** — unified Liquid Glass design system (`nebula-tokens`, `nebula-layout`, `nebula-components`, `axiom-bridge`)
 - Shared page primitives: `PageFrame`, `PageLoading`, `PageLoadError`, `EmptyState`, `ContextBanner`, `PageToolbar`
 - `HomeFleetSnapshot` — 3-metric home strip (Discovered, Published, Needs attention)
 - `serviceActions.ts` — shared Open/Diagnose/Publish/copy menu for `AppCard` and `ServiceCard`
@@ -44,9 +44,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Compact workspace switcher dropdown below 900px viewport
 - Playwright smoke tests for skeleton loading, catalog/cluster toolbars, mobile layout
 - [docs/ui.md](docs/ui.md) — UI architecture and development guide
-- Aether-style two-row top navbar replacing the three-panel left-rail shell
+- Axiom-style two-row top navbar replacing the three-panel left-rail shell
 - `HermesNavbar` component with health chip, spotlight, refresh, help dropdown, and mobile drawer
-- Blue primary color scheme (`#3B82F6`) aligned with Aether design language
+- Blue primary color scheme (`#3B82F6`) aligned with Axiom design language
 - Glass-morphism body background with blue/purple radial gradients
 - GitHub Actions CI workflow (Rust, Go, UI, Helm lint)
 - Network policy Helm template to restrict pod-to-pod traffic
@@ -76,7 +76,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - Deleted unused Zeus shell components (`ZeusDock`, `ZeusLeftRail`, `ZeusTopBar`, `MissionControlStrip`, orphaned home sections)
-- Trimmed `index.css` Zeus rail/dock blocks and legacy `.btn` bridge rules in `aether-bridge.css`
+- Trimmed `index.css` Zeus rail/dock blocks and legacy `.btn` bridge rules in `axiom-bridge.css`
 - Help page wrapped in `PageFrame` for consistent page shell
 - Home, Catalog, Cluster, Health, Spaces, Discovery, Graph, Activity, Help, and App detail migrated to Nebula components
 - `AppCard` / `AttentionQueue` use `GlassPanel` + primary action + overflow menu (max two visible actions)

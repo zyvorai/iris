@@ -43,7 +43,7 @@ export default function ActionMenu({ items, label = 'More actions', className = 
         aria-label={label}
         onClick={() => setOpen((v) => !v)}
       >
-        <MoreHorizontal size={14} />
+        <MoreHorizontal size={16} strokeWidth={1.5} />
       </button>
       {open ? (
         <div className="action-menu-dropdown" role="menu">

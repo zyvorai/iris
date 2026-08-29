@@ -15,18 +15,15 @@ export function healthTier(pct: number): HealthTier {
 export function healthTierLabel(tier: HealthTier): string {
   switch (tier) {
     case 'excellent':
-      return 'EXCELLENT'
+      return 'Excellent'
     case 'stable':
-      return 'STABLE'
+      return 'Stable'
     case 'warning':
-      return 'WARNING'
+      return 'Needs attention'
     case 'critical':
-      return 'CRITICAL'
+      return 'Critical'
   }
 }
-
-const R = 84
-const C = 2 * Math.PI * R
 
 interface HealthRingProps {
   healthy: number
@@ -34,46 +31,25 @@ interface HealthRingProps {
   attentionCount?: number
 }
 
+/** Compact proof — typography only. */
 export default function HealthRing({ healthy, total, attentionCount = 0 }: HealthRingProps) {
   const pct = total > 0 ? Math.round((healthy / total) * 100) : 100
   const tier = healthTier(pct)
-  const offset = C - (pct / 100) * C
   const needsAttention = attentionCount > 0 ? attentionCount : total - healthy
   const animatedPct = Math.round(useCountUp(pct, 900))
 
   return (
-    <div className="health-ring-wrap">
-      <div
-        className={`health-ring tone-${tier}`}
-        data-testid="cluster-health-orb"
-        aria-label={`Cluster health ${pct} percent, ${healthTierLabel(tier)}`}
-      >
-        <svg className="health-ring-ring" viewBox="0 0 190 190" aria-hidden>
-          <circle className="health-ring-track" cx="95" cy="95" r={R} />
-          <circle
-            className="health-ring-progress"
-            cx="95"
-            cy="95"
-            r={R}
-            strokeDasharray={C}
-            strokeDashoffset={offset}
-          />
-        </svg>
-        <div className="health-ring-core">
-          <span className="health-ring-label">{healthTierLabel(tier)}</span>
-          <strong className="health-ring-pct">{animatedPct}%</strong>
-          <span className="health-ring-subtitle">cluster health</span>
-        </div>
-      </div>
-      <p className="health-ring-stats">
+    <div
+      className={`hs-proof tone-${tier}`}
+      data-testid="cluster-health-orb"
+      aria-label={`Cluster health ${pct} percent, ${healthTierLabel(tier)}`}
+    >
+      <strong className="hs-proof-value">{animatedPct}%</strong>
+      <span className="hs-proof-label">{healthTierLabel(tier)}</span>
+      <span className="hs-proof-sub">
         {healthy}/{total} healthy
-        {needsAttention > 0 ? (
-          <>
-            <br />
-            {needsAttention} require attention
-          </>
-        ) : null}
-      </p>
+        {needsAttention > 0 ? ` · ${needsAttention} need attention` : ''}
+      </span>
     </div>
   )
 }

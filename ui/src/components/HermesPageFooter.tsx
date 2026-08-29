@@ -2,7 +2,6 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import { Link } from 'react-router-dom'
-import { BookOpen, Keyboard, LifeBuoy } from 'lucide-react'
 
 interface HermesPageFooterProps {
   onOpenShortcuts?: () => void
@@ -10,24 +9,19 @@ interface HermesPageFooterProps {
 
 export default function HermesPageFooter({ onOpenShortcuts }: HermesPageFooterProps) {
   return (
-    <div className="hermes-page-footer">
+    <footer className="hermes-page-footer">
       <nav className="hermes-help-strip" aria-label="Help and resources">
         <Link to="/help" className="hermes-help-link">
-          <LifeBuoy size={13} />
           Help
         </Link>
         <button type="button" className="hermes-help-link" onClick={onOpenShortcuts}>
-          <Keyboard size={13} />
           Shortcuts
         </button>
-        <a href="https://github.com/ssahani/hermes" target="_blank" rel="noopener noreferrer" className="hermes-help-link">
-          <BookOpen size={13} />
+        <a href="https://github.com/zyvorai/hermes" target="_blank" rel="noopener noreferrer" className="hermes-help-link">
           Docs
         </a>
-        <a href="/api/v1/catalog" className="hermes-help-link">
-          API
-        </a>
       </nav>
-    </div>
+      <p className="hermes-product-line">Hermes · ZyvorAI Labs</p>
+    </footer>
   )
 }

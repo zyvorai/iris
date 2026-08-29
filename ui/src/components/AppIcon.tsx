@@ -7,7 +7,8 @@ import { accentColorFor } from '../utils/iconColor'
 interface AppIconProps {
   icon: string
   name: string
-  size?: 'sm' | 'md'
+  /** xs = dense lists / palette · sm = board rows · md = tiles / hero */
+  size?: 'xs' | 'sm' | 'md'
 }
 
 const labels: Record<string, string> = {
@@ -39,8 +40,8 @@ const labels: Record<string, string> = {
 export default function AppIcon({ icon, name, size = 'md' }: AppIconProps) {
   const key = icon && icon !== 'app' ? icon : 'app'
   const label = labels[key] ?? name.slice(0, 2).toUpperCase()
-  const { gradient, glow } = accentColorFor(name, key)
-  const style = { '--icon-bg': gradient, '--icon-glow': glow } as CSSProperties
+  const { accent } = accentColorFor(name, key)
+  const style = { '--icon-accent': accent } as CSSProperties
 
   return (
     <div className={`app-icon app-icon-${size}`} style={style} aria-hidden>

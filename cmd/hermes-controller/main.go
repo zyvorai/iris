@@ -18,8 +18,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 
-	"github.com/ssahani/hermes/controller/discovery"
-	"github.com/ssahani/hermes/controller/store"
+	"github.com/zyvorai/hermes/controller/discovery"
+	"github.com/zyvorai/hermes/controller/store"
 )
 
 func main() {

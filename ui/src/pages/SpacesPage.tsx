@@ -34,6 +34,16 @@ export default function SpacesPage() {
       onRetry={() => void catalog.refetch()}
       errorTitle="Could not load spaces"
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Spaces</p>
+            <h1 className="h-hero" style={{ maxWidth: '16ch' }}>Browse by category</h1>
+            <p className="hs-lede">
+              Mission Control shows all discovered services; spaces show published apps only.
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         {issueCount > 0 && (fleetInsight.data || fleetInsight.isLoading) ? (
           <ZyraAiPanel
@@ -51,11 +61,8 @@ export default function SpacesPage() {
           <div className="section-head-nebula">
             <GlyphTile tone="brand" icon={<Layers size={14} />} size="sm" />
             <div>
-              <p className="section-label">Spaces</p>
-              <h2 className="section-title">Browse by category</h2>
-              <p className="body-text">
-                Mission Control shows all discovered services; spaces show published apps only.
-              </p>
+              <p className="hs-eyebrow">Categories</p>
+              <h2 className="h-tile">Published spaces</h2>
             </div>
           </div>
           <div className="space-list" style={{ marginTop: '1rem', display: 'grid', gap: '0.75rem' }}>
@@ -90,6 +97,7 @@ export default function SpacesPage() {
           )}
         </GlassPanel>
       </div>
+      </div>
     </PageFrame>
   )
 }
@@ -115,14 +123,17 @@ export function SpaceDetailPage() {
       hasData={Boolean(catalog.data)}
       onRetry={() => void catalog.refetch()}
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">
+              <Link to="/spaces" className="section-link-nebula">← All spaces</Link>
+            </p>
+            <h1 className="h-hero" style={{ maxWidth: '16ch' }}>{space?.label ?? 'Space'}</h1>
+            <p className="hs-lede">{space?.description ?? 'Published apps in this space'}</p>
+          </div>
+        </section>
       <div className="page-grid">
-        <GlassPanel className="glass-panel-section">
-          <Link to="/spaces" className="section-link-nebula">
-            ← All spaces
-          </Link>
-          <h2 className="section-title" style={{ marginTop: '0.5rem' }}>{space?.label ?? 'Space'}</h2>
-          <p className="body-text">{space?.description ?? 'Published apps in this space'}</p>
-        </GlassPanel>
         <GlassPanel className="glass-panel-section" data-testid={`space-${spaceId}`}>
           <p className="section-label">{apps.length} published app{apps.length === 1 ? '' : 's'}</p>
           {apps.length ? (
@@ -135,6 +146,7 @@ export function SpaceDetailPage() {
             <EmptyState icon={<Layers size={22} />} title="No apps in this space" description="Publish apps that match this category to see them here." />
           )}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

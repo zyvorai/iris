@@ -3,7 +3,7 @@
 	test-remote-smoke test-remote-quick test-remote-all test-platform-remote
 
 VERSION ?= 0.2.0
-REGISTRY ?= ghcr.io/ssahani/hermes
+REGISTRY ?= ghcr.io/zyvorai/hermes
 DEPLOY_HOST ?= 212.8.252.194
 DEPLOY_USER ?= sus
 HERMES_HOST ?= $(DEPLOY_HOST)
@@ -42,7 +42,7 @@ test-remote-all:
 
 test-platform-remote:
 	chmod +x scripts/test-platform-remote.sh scripts/lib/resolve-zyvor-sibling.sh 2>/dev/null || true
-	@AETHER_TEST_TIERS=full HERMES_TEST_TIERS=full ./scripts/test-platform-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
+	@AXIOM_TEST_TIERS=full HERMES_TEST_TIERS=full ./scripts/test-platform-remote.sh $(DEPLOY_HOST) $(DEPLOY_USER)
 
 build: build-go build-rust build-ui
 

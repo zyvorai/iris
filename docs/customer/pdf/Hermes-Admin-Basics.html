@@ -24,7 +24,7 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 <section class="cover"><div class="kicker">ZyvorAI Labs · Customer Documentation</div>
 <h1>Her<span>mes</span></h1>
 <div class="sub">Admin Basics</div>
-<div class="badge">2026-07-26</div>
+<div class="badge">2026-08-29</div>
 <div class="foot">zyvor.dev · Confidential — for licensed customers</div></section>
 <main><h2>Ports / access</h2>
 <table>
@@ -44,7 +44,22 @@ hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
 </tr>
 </tbody></table>
 <h2>Auth</h2>
-<p>OIDC + API key.</p>
+<p>OIDC + API key. <code>server.auth.mode</code> defaults to <strong><code>none</code></strong> — no login required at all —
+<strong>set it to <code>api_key</code> or <code>oidc</code> before any internet-facing or production install.</strong></p>
+<pre><code class="language-bash">helm upgrade --install hermes charts/hermes -n hermes-system \
+  --set server.auth.mode=api_key --set server.auth.apiKey=&quot;a-real-key&quot;
+</code></pre>
+<h3>Session secret</h3>
+<p>Sessions are signed with <code>HERMES_SESSION_SECRET</code>. This is auto-generated (random, 64
+chars) by the chart on first install and preserved across upgrades — never set it to a
+fixed value checked into source control, since it&#39;s the token-signing key, not a login
+credential. Retrieve it if needed:</p>
+<pre><code class="language-bash">kubectl -n hermes-system get secret hermes-session-secret -o jsonpath=&#39;{.data.session-secret}&#39; | base64 -d; echo
+</code></pre>
+<p>If you run <code>hermes-server</code> <strong>outside this chart</strong> (standalone binary, <code>docker run</code>,
+<code>docker-compose</code>), you must set <code>HERMES_SESSION_SECRET</code> yourself — without it, the binary
+falls back to a hardcoded development default and logs a warning; that fallback value is
+public (it&#39;s in the source), so relying on it is not safe for anything other than local dev.</p>
 <h2>Install sketch</h2>
 <p>Follow the product README and deploy/Helm docs in the repository. Verify health endpoints or CLI status before opening the UI.</p>
 <h2>Related</h2>

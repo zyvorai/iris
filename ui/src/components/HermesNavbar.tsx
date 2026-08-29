@@ -1,186 +1,88 @@
 // Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
 // https://zyvor.dev · info@zyvor.dev
 
-import { useEffect, useRef, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  Activity,
-  BookOpen,
-  ChevronDown,
-  Compass,
-  Copy,
-  GitBranch,
-  Globe,
-  Grid3X3,
-  HeartPulse,
-  HelpCircle,
-  Home,
-  Keyboard,
-  Layers,
-  LayoutGrid,
-  Menu,
-  Moon,
-  RefreshCw,
-  Search,
-  Server,
-  Settings as SettingsIcon,
-  Sparkles,
-  Sun,
-  Users,
-  X,
-} from 'lucide-react'
-import { NavLink, Link } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Moon, Search, Sun } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
-import GlyphTile, { type GlyphTileTone } from './nebula/GlyphTile'
-import PulseGlyph from './icons/PulseGlyph'
 import { hermesApi } from '../services/hermesApi'
-import { refreshHermesData } from '../utils/refreshCatalog'
-import { useAiStatus } from '../hooks/useZyraAiInsight'
-import { ZyraAiBadge } from './nebula/ZyraAiPanel'
 import { loadTheme, saveTheme, type HermesTheme } from '../utils/hermesShellPreferences'
+import {
+  NAV_FLYOUT_DIRECT_LINKS,
+  NAV_FLYOUT_PANELS,
+  NAV_FLYOUT_TRIGGER_LABELS,
+} from '../data/nav-flyout'
+import styles from './HermesNavbar.module.css'
 
 interface HermesNavbarProps {
   onPaletteOpen: () => void
   onOpenShortcuts: () => void
 }
 
-const primaryNav = [
-  { to: '/', label: 'Overview', icon: Home, end: true },
-  { to: '/apps', label: 'Catalog', icon: Grid3X3 },
-  { to: '/cluster', label: 'Cluster', icon: Server },
-  { to: '/health', label: 'Health', icon: HeartPulse },
-  { to: '/spaces', label: 'Spaces', icon: Layers },
-  { to: '/graph', label: 'Topology', icon: GitBranch },
-  { to: '/mission-control', label: 'Mission control', icon: LayoutGrid },
-  { to: '/settings', label: 'Settings', icon: SettingsIcon },
-]
+const CLOSE_DELAY_MS = 220
 
-const moreNav = [
-  { to: '/discovery', label: 'Discovery', icon: Compass },
-  { to: '/federated', label: 'Federated', icon: Globe },
-  { to: '/teams', label: 'Teams', icon: Users },
-  { to: '/activity', label: 'Activity', icon: Activity },
-]
-
-function HelpMenu({ onOpenShortcuts }: { onOpenShortcuts: () => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [open])
-
-  const copyDiag = async () => {
-    try {
-      const payload = { health: `${window.location.origin}/healthz`, cluster: `${window.location.origin}/api/v1/cluster/summary` }
-      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
-      setOpen(false)
-    } catch {
-      // clipboard write failed (non-HTTPS or permission denied) — leave dropdown open
-    }
-  }
-
+function BurgerIcon() {
   return (
-    <div className="hermes-nb-help-wrap" ref={ref}>
-      <button type="button" className="hermes-nb-pill" onClick={() => setOpen((v) => !v)} aria-expanded={open} title="Help">
-        <HelpCircle size={16} />
-        <span className="hermes-nb-pill-label">Help</span>
-        <ChevronDown size={12} className={open ? 'hermes-nb-chevron-open' : ''} />
-      </button>
-      {open && (
-        <div className="hermes-nb-dropdown" role="menu" aria-label="Help menu">
-          <button type="button" className="hermes-nb-dropdown-item" role="menuitem"
-            onClick={() => { setOpen(false); onOpenShortcuts() }}>
-            <Keyboard size={14} /> Keyboard shortcuts
-            <kbd className="hermes-nb-kbd">?</kbd>
-          </button>
-          <button type="button" className="hermes-nb-dropdown-item" role="menuitem" onClick={() => void copyDiag()}>
-            <Copy size={14} /> Copy diagnostics
-          </button>
-          <a href="https://github.com/ssahani/hermes" target="_blank" rel="noreferrer"
-            className="hermes-nb-dropdown-item" role="menuitem" onClick={() => setOpen(false)}>
-            <BookOpen size={14} /> Documentation
-          </a>
-        </div>
-      )}
-    </div>
+    <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+      <path d="M2 5.5h13M2 11.5h13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   )
 }
 
-function MoreMenu({ activeToneFor }: { activeToneFor: (path: string) => GlyphTileTone }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [open])
-
+function ChevronIcon() {
   return (
-    <div className="hermes-nb-help-wrap" ref={ref}>
-      <button type="button" className="hermes-nb-pill" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        More
-        <ChevronDown size={12} className={open ? 'hermes-nb-chevron-open' : ''} />
-      </button>
-      {open && (
-        <div className="hermes-nb-dropdown" role="menu">
-          {moreNav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) => `hermes-nb-dropdown-item${isActive ? ' active' : ''}`}
-              data-tone={activeToneFor(item.to)}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
-      )}
-    </div>
+    <svg width="9" height="14" viewBox="0 0 9 14" fill="none" aria-hidden="true">
+      <path d="M1.5 1L7 7l-5.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
   )
 }
 
-export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesNavbarProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [spinning, setSpinning] = useState(false)
+export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts: _onOpenShortcuts }: HermesNavbarProps) {
   const [theme, setTheme] = useState<HermesTheme>(() => loadTheme())
-  const qc = useQueryClient()
-  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
+  const [openKey, setOpenKey] = useState<string | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetSection, setSheetSection] = useState<string | null>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
 
-  const healthy = cluster.data?.healthy ?? 0
-  const broken = cluster.data?.broken ?? 0
-  const degraded = cluster.data?.degraded ?? 0
-  const total = cluster.data?.total ?? 0
-  const healthPct = cluster.isLoading ? null : total > 0 ? Math.round((healthy / total) * 100) : 100
-  const aiStatus = useAiStatus()
-  const statusTone = cluster.isLoading ? 'ok'
-    : broken > 0 ? 'bad'
-    : (degraded > 0 || (healthPct ?? 0) < 80) ? 'warn'
-    : 'ok'
-  const healthTileTone: GlyphTileTone = statusTone === 'bad' ? 'critical' : statusTone === 'warn' ? 'warn' : 'ok'
-  // Every nav item's icon tile is the single brand accent; only the Health tab's
-  // *active-state* tint reflects live cluster status — a dashboard's primary nav
-  // should still say "something's wrong" via color, same as the status badges do.
-  const activeToneFor = (path: string): GlyphTileTone => (path === '/health' ? healthTileTone : 'brand')
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }, [])
 
-  const handleRefresh = () => {
-    setSpinning(true)
-    void refreshHermesData(qc)
-    setTimeout(() => setSpinning(false), 600)
+  const scheduleClose = useCallback(() => {
+    clearCloseTimer()
+    closeTimer.current = setTimeout(() => setOpenKey(null), CLOSE_DELAY_MS)
+  }, [clearCloseTimer])
+
+  const handleTriggerClick = (key: string) => {
+    setOpenKey((current) => (current === key ? null : key))
   }
+
+  const handleTriggerEnter = (key: string) => {
+    clearCloseTimer()
+    setOpenKey((current) => (current ? key : current))
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && openKey) {
+        const key = openKey
+        setOpenKey(null)
+        triggerRefs.current[key]?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [openKey])
+
+  useEffect(() => {
+    document.body.style.overflow = sheetOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [sheetOpen])
 
   const toggleTheme = () => {
     const next: HermesTheme = theme === 'dark' ? 'light' : 'dark'
@@ -188,158 +90,201 @@ export default function HermesNavbar({ onPaletteOpen, onOpenShortcuts }: HermesN
     setTheme(next)
   }
 
-  useEffect(() => {
-    if (!mobileOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [mobileOpen])
+  const closeSheet = () => {
+    setSheetOpen(false)
+    setSheetSection(null)
+  }
 
   return (
-    <nav className="hermes-navbar" data-testid="hermes-navbar">
-      <div className="hermes-nb-content">
-        {/* Row 1: Brand + utilities */}
-        <div className="hermes-nb-row1">
-          <div className="hermes-nb-brand-area">
-            <Link to="/" className="hermes-nb-brand" onClick={() => setMobileOpen(false)}>
-              <GlyphTile tone="brand" icon={<PulseGlyph />} size="md" />
-              <div className="hermes-nb-brand-text">
-                <span className="hermes-nb-brand-name">Hermes</span>
-                <span className="hermes-nb-brand-sub">Service Launchpad</span>
-              </div>
-            </Link>
+    <>
+      <nav
+        className={styles.gnav}
+        aria-label="Global"
+        data-testid="hermes-navbar"
+        data-open={String(!!openKey)}
+        onMouseLeave={scheduleClose}
+      >
+        <div className={styles.gnavInner}>
+          <Link to="/" className={styles.mark} aria-label="Hermes home" onClick={closeSheet}>
+            <span className={styles.word}>Hermes</span>
+          </Link>
+
+          <div className={styles.links}>
+            {NAV_FLYOUT_DIRECT_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === '/'}
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+            {NAV_FLYOUT_PANELS.map((panel) => (
+              <button
+                key={panel.key}
+                ref={(el) => {
+                  triggerRefs.current[panel.key] = el
+                }}
+                type="button"
+                className={styles.link}
+                aria-expanded={openKey === panel.key}
+                aria-controls="hermes-fly"
+                onClick={() => handleTriggerClick(panel.key)}
+                onMouseEnter={() => handleTriggerEnter(panel.key)}
+              >
+                {NAV_FLYOUT_TRIGGER_LABELS[panel.key]}
+              </button>
+            ))}
           </div>
 
-          <div className="hermes-nb-utilities">
-            <WorkspaceSwitcher />
-            <Link
-              to="/health"
-              className="zeus-health-chip zeus-health-chip-compact"
-              data-tone={statusTone}
-              title={
-                aiStatus.data?.llmConfigured
-                  ? aiStatus.data.llmReachable === false
-                    ? `Zyra AI unreachable${aiStatus.data.probeMessage ? `: ${aiStatus.data.probeMessage}` : ''}`
-                    : `Zyra AI (${aiStatus.data.model}) · ${healthy} of ${total} healthy`
-                  : `Rules engine · ${healthy} of ${total} healthy`
-              }
+          <div className={styles.utils}>
+            <div className={styles.workspaceSlot}>
+              <WorkspaceSwitcher />
+            </div>
+            <button
+              type="button"
+              className={styles.icon}
+              onClick={onPaletteOpen}
+              aria-label="Search"
+              title="Search (⌘K)"
               data-testid="navbar-health-chip"
             >
-              <span className="zeus-live-dot" data-tone={statusTone} aria-hidden />
-              <span className="zeus-health-label">{healthPct != null ? `${healthPct}%` : '—'} healthy</span>
-            </Link>
-            {aiStatus.data ? (
-              <ZyraAiBadge
-                source={aiStatus.data.llmConfigured ? 'llm' : 'rules'}
-                warn={aiStatus.data.llmConfigured && aiStatus.data.llmReachable === false}
-              />
-            ) : null}
-            <button type="button" className="hermes-nb-pill hermes-nb-search-pill" onClick={onPaletteOpen}>
-              <Search size={15} />
-              <span className="hermes-nb-pill-label">Spotlight</span>
-              <kbd className="hermes-nb-kbd">⌘K</kbd>
+              <Search size={17} strokeWidth={1.5} />
             </button>
             <button
               type="button"
-              className="hermes-nb-icon-pill hermes-nb-icon-pill-refresh"
-              onClick={handleRefresh}
-              title="Refresh data"
-            >
-              <RefreshCw size={16} className={spinning ? 'hermes-nb-spin' : ''} />
-            </button>
-            <button
-              type="button"
-              className={`hermes-nb-icon-pill hermes-nb-icon-pill-theme${theme === 'dark' ? ' is-sun' : ' is-moon'}`}
+              className={styles.icon}
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
               aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              {theme === 'dark' ? <Sun size={17} strokeWidth={1.5} /> : <Moon size={17} strokeWidth={1.5} />}
             </button>
-            <HelpMenu onOpenShortcuts={onOpenShortcuts} />
-            {auth.data?.mode === 'oidc' && (
-              auth.data.authenticated ? (
+            {auth.data?.mode === 'oidc' &&
+              (auth.data.authenticated ? (
                 <button
                   type="button"
-                  className="hermes-nb-pill"
-                  onClick={() => void fetch('/auth/logout', { method: 'POST' }).then(res => res.ok && window.location.reload()).catch(() => {})}
+                  className={styles.cta}
+                  onClick={() =>
+                    void fetch('/auth/logout', { method: 'POST' })
+                      .then((res) => res.ok && window.location.reload())
+                      .catch(() => {})
+                  }
                   title={auth.data.userId}
                 >
-                  <Sparkles size={14} />
-                  <span className="hermes-nb-pill-label hermes-nb-user-label">{auth.data.userId}</span>
+                  Sign out
                 </button>
               ) : (
-                <a href="/auth/login" className="hermes-nb-pill hermes-nb-pill-primary">Sign in</a>
-              )
-            )}
+                <a href="/auth/login" className={styles.cta}>
+                  Sign in
+                </a>
+              ))}
             <button
               type="button"
-              className="hermes-nb-icon-pill hermes-nb-mobile-toggle"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-expanded={mobileOpen}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              className={styles.burger}
+              aria-expanded={sheetOpen}
+              aria-controls="hermes-sheet"
+              aria-label="Menu"
+              onClick={() => setSheetOpen((v) => !v)}
             >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+              <BurgerIcon />
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Row 2: Nav pills (desktop) */}
-        <div className="hermes-nb-row2">
-          {primaryNav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `hermes-nb-nav-pill${isActive ? ' active' : ''}`}
-              data-tone={activeToneFor(item.to)}
+      <div
+        className={styles.fly}
+        id="hermes-fly"
+        data-open={String(!!openKey)}
+        onMouseEnter={clearCloseTimer}
+        onMouseLeave={scheduleClose}
+      >
+        <div className={styles.flyInner}>
+          {NAV_FLYOUT_PANELS.map((panel) => (
+            <div
+              key={panel.key}
+              className={styles.flyPanel}
+              data-panel={panel.key}
+              data-active={String(openKey === panel.key)}
             >
-              {item.label}
-            </NavLink>
-          ))}
-          <MoreMenu activeToneFor={activeToneFor} />
-        </div>
-      </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <>
-          <button
-            type="button"
-            className="hermes-nb-backdrop"
-            aria-label="Close menu"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="hermes-nb-drawer" aria-label="Navigation">
-            <div className="hermes-nb-drawer-head">
-              <span>Menu</span>
-              <button type="button" className="hermes-nb-icon-pill" onClick={() => setMobileOpen(false)} aria-label="Close">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="hermes-nb-drawer-body">
-              <button type="button" className="hermes-nb-drawer-cmd" onClick={() => { onPaletteOpen(); setMobileOpen(false) }}>
-                <Search size={16} /> Spotlight <kbd className="hermes-nb-kbd">⌘K</kbd>
-              </button>
-              <div className="hermes-nb-drawer-group">
-                <div className="hermes-nb-drawer-group-label">Navigation</div>
-                {[...primaryNav, ...moreNav].map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === '/'}
-                    className={({ isActive }) => `hermes-nb-drawer-item${isActive ? ' active' : ''}`}
-                    data-tone={activeToneFor(item.to)}
-                    onClick={() => setMobileOpen(false)}
+              <div className={`${styles.flyCols} ${styles.flyCols3}`}>
+                {panel.groups.map((group) => (
+                  <div
+                    key={group.heading}
+                    className={group.lead ? `${styles.flyGroup} ${styles.flyLead}` : styles.flyGroup}
                   >
-                    {item.label}
-                  </NavLink>
+                    <h3>{group.heading}</h3>
+                    <ul>
+                      {group.links.map((link) => (
+                        <li key={link.to}>
+                          <Link to={link.to} onClick={() => setOpenKey(null)}>
+                            {link.label}
+                            {link.sub ? <small>{link.sub}</small> : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
               </div>
             </div>
-          </aside>
-        </>
-      )}
-    </nav>
+          ))}
+        </div>
+      </div>
+      <div className={styles.flyScrim} data-open={String(!!openKey)} onClick={() => setOpenKey(null)} />
+
+      <div className={styles.sheet} id="hermes-sheet" data-open={String(sheetOpen)}>
+        <div className={styles.sheetItem}>
+          <Link className={styles.sheetTop} to="/" onClick={closeSheet}>
+            Overview
+          </Link>
+        </div>
+        {NAV_FLYOUT_DIRECT_LINKS.map((link) => (
+          <div key={link.to} className={styles.sheetItem}>
+            <Link className={styles.sheetTop} to={link.to} onClick={closeSheet}>
+              {link.label}
+            </Link>
+          </div>
+        ))}
+        {NAV_FLYOUT_PANELS.map((panel) => (
+          <div key={panel.key} className={styles.sheetItem}>
+            <button
+              type="button"
+              className={styles.sheetTop}
+              aria-expanded={sheetSection === panel.key}
+              onClick={() => setSheetSection((c) => (c === panel.key ? null : panel.key))}
+            >
+              {NAV_FLYOUT_TRIGGER_LABELS[panel.key]}
+              <ChevronIcon />
+            </button>
+            <div className={styles.sheetSub} data-open={String(sheetSection === panel.key)}>
+              {panel.groups.flatMap((group) =>
+                group.links.map((link) => (
+                  <Link key={link.to} to={link.to} onClick={closeSheet}>
+                    {link.label}
+                  </Link>
+                )),
+              )}
+            </div>
+          </div>
+        ))}
+        <div className={styles.sheetCta}>
+          <button
+            type="button"
+            className={styles.sheetCtaBtn}
+            onClick={() => {
+              closeSheet()
+              onPaletteOpen()
+            }}
+          >
+            Search
+          </button>
+        </div>
+      </div>
+    </>
   )
 }

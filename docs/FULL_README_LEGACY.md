@@ -119,7 +119,7 @@ Hermes continuously discovers applications across your cluster.
 - Ingresses and Gateway API (`HTTPRoute`)
 - Service mesh routes (Istio, Linkerd, Cilium)
 - Custom resources (Argo CD, KubeVirt, Crossplane, Backstage)
-- Zeus native applications (HyperSDK, Atlas, Athena, Kronos)
+- Zeus native applications (Transiva, Atlas, Athena, Kronos)
 
 No manual registration required for cluster services. Hermes watches the cluster and builds the catalog for you.
 
@@ -427,7 +427,7 @@ make deploy-remote
 # Post-deploy smoke
 make test-remote-smoke
 
-# Full Zyvor stack (VMRogue + PacketWolf + Aether)
+# Full Zyvor stack (VMRogue + PacketWolf + Axiom)
 ./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
 ```
 

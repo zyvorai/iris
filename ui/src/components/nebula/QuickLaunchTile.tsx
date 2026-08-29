@@ -45,7 +45,7 @@ export default function QuickLaunchTile({ app }: QuickLaunchTileProps) {
       <StatusBadge status={app.status} />
       <div className="quick-launch-tile-actions">
         <Button variant="primary" className="nebula-btn-compact" onClick={() => void openApp(app)}>
-          Open <ExternalLink size={11} />
+          Open <ExternalLink size={14} strokeWidth={1.5} />
         </Button>
         <ActionMenu
           items={[

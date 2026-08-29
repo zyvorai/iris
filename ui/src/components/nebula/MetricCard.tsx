@@ -3,13 +3,12 @@
 
 import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
-import GlassPanel from './GlassPanel'
 import { useCountUp } from '../../hooks/useCountUp'
 
 export type MetricCardTone = 'blue' | 'green' | 'purple' | 'cyan' | 'pink' | 'orange'
 
 interface MetricCardProps {
-  icon: LucideIcon
+  icon?: LucideIcon
   label: string
   value: string
   sub?: string
@@ -18,37 +17,27 @@ interface MetricCardProps {
   tone?: MetricCardTone
 }
 
-export default function MetricCard({ icon: Icon, label, value, sub, to, warn, tone }: MetricCardProps) {
-  const toneClass = warn ? 'metric-card-warn' : tone ? `metric-card-tone-${tone}` : ''
+/** Apple-style proof cell — typography only, optional icon ignored for quiet chrome. */
+export default function MetricCard({ label, value, sub, to, warn }: MetricCardProps) {
   const numeric = Number(value)
   const isNumeric = value.trim() !== '' && Number.isFinite(numeric)
   const animated = useCountUp(isNumeric ? numeric : 0)
   const display = isNumeric ? String(Math.round(animated)) : value
-  const panel = (
-    <GlassPanel className={`metric-card${toneClass ? ` ${toneClass}` : ''}`}>
-      <div className="metric-card-head">
-        <span className="metric-card-icon" aria-hidden>
-          <Icon size={13} />
-        </span>
-        <span>{label}</span>
-      </div>
-      <p className="metric-card-value">{display}</p>
-      {sub ? <p className="metric-card-sub">{sub}</p> : null}
-      <div className="metric-card-bar" aria-hidden>
-        {Array.from({ length: 6 }, (_, i) => (
-          <span key={i} />
-        ))}
-      </div>
-    </GlassPanel>
+  const body = (
+    <div className={`hs-stat${warn ? ' hs-stat-warn' : ''}`}>
+      <p className="hs-stat-value">{display}</p>
+      <p className="hs-stat-label">{label}</p>
+      {sub ? <p className="hs-stat-sub">{sub}</p> : null}
+    </div>
   )
 
   if (to) {
     return (
-      <Link to={to} className="metric-card-link">
-        {panel}
+      <Link to={to} className="hs-stat-link">
+        {body}
       </Link>
     )
   }
 
-  return <div className="metric-card-link">{panel}</div>
+  return <div className="hs-stat-link">{body}</div>
 }

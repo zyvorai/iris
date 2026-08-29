@@ -3,7 +3,7 @@
 ## 1. Install
 
 ```bash
-helm install hermes oci://ghcr.io/hypersdk/charts/hermes \
+helm install hermes oci://ghcr.io/zyvorai/charts/hermes \
   --version 0.2.0 \
   --namespace hermes-system \
   --create-namespace
@@ -24,7 +24,7 @@ Visit `http://<node-ip>:31847` — Hermes auto-discovers all services on your cl
 
 ```bash
 kubectl create secret generic hermes-llm --from-literal=apiKey="sk-..." -n hermes-system
-helm upgrade hermes oci://ghcr.io/hypersdk/charts/hermes --reuse-values \
+helm upgrade hermes oci://ghcr.io/zyvorai/charts/hermes --reuse-values \
   --set server.llm.apiUrl="https://api.openai.com/v1" \
   --set server.llm.existingSecret="hermes-llm" \
   --set server.llm.model="gpt-4o-mini" -n hermes-system

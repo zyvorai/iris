@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Publish Hermes Docker images + Helm chart to ghcr.io/hypersdk from the remote build server.
+# Publish Hermes Docker images + Helm chart to ghcr.io/zyvorai from the remote build server.
 #
 # Usage:
-#   HYPERSDK_GHCR_TOKEN=<pat> ./scripts/publish-ghcr.sh [host] [user] [version]
+#   ZYVORAI_GHCR_TOKEN=<pat> ./scripts/publish-ghcr.sh [host] [user] [version]
 #
 # Example:
-#   HYPERSDK_GHCR_TOKEN=ghp_xxx ./scripts/publish-ghcr.sh 212.8.248.187 sus 0.2.0
+#   ZYVORAI_GHCR_TOKEN=ghp_xxx ./scripts/publish-ghcr.sh 212.8.248.187 sus 0.2.0
 
 set -euo pipefail
 
@@ -13,11 +13,11 @@ HOST="${1:-212.8.248.187}"
 RUSER="${2:-sus}"
 VERSION="${3:-0.2.0}"
 REMOTE="${RUSER}@${HOST}"
-ORG="hypersdk"
+ORG="zyvorai"
 
-if [[ -z "${HYPERSDK_GHCR_TOKEN:-}" ]]; then
-  echo "Error: set HYPERSDK_GHCR_TOKEN before running" >&2
-  echo "  export HYPERSDK_GHCR_TOKEN='ghp_...'" >&2
+if [[ -z "${ZYVORAI_GHCR_TOKEN:-}" ]]; then
+  echo "Error: set ZYVORAI_GHCR_TOKEN before running" >&2
+  echo "  export ZYVORAI_GHCR_TOKEN='ghp_...'" >&2
   exit 1
 fi
 
@@ -27,7 +27,7 @@ echo "==> Publishing hermes v${VERSION} to ghcr.io/${ORG}"
 echo "==> [1/2] Pushing Docker images to ghcr.io/${ORG}"
 ssh "$REMOTE" bash -s <<ENDSSH
 set -euo pipefail
-echo "${HYPERSDK_GHCR_TOKEN}" | podman login ghcr.io -u ${ORG} --password-stdin
+echo "${ZYVORAI_GHCR_TOKEN}" | podman login ghcr.io -u ${ORG} --password-stdin
 
 for img in hermes-server hermes-controller; do
   podman tag docker.io/library/\${img}:latest ghcr.io/${ORG}/\${img}:${VERSION} 2>/dev/null || true
@@ -52,7 +52,7 @@ if ! command -v helm &>/dev/null; then
   curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-echo "${HYPERSDK_GHCR_TOKEN}" | helm registry login ghcr.io -u ${ORG} --password-stdin
+echo "${ZYVORAI_GHCR_TOKEN}" | helm registry login ghcr.io -u ${ORG} --password-stdin
 
 mkdir -p /tmp/helm-packages
 helm package "${CHARTS_DIR}/hermes" -d /tmp/helm-packages

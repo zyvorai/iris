@@ -29,8 +29,8 @@ function ownerInitials(label: string): string {
 }
 
 function OwnerAvatar({ label }: { label: string }) {
-  const { gradient, glow } = iconColorFor(label)
-  const style = { '--icon-bg': gradient, '--icon-glow': glow } as CSSProperties
+  const { accent } = iconColorFor(label)
+  const style = { '--icon-accent': accent } as CSSProperties
   return (
     <span className="app-icon app-icon-sm owner-avatar" style={style} aria-hidden>
       {ownerInitials(label)}
@@ -85,6 +85,16 @@ export default function TeamsPage() {
       onRetry={onRetry}
       errorTitle="Could not load teams"
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Team ownership</p>
+            <h1 className="h-hero" style={{ maxWidth: '14ch' }}>Who owns what</h1>
+            <p className="hs-lede">
+              Owners from service annotations — a lightweight org map over your catalog.
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         {focusOwner && (ownerInsight.data || ownerInsight.isLoading) ? (
           <ZyraAiPanel
@@ -107,21 +117,18 @@ export default function TeamsPage() {
           />
         ) : null}
 
-        <GlassPanel className="glass-panel-section">
-          <div className="section-head-nebula">
-            <GlyphTile tone="brand" icon={<Users size={14} />} size="sm" />
-            <div>
-              <p className="section-label">Team ownership</p>
-              <h2 className="section-title">Who owns what</h2>
-              <p className="body-text">
-                Owners from service annotations — a lightweight org map over your catalog.
-              </p>
-            </div>
-            {focusOwner ? (
+        {focusOwner ? (
+          <GlassPanel className="glass-panel-section">
+            <div className="section-head-nebula">
+              <GlyphTile tone="brand" icon={<Users size={14} />} size="sm" />
+              <div>
+                <p className="hs-eyebrow">Focus</p>
+                <h2 className="h-tile">Ask Zyra about ownership</h2>
+              </div>
               <AskZyraButton compact command={`owner insight ${focusOwner}`} />
-            ) : null}
-          </div>
-        </GlassPanel>
+            </div>
+          </GlassPanel>
+        ) : null}
 
         {!owners.data?.length ? (
           <GlassPanel className="glass-panel-section">
@@ -164,6 +171,7 @@ export default function TeamsPage() {
         <Button variant="secondary" to="/graph">
           <GitBranch size={14} /> View dependency graph
         </Button>
+      </div>
       </div>
     </PageFrame>
   )

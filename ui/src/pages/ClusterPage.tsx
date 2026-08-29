@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Layers, Rocket, Server, Compass } from 'lucide-react'
+import { Server } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
 import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
@@ -179,25 +179,32 @@ export default function ClusterPage() {
         </GlassPanel>
       }
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Cluster catalog</p>
+            <h1 className="h-hero" style={{ maxWidth: '18ch' }}>Every service, cluster-wide</h1>
+            <p className="hs-lede">
+              Publish to add apps to your launchpad.
+              {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         <GlassPanel className="glass-panel-section hero-command-panel">
           <div className="section-head-nebula">
-            <GlyphTile tone="brand" icon={<Server size={14} />} size="sm" />
+            <GlyphTile tone="brand" icon={<Server />} size="sm" />
             <div>
-              <p className="section-label">Cluster catalog</p>
-              <h2 className="section-title">Every service, cluster-wide</h2>
-              <p className="body-text">
-                Publish to add apps to your launchpad.
-                {clusters.data?.[0] ? ` Connected to ${clusters.data[0].name}.` : ''}
-              </p>
+              <p className="hs-eyebrow">Overview</p>
+              <h2 className="h-tile">Fleet snapshot</h2>
             </div>
             <AskZyraButton compact command={askCommand} />
           </div>
           <div className="metric-strip metric-strip-4" style={{ marginTop: '1rem' }}>
-            <MetricCard icon={Layers} label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
-            <MetricCard icon={Server} label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" />
-            <MetricCard icon={Rocket} label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" />
-            <MetricCard icon={Compass} label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
+            <MetricCard label="Services" value={String(summary.data?.total ?? '—')} sub="Discovered" />
+            <MetricCard label="Namespaces" value={String(summary.data?.namespaces ?? '—')} sub="Active" />
+            <MetricCard label="Published" value={String(summary.data?.published ?? '—')} sub="On launchpad" />
+            <MetricCard label="Unpublished" value={String(summary.data?.discovery ?? '—')} sub="Awaiting publish" to="/discovery" />
           </div>
         </GlassPanel>
 
@@ -315,6 +322,7 @@ export default function ClusterPage() {
             />
           ))
         )}
+      </div>
       </div>
     </PageFrame>
   )

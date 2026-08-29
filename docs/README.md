@@ -34,7 +34,7 @@ Hermes ships fleet and per-app intelligence with LLM + rule-based fallback. Conf
 
 ## Ecosystem
 
-Part of the [Zyvor / HyperSDK platform stack](https://zyvor.dev):
+Part of the [Zyvor / Transiva platform stack](https://zyvor.dev):
 
 | Product | Role |
 |---------|------|
@@ -43,10 +43,10 @@ Part of the [Zyvor / HyperSDK platform stack](https://zyvor.dev):
 | **zeus-os (v9s)** | Cloud / KubeVirt control plane |
 | **hermes** | Application layer for K8s |
 | **forge** | AI infrastructure on K8s |
-| **hypersdk / hyper2kvm** | VM migration |
+| **transiva / h2kvm** | VM migration |
 | **guestkit** | Offline VM assurance |
 | **packetwolf** | Network intelligence |
-| **Aether** | Runtime portability |
+| **Axiom** | Runtime portability |
 | **Veyron** | KubeVirt VM command center |
 | **IronWolf** | Metal3 bare-metal automation |
 

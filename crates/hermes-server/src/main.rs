@@ -13,7 +13,10 @@ use std::time::Duration;
 
 use anyhow::Context;
 use axum::{
-    middleware,
+    body::Body,
+    http::{header, Method, Request, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Redirect, Response},
     routing::get,
     Router,
 };
@@ -104,12 +107,13 @@ async fn main() -> anyhow::Result<()> {
         .layer(middleware::from_fn_with_state(auth_cfg.clone(), auth::require_auth));
 
     let app = Router::new()
-        .route("/healthz", get(|| async { axum::http::StatusCode::OK }))
+        .route("/healthz", get(|| async { StatusCode::OK }))
         .route("/api/v1/ws-echo", get(auth::ws_echo))
         .merge(metrics_routes)
         .merge(auth_routes)
         .merge(protected)
         .fallback_service(spa)
+        .layer(middleware::from_fn(orphan_launchpad_redirect))
         .layer(TraceLayer::new_for_http());
 
     let addr: SocketAddr = bind.parse().context("parse bind address")?;
@@ -131,6 +135,73 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     tracing::info!("hermes-server stopped");
     Ok(())
+}
+
+/// When a Mode A launchpad app navigates to a root-absolute path (e.g. `/simulate`),
+/// bounce back under the Referer mount instead of serving Hermes 404.
+async fn orphan_launchpad_redirect(req: Request<Body>, next: Next) -> Response {
+    if req.method() == Method::GET {
+        if let Some(location) = orphan_launchpad_location(&req) {
+            tracing::debug!(%location, "orphan launchpad redirect");
+            return Redirect::temporary(&location).into_response();
+        }
+    }
+    next.run(req).await
+}
+
+fn orphan_launchpad_location(req: &Request<Body>) -> Option<String> {
+    let path = req.uri().path();
+    if is_hermes_dock_path(path) {
+        return None;
+    }
+    let mount = launchpad_mount_from_referer(req.headers())?;
+    if path.starts_with(&mount) {
+        return None;
+    }
+    let q = req
+        .uri()
+        .query()
+        .map(|q| format!("?{q}"))
+        .unwrap_or_default();
+    Some(format!("{mount}{path}{q}"))
+}
+
+fn is_hermes_dock_path(path: &str) -> bool {
+    if path == "/" {
+        return true;
+    }
+    // Exact segments / prefixes for Hermes Dock — avoid bare "/s" matching "/simulate".
+    const EXACT: &[&str] = &["/apps", "/health", "/cluster", "/graph", "/federated", "/teams", "/spaces", "/discovery", "/activity", "/mission-control", "/settings", "/help", "/healthz", "/metrics"];
+    if EXACT.iter().any(|p| path == *p || path.starts_with(&format!("{p}/"))) {
+        return true;
+    }
+    const PREFIXES: &[&str] = &["/api/", "/auth/", "/launchpad/", "/a/", "/s/", "/fonts/", "/assets/", "/_next/"];
+    PREFIXES.iter().any(|p| path.starts_with(p))
+        || path == "/api"
+        || path == "/auth"
+        || path == "/launchpad"
+        || path == "/a"
+        || path == "/s"
+        || path == "/fonts"
+        || path == "/assets"
+        || path == "/_next"
+}
+
+fn launchpad_mount_from_referer(headers: &axum::http::HeaderMap) -> Option<String> {
+    let referer = headers.get(header::REFERER)?.to_str().ok()?;
+    let path = referer
+        .parse::<axum::http::Uri>()
+        .ok()?
+        .path()
+        .to_string();
+    let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
+    if parts.len() >= 4 && parts[0] == "launchpad" && parts[1] == "a" {
+        return Some(format!("/launchpad/a/{}/{}", parts[2], parts[3]));
+    }
+    if parts.len() >= 3 && parts[0] == "a" {
+        return Some(format!("/a/{}/{}", parts[1], parts[2]));
+    }
+    None
 }
 
 async fn shutdown_signal() {

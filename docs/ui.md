@@ -1,6 +1,6 @@
 # Hermes UI (Nebula)
 
-Hermes ships a single-page React application aligned with the Aether Liquid Glass design language. The UI lives under `ui/` and is embedded in `hermes-server` at runtime.
+Hermes ships a single-page React application aligned with the Axiom Liquid Glass design language. The UI lives under `ui/` and is embedded in `hermes-server` at runtime.
 
 ## Design system
 
@@ -9,7 +9,7 @@ Hermes ships a single-page React application aligned with the Aether Liquid Glas
 | Tokens | `ui/src/styles/nebula-tokens.css` | Colors, radii, typography, Zeus/Hermes CSS variable bridge |
 | Layout | `ui/src/styles/nebula-layout.css` | App shell, scroll areas, page grid |
 | Components | `ui/src/styles/nebula-components.css` | Glass panels, cards, toolbars, skeletons, empty states, drawers |
-| Legacy bridge | `ui/src/styles/aether-bridge.css` | Maps remaining legacy classes to Nebula surfaces |
+| Legacy bridge | `ui/src/styles/axiom-bridge.css` | Maps remaining legacy classes to Nebula surfaces |
 | Legacy | `ui/src/index.css` | Older Hermes styles (being retired incrementally) |
 
 Load order is defined in `ui/src/main.tsx`: tokens → layout → components → `index.css` → bridge.

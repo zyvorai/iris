@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/ssahani/hermes/controller/model"
-	"github.com/ssahani/hermes/controller/store"
+	"github.com/zyvorai/hermes/controller/model"
+	"github.com/zyvorai/hermes/controller/store"
 )
 
 func main() {

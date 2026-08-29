@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Delegate full Zyvor stack E2E (VMRogue + PacketWolf + Aether) to the VMRogue orchestrator.
+# Delegate full Zyvor stack E2E (VMRogue + PacketWolf + Axiom) to the VMRogue orchestrator.
 #
 # Usage:
 #   ./scripts/test-zyvor-stack-remote.sh <host> [vmrogue_port] [ssh_user]

@@ -7,11 +7,9 @@ import { Grid3X3 } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
 import Board from '../components/nebula/Board'
 import GlassPanel from '../components/nebula/GlassPanel'
-import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import PageToolbar from '../components/nebula/PageToolbar'
 import EmptyState from '../components/nebula/EmptyState'
-import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
@@ -191,6 +189,16 @@ export default function AppsPage() {
         </GlassPanel>
       }
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Catalog</p>
+            <h1 className="h-hero" style={{ maxWidth: '16ch' }}>Apps &amp; services</h1>
+            <p className="hs-lede">
+              Published launchpad apps and the full discovered cluster inventory.
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         {showFleetAi && (fleetInsight.data || fleetInsight.isLoading) ? (
           <ZyraAiPanel
@@ -214,18 +222,6 @@ export default function AppsPage() {
         ) : null}
 
         <GlassPanel className="glass-panel-section">
-          <div className="section-head-nebula">
-            <GlyphTile tone="brand" icon={<Grid3X3 size={14} />} size="sm" />
-            <div>
-              <p className="section-label">Catalog</p>
-              <h2 className="section-title">Apps &amp; services</h2>
-              <p className="body-text">
-                Published launchpad apps and the full discovered cluster inventory.
-              </p>
-            </div>
-            <AskZyraButton compact command={showFleetAi ? 'explain' : 'suggest publish'} />
-          </div>
-
           <PageToolbar className="page-toolbar-stacked" data-testid="catalog-toolbar">
             <div className="view-toggle" role="tablist">
               <button type="button" className={mode === 'published' ? 'active' : ''} onClick={() => setMode('published')}>
@@ -308,6 +304,7 @@ export default function AppsPage() {
             </Board>
           )}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

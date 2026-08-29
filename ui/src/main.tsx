@@ -11,9 +11,10 @@ import { applyShellPreferencesOnBoot } from './utils/hermesShellPreferences'
 import './styles/fonts.css'
 import './styles/nebula-tokens.css'
 import './styles/nebula-layout.css'
+import './styles/hs-primitives.css'
 import './styles/nebula-components.css'
 import './index.css'
-import './styles/aether-bridge.css'
+import './styles/axiom-bridge.css'
 
 applyShellPreferencesOnBoot()
 

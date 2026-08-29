@@ -15,16 +15,23 @@ export default function HelpPage() {
 
   return (
     <PageFrame loading={false} error={false} hasData onRetry={() => {}}>
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Help</p>
+            <h1 className="h-hero" style={{ maxWidth: '14ch' }}>Hermes guide</h1>
+            <p className="hs-lede">
+              Discover, launch, and govern catalog apps across your cluster and federated peers.
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         <GlassPanel className="glass-panel-section">
           <div className="section-head-nebula">
             <GlyphTile tone="brand" icon={<BookOpen size={14} />} size="sm" />
             <div>
-              <p className="section-label">Help</p>
-              <h2 className="section-title">Hermes guide</h2>
-              <p className="body-text">
-                Discover, launch, and govern catalog apps across your cluster and federated peers.
-              </p>
+              <p className="hs-eyebrow">Reference</p>
+              <h2 className="h-tile">How to use Hermes</h2>
             </div>
             {aiStatus.data ? <ZyraAiBadge source={aiStatus.data.llmConfigured ? 'llm' : 'rules'} /> : null}
           </div>
@@ -79,7 +86,7 @@ export default function HelpPage() {
             <Button variant="secondary" to="/activity">View activity</Button>
             <Button variant="ghost" href="/api/v1/insights/status">AI status API</Button>
             <Button variant="ghost" href="/api/v1/catalog">Catalog API</Button>
-            <Button variant="ghost" href="https://github.com/ssahani/hermes" target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" href="https://github.com/zyvorai/hermes" target="_blank" rel="noopener noreferrer">
               <BookOpen size={14} /> Repository
             </Button>
           </div>
@@ -88,6 +95,7 @@ export default function HelpPage() {
             <ZyvorInline /> · Hermes is part of the Zeus platform by ZyvorAI Labs
           </p>
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

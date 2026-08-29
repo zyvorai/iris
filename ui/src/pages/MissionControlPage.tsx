@@ -36,8 +36,19 @@ export default function MissionControlPage() {
         ) : undefined
       }
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Live status</p>
+            <h1 className="h-hero" style={{ maxWidth: '16ch' }}>Mission Control</h1>
+            <p className="hs-lede">
+              Discovered services by space — expandable cards with diagnosis and actions.
+            </p>
+          </div>
+        </section>
       <div className="page-grid">
         <MissionControlSpaces apps={apps} />
+      </div>
       </div>
     </PageFrame>
   )

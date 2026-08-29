@@ -902,7 +902,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
                 className={`palette-item ${i === selected ? 'selected' : ''}`}
                 onClick={() => activate(row)}
               >
-                <GlyphTile tone="brand" icon={<row.icon size={14} />} size="sm" />
+                <GlyphTile tone="brand" icon={<row.icon />} size="sm" />
                 <div>
                   <strong>{row.label}</strong>
                   <div className="app-meta">{row.meta ?? 'Navigate'}</div>
@@ -915,7 +915,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
                 className={`palette-item ${i === selected ? 'selected' : ''}`}
                 onClick={() => activate(row)}
               >
-                <GlyphTile tone="brand" icon={<Layers size={14} />} size="sm" />
+                <GlyphTile tone="brand" icon={<Layers />} size="sm" />
                 <div>
                   <strong>{row.label}</strong>
                   <div className="app-meta">{row.meta}</div>
@@ -928,7 +928,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
                 className={`palette-item ${i === selected ? 'selected' : ''} ${statusTone(row.app.status)}`}
                 onClick={() => activate(row)}
               >
-                <AppIcon icon={row.app.icon} name={row.app.displayName} size="sm" />
+                <AppIcon icon={row.app.icon} name={row.app.displayName} size="xs" />
                 <div>
                   <strong>{row.app.displayName}</strong>
                   <div className="app-meta">

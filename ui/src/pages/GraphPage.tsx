@@ -93,6 +93,14 @@ export default function GraphPage() {
       onRetry={() => void graph.refetch()}
       errorTitle="Could not load application graph"
     >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Application graph</p>
+            <h1 className="h-hero" style={{ maxWidth: '14ch' }}>Dependency map</h1>
+            <p className="hs-lede">Dependency links between published catalog apps</p>
+          </div>
+        </section>
       <div className="page-grid">
         {graph.data ? (
           <ZyraAiPanel
@@ -119,9 +127,8 @@ export default function GraphPage() {
           <div className="section-head-nebula">
             <GlyphTile tone="brand" icon={<GitBranch size={14} />} size="sm" />
             <div>
-              <p className="section-label">Application graph</p>
-              <h2 className="section-title">Dependency map</h2>
-              <p className="body-text">Dependency links between published catalog apps</p>
+              <p className="hs-eyebrow">Topology</p>
+              <h2 className="h-tile">Explore links</h2>
             </div>
             {filtered ? (
               <span className="nebula-status-badge status-unknown">
@@ -174,6 +181,7 @@ export default function GraphPage() {
             <AppGraphView graph={filtered} />
           ) : null}
         </GlassPanel>
+      </div>
       </div>
     </PageFrame>
   )

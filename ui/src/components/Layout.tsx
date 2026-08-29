@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import CommandPalette from './CommandPalette'
 import HermesNavbar from './HermesNavbar'
 import HermesPageFooter from './HermesPageFooter'
-import HermesStatusStrip from './HermesStatusStrip'
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import DiagnosisDrawer from './nebula/DiagnosisDrawer'
 import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
@@ -40,15 +39,11 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="app-shell">
-      <div className="hermes-page-mesh" aria-hidden />
-      <div className="top-command-bar">
-        <HermesNavbar onPaletteOpen={() => openSpotlight()} onOpenShortcuts={() => setShortcutsOpen(true)} />
-      </div>
+      <HermesNavbar onPaletteOpen={() => openSpotlight()} onOpenShortcuts={() => setShortcutsOpen(true)} />
       <div className="main-scroll-area">
         {children}
         <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       </div>
-      <HermesStatusStrip />
       {open ? <CommandPalette onClose={closeSpotlight} initialQuery={seed} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}
       <DiagnosisDrawer appId={diagnoseAppId} onClose={closeDiagnose} />

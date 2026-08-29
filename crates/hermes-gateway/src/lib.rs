@@ -7,7 +7,7 @@ use axum::{
     body::Body,
     extract::{FromRequestParts, Path, State, WebSocketUpgrade},
     http::{header, HeaderMap, HeaderName, HeaderValue, Request, StatusCode, Uri},
-    response::{IntoResponse, Response},
+    response::{IntoResponse, Redirect, Response},
     routing::any,
     Router,
 };
@@ -43,6 +43,8 @@ pub fn routes(state: GatewayState) -> Router {
         .route("/s/{token}", any(share_proxy_root))
         .route("/s/{token}/", any(share_proxy_root))
         .route("/s/{token}/{*rest}", any(share_proxy_path))
+        // Orphan Next.js / Vite assets that backends emit as root-absolute `/_next/...`
+        .route("/_next/{*rest}", any(orphan_next_proxy))
         .with_state(state)
 }
 
@@ -176,6 +178,25 @@ async fn proxy_app(st: GatewayState, app: hermes_core::App, rest: String, req: R
             format!("backend unavailable: {}", app.status_message),
         )
             .into_response();
+    }
+
+    // Next.js apps without basePath use ?next=/ after login — rewrite to the launchpad mount.
+    if app.rewrite.add_prefix.is_empty() && req.method() == axum::http::Method::GET {
+        if let Some(q) = req.uri().query() {
+            if (rest == "login" || rest.ends_with("/login"))
+                && (q == "next=%2F" || q == "next=/" || q.starts_with("next=%2F&") || q.starts_with("next=/&"))
+            {
+                let mount = route_mount(&app);
+                let next = percent_encode_path(&format!("{mount}/"));
+                let location = if q.contains('&') {
+                    let tail = q.split_once('&').map(|(_, t)| t).unwrap_or("");
+                    format!("{mount}/login?next={next}&{tail}")
+                } else {
+                    format!("{mount}/login?next={next}")
+                };
+                return Redirect::temporary(&location).into_response();
+            }
+        }
     }
 
     let user = req
@@ -331,7 +352,7 @@ fn collect_forward_context(headers: &HeaderMap, app: &hermes_core::App) -> Forwa
 }
 
 async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> Response {
-    let query = req.uri().query().map(str::to_string);
+    let query = rewrite_forward_query(&app, req.uri().query());
     let forward = collect_forward_context(req.headers(), &app);
     let backend_path = build_backend_path(&app, &rest);
     let mut target = format!(
@@ -401,10 +422,262 @@ async fn http_proxy(app: hermes_core::App, rest: String, req: Request<Body>) -> 
                 return (status, out_headers, body).into_response();
             }
             let body = resp.bytes().await.unwrap_or_default();
+            let ct = out_headers
+                .get(header::CONTENT_TYPE)
+                .and_then(|v| v.to_str().ok())
+                .map(str::to_string);
+            let body = rewrite_mode_a_body(&app, ct.as_deref(), body);
+            // Body is fully buffered; let the HTTP stack set Content-Length.
+            out_headers.remove(header::CONTENT_LENGTH);
             (status, out_headers, body).into_response()
         }
         Err(e) => (StatusCode::BAD_GATEWAY, format!("proxy error: {e}")).into_response(),
     }
+}
+
+/// Catch root-absolute `/_next/...` requests (Next.js without basePath) and proxy them
+/// to the published app identified by the Referer launchpad mount.
+async fn orphan_next_proxy(
+    State(st): State<GatewayState>,
+    Path(rest): Path<String>,
+    req: Request<Body>,
+) -> Response {
+    let referer = req
+        .headers()
+        .get(header::REFERER)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    let Some(app) = resolve_app_from_referer(&st, referer) else {
+        return (StatusCode::NOT_FOUND, "orphaned /_next asset").into_response();
+    };
+    if !app.visibility.published {
+        return (StatusCode::FORBIDDEN, "app not published").into_response();
+    }
+    proxy_app(st, app, format!("_next/{rest}"), req).await
+}
+
+fn resolve_app_from_referer(st: &GatewayState, referer: &str) -> Option<hermes_core::App> {
+    let Ok(uri) = referer.parse::<Uri>() else {
+        return None;
+    };
+    let path = uri.path();
+    // /launchpad/a/{ns}/{slug}/... or /a/{ns}/{slug}/...
+    let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
+    let (ns, slug) = if parts.len() >= 4 && parts[0] == "launchpad" && parts[1] == "a" {
+        (parts[2], parts[3])
+    } else if parts.len() >= 3 && parts[0] == "a" {
+        (parts[1], parts[2])
+    } else if parts.len() >= 3 && parts[0] == "launchpad" && parts[1] == "apps" {
+        return st
+            .store
+            .get_app_by_canonical_slug(parts[2])
+            .ok()
+            .flatten();
+    } else {
+        return None;
+    };
+    st.store.get_app_by_route(ns, slug).ok().flatten()
+}
+
+/// Mode A backends emit root-absolute asset URLs (`/_next/...`). Rewrite them under the
+/// public mount so the browser hits the gateway again instead of the Hermes SPA.
+pub fn rewrite_mode_a_body(app: &hermes_core::App, content_type: Option<&str>, body: Bytes) -> Bytes {
+    // Mode B apps are subpath-aware and already emit correctly prefixed URLs.
+    if !app.rewrite.add_prefix.is_empty() {
+        return body;
+    }
+    let mount = route_mount(app);
+    if mount.is_empty() {
+        return body;
+    }
+    let Some(ct) = content_type.map(|s| s.to_ascii_lowercase()) else {
+        return body;
+    };
+    let is_html = ct.contains("text/html") || ct.contains("application/xhtml");
+    let rewriteable = is_html
+        || ct.contains("text/css")
+        || ct.contains("javascript")
+        || ct.contains("application/json")
+        || ct.contains("text/plain");
+    if !rewriteable {
+        return body;
+    }
+    let Ok(text) = std::str::from_utf8(&body) else {
+        return body;
+    };
+    let mut rewritten = rewrite_root_absolute_refs(&mount, text);
+    if is_html {
+        rewritten = inject_mount_shim(&mount, &rewritten);
+    }
+    if rewritten == text {
+        return body;
+    }
+    Bytes::from(rewritten)
+}
+
+/// Client-side shim so Next.js / SPA routers without `basePath` stay under the launchpad mount.
+fn inject_mount_shim(mount: &str, html: &str) -> String {
+    if html.contains("data-hermes-mount-shim") {
+        return html.to_string();
+    }
+    let mount_js = mount.replace('\\', "\\\\").replace('\'', "\\'");
+    let shim = format!(
+        r#"<script data-hermes-mount-shim>(function(m){{
+if(typeof window==='undefined'||window.__hermesMountShim)return;window.__hermesMountShim=m;
+function isMountRoot(p){{return p===m||p===m+'/';}}
+function keep(p){{return!p||p.charAt(0)!=='/'||p.indexOf('//')===0||(p.indexOf(m)===0&&!isMountRoot(p))||p.indexOf('/api/v1')===0||(p.indexOf('/launchpad')===0&&!isMountRoot(p))||p.indexOf('/auth/')===0||p.indexOf('/healthz')===0||p.indexOf('/metrics')===0;}}
+function fix(p){{if(isMountRoot(p)||p==='/')return m+'/';if(keep(p))return p;return m+p;}}
+function fixUrl(u){{if(typeof u!=='string')return u;try{{var x=new URL(u,location.origin);if(x.origin!==location.origin)return u;var n=fix(x.pathname);if(n===x.pathname)return u;return n+x.search+x.hash;}}catch(e){{return u;}}}}
+function softGo(path,search,hash){{var next=fix(path)+(search||'')+(hash||'');if(next!==location.pathname+location.search+location.hash)history.pushState(history.state,'',next);window.dispatchEvent(new PopStateEvent('popstate'));}}
+function rewriteAnchors(root){{try{{(root||document).querySelectorAll('a[href^="/"]').forEach(function(a){{var raw=a.getAttribute('href');if(!raw)return;try{{var u=new URL(raw,location.origin);if(keep(u.pathname)&&!isMountRoot(u.pathname))return;a.setAttribute('href',fix(u.pathname)+u.search+u.hash);}}catch(_){{}}}});}}catch(_){{}}}}
+var ps=history.pushState,rs=history.replaceState;
+history.pushState=function(s,t,u){{return ps.call(history,s,t,u==null?u:fixUrl(String(u)));}};
+history.replaceState=function(s,t,u){{return rs.call(history,s,t,u==null?u:fixUrl(String(u)));}};
+var of=window.fetch;window.fetch=function(i,n){{if(typeof i==='string')i=fixUrl(i);else if(i&&typeof Request!=='undefined'&&i instanceof Request){{var u=fixUrl(i.url);if(u!==i.url)i=new Request(u,i);}}return of.call(this,i,n);}};
+try{{var oa=Location.prototype.assign,orr=Location.prototype.replace;Location.prototype.assign=function(u){{return oa.call(this,fixUrl(String(u)));}};Location.prototype.replace=function(u){{return orr.call(this,fixUrl(String(u)));}};}}catch(_){{}}
+try{{var hrefDesc=Object.getOwnPropertyDescriptor(Location.prototype,'href');if(hrefDesc&&hrefDesc.set&&hrefDesc.get){{Object.defineProperty(Location.prototype,'href',{{configurable:true,enumerable:true,get:function(){{return hrefDesc.get.call(this);}},set:function(v){{hrefDesc.set.call(this,fixUrl(String(v)));}}}});}}}}catch(_){{}}
+document.addEventListener('click',function(e){{var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a||(a.target&&a.target!=='_self')||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;var h=a.getAttribute('href');if(!h||h.charAt(0)==='#'||h.indexOf('mailto:')===0||h.indexOf('javascript:')===0)return;try{{var u=new URL(h,location.href);if(u.origin!==location.origin)return;if(u.pathname==='/'||isMountRoot(u.pathname)){{e.preventDefault();e.stopImmediatePropagation();location.assign(m+'/'+(u.search||'')+(u.hash||''));return;}}if(keep(u.pathname))return;e.preventDefault();e.stopImmediatePropagation();softGo(u.pathname,u.search,u.hash);}}catch(_){{}}}},true);
+function boot(){{rewriteAnchors(document);try{{new MutationObserver(function(){{rewriteAnchors(document);}}).observe(document.documentElement,{{childList:true,subtree:true}});}}catch(_){{}}}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+}})('{mount_js}');</script>"#
+    );
+    if let Some(idx) = html.find("<head>") {
+        let mut out = String::with_capacity(html.len() + shim.len());
+        out.push_str(&html[..idx + 6]);
+        out.push_str(&shim);
+        out.push_str(&html[idx + 6..]);
+        return out;
+    }
+    if let Some(idx) = html.find("<head ") {
+        if let Some(end) = html[idx..].find('>') {
+            let at = idx + end + 1;
+            let mut out = String::with_capacity(html.len() + shim.len());
+            out.push_str(&html[..at]);
+            out.push_str(&shim);
+            out.push_str(&html[at..]);
+            return out;
+        }
+    }
+    format!("{shim}{html}")
+}
+
+/// Rewrite `?next=/` on the public launchpad URL to `?next={mount}/` for the backend.
+fn rewrite_forward_query(app: &hermes_core::App, query: Option<&str>) -> Option<String> {
+    if app.rewrite.add_prefix.is_empty() {
+        let mount = route_mount(app);
+        if let Some(q) = query {
+            if q == "next=%2F" || q == "next=/" {
+                return Some(format!("next={}", percent_encode_path(&format!("{mount}/"))));
+            }
+            if let Some(rest) = q.strip_prefix("next=%2F&") {
+                return Some(format!(
+                    "next={}&{}",
+                    percent_encode_path(&format!("{mount}/")),
+                    rest
+                ));
+            }
+        }
+    }
+    query.map(str::to_string)
+}
+
+fn percent_encode_path(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 8);
+    for ch in s.chars() {
+        match ch {
+            'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '~' => out.push(ch),
+            '/' => out.push_str("%2F"),
+            _ => {
+                for b in ch.to_string().as_bytes() {
+                    out.push_str(&format!("%{:02X}", b));
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Rewrite root-absolute refs (`/_next/…`, `/api/…`) so they stay under `mount`.
+pub fn rewrite_root_absolute_refs(mount: &str, input: &str) -> String {
+    let mut out = input.to_string();
+    out = out.replace("\"assetPrefix\":\"\"", &format!("\"assetPrefix\":\"{mount}\""));
+    out = out.replace("'assetPrefix':''", &format!("'assetPrefix':'{mount}'"));
+    // Next.js RSC / flight payloads escape quotes inside the pushed JSON string.
+    out = out.replace(
+        "\\\"assetPrefix\\\":\\\"\\\"",
+        &format!("\\\"assetPrefix\\\":\\\"{mount}\\\""),
+    );
+    // RSC flight payloads also carry post-login `next` as root `/`.
+    out = out.replace("\\\"next\\\":\\\"/\\\"", &format!("\\\"next\\\":\\\"{mount}/\\\""));
+    for root in ["/_next/", "/assets/"] {
+        out = prefix_unmounted_root(&out, mount, root);
+    }
+    // App APIs under /api/… — leave Hermes control-plane /api/v1 alone.
+    out = prefix_unmounted_root_except(&out, mount, "/api/", &["/api/v1/"]);
+    // Root-absolute app routes (Next.js <Link href="/…">)
+    out = rewrite_root_app_paths(&out, mount);
+    out
+}
+
+fn rewrite_root_app_paths(input: &str, mount: &str) -> String {
+    let mut out = rewrite_quoted_root_paths(input, mount, "href=\"");
+    out = rewrite_quoted_root_paths(&out, mount, "href='");
+    out = rewrite_quoted_root_paths(&out, mount, "\\\"href\\\":\\\"");
+    out = out.replace("\"next\":\"/\"", &format!("\"next\":\"{mount}/\""));
+    out = out.replace("\\\"next\\\":\\\"/\\\"", &format!("\\\"next\\\":\\\"{mount}/\\\""));
+    out
+}
+
+/// Prefix `href="/foo"` → `href="{mount}/foo"` when not already mounted / external.
+fn rewrite_quoted_root_paths(input: &str, mount: &str, marker: &str) -> String {
+    let mut out = String::with_capacity(input.len().saturating_add(64));
+    let mut rest = input;
+    while let Some(idx) = rest.find(marker) {
+        let after_marker = idx + marker.len();
+        out.push_str(&rest[..after_marker]);
+        rest = &rest[after_marker..];
+        if rest.starts_with("//") || rest.starts_with(mount) || rest.starts_with("/api/v1/") {
+            continue;
+        }
+        if rest.starts_with('/') {
+            out.push_str(mount);
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
+fn prefix_unmounted_root(input: &str, mount: &str, root: &str) -> String {
+    prefix_unmounted_root_except(input, mount, root, &[])
+}
+
+fn prefix_unmounted_root_except(input: &str, mount: &str, root: &str, except: &[&str]) -> String {
+    let mut out = String::with_capacity(input.len().saturating_add(64));
+    let mut rest = input;
+    while let Some(idx) = rest.find(root) {
+        let before = &rest[..idx];
+        let after_start = idx + root.len();
+        let candidate_tail = &rest[idx..];
+        let at_boundary = before
+            .chars()
+            .last()
+            .map(|c| matches!(c, '"' | '\'' | '`' | '=' | '(' | '[' | ',' | ' ' | '\n' | '\r' | '\t' | ':'))
+            .unwrap_or(true);
+        let skip = !at_boundary
+            || before.ends_with(mount)
+            || except.iter().any(|ex| candidate_tail.starts_with(ex));
+        if skip {
+            out.push_str(&rest[..after_start]);
+            rest = &rest[after_start..];
+            continue;
+        }
+        out.push_str(before);
+        out.push_str(mount);
+        out.push_str(root);
+        rest = &rest[after_start..];
+    }
+    out.push_str(rest);
+    out
 }
 
 async fn tunnel_websocket(
@@ -610,6 +883,8 @@ fn filter_request_headers(in_headers: &HeaderMap) -> HeaderMap {
             || name.eq_ignore_ascii_case("connection")
             || name.eq_ignore_ascii_case("upgrade")
             || name.eq_ignore_ascii_case("content-length")
+            // Ask upstream for identity so Mode A HTML rewrite can inspect/edit the body.
+            || name.eq_ignore_ascii_case("accept-encoding")
             || name.starts_with("sec-websocket")
         {
             continue;
@@ -904,5 +1179,53 @@ mod tests {
             rewrite_set_cookie_value(&app, "sid=abc; Path=/grafana"),
             "sid=abc; Path=/launchpad/a/hermes-demo/grafana/grafana"
         );
+    }
+
+    #[test]
+    fn mode_a_body_rewrites_next_assets_and_asset_prefix() {
+        let mount = "/launchpad/a/zyvor-janus/zyvor-janus-web";
+        let html = r#"<link href="/_next/static/css/x.css"/><script src="/_next/static/chunks/a.js"></script>"assetPrefix":"""#;
+        let out = rewrite_root_absolute_refs(mount, html);
+        assert!(out.contains(&format!("{mount}/_next/static/css/x.css")));
+        assert!(out.contains(&format!("{mount}/_next/static/chunks/a.js")));
+        assert!(out.contains(&format!("\"assetPrefix\":\"{mount}\"")));
+        assert!(!out.contains("href=\"/_next/"));
+    }
+
+    #[test]
+    fn mode_a_body_skips_already_mounted_and_hermes_api() {
+        let mount = "/launchpad/a/zyvor-janus/zyvor-janus-web";
+        let html = format!(
+            r#"href="{mount}/_next/static/a.js" fetch("/api/auth/login") keep("/api/v1/catalog")"#
+        );
+        let out = rewrite_root_absolute_refs(mount, &html);
+        assert_eq!(out.matches(&format!("{mount}/_next/")).count(), 1);
+        assert!(out.contains(&format!("{mount}/api/auth/login")));
+        assert!(out.contains("\"/api/v1/catalog\""));
+        assert!(!out.contains(&format!("{mount}/api/v1/")));
+    }
+
+    #[test]
+    fn mode_a_body_helper_skips_mode_b() {
+        let app = sample_app(Rewrite {
+            strip_prefix: String::new(),
+            add_prefix: "/launchpad/a/hermes-demo/grafana".into(),
+        });
+        let raw = Bytes::from_static(br#"href="/_next/static/x.css""#);
+        let out = rewrite_mode_a_body(&app, Some("text/html"), raw.clone());
+        assert_eq!(out, raw);
+    }
+
+    #[test]
+    fn mode_a_html_injects_mount_shim() {
+        let app = sample_app(Rewrite {
+            strip_prefix: "/launchpad/a/hermes-demo/grafana".into(),
+            add_prefix: String::new(),
+        });
+        let raw = Bytes::from_static(br#"<!DOCTYPE html><html><head><title>t</title></head><body>hi</body></html>"#);
+        let out = rewrite_mode_a_body(&app, Some("text/html; charset=utf-8"), raw);
+        let s = std::str::from_utf8(&out).unwrap();
+        assert!(s.contains("data-hermes-mount-shim"));
+        assert!(s.contains("/launchpad/a/hermes-demo/grafana"));
     }
 }

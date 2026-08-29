@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/ssahani/hermes/controller/model"
+	"github.com/zyvorai/hermes/controller/model"
 )
 
 func (w *Watcher) Diagnose(ctx context.Context, app model.App) model.AppDiagnosis {

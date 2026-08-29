@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Delegate Aether + Hermes platform E2E to the Aether orchestrator.
+# Delegate Axiom + Hermes platform E2E to the Axiom orchestrator.
 #
 # Usage:
 #   ./scripts/test-platform-remote.sh <host> [ssh_user]
@@ -10,8 +10,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # shellcheck source=lib/resolve-zyvor-sibling.sh
 source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh"
 
-PLATFORM_SCRIPT="$(resolve_zyvor_script "${REPO_ROOT}" Aether "scripts/test-platform-remote.sh")" || {
-  echo "ERROR: Aether platform orchestrator not found. Clone sibling Aether/ or set AETHER_REPO." >&2
+PLATFORM_SCRIPT="$(resolve_zyvor_script "${REPO_ROOT}" Axiom "scripts/test-platform-remote.sh")" || {
+  echo "ERROR: Axiom platform orchestrator not found. Clone sibling axiom/ or set AXIOM_REPO." >&2
   exit 1
 }
 

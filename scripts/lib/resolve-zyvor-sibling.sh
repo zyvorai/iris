@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Resolve sibling Zyvor product checkouts (tt/VMRogue, tt/v9s, tt/Aether, …).
+# Resolve sibling Zyvor product checkouts (tt/VMRogue, tt/v9s, tt/axiom, …).
 #
 # Usage (from another script):
 #   # shellcheck source=lib/resolve-zyvor-sibling.sh
@@ -28,15 +28,22 @@ resolve_zyvor_sibling() {
   lower="$(echo "${name}" | tr '[:upper:]' '[:lower:]')"
   upper="$(echo "${name:0:1}" | tr '[:lower:]' '[:upper:]')${name:1}"
 
+  local candidates=(
+    "${override}"
+    "${repo_root}/../${name}"
+    "${repo_root}/../${lower}"
+    "${repo_root}/../${upper}"
+    "${tt}/${name}"
+    "${tt}/${lower}"
+    "${tt}/${upper}"
+  )
+  # Axiom renamed from Aether — accept legacy checkout path / env.
+  if [[ "${lower}" == "axiom" ]]; then
+    candidates+=("${AETHER_REPO:-}" "${repo_root}/../Aether" "${tt}/Aether")
+  fi
+
   local d
-  for d in \
-    "${override}" \
-    "${repo_root}/../${name}" \
-    "${repo_root}/../${lower}" \
-    "${repo_root}/../${upper}" \
-    "${tt}/${name}" \
-    "${tt}/${lower}" \
-    "${tt}/${upper}"; do
+  for d in "${candidates[@]}"; do
     [[ -n "${d}" && -d "${d}" ]] || continue
     printf '%s\n' "${d}"
     return 0

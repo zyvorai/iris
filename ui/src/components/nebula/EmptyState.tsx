@@ -2,28 +2,27 @@
 // https://zyvor.dev · info@zyvor.dev
 
 import type { ReactNode } from 'react'
-import GlyphTile, { type GlyphTileTone } from './GlyphTile'
 
 interface EmptyStateProps {
-  icon: ReactNode
+  icon?: ReactNode
   title: string
   description?: string
   action?: ReactNode
-  tone?: GlyphTileTone
+  tone?: string
   'data-testid'?: string
 }
 
+/** Quiet empty state — title first; icon optional and muted (no colored badge). */
 export default function EmptyState({
   icon,
   title,
   description,
   action,
-  tone = 'brand',
   'data-testid': testId,
 }: EmptyStateProps) {
   return (
     <div className="glass-empty-state" data-testid={testId ?? 'empty-state'}>
-      <GlyphTile tone={tone} icon={icon} size="lg" className="glass-empty-state-icon" />
+      {icon ? <div className="glass-empty-state-icon" aria-hidden>{icon}</div> : null}
       <h3 className="glass-empty-state-title">{title}</h3>
       {description ? <p className="glass-empty-state-desc">{description}</p> : null}
       {action ? <div className="glass-empty-state-action">{action}</div> : null}

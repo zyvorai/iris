@@ -1,4 +1,4 @@
-module github.com/ssahani/hermes
+module github.com/zyvorai/hermes
 
 go 1.23.0
 

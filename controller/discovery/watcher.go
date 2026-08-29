@@ -20,9 +20,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/ssahani/hermes/controller/model"
-	"github.com/ssahani/hermes/controller/signatures"
-	"github.com/ssahani/hermes/controller/store"
+	"github.com/zyvorai/hermes/controller/model"
+	"github.com/zyvorai/hermes/controller/signatures"
+	"github.com/zyvorai/hermes/controller/store"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 	gwexternalversions "sigs.k8s.io/gateway-api/pkg/client/informers/externalversions"
 	"k8s.io/client-go/dynamic"
