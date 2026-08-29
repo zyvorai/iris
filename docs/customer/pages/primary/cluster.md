@@ -15,7 +15,7 @@ Cluster — Primary surface.
 - Route / id: `/cluster`
 - Nav: **Primary → Cluster** (sidebar, command palette, or desktop nav)
 
-## What you can do
+## Operate from the console (UX)
 
 1. Open `/cluster` and wait for live data from Hermes.
 2. Use filters and search when the page provides them.

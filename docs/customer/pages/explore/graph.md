@@ -15,7 +15,7 @@ Graph — Explore surface.
 - Route / id: `/graph`
 - Nav: **Explore → Graph** (sidebar, command palette, or desktop nav)
 
-## What you can do
+## Operate from the console (UX)
 
 1. Open `/graph` and wait for live data from Hermes.
 2. Use filters and search when the page provides them.

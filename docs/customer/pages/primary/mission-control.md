@@ -15,7 +15,7 @@ Mission Control — live departures board across namespaces and workspaces.
 - Route / id: `/mission-control`
 - Nav: **Primary → Mission Control** (sidebar, command palette, or desktop nav)
 
-## What you can do
+## Operate from the console (UX)
 
 1. Open `/mission-control` and wait for live data from Hermes.
 2. Use filters and search when the page provides them.

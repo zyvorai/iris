@@ -15,7 +15,7 @@ Teams — Admin surface.
 - Route / id: `/teams`
 - Nav: **Admin → Teams** (sidebar, command palette, or desktop nav)
 
-## What you can do
+## Operate from the console (UX)
 
 1. Open `/teams` and wait for live data from Hermes.
 2. Use filters and search when the page provides them.
