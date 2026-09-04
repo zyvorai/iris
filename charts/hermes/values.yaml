@@ -126,12 +126,3 @@ demoApps:
 
 networkPolicy:
   enabled: false
-
-# Licence key (optional — 30-day keyless trial runs without this)
-# To apply a commercial licence after the trial:
-#   kubectl create secret generic hermes-license --from-literal=license.key="<key>" -n hermes-system
-#   helm upgrade hermes oci://ghcr.io/zyvorai/charts/hermes --reuse-values \
-#     --set license.existingSecret="hermes-license" -n hermes-system
-license:
-  key: ""
-  existingSecret: ""

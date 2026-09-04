@@ -1,5 +1,7 @@
 # Hermes
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 **The application operating layer for Kubernetes.**
 
 
@@ -60,21 +62,24 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 ```bash
 git clone https://github.com/zyvorai/hermes.git && cd hermes
 
-# Helm install (images are private — build/push your own, or use a registry
-# credential your Zyvor contact provides; the defaults in values.yaml won't
-# be pullable otherwise)
+# Build from source (recommended) or pull published GHCR images when available
+make build
+
+# Helm install from the local chart (override image repos as needed)
 helm install hermes ./charts/hermes \
   -n hermes-system --create-namespace \
-  --set global.domain=zeus.local \
-  --set image.controller.repository=<your-registry>/hermes-controller \
-  --set image.server.repository=<your-registry>/hermes-server
+  --set global.domain=hermes.local \
+  --set controller.publicBaseUrl=https://<node-ip>:31847 \
+  --set image.controller.repository=hermes-controller \
+  --set image.server.repository=hermes-server \
+  --set image.controller.pullPolicy=Never \
+  --set image.server.pullPolicy=Never
 
-# Remote lab deploy
-make deploy-remote
-./scripts/test-zyvor-stack-remote.sh <ephemeral-ip> 30151 operator
+# Remote k3s deploy (builds images on the target host)
+./scripts/deploy-remote.sh <host> <user>
 
-# Local dev
-make build && ./scripts/smoke-test.sh
+# Local smoke
+./scripts/smoke-test.sh
 # → https://localhost:31847
 ```
 
@@ -124,6 +129,8 @@ Hermes answers — without namespace archaeology.
 | User stories & validation | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
 | Full product deep dive | [docs/FULL_README_LEGACY.md](docs/FULL_README_LEGACY.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Security | [SECURITY.md](SECURITY.md) |
+| Code of Conduct | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Zyvor Platform Stack
@@ -155,4 +162,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build, test, and CI workflows. **`doc
 
 ## License
 
-Copyright (c) 2026 ZyvorAI Labs Private Limited. See [LICENSE](LICENSE).
+Licensed under the [Apache License, Version 2.0](LICENSE).
+Copyright 2026 ZyvorAI Labs Private Limited. See [NOTICE](NOTICE).

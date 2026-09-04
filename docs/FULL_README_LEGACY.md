@@ -551,6 +551,6 @@ Hermes is how humans enter the software universe that Zeus runs.
 
 ## License
 
-Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
+Copyright 2026 ZyvorAI Labs Private Limited. Licensed under the Apache License, Version 2.0.
 
 https://zyvor.dev · info@zyvor.dev

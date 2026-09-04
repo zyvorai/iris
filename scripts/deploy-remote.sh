@@ -74,12 +74,12 @@ usage() {
     HERMES_OIDC_REDIRECT_URL  OIDC redirect URL (default: <public-url>/auth/callback)
 
   Examples:
-    HERMES_LLM_API_URL=https://api.openai.com/v1 HERMES_LLM_API_KEY=sk-... deploy-remote.sh 212.8.252.194 sus
-    HERMES_OIDC_ISSUER=http://212.8.252.194:30180/realms/hermes \
-      HERMES_OIDC_CLIENT_ID=hermes HERMES_OIDC_CLIENT_SECRET=... deploy-remote.sh 212.8.252.194 sus
-    deploy-remote.sh 212.8.252.194 sus
-    deploy-remote.sh sus@212.8.252.194 --k8s --skip-build
-    deploy-remote.sh 212.8.252.194 sus --quick --skip-e2e
+    HERMES_LLM_API_URL=https://api.openai.com/v1 HERMES_LLM_API_KEY=sk-... deploy-remote.sh <host> <user>
+    HERMES_OIDC_ISSUER=https://idp.example.com/realms/hermes \
+      HERMES_OIDC_CLIENT_ID=hermes HERMES_OIDC_CLIENT_SECRET=... deploy-remote.sh <host> <user>
+    deploy-remote.sh <host> <user>
+    deploy-remote.sh <user>@<host> --k8s --skip-build
+    deploy-remote.sh <host> <user> --quick --skip-e2e
 
 EOF
 }

@@ -68,6 +68,14 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 - [ ] Changelog entry under `[Unreleased]`
 - [ ] User story acceptance criteria updated when applicable
 
+## License and conduct
+
+Contributions are accepted under the [Apache License 2.0](LICENSE). By opening a
+pull request you agree that your contribution may be distributed under that
+license. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Security issues: see [SECURITY.md](SECURITY.md) — do not file public issues for vulnerabilities.
+
 ## Code style
 
 - **Rust:** `cargo fmt` + `cargo clippy -- -D warnings`

@@ -2,15 +2,15 @@
 # Publish Hermes Docker images + Helm chart to ghcr.io/zyvorai from the remote build server.
 #
 # Usage:
-#   ZYVORAI_GHCR_TOKEN=<pat> ./scripts/publish-ghcr.sh [host] [user] [version]
+#   ZYVORAI_GHCR_TOKEN=<pat> ./scripts/publish-ghcr.sh <host> <user> [version]
 #
 # Example:
-#   ZYVORAI_GHCR_TOKEN=ghp_xxx ./scripts/publish-ghcr.sh 212.8.248.187 sus 0.2.0
+#   ZYVORAI_GHCR_TOKEN=ghp_xxx ./scripts/publish-ghcr.sh build.example.com builder 0.2.0
 
 set -euo pipefail
 
-HOST="${1:-212.8.248.187}"
-RUSER="${2:-sus}"
+HOST="${1:?host required}"
+RUSER="${2:?user required}"
 VERSION="${3:-0.2.0}"
 REMOTE="${RUSER}@${HOST}"
 ORG="zyvorai"

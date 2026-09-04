@@ -5,7 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Relicensed Hermes under **Apache License 2.0** (see `LICENSE`, `NOTICE`); removed proprietary/trial license wiring from the Helm chart and docs
+- Scrubbed lab IP / default SSH user defaults from Makefile and deploy scripts; require explicit host/user
+- README install path documents build-from-source / local chart install for open source use
+
 ### Added
+- `SECURITY.md`, `CODE_OF_CONDUCT.md`, GitHub issue/PR templates
+- Font OFL notice under `ui/public/fonts/OFL.txt`
 - [docs/development.md](docs/development.md) — developer guide (repo map, local dev, extending controller/API/UI)
 - [docs/api.md](docs/api.md) — HTTP route reference for REST, gateway, auth, and insights
 - `Dockerfile.seed` — enables `docker compose` local dev without a cluster

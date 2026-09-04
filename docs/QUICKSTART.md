@@ -30,6 +30,8 @@ helm upgrade hermes oci://ghcr.io/zyvorai/charts/hermes --reuse-values \
   --set server.llm.model="gpt-4o-mini" -n hermes-system
 ```
 
-## 5. After the 30-day trial
+## 5. Next steps
 
-Contact [sales@zyvor.dev](mailto:sales@zyvor.dev)
+- Enable authentication before exposing Hermes on the public internet (`server.auth.mode`).
+- See [docs/development.md](development.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).
+- Hermes is licensed under Apache License 2.0 — see [LICENSE](../LICENSE).

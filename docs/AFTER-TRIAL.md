@@ -1,21 +1,10 @@
-# After the Hermes Trial
+# Licensing
 
-## Get a commercial licence
+Hermes is open source under the [Apache License, Version 2.0](../LICENSE).
 
-Contact [sales@zyvor.dev](mailto:sales@zyvor.dev)
+No trial key or commercial licence secret is required to run Hermes. Build from
+source or use published container images, then install with Helm as described in
+[QUICKSTART.md](QUICKSTART.md).
 
-## Apply your licence key
-
-```bash
-kubectl create secret generic hermes-license \
-  --from-literal=license.key="<your-key>" \
-  -n hermes-system
-
-helm upgrade hermes oci://ghcr.io/zyvorai/charts/hermes \
-  --version 0.2.0 \
-  --reuse-values \
-  --set license.existingSecret="hermes-license" \
-  -n hermes-system
-
-kubectl -n hermes-system rollout restart deployment/hermes
-```
+For security reports, see [SECURITY.md](../SECURITY.md).
+For contributions, see [CONTRIBUTING.md](../CONTRIBUTING.md).

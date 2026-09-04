@@ -161,13 +161,6 @@ spec:
             {{- end }}
             - name: HERMES_UI_DIR
               value: /app/ui
-            {{- if or .Values.license.key .Values.license.existingSecret }}
-            - name: HERMES_LICENSE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.license.existingSecret | default "hermes-license" }}
-                  key: license.key
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz

@@ -261,7 +261,7 @@ _Ship Hermes with a Helm chart, monitor it with Prometheus, and run it on a lean
 4. **Launch from the launchpad** — Open the Nebula UI, hit Command-K to Spotlight-search, and click to launch any app through the gateway — no port-forward.
 5. **Optional: connect Zyra AI** — Set HERMES_LLM_API_URL and HERMES_LLM_API_KEY (or run the Ollama setup script) for natural-language search and insight. Rule-based mode works with no key.
 
-> **Good to know:** Feature availability reflects Hermes v0.2. Some capabilities are roadmap-only and not yet shipped, including in-cluster mesh policy editing and federated activity export webhooks. Discovery covers Kubernetes Services, Ingress/Gateway API routes, and Istio/Linkerd mesh routes today; discovery of arbitrary custom resources is on the roadmap. The multi-cluster registry is an early single-cluster-first MVP. Hermes ships with a 30-day trial license (HMAC-SHA256 enforced); continued use requires a commercial license from sales@zyvor.dev.
+> **Good to know:** Feature availability reflects Hermes v0.2. Some capabilities are roadmap-only and not yet shipped, including in-cluster mesh policy editing and federated activity export webhooks. Discovery covers Kubernetes Services, Ingress/Gateway API routes, and Istio/Linkerd mesh routes today; discovery of arbitrary custom resources is on the roadmap. The multi-cluster registry is an early single-cluster-first MVP.
 
 ---
-_Hermes is developed by ZyvorAI Labs. Contact **info@zyvor.dev** · Proprietary & Confidential._
+_Hermes is developed by ZyvorAI Labs and released under the Apache License 2.0. Contact **info@zyvor.dev** · [zyvor.dev](https://zyvor.dev)._

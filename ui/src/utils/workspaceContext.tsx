@@ -1,5 +1,5 @@
-// Copyright (c) 2026 ZyvorAI Labs Private Limited. All rights reserved.
-// https://zyvor.dev · info@zyvor.dev
+// Copyright 2026 ZyvorAI Labs Private Limited
+// SPDX-License-Identifier: Apache-2.0
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { HermesApp } from '../types'

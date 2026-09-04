@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./scripts/test-zyvor-stack-remote.sh <host> [vmrogue_port] [ssh_user]
-#   ./scripts/test-zyvor-stack-remote.sh 212.8.252.194 30151 sus
+#   ./scripts/test-zyvor-stack-remote.sh <host> 30151 <user>
 #
 # Environment:
 #   VMROGUE_REPO — override sibling path (default: ../VMRogue under tt/)

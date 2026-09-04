@@ -1,0 +1,7 @@
+This directory may hold self-hosted font files (for example Archivo and
+Azeret Mono) distributed under the SIL Open Font License, Version 1.1.
+
+Full OFL text: https://scripts.sil.org/OFL
+
+Copyright notices for individual font families accompany their upstream
+releases from Google Fonts / the respective foundries.

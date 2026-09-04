@@ -11,3 +11,5 @@ keywords:
 maintainers:
   - name: ZyvorAI Labs Private Limited
 home: https://zyvor.dev
+annotations:
+  artifacthub.io/license: Apache-2.0

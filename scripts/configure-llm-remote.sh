@@ -13,10 +13,10 @@ The API key can be passed as the third argument or via HERMES_LLM_API_KEY.
 Examples:
   HERMES_LLM_API_URL=https://api.openai.com/v1 \
   HERMES_LLM_API_KEY=sk-... \
-    ./scripts/configure-llm-remote.sh 175.110.114.93 sus
+    ./scripts/configure-llm-remote.sh <host> <user>
 
-  HERMES_LLM_API_URL=http://175.110.114.93:11434/v1 HERMES_LLM_MODEL=llama3.2 \
-    ./scripts/configure-llm-remote.sh 175.110.114.93 sus
+  HERMES_LLM_API_URL=http://<host>:11434/v1 HERMES_LLM_MODEL=llama3.2 \
+    ./scripts/configure-llm-remote.sh <host> <user>
 
   # Or use ./scripts/setup-ollama-remote.sh (installs Ollama, binds 0.0.0.0, sets node IP URL)
 EOF

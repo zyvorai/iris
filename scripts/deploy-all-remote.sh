@@ -2,8 +2,8 @@
 # Full remote deploy (rsync + K3s + images + Helm + E2E).
 #
 # Examples:
-#   ./scripts/deploy-all-remote.sh 212.8.252.194 sus
-#   ./scripts/deploy-all-remote.sh sus@212.8.252.194 --quick
+#   ./scripts/deploy-all-remote.sh <host> <user>
+#   ./scripts/deploy-all-remote.sh <user>@<host> --quick
 #   make deploy-all-remote
 set -euo pipefail
 
