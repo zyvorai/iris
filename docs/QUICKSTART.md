@@ -18,7 +18,7 @@ kubectl -n hermes-system rollout status deployment/hermes
 
 ## 3. Open the UI
 
-Visit `http://<node-ip>:31847` — Hermes auto-discovers all services on your cluster.
+Visit `https://<node-ip>:31847` — Hermes auto-discovers all services on your cluster. Use https (self-signed by default); accept the browser trust warning.
 
 ## 4. Enable Zyra AI (optional)
 

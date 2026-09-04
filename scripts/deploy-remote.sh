@@ -411,7 +411,9 @@ deploy_helm() {
 set -euo pipefail
 cd "${REMOTE_DIR}"
 source scripts/lib/open-host-firewall-ports.sh
-open_hermes_firewall_ports || true
+if ! open_hermes_firewall_ports; then
+    echo "WARNING: host firewall open incomplete — public NodePort may be unreachable" >&2
+fi
 export HERMES_TAG HELM_NS HERMES_PUBLIC_HOST="${HERMES_PUBLIC_HOST}" HERMES_NODE_PORT
 bash scripts/lib/helm-hermes-remote.sh
 cd /
@@ -474,12 +476,18 @@ REMOTE
 run_e2e() {
     [ "$SKIP_E2E" = true ] && return 0
     local e2e="${SCRIPT_DIR}/e2e-deploy-verify.sh"
+    local url="https://${TARGET_HOST}:${HERMES_NODE_PORT}"
+    info "Checking public reachability at ${url}/healthz"
+    if ! curl -skf --connect-timeout 10 --max-time 30 "${url}/healthz" >/dev/null; then
+        fail "Hermes not reachable at ${url}/healthz — use https, accept self-signed cert, and ensure cloud SG allows ${HERMES_NODE_PORT}/tcp"
+    fi
+    ok "Public healthz OK"
     [ -f "$e2e" ] || return 0
     chmod +x "$e2e"
     echo ""
-    HERMES_E2E_BASE="https://${TARGET_HOST}:${HERMES_NODE_PORT}" \
+    HERMES_E2E_BASE="${url}" \
         HERMES_NAMESPACE="${HERMES_NAMESPACE}" \
-        "$e2e" || warn "E2E reported issues — see above"
+        "$e2e" || fail "E2E reported issues — see above"
 }
 
 do_uninstall() {
@@ -519,6 +527,7 @@ print_summary() {
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Namespace" "${HERMES_NAMESPACE}"
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Log"       "${DEPLOY_LOG}"
     printf "  ${C_BOLD}└──────────────────────────────────────────────────────────┘${C_RST}\n\n"
+    printf "  ${C_INFO}ℹ${C_RST}  ${C_DIM}Use https:// (not http). Accept the self-signed cert warning. Ensure cloud SG allows ${HERMES_NODE_PORT}/tcp.${C_RST}\n\n"
     printf "  ${C_INFO}🧪${C_RST}  ${C_DIM}Next:${C_RST}  ${C_BOLD}%s${C_RST}\n" "${smoke}"
     printf "  ${C_DIM}       ${C_RST}%s\n" "${stack}"
     printf "  ${C_DIM}       ${C_RST}./scripts/e2e-deploy-verify.sh %s\n" "${url}"

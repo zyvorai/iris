@@ -320,11 +320,14 @@ struct ForwardContext {
 }
 
 fn collect_forward_context(headers: &HeaderMap, app: &hermes_core::App) -> ForwardContext {
+    // Hermes terminates TLS itself (rustls); default to https so backends
+    // (Grafana, Prometheus, …) emit absolute https:// URLs when clients hit
+    // NodePort directly without an ingress X-Forwarded-Proto header.
     let proto = headers
         .get("x-forwarded-proto")
         .and_then(|v| v.to_str().ok())
         .filter(|s| !s.is_empty())
-        .unwrap_or("http")
+        .unwrap_or("https")
         .to_string();
     let host = headers
         .get(header::HOST)
@@ -699,7 +702,7 @@ async fn tunnel_websocket(
         }
         let _ = headers.insert(
             "x-forwarded-proto",
-            forward.proto.parse().unwrap_or_else(|_| "http".parse().unwrap()),
+            forward.proto.parse().unwrap_or_else(|_| "https".parse().unwrap()),
         );
         if !forward.prefix.is_empty() {
             let _ = headers.insert(
@@ -918,7 +921,7 @@ fn inject_hermes_headers(headers: &mut HeaderMap, app: &hermes_core::App, forwar
     );
     headers.insert(
         HeaderName::from_static("x-forwarded-proto"),
-        HeaderValue::from_str(&forward.proto).unwrap_or(HeaderValue::from_static("http")),
+        HeaderValue::from_str(&forward.proto).unwrap_or(HeaderValue::from_static("https")),
     );
     if !forward.host.is_empty() {
         let _ = headers.insert(

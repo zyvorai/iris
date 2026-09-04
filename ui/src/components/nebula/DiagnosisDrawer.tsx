@@ -7,7 +7,7 @@ import { AlertTriangle, Copy, Sparkles, Stethoscope, X } from 'lucide-react'
 import RouteLens from '../RouteLens'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
-import { hermesApi, statusLabel } from '../../services/hermesApi'
+import { hermesApi, statusLabel, appPublicUrl } from '../../services/hermesApi'
 import { useZyraAiInsight } from '../../hooks/useZyraAiInsight'
 import { useInspector } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
@@ -145,8 +145,8 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
                 <strong>{app.data.namespace}</strong>
               </div>
               <div className="diagnosis-drawer-fact">
-                <span>Endpoint</span>
-                <code>{app.data.publicUrl || app.data.routePath}</code>
+                <span>Public URL</span>
+                <code>{appPublicUrl(app.data)}</code>
               </div>
             </div>
           ) : null}

@@ -28,9 +28,9 @@ This is the customer-facing onboarding guide — how to access the product, your
 
 **How to access it**
 
-- **Web:** Nebula launchpad UI on NodePort **31847** — open `http://localhost:31847` (or `http://:31847`). Press `⌘K` / `Ctrl+K` for Spotlight to search and launch any app through the gateway. Key pages: `/` (Command Deck), `/apps`, `/cluster`, `/discovery`, `/health`, `/graph`, `/teams`, `/federated`, `/activity`.
-- **CLI:** There is no dedicated end-user CLI — Hermes is operated with `kubectl` / `helm` plus repo scripts (`./scripts/deploy-remote.sh  `, `./scripts/configure-llm-remote.sh`, `./scripts/setup-ollama-remote.sh`, `./scripts/e2e-deploy-verify.sh http://host:31847`). Every action is also scriptable over REST with `curl`.
-- **API:** REST + WebSocket surface under `http://localhost:31847/api/v1`. Public (no auth): `GET /healthz`, `GET /metrics`, `/auth/*`, `/api/v1/ws-echo`. Example: `curl -s http://localhost:31847/api/v1/apps | jq '.[0]'`. Embedded Zyra AI insights live under `/api/v1/insights/*` and `/api/v1/search/llm`.
+- **Web:** Nebula launchpad UI on NodePort **31847** — open `https://localhost:31847` (or `https://<node-ip>:31847`). Use https (self-signed by default). Press `⌘K` / `Ctrl+K` for Spotlight to search and launch any app through the gateway. Key pages: `/` (Command Deck), `/apps`, `/cluster`, `/discovery`, `/health`, `/graph`, `/teams`, `/federated`, `/activity`.
+- **CLI:** There is no dedicated end-user CLI — Hermes is operated with `kubectl` / `helm` plus repo scripts (`./scripts/deploy-remote.sh <host> <user>`, `./scripts/configure-llm-remote.sh`, `./scripts/setup-ollama-remote.sh`, `./scripts/e2e-deploy-verify.sh https://host:31847`). Every action is also scriptable over REST with `curl`.
+- **API:** REST + WebSocket surface under `https://localhost:31847/api/v1`. Public (no auth): `GET /healthz`, `GET /metrics`, `/auth/*`, `/api/v1/ws-echo`. Example: `curl -sk https://localhost:31847/api/v1/apps | jq '.[0]'`. Embedded Zyra AI insights live under `/api/v1/insights/*` and `/api/v1/search/llm`.
 - **Login:** Auth is disabled unless `HERMES_AUTH_MODE` is set. With `api_key`, send `Authorization: Bearer `; with `oidc`, sign in at `/auth/login` (redirects to your IdP, sets a session cookie). `GET /auth/me` returns the current user, groups, workspaces, and allowed actions.
 - **Needs:** A running Kubernetes cluster (Hermes installs via Helm); optionally set an OpenAI-compatible LLM (`HERMES_LLM_API_URL` + `HERMES_LLM_API_KEY`) to unlock Zyra AI natural-language answers — rule-based mode works with no key.
 
@@ -39,7 +39,7 @@ This is the customer-facing onboarding guide — how to access the product, your
 - **Install and open Hermes**
   1. Install the chart: `helm install hermes oci://ghcr.io/zyvorai/charts/hermes --version 0.2.0 --namespace hermes-system --create-namespace`.
   1. Wait for rollout: `kubectl -n hermes-system rollout status deployment/hermes`.
-  1. Open the Nebula UI at `http://:31847` — discovery starts automatically across every namespace.
+  1. Open the Nebula UI at `https://<node-ip>:31847` — discovery starts automatically across every namespace.
 - **Review the discovery queue and publish an app**
   1. Let discovery run (`discoverAll: true` by default) so newly found Services land in the queue.
   1. Open `/discovery` in the UI and review candidates ranked by Zyra AI publish suggestions.
@@ -251,7 +251,7 @@ _Ship Hermes with a Helm chart, monitor it with Prometheus, and run it on a lean
 - **Remote Deploy Tooling** — Scripts for remote k3s deploy, LLM configuration, Ollama setup, and end-to-end verification. — _Get from git clone to a verified running cluster fast._
   - **How:** Run `./scripts/deploy-remote.sh  `, `./scripts/configure-llm-remote.sh  `, and `./scripts/setup-ollama-remote.sh  `.
 - **Demo Apps & Smoke Tests** — Ships demo Grafana and Prometheus plus smoke and E2E verification scripts. — _Prove the install works end to end in minutes._
-  - **How:** Run `./scripts/smoke-test.sh` locally and `./scripts/e2e-deploy-verify.sh http://host:31847` against a deploy; UI Playwright via `HERMES_E2E_BASE=http://host:31847 npm run test:e2e`.
+  - **How:** Run `./scripts/smoke-test.sh` locally and `./scripts/e2e-deploy-verify.sh https://host:31847` against a deploy; UI Playwright via `HERMES_E2E_BASE=https://host:31847 npm run test:e2e`.
 
 ## Getting started
 

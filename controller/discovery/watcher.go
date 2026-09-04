@@ -405,20 +405,7 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 
 	base := strings.TrimRight(w.cfg.PublicBaseURL, "/")
 	pathPrefix := strings.Trim(w.cfg.PublicPathPrefix, "/")
-	var routePath, publicURL string
-	if pathPrefix != "" {
-		routePath = fmt.Sprintf("/%s/a/%s/%s", pathPrefix, svc.Namespace, slug)
-		publicURL = base + routePath
-		if canonicalSlug != "" {
-			publicURL = fmt.Sprintf("%s/%s/apps/%s", base, pathPrefix, canonicalSlug)
-		}
-	} else {
-		routePath = fmt.Sprintf("/a/%s/%s", svc.Namespace, slug)
-		publicURL = base + routePath
-		if canonicalSlug != "" {
-			publicURL = base + "/apps/" + canonicalSlug
-		}
-	}
+	routePath, publicURL := publicRoute(base, pathPrefix, svc.Namespace, slug, canonicalSlug)
 
 	meta := enrichMeta(metaFromAnnotations(ann), svc.Namespace)
 	if sig != nil && len(sig.DependsOn) > 0 && len(meta.DependsOn) == 0 {
@@ -469,6 +456,26 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		Rewrite:    rewrite,
 		Meta:       meta,
 	}, true
+}
+
+// publicRoute builds the gateway route path and absolute public URL from the
+// current PublicBaseURL / path-prefix config so catalog links track redeploys
+// to a new public host/IP.
+func publicRoute(base, pathPrefix, namespace, slug, canonicalSlug string) (routePath, publicURL string) {
+	if pathPrefix != "" {
+		routePath = fmt.Sprintf("/%s/a/%s/%s", pathPrefix, namespace, slug)
+		publicURL = base + routePath
+		if canonicalSlug != "" {
+			publicURL = fmt.Sprintf("%s/%s/apps/%s", base, pathPrefix, canonicalSlug)
+		}
+		return routePath, publicURL
+	}
+	routePath = fmt.Sprintf("/a/%s/%s", namespace, slug)
+	publicURL = base + routePath
+	if canonicalSlug != "" {
+		publicURL = base + "/apps/" + canonicalSlug
+	}
+	return routePath, publicURL
 }
 
 // healthCheckClient never follows redirects: some backends (e.g. Grafana with
@@ -523,6 +530,17 @@ func (w *Watcher) RefreshHealth(ctx context.Context, interval time.Duration) {
 				key := app.Namespace + "/" + app.Backend.Name
 				if ready, ok := w.endpoints[key]; ok {
 					app.ReadyCount = ready
+				}
+				base := strings.TrimRight(w.cfg.PublicBaseURL, "/")
+				pathPrefix := strings.Trim(w.cfg.PublicPathPrefix, "/")
+				routePath, publicURL := publicRoute(base, pathPrefix, app.Namespace, app.Slug, app.CanonicalSlug)
+				app.RoutePath = routePath
+				app.PublicURL = publicURL
+				// Keep rewrite in sync when the public path prefix changes.
+				if app.Rewrite.AddPrefix != "" {
+					app.Rewrite = model.Rewrite{AddPrefix: routePath}
+				} else {
+					app.Rewrite = model.Rewrite{StripPrefix: routePath}
 				}
 				app.Status, app.StatusMsg = w.healthStatus(app)
 				_ = w.store.UpsertApp(app)

@@ -12,7 +12,8 @@ USE_NODEPORT="${HERMES_USE_NODEPORT:-1}"
 cd "${REMOTE_DIR}"
 
 if [ -z "${HERMES_PUBLIC_HOST}" ]; then
-    HERMES_PUBLIC_HOST="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    echo "HERMES_PUBLIC_HOST is required (public IP or DNS name reachable by clients)" >&2
+    exit 1
 fi
 PUBLIC_BASE="https://${HERMES_PUBLIC_HOST}:${HERMES_NODE_PORT}"
 

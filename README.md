@@ -75,7 +75,7 @@ make deploy-remote
 
 # Local dev
 make build && ./scripts/smoke-test.sh
-# → http://localhost:31847
+# → https://localhost:31847
 ```
 
 Optional LLM for Zyra AI (rule-based fallback works without a key):

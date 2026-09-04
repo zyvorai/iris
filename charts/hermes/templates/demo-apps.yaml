@@ -1,5 +1,5 @@
 {{- if .Values.demoApps.enabled }}
-{{- $publicBase := .Values.controller.publicBaseUrl | default (printf "http://%s:%v" .Values.global.domain .Values.service.nodePort) }}
+{{- $publicBase := .Values.controller.publicBaseUrl | default (printf "https://%s:%v" .Values.global.domain .Values.service.nodePort) }}
 apiVersion: v1
 kind: Namespace
 metadata:
