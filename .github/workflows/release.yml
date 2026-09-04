@@ -84,11 +84,11 @@ jobs:
           set -euo pipefail
           # User-owned packages (zyvorai is a user account, not an org).
           for pkg in iris-server iris-controller 'charts/iris'; do
-            enc="$(printf '%s' "$pkg" | jq -sRr @uri)"
+            enc="$(printf '%s' "$pkg" | jq -sRr @uri | tr -d '\n')"
             echo "Setting $pkg → public"
             gh api --method PATCH \
               -H "Accept: application/vnd.github+json" \
-              "/user/packages/container/${enc}" \
+              "/users/zyvorai/packages/container/${enc}" \
               -f visibility=public
           done
 

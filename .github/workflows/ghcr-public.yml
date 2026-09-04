@@ -18,10 +18,10 @@ jobs:
         run: |
           set -euo pipefail
           for pkg in iris-server iris-controller 'charts/iris'; do
-            enc="$(printf '%s' "$pkg" | jq -sRr @uri)"
+            enc="$(printf '%s' "$pkg" | jq -sRr @uri | tr -d '\n')"
             echo "→ $pkg"
             gh api --method PATCH \
               -H "Accept: application/vnd.github+json" \
-              "/user/packages/container/${enc}" \
+              "/users/zyvorai/packages/container/${enc}" \
               -f visibility=public
           done
