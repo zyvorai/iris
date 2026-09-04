@@ -77,21 +77,6 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
           helm push /tmp/helm/iris-${{ steps.version.outputs.version }}.tgz oci://ghcr.io/${{ env.IMAGE_OWNER }}/charts
 
-      - name: Make GHCR packages public
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # User-owned packages (zyvorai is a user account, not an org).
-          for pkg in iris-server iris-controller 'charts/iris'; do
-            enc="$(printf '%s' "$pkg" | jq -sRr @uri | tr -d '\n')"
-            echo "Setting $pkg → public"
-            gh api --method PATCH \
-              -H "Accept: application/vnd.github+json" \
-              "/users/zyvorai/packages/container/${enc}" \
-              -f visibility=public
-          done
-
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,6 +109,9 @@ jobs:
           ### Chart
 
           - \`oci://ghcr.io/zyvorai/charts/iris\` (version ${VER})
+
+          > First release only: in GitHub → Packages, set each package visibility to **Public**
+          > (iris-server, iris-controller, charts/iris) so anonymous \`helm install\` / pulls work.
           EOF
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release edit "$TAG" --notes-file "$NOTES"
