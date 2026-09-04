@@ -94,11 +94,11 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Lint chart
-        run: helm lint ./charts/hermes
+        run: helm lint ./charts/iris
 
       - name: Template render (sanity check)
         run: |
-          helm template hermes ./charts/hermes \
+          helm template iris ./charts/iris \
             --set global.domain=ci.test.local \
             --set demoApps.enabled=false \
             --set networkPolicy.enabled=true \

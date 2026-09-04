@@ -2,6 +2,19 @@
 
 Iris indexes all cluster services by default (`controller.discoverAll: true`). Annotated and signature-matched applications receive richer metadata; everything else appears in the Cluster and Discovery views.
 
+## From GHCR (recommended)
+
+```bash
+helm install iris oci://ghcr.io/zyvorai/charts/iris \
+  --version 0.2.0 \
+  --namespace iris-system --create-namespace \
+  --set controller.publicBaseUrl=https://<node-ip>:31847
+```
+
+Open `https://<node-ip>:31847` (self-signed TLS by default). Images pull from `ghcr.io/zyvorai/iris-server` and `ghcr.io/zyvorai/iris-controller`.
+
+## From the local chart
+
 ```bash
 helm install iris ./charts/iris \
   -n iris-system \

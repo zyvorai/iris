@@ -62,10 +62,14 @@ Iris transforms Kubernetes from an infrastructure platform into an application p
 ```bash
 git clone https://github.com/zyvorai/iris.git && cd iris
 
-# Build from source (recommended) or pull published GHCR images when available
-make build
+# Install from GHCR (chart + images)
+helm install iris oci://ghcr.io/zyvorai/charts/iris \
+  --version 0.2.0 \
+  --namespace iris-system --create-namespace \
+  --set controller.publicBaseUrl=https://<node-ip>:31847
 
-# Helm install from the local chart (override image repos as needed)
+# Or build from source and use the local chart
+make build
 helm install iris ./charts/iris \
   -n iris-system --create-namespace \
   --set global.domain=iris.local \
