@@ -4,14 +4,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, Layers, Lock } from 'lucide-react'
-import { hermesApi, environmentLabel } from '../services/hermesApi'
+import { irisApi, environmentLabel } from '../services/irisApi'
 import { useWorkspace } from '../utils/workspaceContext'
 
 export default function WorkspaceSwitcher() {
   const { workspaceId, setWorkspaceId } = useWorkspace()
-  const workspaces = useQuery({ queryKey: ['workspaces'], queryFn: hermesApi.listWorkspaces })
-  const clusters = useQuery({ queryKey: ['clusters'], queryFn: hermesApi.listClusters })
-  const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe })
+  const workspaces = useQuery({ queryKey: ['workspaces'], queryFn: irisApi.listWorkspaces })
+  const clusters = useQuery({ queryKey: ['clusters'], queryFn: irisApi.listClusters })
+  const auth = useQuery({ queryKey: ['auth-me'], queryFn: irisApi.authMe })
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -32,7 +32,7 @@ export default function WorkspaceSwitcher() {
         <Layers size={14} aria-hidden />
         <button type="button" className="workspace-chip active" onClick={() => setDropdownOpen((v) => !v)}>
           All
-          <ChevronDown size={12} className={dropdownOpen ? 'hermes-nb-chevron-open' : ''} />
+          <ChevronDown size={12} className={dropdownOpen ? 'iris-nb-chevron-open' : ''} />
         </button>
         {dropdownOpen ? (
           <div className="workspace-dropdown-menu">
@@ -103,7 +103,7 @@ export default function WorkspaceSwitcher() {
         <Layers size={14} aria-hidden />
         <button type="button" className="workspace-chip active" onClick={() => setDropdownOpen((v) => !v)}>
           {activeLabel}
-          <ChevronDown size={12} className={dropdownOpen ? 'hermes-nb-chevron-open' : ''} />
+          <ChevronDown size={12} className={dropdownOpen ? 'iris-nb-chevron-open' : ''} />
         </button>
         {dropdownOpen ? (
           <div className="workspace-dropdown-menu">

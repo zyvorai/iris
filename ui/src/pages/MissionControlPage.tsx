@@ -5,14 +5,14 @@ import { useQuery } from '@tanstack/react-query'
 import MissionControlSpaces from '../components/command/MissionControlSpaces'
 import PageFrame from '../components/nebula/PageFrame'
 import ContextBanner from '../components/nebula/ContextBanner'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useWorkspace } from '../utils/workspaceContext'
 
 /** Standalone departures-board destination — the cross-namespace live status
  * feed extracted from HomePage's embedded Mission Control section, per the
  * mockup's 8-destination IA. */
 export default function MissionControlPage() {
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog, refetchInterval: 15000 })
   const { matchesWorkspace, workspaceId, setWorkspaceId } = useWorkspace()
   const apps = (catalog.data ?? []).filter(matchesWorkspace)
 

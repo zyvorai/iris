@@ -1,7 +1,7 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: Apache-2.0
 
-const KEY = 'hermes-spotlight-recent'
+const KEY = 'iris-spotlight-recent'
 const MAX = 8
 
 export function loadSpotlightRecents(): string[] {

@@ -9,6 +9,6 @@
 .DS_Store
 bin/
 dist/
-cmd/hermes-controller/hermes-controller
-/hermes-controller
-/hermes-server
+cmd/iris-controller/iris-controller
+/iris-controller
+/iris-server

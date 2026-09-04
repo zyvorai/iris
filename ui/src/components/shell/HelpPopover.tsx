@@ -12,7 +12,7 @@ interface HelpPopoverProps {
 const resources = [
   { label: 'Help center', href: '/help', icon: BookOpen, internal: true },
   { label: 'Catalog API', href: '/api/v1/catalog', icon: BookOpen, internal: false },
-  { label: 'GitHub docs', href: 'https://github.com/zyvorai/hermes', icon: BookOpen, internal: false },
+  { label: 'GitHub docs', href: 'https://github.com/zyvorai/iris', icon: BookOpen, internal: false },
 ]
 
 export default function HelpPopover({ onOpenShortcuts }: HelpPopoverProps) {
@@ -45,7 +45,7 @@ export default function HelpPopover({ onOpenShortcuts }: HelpPopoverProps) {
 
   return (
     <div className="zeus-help-popover-wrap" ref={rootRef}>
-      <button type="button" className="hermes-help-menu-btn" onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="iris-help-menu-btn" onClick={() => setOpen((v) => !v)}>
         <HelpCircle size={16} />
         Help
       </button>

@@ -1,4 +1,4 @@
-# Hermes Documentation
+# Iris Documentation
 
 The application operating layer for Kubernetes
 
@@ -30,7 +30,7 @@ Stories cover discovery, launch, health, gateway exposure, publish workflow, Zyr
 
 ## Zyra AI
 
-Hermes ships fleet and per-app intelligence with LLM + rule-based fallback. Configure via `HERMES_LLM_*` env vars or `setup-ollama-remote.sh`. Full endpoint and Spotlight command reference: **[ui.md](ui.md#zyra-ai)**.
+Iris ships fleet and per-app intelligence with LLM + rule-based fallback. Configure via `IRIS_LLM_*` env vars or `setup-ollama-remote.sh`. Full endpoint and Spotlight command reference: **[ui.md](ui.md#zyra-ai)**.
 
 ## Ecosystem
 
@@ -41,7 +41,7 @@ Part of the [Zyvor / Transiva platform stack](https://zyvor.dev):
 | **hypercluster** | Kubernetes bootstrap |
 | **machina** | Bare-metal hypervisor OS |
 | **zeus-os (v9s)** | Cloud / KubeVirt control plane |
-| **hermes** | Application layer for K8s |
+| **iris** | Application layer for K8s |
 | **forge** | AI infrastructure on K8s |
 | **transiva / h2kvm** | VM migration |
 | **guestkit** | Offline VM assurance |

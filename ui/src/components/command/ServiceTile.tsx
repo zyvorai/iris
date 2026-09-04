@@ -2,24 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import AppIcon from '../AppIcon'
-import { openApp, statusLabel, statusTone } from '../../services/hermesApi'
-import type { HermesApp } from '../../types'
+import { openApp, statusLabel, statusTone } from '../../services/irisApi'
+import type { IrisApp } from '../../types'
 
 type ServiceTileVariant = 'compact' | 'detail' | 'hero'
 
 interface ServiceTileProps {
-  app: HermesApp
+  app: IrisApp
   variant?: ServiceTileVariant
-  onInspect?: (app: HermesApp) => void
+  onInspect?: (app: IrisApp) => void
 }
 
-function routeCount(app: HermesApp): number {
+function routeCount(app: IrisApp): number {
   const ingress = app.meta?.ingressHosts?.length ?? 0
   const mesh = app.meta?.meshRoutes?.length ?? 0
   return ingress + mesh
 }
 
-function endpointLabel(app: HermesApp): string {
+function endpointLabel(app: IrisApp): string {
   const routes = routeCount(app)
   if (routes > 0) return `${routes} routes`
   return `:${app.backend.port}`

@@ -1,12 +1,13 @@
 # Changelog
 
-All notable changes to Hermes are documented here.
+All notable changes to Iris are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
 ### Changed
-- Relicensed Hermes under **Apache License 2.0** (see `LICENSE`, `NOTICE`); removed proprietary/trial license wiring from the Helm chart and docs
+- **Renamed project from Hermes to Iris** — binaries (`iris-server`, `iris-controller`), crates, Helm chart (`charts/iris`), Go module (`github.com/zyvorai/iris`), env vars (`IRIS_*`), annotations (`iris.zyvor.dev/*`), and default namespace (`iris-system`). No Hermes aliases retained.
+- Relicensed Iris under **Apache License 2.0** (see `LICENSE`, `NOTICE`); removed proprietary/trial license wiring from the Helm chart and docs
 - Scrubbed lab IP / default SSH user defaults from Makefile and deploy scripts; require explicit host/user
 - README install path documents build-from-source / local chart install for open source use
 
@@ -35,7 +36,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Federated and activity Zeus AI insight APIs, Discovery Publish Zeus picks, Spotlight federation/activity commands
 - LLM connectivity probe on `/insights/status`, Ask Zeus on Cluster/Discovery/Graph/Apps, insight panel refresh
 - Teams owner insight panel, Graph ZeusAiPanel upgrade, Federated/Activity Ask Zeus + refresh
-- `setup-ollama-remote.sh` — installs Ollama on the deploy host (0.0.0.0 bind) and configures Hermes for k3s pod reachability
+- `setup-ollama-remote.sh` — installs Ollama on the deploy host (0.0.0.0 bind) and configures Iris for k3s pod reachability
 
 - True-empty vs filter-empty states on Catalog and Cluster pages with distinct CTAs
 - Mobile toolbar stacking (`.page-toolbar-stacked`), category chip scroll shell, cluster export in `ActionMenu`
@@ -52,7 +53,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Playwright smoke tests for skeleton loading, catalog/cluster toolbars, mobile layout
 - [docs/ui.md](docs/ui.md) — UI architecture and development guide
 - Axiom-style two-row top navbar replacing the three-panel left-rail shell
-- `HermesNavbar` component with health chip, spotlight, refresh, help dropdown, and mobile drawer
+- `IrisNavbar` component with health chip, spotlight, refresh, help dropdown, and mobile drawer
 - Blue primary color scheme (`#3B82F6`) aligned with Axiom design language
 - Glass-morphism body background with blue/purple radial gradients
 - GitHub Actions CI workflow (Rust, Go, UI, Helm lint)
@@ -70,15 +71,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - App graph panel shows inline skeleton while graph loads; empty graph uses `EmptyState`
 - Workspace switcher showed duplicate All/Production chips plus compact dropdown (CSS specificity vs `index.css`)
 - Cluster cards exposed raw in-cluster probe URLs and Go HTTP errors to end users
-- Refresh button in navbar was a no-op (dispatched a custom event with no listeners) — now calls `refreshHermesData(queryClient)`
+- Refresh button in navbar was a no-op (dispatched a custom event with no listeners) — now calls `refreshIrisData(queryClient)`
 - Health chip showed "100% healthy" while cluster data was still loading
 - `statusTone` ignored `degraded` services — now correctly shows `warn` when any service is degraded
 - Logout fetch reloaded on HTTP error responses — now checks `res.ok` before reloading
 - `copyDiag` silently swallowed clipboard errors — now leaves the dropdown open on failure
 - Duplicate `/help` route appeared in both navbar HelpMenu and "More" dropdown
-- `index.css` had two conflicting `.hermes-main` definitions with different bottom-padding values
+- `index.css` had two conflicting `.iris-main` definitions with different bottom-padding values
 - Graph edge stroke color clashed with node focus highlight (both were the same blue)
-- Stale 128 px dock-clearance padding in `.hermes-scroll-body` (dock is no longer rendered)
+- Stale 128 px dock-clearance padding in `.iris-scroll-body` (dock is no longer rendered)
 - `Makefile` hardcoded a specific deployment IP; default is now unset
 
 ### Changed

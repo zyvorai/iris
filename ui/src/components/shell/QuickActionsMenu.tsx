@@ -5,15 +5,15 @@ import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, MoreHorizontal, RefreshCw, Rocket } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { hermesApi } from '../../services/hermesApi'
-import { refreshHermesData } from '../../utils/refreshCatalog'
+import { irisApi } from '../../services/irisApi'
+import { refreshIrisData } from '../../utils/refreshCatalog'
 
 export default function QuickActionsMenu() {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const qc = useQueryClient()
-  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary })
-  const discovery = useQuery({ queryKey: ['discovery'], queryFn: hermesApi.listDiscovery })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: irisApi.clusterSummary })
+  const discovery = useQuery({ queryKey: ['discovery'], queryFn: irisApi.listDiscovery })
 
   useEffect(() => {
     if (!open) return
@@ -25,15 +25,15 @@ export default function QuickActionsMenu() {
   }, [open])
 
   const refresh = useMutation({
-    mutationFn: () => refreshHermesData(qc),
+    mutationFn: () => refreshIrisData(qc),
   })
 
   const exportCatalog = async () => {
-    const blob = await hermesApi.exportCatalog()
+    const blob = await irisApi.exportCatalog()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `hermes-catalog-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `iris-catalog-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
     setOpen(false)
@@ -43,7 +43,7 @@ export default function QuickActionsMenu() {
 
   return (
     <div className="quick-actions-wrap" ref={rootRef}>
-      <button type="button" className="hermes-search-btn quick-actions-trigger" onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="iris-search-btn quick-actions-trigger" onClick={() => setOpen((v) => !v)}>
         <MoreHorizontal size={16} />
         <span>Actions</span>
       </button>

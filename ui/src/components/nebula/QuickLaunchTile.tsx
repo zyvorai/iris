@@ -8,13 +8,13 @@ import GlassPanel from './GlassPanel'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
 import ActionMenu from './ActionMenu'
-import { appDetailPath, copyAppUrl, openApp } from '../../services/hermesApi'
+import { appDetailPath, copyAppUrl, openApp } from '../../services/irisApi'
 import { useInspector } from '../../utils/inspectorContext'
 import { accentColorFor } from '../../utils/iconColor'
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 interface QuickLaunchTileProps {
-  app: HermesApp
+  app: IrisApp
 }
 
 export default function QuickLaunchTile({ app }: QuickLaunchTileProps) {

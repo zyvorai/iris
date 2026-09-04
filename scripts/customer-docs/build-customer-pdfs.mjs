@@ -41,7 +41,7 @@ const THEMES = {
   Ragnarok: { accent: '#f43f5e', grad: '#1a0a0f,#881337,#0d1b2a', brandHtml: 'Ragna<span>rok</span>' },
   Axiom: { accent: '#818cf8', grad: '#0f0a1a,#312e81,#0d1b2a', brandHtml: 'Ae<span>ther</span>' },
   'Zyvor Fabric': { accent: '#2dd4bf', grad: '#042f2e,#115e59,#0d1b2a', brandHtml: 'Zyvor <span>Fabric</span>' },
-  Hermes: { accent: '#fb7185', grad: '#1c0a12,#9f1239,#0d1b2a', brandHtml: 'Her<span>mes</span>' },
+  Iris: { accent: '#fb7185', grad: '#1c0a12,#9f1239,#0d1b2a', brandHtml: 'Her<span>mes</span>' },
   Transiva: { accent: '#60a5fa', grad: '#0a0a1a,#1e3a5f,#0d1b2a', brandHtml: 'Hyper<span>SDK</span>' },
   ZySign: { accent: '#a3e635', grad: '#14532d,#365314,#0d1b2a', brandHtml: 'Zy<span>Sign</span>' },
 }

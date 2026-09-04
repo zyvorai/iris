@@ -15,7 +15,7 @@ func TestBuildAppInheritsSignatureCanonicalSlugWhenEnabled(t *testing.T) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "grafana",
-			Namespace: "hermes-demo",
+			Namespace: "iris-demo",
 			Annotations: map[string]string{
 				annoEnabled:   "true",
 				annoName:      "Grafana",
@@ -41,7 +41,7 @@ func TestBuildAppKeepsExplicitAnnotationSlug(t *testing.T) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "grafana",
-			Namespace: "hermes-demo",
+			Namespace: "iris-demo",
 			Annotations: map[string]string{
 				annoEnabled: "true",
 				annoSlug:    "custom-grafana",

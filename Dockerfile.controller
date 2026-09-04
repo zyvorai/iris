@@ -4,10 +4,10 @@ WORKDIR /src
 COPY go.mod go.sum ./
 COPY cmd ./cmd
 COPY controller ./controller
-RUN cd cmd/hermes-controller && go build -o /hermes-controller .
+RUN cd cmd/iris-controller && go build -o /iris-controller .
 
 FROM docker.io/library/alpine:3.21
 RUN apk add --no-cache ca-certificates
-COPY --from=go-builder /hermes-controller /usr/local/bin/hermes-controller
+COPY --from=go-builder /iris-controller /usr/local/bin/iris-controller
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/hermes-controller"]
+ENTRYPOINT ["/usr/local/bin/iris-controller"]

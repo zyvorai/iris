@@ -9,10 +9,10 @@ import QuickLaunchBar from '../components/command/QuickLaunchBar'
 import HomeFleetSnapshot from '../components/command/HomeFleetSnapshot'
 import PageFrame from '../components/nebula/PageFrame'
 import ContextBanner from '../components/nebula/ContextBanner'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
-import type { HermesApp } from '../types'
+import type { IrisApp } from '../types'
 
 function greeting() {
   const h = new Date().getHours()
@@ -28,14 +28,14 @@ function statusRank(status: string): number {
 }
 
 export default function HomePage() {
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
-  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
-  const auth = useQuery({ queryKey: ['auth-me'], queryFn: hermesApi.authMe, retry: false })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog, refetchInterval: 15000 })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: irisApi.clusterSummary, refetchInterval: 15000 })
+  const auth = useQuery({ queryKey: ['auth-me'], queryFn: irisApi.authMe, retry: false })
   const { matchesWorkspace, workspaceId, setWorkspaceId } = useWorkspace()
   const { openDiagnose } = useInspector()
   const navigate = useNavigate()
 
-  const filterWs = (list: HermesApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
+  const filterWs = (list: IrisApp[] | undefined) => (list ?? []).filter(matchesWorkspace)
   const catalogApps = filterWs(catalog.data)
   const serviceCount = cluster.data?.total ?? catalogApps.length
   const namespaceCount = cluster.data?.namespaces ?? 0

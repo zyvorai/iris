@@ -35,10 +35,10 @@ import {
   appPublicUrl,
   copyAppUrl,
   environmentLabel,
-  hermesApi,
+  irisApi,
   openApp,
   sourceLabel,
-} from '../services/hermesApi'
+} from '../services/irisApi'
 
 export default function AppDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -50,22 +50,22 @@ export default function AppDetailPage() {
 
   const app = useQuery({
     queryKey: ['app', id],
-    queryFn: () => hermesApi.getApp(appId),
+    queryFn: () => irisApi.getApp(appId),
     enabled: Boolean(id),
   })
 
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: irisApi.listFavorites })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
   const isFavorite = favorites.data?.some((f) => f.id === app.data?.id) ?? false
 
   const favMutation = useMutation({
     mutationFn: () =>
-      isFavorite ? hermesApi.removeFavorite(app.data!.id) : hermesApi.addFavorite(app.data!.id),
+      isFavorite ? irisApi.removeFavorite(app.data!.id) : irisApi.addFavorite(app.data!.id),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['favorites'] }),
   })
 
   const recommendMutation = useMutation({
-    mutationFn: (recommended: boolean) => hermesApi.setRecommended(app.data!.id, recommended),
+    mutationFn: (recommended: boolean) => irisApi.setRecommended(app.data!.id, recommended),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['app', id] })
       void qc.invalidateQueries({ queryKey: ['catalog'] })
@@ -292,9 +292,9 @@ export default function AppDetailPage() {
 
 export function HealthPage() {
   const { openDiagnose } = useInspector()
-  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
-  const publishedHealth = useQuery({ queryKey: ['health'], queryFn: hermesApi.healthSummary, refetchInterval: 15000 })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: irisApi.clusterSummary, refetchInterval: 15000 })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog, refetchInterval: 15000 })
+  const publishedHealth = useQuery({ queryKey: ['health'], queryFn: irisApi.healthSummary, refetchInterval: 15000 })
 
   const unhealthy = useMemo(() => {
     const rank = (s: string) => (s === 'broken' ? 0 : s === 'degraded' ? 1 : 2)

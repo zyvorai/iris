@@ -15,8 +15,8 @@ import Button from '../components/nebula/Button'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
-import type { HermesApp } from '../types'
-import { hermesApi } from '../services/hermesApi'
+import type { IrisApp } from '../types'
+import { irisApi } from '../services/irisApi'
 import { useOwnerInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import { iconColorFor } from '../utils/iconColor'
@@ -40,11 +40,11 @@ function OwnerAvatar({ label }: { label: string }) {
 
 export default function TeamsPage() {
   const { openDiagnose } = useInspector()
-  const owners = useQuery({ queryKey: ['owners'], queryFn: hermesApi.listOwners })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const owners = useQuery({ queryKey: ['owners'], queryFn: irisApi.listOwners })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
 
   const appsByOwner = useMemo(() => {
-    const map = new Map<string, HermesApp[]>()
+    const map = new Map<string, IrisApp[]>()
     for (const app of catalog.data ?? []) {
       const owner = app.meta?.owner?.trim()
       if (!owner) continue
@@ -135,7 +135,7 @@ export default function TeamsPage() {
             <EmptyState
               icon={<Users size={22} />}
               title="No owner metadata yet"
-              description="Add hermes.zyvor.dev/owner annotations to services."
+              description="Add iris.zyvor.dev/owner annotations to services."
             />
           </GlassPanel>
         ) : (

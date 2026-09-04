@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Hermes — post-deploy E2E verification
+# Iris — post-deploy E2E verification
 set -euo pipefail
 
-BASE="${1:-${HERMES_E2E_BASE:-https://127.0.0.1:31847}}"
+BASE="${1:-${IRIS_E2E_BASE:-https://127.0.0.1:31847}}"
 BASE="${BASE%/}"
-NS="${HERMES_NAMESPACE:-hermes-system}"
+NS="${IRIS_NAMESPACE:-iris-system}"
 START=$SECONDS
 
-# hermes-server terminates TLS with a self-signed cert unless HERMES_TLS_CERT/
-# HERMES_TLS_KEY point at a real one — skip verification for this script's own checks.
+# iris-server terminates TLS with a self-signed cert unless IRIS_TLS_CERT/
+# IRIS_TLS_KEY point at a real one — skip verification for this script's own checks.
 curl() { command curl -k "$@"; }
 
 pass=0; fail=0
@@ -81,11 +81,11 @@ check "federated catalog"      "curl -sf '${BASE}/api/v1/catalog/federated' | gr
 check "search LLM"             "curl -sf '${BASE}/api/v1/search/llm?q=grafana' | grep -q '\"intent\"'"
 check "clusters"               "curl -sf '${BASE}/api/v1/clusters' | grep -q '\"status\"'"
 check "health summary"         "curl -sf '${BASE}/api/v1/health/apps'"
-check "app diagnosis"          "curl -sf '${BASE}/api/v1/apps/hermes-demo/grafana/diagnosis' | grep -q '\"chain\"'"
-check "app insight"            "curl -sf '${BASE}/api/v1/apps/hermes-demo/grafana/insight' | grep -q '\"explanation\"'"
+check "app diagnosis"          "curl -sf '${BASE}/api/v1/apps/iris-demo/grafana/diagnosis' | grep -q '\"chain\"'"
+check "app insight"            "curl -sf '${BASE}/api/v1/apps/iris-demo/grafana/insight' | grep -q '\"explanation\"'"
 check "fleet insight"          "curl -sf '${BASE}/api/v1/insights/fleet' | grep -q '\"summary\"'"
 check "discovery insight"      "curl -sf '${BASE}/api/v1/insights/discovery' | grep -q '\"summary\"'"
-check "namespace insight"      "curl -sf '${BASE}/api/v1/insights/namespace/hermes-demo' | grep -q '\"namespace\"'"
+check "namespace insight"      "curl -sf '${BASE}/api/v1/insights/namespace/iris-demo' | grep -q '\"namespace\"'"
 check "graph insight"          "curl -sf '${BASE}/api/v1/insights/graph' | grep -q '\"summary\"'"
 check "owner insight"          "curl -sf '${BASE}/api/v1/insights/owner/platform' | grep -q '\"owner\"'"
 check "federated insight"      "curl -sf '${BASE}/api/v1/insights/federated' | grep -q '\"summary\"'"
@@ -97,23 +97,23 @@ check "shares admin"           "curl -sf '${BASE}/api/v1/shares/all' | grep -q '
 check "audit"                  "curl -sf '${BASE}/api/v1/audit?limit=5'"
 check "federated audit"        "curl -sf '${BASE}/api/v1/audit/federated?limit=5' | grep -q '\"clusterId\"'"
 check "stats"                  "curl -sf '${BASE}/api/v1/stats'"
-check "metrics"                "curl -sf '${BASE}/metrics' | grep -q hermes_apps_total"
+check "metrics"                "curl -sf '${BASE}/metrics' | grep -q iris_apps_total"
 check "federation publish 404" "curl -sf -X POST '${BASE}/api/v1/federation/publish/_missing_/demo/app' | grep -q '\"ok\"' || test \"\$(curl -s -o /dev/null -w '%{http_code}' -X POST '${BASE}/api/v1/federation/publish/_missing_/demo/app')\" = '404'"
 check "federation rbac 404"    "curl -sf '${BASE}/api/v1/federation/rbac/_missing_' >/dev/null 2>&1 || test \"\$(curl -s -o /dev/null -w '%{http_code}' '${BASE}/api/v1/federation/rbac/_missing_')\" = '404'"
 
 # ── Gateway routes ────────────────────────────────────────────────────────────
 section "Gateway routes"
 
-check_gateway "launchpad gateway"  "${BASE}/launchpad/a/hermes-demo/grafana"
-check_gateway "launchpad trailing slash" "${BASE}/launchpad/a/hermes-demo/grafana/"
+check_gateway "launchpad gateway"  "${BASE}/launchpad/a/iris-demo/grafana"
+check_gateway "launchpad trailing slash" "${BASE}/launchpad/a/iris-demo/grafana/"
 check "launchpad canonical"        "code=\$(curl -s -o /dev/null -w '%{http_code}' '${BASE}/launchpad/apps/grafana'); test \"\$code\" != '404'"
-check_gateway "legacy gateway"     "${BASE}/a/hermes-demo/grafana"
+check_gateway "legacy gateway"     "${BASE}/a/iris-demo/grafana"
 
 # Assert redirects stay under the launchpad mount (not SPA fallback).
-loc="$(curl -sI "${BASE}/launchpad/a/hermes-demo/grafana" 2>/dev/null | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} $1=="location:"{print $2; exit}')"
+loc="$(curl -sI "${BASE}/launchpad/a/iris-demo/grafana" 2>/dev/null | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} $1=="location:"{print $2; exit}')"
 if [ -n "${loc}" ]; then
     case "${loc}" in
-        */launchpad/a/hermes-demo/grafana*|*/a/hermes-demo/grafana*)
+        */launchpad/a/iris-demo/grafana*|*/a/iris-demo/grafana*)
             printf "  ${C_OK}✓${C_RST}  grafana Location under mount\n"; pass=$((pass + 1)) ;;
         *)
             printf "  ${C_FAIL}✗${C_RST}  grafana Location under mount ${C_DIM}%s${C_RST}\n" "${loc}"
@@ -121,7 +121,7 @@ if [ -n "${loc}" ]; then
     esac
 else
     # 200 with no redirect is also fine once slash routes are fixed.
-    code="$(curl -s -o /dev/null -w '%{http_code}' "${BASE}/launchpad/a/hermes-demo/grafana/" 2>/dev/null || true)"
+    code="$(curl -s -o /dev/null -w '%{http_code}' "${BASE}/launchpad/a/iris-demo/grafana/" 2>/dev/null || true)"
     if echo "${code}" | grep -qE '^(200|301|302)$'; then
         printf "  ${C_OK}✓${C_RST}  grafana root reachable\n"; pass=$((pass + 1))
     else
@@ -130,20 +130,20 @@ else
     fi
 fi
 
-# Proxied JSON APIs must not return the Hermes SPA.
+# Proxied JSON APIs must not return the Iris SPA.
 check "grafana api health via gateway" \
-    "curl -sf '${BASE}/launchpad/a/hermes-demo/grafana/api/health' | grep -q '\"database\"'"
+    "curl -sf '${BASE}/launchpad/a/iris-demo/grafana/api/health' | grep -q '\"database\"'"
 check "prometheus query via gateway" \
-    "curl -sf --get '${BASE}/launchpad/a/hermes-demo/prometheus-server/api/v1/query' --data-urlencode 'query=up' | grep -q '\"status\"'"
+    "curl -sf --get '${BASE}/launchpad/a/iris-demo/prometheus-server/api/v1/query' --data-urlencode 'query=up' | grep -q '\"status\"'"
 check "prometheus trailing-slash root not SPA" \
-    "! curl -s '${BASE}/launchpad/a/hermes-demo/prometheus-server/' | grep -q 'Hermes Dock'"
+    "! curl -s '${BASE}/launchpad/a/iris-demo/prometheus-server/' | grep -q 'Iris Dock'"
 
 # ── Share link flow ───────────────────────────────────────────────────────────
 section "Share link  (create → access → revoke)"
 
 SHARE_JSON="$(curl -sf -X POST "${BASE}/api/v1/shares" \
     -H 'Content-Type: application/json' \
-    -d '{"appId":"hermes-demo/grafana","ttlMinutes":30}' 2>/dev/null || true)"
+    -d '{"appId":"iris-demo/grafana","ttlMinutes":30}' 2>/dev/null || true)"
 if [ -n "${SHARE_JSON}" ] && echo "${SHARE_JSON}" | grep -q '"token"'; then
     SHARE_TOKEN="$(echo "${SHARE_JSON}" | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])" 2>/dev/null || true)"
     if [ -n "${SHARE_TOKEN}" ]; then

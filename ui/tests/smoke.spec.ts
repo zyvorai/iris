@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test'
 
 async function waitForPageReady(page: import('@playwright/test').Page) {
   await expect(page.locator('.app-shell')).toBeVisible()
-  await expect(page.getByTestId('hermes-navbar')).toBeVisible()
+  await expect(page.getByTestId('iris-navbar')).toBeVisible()
   const loading = page.getByTestId('page-loading')
   if (await loading.count()) {
     await expect(loading).toBeHidden({ timeout: 15000 })
@@ -43,7 +43,7 @@ test('mission control page shows the departures board by space', async ({ page }
 
 test('spotlight opens from navbar', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('hermes-navbar')).toBeVisible()
+  await expect(page.getByTestId('iris-navbar')).toBeVisible()
   await page.keyboard.press('Meta+k')
   await expect(page.getByPlaceholder(/open grafana/i)).toBeVisible()
 })
@@ -51,8 +51,8 @@ test('spotlight opens from navbar', async ({ page }) => {
 test('footer visible after scroll', async ({ page }) => {
   await page.goto('/')
   await page.locator('.main-scroll-area').evaluate((el) => { el.scrollTop = el.scrollHeight })
-  await expect(page.locator('.hermes-page-footer')).toBeVisible()
-  await expect(page.locator('.hermes-page-footer')).toContainText('Help')
+  await expect(page.locator('.iris-page-footer')).toBeVisible()
+  await expect(page.locator('.iris-page-footer')).toContainText('Help')
 })
 
 test('catalog page renders toolbar', async ({ page }) => {
@@ -292,7 +292,7 @@ test('cluster page ask zyra opens spotlight', async ({ page }) => {
 
 test('help page renders zyvor footer', async ({ page }) => {
   await page.goto('/help')
-  await expect(page.getByRole('heading', { name: /hermes guide/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /iris guide/i })).toBeVisible()
   await expect(page.locator('.zyvor-inline')).toContainText('zyvor.dev')
 })
 

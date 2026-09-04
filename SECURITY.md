@@ -21,7 +21,7 @@ We aim to acknowledge reports within a few business days and will coordinate a f
 
 ## Preferential scope
 
-- Remote code execution, authentication bypass, and privilege escalation in Hermes (controller, server, gateway, Helm chart defaults)
+- Remote code execution, authentication bypass, and privilege escalation in Iris (controller, server, gateway, Helm chart defaults)
 - Secrets leakage via logs or the public API when auth is enabled
 
 Out of scope: denial of service against self-hosted lab clusters, issues that require already-compromised cluster admin credentials, or vulnerabilities solely in third-party dependencies (report upstream when possible).

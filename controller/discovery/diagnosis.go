@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/zyvorai/hermes/controller/model"
+	"github.com/zyvorai/iris/controller/model"
 )
 
 func (w *Watcher) Diagnose(ctx context.Context, app model.App) model.AppDiagnosis {
@@ -22,7 +22,7 @@ func (w *Watcher) Diagnose(ctx context.Context, app model.App) model.AppDiagnosi
 	chain := []model.DiagnosisChainNode{
 		{ID: "user", Label: "User"},
 		{ID: "identity", Label: "Zeus Identity"},
-		{ID: "gateway", Label: "Hermes Gateway"},
+		{ID: "gateway", Label: "Iris Gateway"},
 		{ID: "approute", Label: "AppRoute: " + slug},
 		{ID: "namespace", Label: "Namespace: " + app.Namespace},
 	}

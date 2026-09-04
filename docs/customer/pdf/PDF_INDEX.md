@@ -1,10 +1,10 @@
-# Hermes customer PDFs
+# Iris customer PDFs
 
 Generated: 2026-08-29
 
 Rebuild: `node scripts/customer-docs/build-customer-pdfs.mjs`
 
-- `Hermes-Customer-README.pdf` — Customer Documentation Overview
-- `Hermes-Getting-Started.pdf` — Getting Started
-- `Hermes-Admin-Basics.pdf` — Admin Basics
-- `Hermes-Page-by-Page.pdf` — Page-by-Page Product Manual
+- `Iris-Customer-README.pdf` — Customer Documentation Overview
+- `Iris-Getting-Started.pdf` — Getting Started
+- `Iris-Admin-Basics.pdf` — Admin Basics
+- `Iris-Page-by-Page.pdf` — Page-by-Page Product Manual

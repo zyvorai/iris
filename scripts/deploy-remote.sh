@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hermes — Remote deployment (SSH + rsync + K3s/Helm)
+# Iris — Remote deployment (SSH + rsync + K3s/Helm)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -10,12 +10,12 @@ source "${SCRIPT_DIR}/lib/k3s-image-import.sh"
 VERSION="0.2.0"
 REMOTE_DIR=""
 DEPLOY_PROFILE="k3s"
-DEPLOY_LOG="${HERMES_DEPLOY_LOG:-${HOME}/.hermes/deploy-$(date +%Y%m%d-%H%M%S).log}"
+DEPLOY_LOG="${IRIS_DEPLOY_LOG:-${HOME}/.iris/deploy-$(date +%Y%m%d-%H%M%S).log}"
 DEPLOY_START=$SECONDS
 
-HERMES_NAMESPACE="${HERMES_NAMESPACE:-hermes-system}"
-HERMES_NODE_PORT="${HERMES_NODE_PORT:-31847}"
-HERMES_TAG="${HERMES_TAG:-$(git -C "${PROJECT_DIR}" rev-parse --short HEAD 2>/dev/null || echo 0.1.0)}"
+IRIS_NAMESPACE="${IRIS_NAMESPACE:-iris-system}"
+IRIS_NODE_PORT="${IRIS_NODE_PORT:-31847}"
+IRIS_TAG="${IRIS_TAG:-$(git -C "${PROJECT_DIR}" rev-parse --short HEAD 2>/dev/null || echo 0.1.0)}"
 
 K3S_MODE=true
 SKIP_CLUSTER_SETUP=false
@@ -30,7 +30,7 @@ VERIFY_ONLY=false
 PREFLIGHT_ONLY=false
 WITH_DEMO_APPS=true
 VERBOSE=false
-SSH_RETRIES="${HERMES_SSH_RETRIES:-3}"
+SSH_RETRIES="${IRIS_SSH_RETRIES:-3}"
 DEPLOY_AND_TEST=false
 POSITIONAL=()
 
@@ -57,26 +57,26 @@ usage() {
     --skip-e2e         Skip post-deploy E2E suite
     --skip-build       Skip container image build (Helm only)
     --no-demo-apps     Do not install demo Grafana / Prometheus services
-    --uninstall        Remove Hermes from cluster
+    --uninstall        Remove Iris from cluster
     -v / --verbose     Stream remote build output
 
   Environment:
-    HERMES_NAMESPACE   K8s namespace      (default: hermes-system)
-    HERMES_NODE_PORT   NodePort           (default: 31847)
-    HERMES_TAG         Image tag          (default: git short SHA)
-    HERMES_SSH_RETRIES SSH retry count    (default: 3)
-    HERMES_LLM_API_URL OpenAI-compatible chat completions base URL
-    HERMES_LLM_API_KEY Bearer token (stored in K8s secret hermes-llm on remote)
-    HERMES_LLM_MODEL   Model name         (default: gpt-4o-mini)
-    HERMES_OIDC_ISSUER        OIDC issuer URL (sets server.auth.mode=oidc when non-empty)
-    HERMES_OIDC_CLIENT_ID     OIDC client id
-    HERMES_OIDC_CLIENT_SECRET OIDC client secret (stored in K8s secret hermes-oidc on remote)
-    HERMES_OIDC_REDIRECT_URL  OIDC redirect URL (default: <public-url>/auth/callback)
+    IRIS_NAMESPACE   K8s namespace      (default: iris-system)
+    IRIS_NODE_PORT   NodePort           (default: 31847)
+    IRIS_TAG         Image tag          (default: git short SHA)
+    IRIS_SSH_RETRIES SSH retry count    (default: 3)
+    IRIS_LLM_API_URL OpenAI-compatible chat completions base URL
+    IRIS_LLM_API_KEY Bearer token (stored in K8s secret iris-llm on remote)
+    IRIS_LLM_MODEL   Model name         (default: gpt-4o-mini)
+    IRIS_OIDC_ISSUER        OIDC issuer URL (sets server.auth.mode=oidc when non-empty)
+    IRIS_OIDC_CLIENT_ID     OIDC client id
+    IRIS_OIDC_CLIENT_SECRET OIDC client secret (stored in K8s secret iris-oidc on remote)
+    IRIS_OIDC_REDIRECT_URL  OIDC redirect URL (default: <public-url>/auth/callback)
 
   Examples:
-    HERMES_LLM_API_URL=https://api.openai.com/v1 HERMES_LLM_API_KEY=sk-... deploy-remote.sh <host> <user>
-    HERMES_OIDC_ISSUER=https://idp.example.com/realms/hermes \
-      HERMES_OIDC_CLIENT_ID=hermes HERMES_OIDC_CLIENT_SECRET=... deploy-remote.sh <host> <user>
+    IRIS_LLM_API_URL=https://api.openai.com/v1 IRIS_LLM_API_KEY=sk-... deploy-remote.sh <host> <user>
+    IRIS_OIDC_ISSUER=https://idp.example.com/realms/iris \
+      IRIS_OIDC_CLIENT_ID=iris IRIS_OIDC_CLIENT_SECRET=... deploy-remote.sh <host> <user>
     deploy-remote.sh <host> <user>
     deploy-remote.sh <user>@<host> --k8s --skip-build
     deploy-remote.sh <host> <user> --quick --skip-e2e
@@ -221,8 +221,8 @@ print_banner() {
     echo ""
     printf "  ${C_DIM}%-16s${C_RST}%s\n" "target"    "${TARGET_USER}@${TARGET_HOST}"
     printf "  ${C_DIM}%-16s${C_RST}%s\n" "profile"   "${DEPLOY_PROFILE}"
-    printf "  ${C_DIM}%-16s${C_RST}%s\n" "image tag" "${HERMES_TAG}"
-    printf "  ${C_DIM}%-16s${C_RST}%s\n" "namespace" "${HERMES_NAMESPACE}"
+    printf "  ${C_DIM}%-16s${C_RST}%s\n" "image tag" "${IRIS_TAG}"
+    printf "  ${C_DIM}%-16s${C_RST}%s\n" "namespace" "${IRIS_NAMESPACE}"
     printf "  ${C_DIM}%-16s${C_RST}%s\n" "log"       "${DEPLOY_LOG}"
     [ "$DRY_RUN" = true ] && printf "\n  ${C_WARN}!${C_RST}  ${C_BOLD}DRY RUN${C_RST} — no remote commands will execute\n"
     hr
@@ -231,7 +231,7 @@ print_banner() {
 # ── Validate ──────────────────────────────────────────────────────────────────
 validate() {
     [ -n "${TARGET_HOST}" ] || { usage; exit 1; }
-    [ -f "${PROJECT_DIR}/charts/hermes/Chart.yaml" ] || fail "Not in hermes repo root"
+    [ -f "${PROJECT_DIR}/charts/iris/Chart.yaml" ] || fail "Not in iris repo root"
 }
 
 # ── Steps ─────────────────────────────────────────────────────────────────────
@@ -239,7 +239,7 @@ check_connectivity() {
     step 1 7 "SSH Connectivity"
     info "Connecting to ${TARGET_USER}@${TARGET_HOST}"
     if [ "$DRY_RUN" = true ]; then
-        REMOTE_DIR="${HOME}/.deployments/hermes"
+        REMOTE_DIR="${HOME}/.deployments/iris"
         ok "Dry-run — skipping live SSH"
         return 0
     fi
@@ -248,7 +248,7 @@ check_connectivity() {
     local rh
     rh=$(_ssh "echo \$HOME" | tr -d '\r')
     _spin_stop
-    REMOTE_DIR="${rh}/.deployments/hermes"
+    REMOTE_DIR="${rh}/.deployments/iris"
     ok "SSH OK  ·  remote dir ${REMOTE_DIR}"
 }
 
@@ -286,7 +286,7 @@ sync_files() {
     info "rsync → ${TARGET_HOST}:${REMOTE_DIR}"
     _rsync \
         --exclude '.git' --exclude 'target' --exclude 'ui/node_modules' --exclude 'ui/dist' \
-        --exclude 'bin' --exclude '.hermes' \
+        --exclude 'bin' --exclude '.iris' \
         "${PROJECT_DIR}/" "${TARGET_USER}@${TARGET_HOST}:${REMOTE_DIR}/"
     ok "Sources synced"
 }
@@ -309,9 +309,9 @@ if [ -f /etc/rancher/k3s/k3s.yaml ]; then
     if [ -r /etc/rancher/k3s/k3s.yaml ]; then
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
     else
-        $SUDO cat /etc/rancher/k3s/k3s.yaml > "$HOME/.kube/hermes-k3s.yaml"
-        chmod 600 "$HOME/.kube/hermes-k3s.yaml"
-        export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+        $SUDO cat /etc/rancher/k3s/k3s.yaml > "$HOME/.kube/iris-k3s.yaml"
+        chmod 600 "$HOME/.kube/iris-k3s.yaml"
+        export KUBECONFIG="$HOME/.kube/iris-k3s.yaml"
     fi
 fi
 kubectl get nodes
@@ -323,8 +323,8 @@ REMOTE
 build_images_remote() {
     step 5 7 "Build Images"
     if [ "$SKIP_BUILD" = true ]; then ok "Skipped (--skip-build)"; return 0; fi
-    info "Building hermes-server:${HERMES_TAG} + hermes-controller:${HERMES_TAG}"
-    _ssh env REMOTE_DIR="${REMOTE_DIR}" HERMES_TAG="${HERMES_TAG}" bash <<'REMOTE' || fail "Remote image build failed"
+    info "Building iris-server:${IRIS_TAG} + iris-controller:${IRIS_TAG}"
+    _ssh env REMOTE_DIR="${REMOTE_DIR}" IRIS_TAG="${IRIS_TAG}" bash <<'REMOTE' || fail "Remote image build failed"
 set -e
 cd "${REMOTE_DIR}"
 SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
@@ -365,148 +365,148 @@ echo "── UI"
 (cd ui && npm ci --silent && npm run build)
 
 echo "── Rust server"
-cargo build --release -p hermes-server 2>&1 | tail -3
+cargo build --release -p iris-server 2>&1 | tail -3
 
 echo "── Go controller"
-(cd cmd/hermes-controller && go build -o /tmp/hermes-controller .)
+(cd cmd/iris-controller && go build -o /tmp/iris-controller .)
 
-TAG="${HERMES_TAG}"
-if ! $DOCKER_BIN build -f Dockerfile.server -t "hermes-server:${TAG}" . 2>&1; then
+TAG="${IRIS_TAG}"
+if ! $DOCKER_BIN build -f Dockerfile.server -t "iris-server:${TAG}" . 2>&1; then
     echo "── Falling back to runtime Dockerfile"
-    $DOCKER_BIN build -f Dockerfile.server.runtime -t "hermes-server:${TAG}" .
+    $DOCKER_BIN build -f Dockerfile.server.runtime -t "iris-server:${TAG}" .
 fi
-$DOCKER_BIN build -f Dockerfile.controller -t "hermes-controller:${TAG}" .
+$DOCKER_BIN build -f Dockerfile.controller -t "iris-controller:${TAG}" .
 
 if [ -f "scripts/lib/k3s-image-import.sh" ]; then
     source "scripts/lib/k3s-image-import.sh"
-    k3s_import_oci_image "hermes-controller:${TAG}" "$DOCKER_BIN"
-    k3s_import_oci_image "hermes-server:${TAG}" "$DOCKER_BIN"
+    k3s_import_oci_image "iris-controller:${TAG}" "$DOCKER_BIN"
+    k3s_import_oci_image "iris-server:${TAG}" "$DOCKER_BIN"
 fi
-echo "── hermes-server:${TAG}  hermes-controller:${TAG}"
+echo "── iris-server:${TAG}  iris-controller:${TAG}"
 REMOTE
     ok "Images built and imported"
 }
 
 deploy_helm() {
     step 6 7 "Helm Deploy"
-    info "helm upgrade --install hermes ./charts/hermes -n ${HERMES_NAMESPACE}"
+    info "helm upgrade --install iris ./charts/iris -n ${IRIS_NAMESPACE}"
     ensure_remote_dir
     _spin_start "Applying Helm release (up to 8 min)"
     _ssh env \
         REMOTE_DIR="${REMOTE_DIR}" \
-        HELM_NS="${HERMES_NAMESPACE}" \
-        HERMES_TAG="${HERMES_TAG}" \
-        HERMES_PUBLIC_HOST="${TARGET_HOST}" \
-        HERMES_NODE_PORT="${HERMES_NODE_PORT}" \
-        HERMES_USE_NODEPORT=1 \
-        HERMES_DEMO_APPS="${WITH_DEMO_APPS}" \
-        HERMES_LLM_API_URL="${HERMES_LLM_API_URL:-}" \
-        HERMES_LLM_API_KEY="${HERMES_LLM_API_KEY:-}" \
-        HERMES_LLM_MODEL="${HERMES_LLM_MODEL:-}" \
-        HERMES_OIDC_ISSUER="${HERMES_OIDC_ISSUER:-}" \
-        HERMES_OIDC_CLIENT_ID="${HERMES_OIDC_CLIENT_ID:-}" \
-        HERMES_OIDC_CLIENT_SECRET="${HERMES_OIDC_CLIENT_SECRET:-}" \
-        HERMES_OIDC_REDIRECT_URL="${HERMES_OIDC_REDIRECT_URL:-}" \
+        HELM_NS="${IRIS_NAMESPACE}" \
+        IRIS_TAG="${IRIS_TAG}" \
+        IRIS_PUBLIC_HOST="${TARGET_HOST}" \
+        IRIS_NODE_PORT="${IRIS_NODE_PORT}" \
+        IRIS_USE_NODEPORT=1 \
+        IRIS_DEMO_APPS="${WITH_DEMO_APPS}" \
+        IRIS_LLM_API_URL="${IRIS_LLM_API_URL:-}" \
+        IRIS_LLM_API_KEY="${IRIS_LLM_API_KEY:-}" \
+        IRIS_LLM_MODEL="${IRIS_LLM_MODEL:-}" \
+        IRIS_OIDC_ISSUER="${IRIS_OIDC_ISSUER:-}" \
+        IRIS_OIDC_CLIENT_ID="${IRIS_OIDC_CLIENT_ID:-}" \
+        IRIS_OIDC_CLIENT_SECRET="${IRIS_OIDC_CLIENT_SECRET:-}" \
+        IRIS_OIDC_REDIRECT_URL="${IRIS_OIDC_REDIRECT_URL:-}" \
         bash <<'REMOTE' || { _spin_stop; fail "Helm deploy failed"; }
 set -euo pipefail
 cd "${REMOTE_DIR}"
 source scripts/lib/open-host-firewall-ports.sh
-if ! open_hermes_firewall_ports; then
+if ! open_iris_firewall_ports; then
     echo "WARNING: host firewall open incomplete — public NodePort may be unreachable" >&2
 fi
-export HERMES_TAG HELM_NS HERMES_PUBLIC_HOST="${HERMES_PUBLIC_HOST}" HERMES_NODE_PORT
-bash scripts/lib/helm-hermes-remote.sh
+export IRIS_TAG HELM_NS IRIS_PUBLIC_HOST="${IRIS_PUBLIC_HOST}" IRIS_NODE_PORT
+bash scripts/lib/helm-iris-remote.sh
 cd /
 REMOTE
     _spin_stop
     ok "Helm release applied"
 }
 
-restart_hermes_pods() {
+restart_iris_pods() {
     [ "$SKIP_BUILD" = true ] && return 0
     info "Rolling restart to pick up new images"
     _spin_start "Waiting for rollout"
-    _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE' || { _spin_stop; fail "Pod restart failed"; }
+    _ssh env HELM_NS="${IRIS_NAMESPACE}" bash <<'REMOTE' || { _spin_stop; fail "Pod restart failed"; }
 set -euo pipefail
 if [ -f /etc/rancher/k3s/k3s.yaml ]; then
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/iris-k3s.yaml"
 fi
-kubectl -n "${HELM_NS}" rollout restart deploy/hermes
-kubectl -n "${HELM_NS}" rollout status deploy/hermes --timeout=5m
+kubectl -n "${HELM_NS}" rollout restart deploy/iris
+kubectl -n "${HELM_NS}" rollout status deploy/iris --timeout=5m
 REMOTE
     _spin_stop
     ok "Pods restarted"
 }
 
-require_hermes_ready() {
+require_iris_ready() {
     step 7 7 "Verify"
-    info "Checking Hermes pods in ${HERMES_NAMESPACE}"
+    info "Checking Iris pods in ${IRIS_NAMESPACE}"
     _spin_start "Waiting for rollout to complete"
-    _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE' || { _spin_stop; fail "Hermes did not become ready"; }
+    _ssh env HELM_NS="${IRIS_NAMESPACE}" bash <<'REMOTE' || { _spin_stop; fail "Iris did not become ready"; }
 set -euo pipefail
 if [ -f /etc/rancher/k3s/k3s.yaml ]; then
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/iris-k3s.yaml"
 fi
-helm status hermes -n "${HELM_NS}" >/dev/null 2>&1 || { echo "Helm release 'hermes' not found in ${HELM_NS}"; exit 1; }
-kubectl -n "${HELM_NS}" rollout status deploy/hermes --timeout=5m
+helm status iris -n "${HELM_NS}" >/dev/null 2>&1 || { echo "Helm release 'iris' not found in ${HELM_NS}"; exit 1; }
+kubectl -n "${HELM_NS}" rollout status deploy/iris --timeout=5m
 kubectl -n "${HELM_NS}" get pods,svc
 REMOTE
     _spin_stop
-    ok "Hermes is ready"
+    ok "Iris is ready"
 }
 
 verify_remote() {
     [ "$SKIP_VERIFY" = true ] && return 0
     [ "$DRY_RUN" = true ] && return 0
-    _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE' || fail "Remote verification failed"
+    _ssh env HELM_NS="${IRIS_NAMESPACE}" bash <<'REMOTE' || fail "Remote verification failed"
 set -e
 if [ -f /etc/rancher/k3s/k3s.yaml ]; then
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/iris-k3s.yaml"
 fi
 echo "── pods ──"
 kubectl -n "${HELM_NS}" get pods -o wide
 echo "── service ──"
-kubectl -n "${HELM_NS}" get svc hermes-server
+kubectl -n "${HELM_NS}" get svc iris-server
 REMOTE
 }
 
 run_e2e() {
     [ "$SKIP_E2E" = true ] && return 0
     local e2e="${SCRIPT_DIR}/e2e-deploy-verify.sh"
-    local url="https://${TARGET_HOST}:${HERMES_NODE_PORT}"
+    local url="https://${TARGET_HOST}:${IRIS_NODE_PORT}"
     info "Checking public reachability at ${url}/healthz"
     if ! curl -skf --connect-timeout 10 --max-time 30 "${url}/healthz" >/dev/null; then
-        fail "Hermes not reachable at ${url}/healthz — use https, accept self-signed cert, and ensure cloud SG allows ${HERMES_NODE_PORT}/tcp"
+        fail "Iris not reachable at ${url}/healthz — use https, accept self-signed cert, and ensure cloud SG allows ${IRIS_NODE_PORT}/tcp"
     fi
     ok "Public healthz OK"
     [ -f "$e2e" ] || return 0
     chmod +x "$e2e"
     echo ""
-    HERMES_E2E_BASE="${url}" \
-        HERMES_NAMESPACE="${HERMES_NAMESPACE}" \
+    IRIS_E2E_BASE="${url}" \
+        IRIS_NAMESPACE="${IRIS_NAMESPACE}" \
         "$e2e" || fail "E2E reported issues — see above"
 }
 
 do_uninstall() {
-    info "Uninstalling Hermes from ${HERMES_NAMESPACE}"
-    _ssh env HELM_NS="${HERMES_NAMESPACE}" bash <<'REMOTE'
+    info "Uninstalling Iris from ${IRIS_NAMESPACE}"
+    _ssh env HELM_NS="${IRIS_NAMESPACE}" bash <<'REMOTE'
 set -e
 if [ -f /etc/rancher/k3s/k3s.yaml ]; then
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/hermes-k3s.yaml"
+    [ -r /etc/rancher/k3s/k3s.yaml ] || export KUBECONFIG="$HOME/.kube/iris-k3s.yaml"
 fi
-helm uninstall hermes -n "${HELM_NS}" 2>/dev/null || true
-kubectl delete namespace hermes-demo --ignore-not-found 2>/dev/null || true
+helm uninstall iris -n "${HELM_NS}" 2>/dev/null || true
+kubectl delete namespace iris-demo --ignore-not-found 2>/dev/null || true
 REMOTE
-    ok "Hermes uninstalled"
+    ok "Iris uninstalled"
 }
 
 print_summary() {
     local total=$((SECONDS - DEPLOY_START))
-    local url="https://${TARGET_HOST}:${HERMES_NODE_PORT}"
+    local url="https://${TARGET_HOST}:${IRIS_NODE_PORT}"
     # shellcheck source=lib/resolve-zyvor-sibling.sh
     source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh" 2>/dev/null || true
     local smoke="./scripts/test-all-features-remote.sh ${TARGET_HOST} ${TARGET_USER}"
@@ -521,17 +521,17 @@ print_summary() {
     hr
     printf "  ${C_OK}✓${C_RST}  ${C_BOLD}Deploy complete${C_RST}  ${C_DIM}%ds total${C_RST}\n\n" "$total"
     printf "  ${C_BOLD}┌──────────────────────────────────────────────────────────┐${C_RST}\n"
-    printf "  ${C_BOLD}│${C_RST}  ${C_BOLD}%-14s${C_RST}  %s/%-30s${C_BOLD}│${C_RST}\n"  "Hermes"    "${url}" ""
+    printf "  ${C_BOLD}│${C_RST}  ${C_BOLD}%-14s${C_RST}  %s/%-30s${C_BOLD}│${C_RST}\n"  "Iris"    "${url}" ""
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -skf %s/healthz%-19s${C_RST}${C_BOLD}│${C_RST}\n"  "Health"    "${url}" ""
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}curl -skf %s/api/v1/apps%-13s${C_RST}${C_BOLD}│${C_RST}\n" "API"       "${url}" ""
-    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Namespace" "${HERMES_NAMESPACE}"
+    printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Namespace" "${IRIS_NAMESPACE}"
     printf "  ${C_BOLD}│${C_RST}  %-14s  ${C_DIM}%-42s${C_RST}${C_BOLD}│${C_RST}\n"       "Log"       "${DEPLOY_LOG}"
     printf "  ${C_BOLD}└──────────────────────────────────────────────────────────┘${C_RST}\n\n"
-    printf "  ${C_INFO}ℹ${C_RST}  ${C_DIM}Use https:// (not http). Accept the self-signed cert warning. Ensure cloud SG allows ${HERMES_NODE_PORT}/tcp.${C_RST}\n\n"
+    printf "  ${C_INFO}ℹ${C_RST}  ${C_DIM}Use https:// (not http). Accept the self-signed cert warning. Ensure cloud SG allows ${IRIS_NODE_PORT}/tcp.${C_RST}\n\n"
     printf "  ${C_INFO}🧪${C_RST}  ${C_DIM}Next:${C_RST}  ${C_BOLD}%s${C_RST}\n" "${smoke}"
     printf "  ${C_DIM}       ${C_RST}%s\n" "${stack}"
     printf "  ${C_DIM}       ${C_RST}./scripts/e2e-deploy-verify.sh %s\n" "${url}"
-    printf "  ${C_DIM}       ${C_RST}kubectl -n %s get pods\n\n" "${HERMES_NAMESPACE}"
+    printf "  ${C_DIM}       ${C_RST}kubectl -n %s get pods\n\n" "${IRIS_NAMESPACE}"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -544,7 +544,7 @@ main() {
     if [ "$PREFLIGHT_ONLY" = true ]; then echo ""; ok "Preflight-only done"; echo ""; exit 0; fi
     if [ "$UNINSTALL"      = true ]; then do_uninstall; exit 0; fi
     if [ "$VERIFY_ONLY"    = true ]; then
-        require_hermes_ready
+        require_iris_ready
         verify_remote
         run_e2e
         print_summary
@@ -557,8 +557,8 @@ main() {
         build_images_remote
     fi
     deploy_helm
-    restart_hermes_pods
-    require_hermes_ready
+    restart_iris_pods
+    require_iris_ready
     [ "$SKIP_VERIFY" != true ] && verify_remote
     run_e2e
     print_summary

@@ -9,8 +9,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-DEFAULT_HOST="${DEPLOY_HOST:-${HERMES_HOST:-}}"
-DEFAULT_USER="${DEPLOY_USER:-${HERMES_USER:-}}"
+DEFAULT_HOST="${DEPLOY_HOST:-${IRIS_HOST:-}}"
+DEFAULT_USER="${DEPLOY_USER:-${IRIS_USER:-}}"
 
 ARGS=()
 if [[ $# -eq 0 ]]; then

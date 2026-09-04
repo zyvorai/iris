@@ -3,7 +3,7 @@
 
 import type { QueryClient } from '@tanstack/react-query'
 
-export async function refreshHermesData(qc: QueryClient) {
+export async function refreshIrisData(qc: QueryClient) {
   await Promise.all([
     qc.invalidateQueries({ queryKey: ['catalog'] }),
     qc.invalidateQueries({ queryKey: ['apps'] }),

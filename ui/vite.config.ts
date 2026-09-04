@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const hermesPort = process.env.HERMES_PORT ?? '31847'
-const hermesOrigin = process.env.HERMES_ORIGIN ?? `http://localhost:${hermesPort}`
+const irisPort = process.env.IRIS_PORT ?? '31847'
+const irisOrigin = process.env.IRIS_ORIGIN ?? `http://localhost:${irisPort}`
 
 const proxyTarget = {
-  target: hermesOrigin,
+  target: irisOrigin,
   changeOrigin: true,
   secure: false,
 }

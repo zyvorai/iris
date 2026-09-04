@@ -4,16 +4,16 @@ metadata:
   name: grafana
   namespace: monitoring
   annotations:
-    hermes.zyvor.dev/enabled: "true"
-    hermes.zyvor.dev/name: "Grafana"
-    hermes.zyvor.dev/description: "Observability dashboard"
-    hermes.zyvor.dev/icon: "grafana"
-    hermes.zyvor.dev/category: "Monitoring"
-    hermes.zyvor.dev/port: "80"
-    hermes.zyvor.dev/scheme: "http"
-    hermes.zyvor.dev/path: "/"
-    hermes.zyvor.dev/auth: "none"
-    hermes.zyvor.dev/published: "true"
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Grafana"
+    iris.zyvor.dev/description: "Observability dashboard"
+    iris.zyvor.dev/icon: "grafana"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/port: "80"
+    iris.zyvor.dev/scheme: "http"
+    iris.zyvor.dev/path: "/"
+    iris.zyvor.dev/auth: "none"
+    iris.zyvor.dev/published: "true"
 spec:
   type: ClusterIP
   selector:

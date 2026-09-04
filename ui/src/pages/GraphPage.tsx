@@ -15,7 +15,7 @@ import EmptyState from '../components/nebula/EmptyState'
 import PageLoading from '../components/nebula/PageLoading'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useGraphInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import type { AppGraph } from '../types'
@@ -56,8 +56,8 @@ export default function GraphPage() {
   const [brokenOnly, setBrokenOnly] = useState(false)
   const [meshOnly, setMeshOnly] = useState(false)
 
-  const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 15000 })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const graph = useQuery({ queryKey: ['graph'], queryFn: irisApi.getGraph, refetchInterval: 15000 })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
   const graphInsight = useGraphInsight(Boolean(graph.data))
   const { openDiagnose } = useInspector()
 
@@ -188,7 +188,7 @@ export default function GraphPage() {
 }
 
 export function AppGraphPanel({ appId }: { appId: string }) {
-  const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph })
+  const graph = useQuery({ queryKey: ['graph'], queryFn: irisApi.getGraph })
 
   if (graph.isLoading && !graph.data) {
     return (

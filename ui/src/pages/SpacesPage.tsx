@@ -12,13 +12,13 @@ import GlyphTile from '../components/nebula/GlyphTile'
 import PageFrame from '../components/nebula/PageFrame'
 import EmptyState from '../components/nebula/EmptyState'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
-import { groupAppsBySpace, HERMES_SPACES, spaceById, spaceCounts } from '../utils/spaces'
+import { groupAppsBySpace, IRIS_SPACES, spaceById, spaceCounts } from '../utils/spaces'
 import { useStatusFlip } from '../hooks/useStatusFlip'
 
 export default function SpacesPage() {
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
   const published = (catalog.data ?? []).filter((a) => a.visibility.published)
 
   const loading = catalog.isLoading && !catalog.data
@@ -66,7 +66,7 @@ export default function SpacesPage() {
             </div>
           </div>
           <div className="space-list" style={{ marginTop: '1rem', display: 'grid', gap: '0.75rem' }}>
-            {HERMES_SPACES.filter((space) => spaceCounts(published)[space.id] > 0).map((space) => (
+            {IRIS_SPACES.filter((space) => spaceCounts(published)[space.id] > 0).map((space) => (
               <Link key={space.id} to={`/spaces/${space.id}`} className="hub-link-card">
                 <div>
                   <h3>{space.label}</h3>
@@ -105,8 +105,8 @@ export default function SpacesPage() {
 export function SpaceDetailPage() {
   const { spaceId = '' } = useParams()
   const space = spaceById(spaceId)
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: irisApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
 
   const apps = space

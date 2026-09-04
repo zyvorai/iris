@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish Hermes Docker images + Helm chart to ghcr.io/zyvorai from the remote build server.
+# Publish Iris Docker images + Helm chart to ghcr.io/zyvorai from the remote build server.
 #
 # Usage:
 #   ZYVORAI_GHCR_TOKEN=<pat> ./scripts/publish-ghcr.sh <host> <user> [version]
@@ -21,7 +21,7 @@ if [[ -z "${ZYVORAI_GHCR_TOKEN:-}" ]]; then
   exit 1
 fi
 
-echo "==> Publishing hermes v${VERSION} to ghcr.io/${ORG}"
+echo "==> Publishing iris v${VERSION} to ghcr.io/${ORG}"
 
 # ── 1. Push Docker images ───────────────────────────────────────────────────
 echo "==> [1/2] Pushing Docker images to ghcr.io/${ORG}"
@@ -29,7 +29,7 @@ ssh "$REMOTE" bash -s <<ENDSSH
 set -euo pipefail
 echo "${ZYVORAI_GHCR_TOKEN}" | podman login ghcr.io -u ${ORG} --password-stdin
 
-for img in hermes-server hermes-controller; do
+for img in iris-server iris-controller; do
   podman tag docker.io/library/\${img}:latest ghcr.io/${ORG}/\${img}:${VERSION} 2>/dev/null || true
   podman tag docker.io/library/\${img}:latest ghcr.io/${ORG}/\${img}:latest 2>/dev/null || true
   podman push ghcr.io/${ORG}/\${img}:${VERSION} 2>/dev/null || echo "Skipping \${img} (not yet built locally)"
@@ -41,7 +41,7 @@ ENDSSH
 # ── 2. Push Helm chart ──────────────────────────────────────────────────────
 echo "==> [2/2] Packaging and pushing Helm chart to oci://ghcr.io/${ORG}/charts"
 
-CHARTS_DIR="/tmp/hermes-charts-${VERSION}"
+CHARTS_DIR="/tmp/iris-charts-${VERSION}"
 ssh "$REMOTE" "mkdir -p ${CHARTS_DIR}"
 rsync -az --delete charts/ "${REMOTE}:${CHARTS_DIR}/"
 
@@ -55,7 +55,7 @@ fi
 echo "${ZYVORAI_GHCR_TOKEN}" | helm registry login ghcr.io -u ${ORG} --password-stdin
 
 mkdir -p /tmp/helm-packages
-helm package "${CHARTS_DIR}/hermes" -d /tmp/helm-packages
+helm package "${CHARTS_DIR}/iris" -d /tmp/helm-packages
 
 for tgz in /tmp/helm-packages/*.tgz; do
   echo "Pushing \$tgz"
@@ -68,5 +68,5 @@ ENDSSH
 
 echo ""
 echo "✓ Done. Customer install:"
-echo "  helm install hermes oci://ghcr.io/${ORG}/charts/hermes --version ${VERSION} \\"
-echo "    --namespace hermes-system --create-namespace"
+echo "  helm install iris oci://ghcr.io/${ORG}/charts/iris --version ${VERSION} \\"
+echo "    --namespace iris-system --create-namespace"

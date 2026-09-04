@@ -4,8 +4,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DB="${HERMES_DB_PATH:-/tmp/hermes-smoke.db}"
-PORT="${HERMES_PORT:-31847}"
+DB="${IRIS_DB_PATH:-/tmp/iris-smoke.db}"
+PORT="${IRIS_PORT:-31847}"
 BASE="http://127.0.0.1:${PORT}"
 START=$SECONDS
 
@@ -50,19 +50,19 @@ printf "\n"
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 section "Build"
-info "cargo build -p hermes-server"
-cargo build -q -p hermes-server
+info "cargo build -p iris-server"
+cargo build -q -p iris-server
 info "seeding ${DB}"
-go run ./cmd/hermes-seed "$DB"
+go run ./cmd/iris-seed "$DB"
 ok "Build complete"
 
 # ── Start server ──────────────────────────────────────────────────────────────
 section "Server startup"
-info "Starting hermes-server on :${PORT}"
-HERMES_BIND="127.0.0.1:${PORT}" \
-HERMES_DB_PATH="$DB" \
-HERMES_UI_DIR="${ROOT}/ui/dist" \
-./target/debug/hermes-server &
+info "Starting iris-server on :${PORT}"
+IRIS_BIND="127.0.0.1:${PORT}" \
+IRIS_DB_PATH="$DB" \
+IRIS_UI_DIR="${ROOT}/ui/dist" \
+./target/debug/iris-server &
 PID=$!
 trap 'kill $PID 2>/dev/null || true' EXIT
 

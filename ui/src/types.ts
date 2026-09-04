@@ -45,7 +45,7 @@ export interface ShareLink {
   createdBy?: string
 }
 
-export interface FederatedApp extends HermesApp {
+export interface FederatedApp extends IrisApp {
   clusterId: string
   clusterName: string
 }
@@ -53,7 +53,7 @@ export interface FederatedApp extends HermesApp {
 export interface SearchIntent {
   intent: string
   answer: string
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 export interface AppInsight {
@@ -210,7 +210,7 @@ export interface TeamOwner {
   unhealthy: number
 }
 
-export interface HermesApp {
+export interface IrisApp {
   id: string
   slug: string
   canonicalSlug?: string
@@ -243,7 +243,7 @@ export interface CatalogStats {
 }
 
 export interface SearchHit {
-  app: HermesApp
+  app: IrisApp
   score: number
 }
 
@@ -252,7 +252,7 @@ export interface HealthSummary {
   healthy: number
   degraded: number
   broken: number
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 export interface ClusterSummary {

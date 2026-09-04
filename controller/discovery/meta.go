@@ -6,7 +6,7 @@ package discovery
 import (
 	"strings"
 
-	"github.com/zyvorai/hermes/controller/model"
+	"github.com/zyvorai/iris/controller/model"
 )
 
 func metaFromAnnotations(ann map[string]string) model.AppMeta {

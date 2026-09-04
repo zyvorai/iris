@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/zyvorai/hermes/controller/model"
+	"github.com/zyvorai/iris/controller/model"
 )
 
 var virtualServiceGVR = schema.GroupVersionResource{

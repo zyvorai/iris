@@ -1,6 +1,6 @@
 # Using the Dashboard
 
-Hermes is organized by navigation groups (sidebar, desktop nav, or CLI command groups). Use search / command palette when available.
+Iris is organized by navigation groups (sidebar, desktop nav, or CLI command groups). Use search / command palette when available.
 
 ## Surfaces
 

@@ -5,12 +5,12 @@ import { useState } from 'react'
 import { Moon, Settings as SettingsIcon, Sun } from 'lucide-react'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
-import { loadTheme, saveTheme, type HermesTheme } from '../utils/hermesShellPreferences'
+import { loadTheme, saveTheme, type IrisTheme } from '../utils/irisShellPreferences'
 
 export default function SettingsPage() {
-  const [theme, setTheme] = useState<HermesTheme>(() => loadTheme())
+  const [theme, setTheme] = useState<IrisTheme>(() => loadTheme())
 
-  const setThemeAndSave = (next: HermesTheme) => {
+  const setThemeAndSave = (next: IrisTheme) => {
     saveTheme(next)
     setTheme(next)
   }

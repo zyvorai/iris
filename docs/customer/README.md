@@ -1,4 +1,4 @@
-# Hermes — Customer Documentation
+# Iris — Customer Documentation
 
 Application operating layer for Kubernetes — discovers dashboards/APIs and gives users a permanent front door.
 
@@ -10,7 +10,7 @@ Application operating layer for Kubernetes — discovers dashboards/APIs and giv
 | Look up any screen | [Complete page index](PAGE_INDEX.md) |
 | Deploy, auth, ports | [Admin basics](admin-basics.md) |
 | Multi-page jobs | [Common workflows](workflows.md) |
-| Capability map | [Feature Guide](../hermes-customer-feature-guide.md) |
+| Capability map | [Feature Guide](../iris-customer-feature-guide.md) |
 
 ## Printable PDFs
 
@@ -22,10 +22,10 @@ Output lands in [`pdf/`](pdf/):
 
 | PDF | Contents |
 |-----|----------|
-| `Hermes-Customer-README.pdf` | This overview |
-| `Hermes-Getting-Started.pdf` | Access, basics, workflows |
-| `Hermes-Page-by-Page.pdf` | Complete page manual |
-| `Hermes-Admin-Basics.pdf` | Deploy, auth, ports |
+| `Iris-Customer-README.pdf` | This overview |
+| `Iris-Getting-Started.pdf` | Access, basics, workflows |
+| `Iris-Page-by-Page.pdf` | Complete page manual |
+| `Iris-Admin-Basics.pdf` | Deploy, auth, ports |
 
 ## Product at a glance
 
@@ -43,4 +43,4 @@ Application operating layer for Kubernetes — discovers dashboards/APIs and giv
 
 ---
 
-*ZyvorAI Labs · [zyvor.dev](https://zyvor.dev) · Hermes*
+*ZyvorAI Labs · [zyvor.dev](https://zyvor.dev) · Iris*

@@ -69,7 +69,7 @@ k3s_import_oci_image() {
         return 1
     fi
 
-    # Podman may import hyphenated names with spaces (hermes-controller → hermes controller)
+    # Podman may import hyphenated names with spaces (iris-controller → iris controller)
     local spaced="${base//-/\ }"
     local imported_ref=""
     while IFS= read -r candidate; do
@@ -99,6 +99,6 @@ k3s_import_oci_image() {
     fi
 
     echo "k3s import: ${ref} not visible after import" >&2
-    k3s_ctr images ls 2>/dev/null | grep -i hermes || true
+    k3s_ctr images ls 2>/dev/null | grep -i iris || true
     return 1
 }

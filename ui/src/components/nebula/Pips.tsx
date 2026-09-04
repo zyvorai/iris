@@ -1,11 +1,11 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: Apache-2.0
 
-import { statusLabel } from '../../services/hermesApi'
-import type { HermesApp } from '../../types'
+import { statusLabel } from '../../services/irisApi'
+import type { IrisApp } from '../../types'
 
 interface PipsProps {
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 /** Compact fleet-glance strip — one square per service, colored by status. */

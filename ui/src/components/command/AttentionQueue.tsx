@@ -10,11 +10,11 @@ import { useStatusFlip } from '../../hooks/useStatusFlip'
 import GlassPanel from '../nebula/GlassPanel'
 import EmptyState from '../nebula/EmptyState'
 import { useFleetInsight } from '../../hooks/useZyraAiInsight'
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 interface AttentionQueueProps {
-  apps: HermesApp[]
-  onInspect?: (app: HermesApp) => void
+  apps: IrisApp[]
+  onInspect?: (app: IrisApp) => void
 }
 
 export default function AttentionQueue({ apps }: AttentionQueueProps) {

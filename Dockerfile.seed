@@ -3,9 +3,9 @@ WORKDIR /src
 COPY go.mod go.sum ./
 COPY cmd ./cmd
 COPY controller ./controller
-RUN cd cmd/hermes-seed && go build -o /hermes-seed .
+RUN cd cmd/iris-seed && go build -o /iris-seed .
 
 FROM docker.io/library/alpine:3.21
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /hermes-seed /usr/local/bin/hermes-seed
-ENTRYPOINT ["/usr/local/bin/hermes-seed"]
+COPY --from=builder /iris-seed /usr/local/bin/iris-seed
+ENTRYPOINT ["/usr/local/bin/iris-seed"]

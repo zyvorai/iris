@@ -13,7 +13,7 @@ try {
 } catch {}
 const CUSTOMER = resolve(ROOT, 'docs/customer')
 const SITE = resolve(process.argv[2] ?? resolve(ROOT, '../zyvor-web'))
-const PRODUCT = process.env.CUSTOMER_DOCS_PRODUCT || 'Hermes'
+const PRODUCT = process.env.CUSTOMER_DOCS_PRODUCT || 'Iris'
 const SLUG = (process.env.CUSTOMER_DOCS_SLUG || PRODUCT).toLowerCase().replace(/\s+/g, '-')
 const PDF_PREFIX = process.env.CUSTOMER_DOCS_PDF_PREFIX || PRODUCT.replace(/\s+/g, '-')
 const MANUAL_DIR = process.env.CUSTOMER_DOCS_MANUAL_DIR || `${SLUG}-manual`
@@ -44,7 +44,7 @@ const REPO_ONLY = new RegExp(
     'ragnarok-customer-feature-guide',
     'axiom-customer-feature-guide',
     'zyvor-fabric-customer-feature-guide',
-    'hermes-customer-feature-guide',
+    'iris-customer-feature-guide',
     'transiva-customer-feature-guide',
     'DEPLOYMENT_GUIDE',
     'AIRGAP_INSTALL',

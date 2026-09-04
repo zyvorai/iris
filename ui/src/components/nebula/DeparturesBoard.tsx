@@ -8,13 +8,13 @@ import AppIcon from '../AppIcon'
 import StatusBadge from './StatusBadge'
 import ActionMenu from './ActionMenu'
 import { buildServiceMenuItems, canOpenApp, isUnhealthy } from './serviceActions'
-import { appDetailPath, appLaunchPath, hermesApi, openApp, statusTone } from '../../services/hermesApi'
+import { appDetailPath, appLaunchPath, irisApi, openApp, statusTone } from '../../services/irisApi'
 import { useInspector } from '../../utils/inspectorContext'
 import { useToast } from '../Toast'
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 interface DeparturesRowProps {
-  app: HermesApp
+  app: IrisApp
   favorite?: boolean
   /** Omit to use the row's own local-publish mutation (the default for most
    * pages); pass a function to override it (e.g. federation publish); pass
@@ -33,7 +33,7 @@ export default function DeparturesRow({ app, favorite = false, onPublish, onHide
   const qc = useQueryClient()
   const toast = useToast()
   const publish = useMutation({
-    mutationFn: () => hermesApi.publish(app.id),
+    mutationFn: () => irisApi.publish(app.id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['catalog'] })
       void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
@@ -43,7 +43,7 @@ export default function DeparturesRow({ app, favorite = false, onPublish, onHide
     onError: () => toast(`Could not publish ${app.displayName}`, 'error'),
   })
   const favMutation = useMutation({
-    mutationFn: () => (favorite ? hermesApi.removeFavorite(app.id) : hermesApi.addFavorite(app.id)),
+    mutationFn: () => (favorite ? irisApi.removeFavorite(app.id) : irisApi.addFavorite(app.id)),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['favorites'] }),
   })
 

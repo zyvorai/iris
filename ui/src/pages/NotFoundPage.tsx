@@ -16,7 +16,7 @@ export default function NotFoundPage() {
             <p className="hs-eyebrow">404</p>
             <h1 className="h-hero" style={{ maxWidth: '12ch' }}>Page not found</h1>
             <p className="hs-lede">
-              That URL doesn&apos;t match anything in Hermes — it may have moved, or the link was mistyped.
+              That URL doesn&apos;t match anything in Iris — it may have moved, or the link was mistyped.
             </p>
           </div>
         </section>

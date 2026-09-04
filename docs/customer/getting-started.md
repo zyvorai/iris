@@ -1,14 +1,14 @@
-# Getting Started with Hermes
+# Getting Started with Iris
 
 ## What you need
 
 See [Admin basics](admin-basics.md) for ports and auth. Summary:
 
-Open the Hermes UI via NodePort or ingress from your chart.
+Open the Iris UI via NodePort or ingress from your chart.
 
 ## 1. Open the product
 
-Open the Hermes UI via NodePort or ingress from your chart.
+Open the Iris UI via NodePort or ingress from your chart.
 
 ## 2. Sign in / authenticate
 

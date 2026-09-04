@@ -1,4 +1,4 @@
-module github.com/zyvorai/hermes
+module github.com/zyvorai/iris
 
 go 1.23.0
 

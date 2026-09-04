@@ -1,5 +1,5 @@
 /*
- * Hermes Nebula Command Deck — component styles
+ * Iris Nebula Command Deck — component styles
  */
 
 /* Surface panel — quiet Apple card */
@@ -1145,7 +1145,7 @@
 }
 
 /* Footer inside scroll */
-.main-scroll-area .hermes-page-footer {
+.main-scroll-area .iris-page-footer {
   margin-top: 3rem;
   padding: 1.75rem 0 0.5rem;
   border-top: 1px solid var(--border-soft);
@@ -1721,7 +1721,7 @@
   color: inherit;
 }
 
-.hermes-nb-utilities .zyra-ai-badge {
+.iris-nb-utilities .zyra-ai-badge {
   margin-left: -0.15rem;
 }
 

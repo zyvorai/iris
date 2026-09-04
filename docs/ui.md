@@ -1,16 +1,16 @@
-# Hermes UI (Nebula)
+# Iris UI (Nebula)
 
-Hermes ships a single-page React application aligned with the Axiom Liquid Glass design language. The UI lives under `ui/` and is embedded in `hermes-server` at runtime.
+Iris ships a single-page React application aligned with the Axiom Liquid Glass design language. The UI lives under `ui/` and is embedded in `iris-server` at runtime.
 
 ## Design system
 
 | Layer | Path | Role |
 |-------|------|------|
-| Tokens | `ui/src/styles/nebula-tokens.css` | Colors, radii, typography, Zeus/Hermes CSS variable bridge |
+| Tokens | `ui/src/styles/nebula-tokens.css` | Colors, radii, typography, Zeus/Iris CSS variable bridge |
 | Layout | `ui/src/styles/nebula-layout.css` | App shell, scroll areas, page grid |
 | Components | `ui/src/styles/nebula-components.css` | Glass panels, cards, toolbars, skeletons, empty states, drawers |
 | Legacy bridge | `ui/src/styles/axiom-bridge.css` | Maps remaining legacy classes to Nebula surfaces |
-| Legacy | `ui/src/index.css` | Older Hermes styles (being retired incrementally) |
+| Legacy | `ui/src/index.css` | Older Iris styles (being retired incrementally) |
 
 Load order is defined in `ui/src/main.tsx`: tokens → layout → components → `index.css` → bridge.
 
@@ -39,27 +39,27 @@ Configure OpenAI-compatible LLM access on the server:
 
 | Env | Purpose |
 |-----|---------|
-| `HERMES_LLM_API_URL` | Chat completions base URL (e.g. `https://api.openai.com/v1`) |
-| `HERMES_LLM_API_KEY` | Bearer token |
-| `HERMES_LLM_MODEL` | Model name (default `gpt-4o-mini`) |
+| `IRIS_LLM_API_URL` | Chat completions base URL (e.g. `https://api.openai.com/v1`) |
+| `IRIS_LLM_API_KEY` | Bearer token |
+| `IRIS_LLM_MODEL` | Model name (default `gpt-4o-mini`) |
 
-When unset, Hermes uses rule-based insight and intent search — no external API required.
+When unset, Iris uses rule-based insight and intent search — no external API required.
 
 **Remote deploy with LLM:**
 
 ```bash
-export HERMES_LLM_API_URL=https://api.openai.com/v1
-export HERMES_LLM_API_KEY=sk-...
+export IRIS_LLM_API_URL=https://api.openai.com/v1
+export IRIS_LLM_API_KEY=sk-...
 ./scripts/deploy-remote.sh <ephemeral-ip> operator
 
 # Or apply LLM settings to an existing deploy (Helm only):
 ./scripts/configure-llm-remote.sh <ephemeral-ip> operator
 
-# Or install Ollama on the remote host and point Hermes at it (k3s: binds 0.0.0.0, uses node IP):
+# Or install Ollama on the remote host and point Iris at it (k3s: binds 0.0.0.0, uses node IP):
 ./scripts/setup-ollama-remote.sh <ephemeral-ip> operator
 ```
 
-The API key is stored in the Kubernetes secret `hermes-llm` on the cluster (not in plain Helm values).
+The API key is stored in the Kubernetes secret `iris-llm` on the cluster (not in plain Helm values).
 
 | Endpoint | Purpose |
 |----------|---------|
@@ -125,24 +125,24 @@ Raw probe errors from the controller (e.g. `Get "http://svc.ns.svc.cluster.local
 ```bash
 cd ui
 npm ci
-npm run dev          # Vite dev server (proxies API to HERMES_API or localhost:31847)
+npm run dev          # Vite dev server (proxies API to IRIS_API or localhost:31847)
 npm run build        # Production bundle → ui/dist/
-npm run test:e2e     # Playwright smoke tests (starts preview server if HERMES_E2E_BASE unset)
+npm run test:e2e     # Playwright smoke tests (starts preview server if IRIS_E2E_BASE unset)
 ```
 
 Run smoke tests against a live deploy:
 
 ```bash
-HERMES_E2E_BASE=http://your-host:31847 npm run test:e2e
+IRIS_E2E_BASE=http://your-host:31847 npm run test:e2e
 ```
 
 ## Deployment
 
-The UI is baked into the `hermes-server` image. After UI changes:
+The UI is baked into the `iris-server` image. After UI changes:
 
 ```bash
 cd ui && npm run build
-# rebuild/push hermes-server image and roll the deployment
+# rebuild/push iris-server image and roll the deployment
 ```
 
 See the repository root `Makefile` and `scripts/deploy-remote.sh` for cluster deploy helpers.

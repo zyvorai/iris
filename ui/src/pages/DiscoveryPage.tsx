@@ -13,22 +13,22 @@ import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useDiscoveryInsight } from '../hooks/useZyraAiInsight'
-import { refreshHermesData } from '../utils/refreshCatalog'
+import { refreshIrisData } from '../utils/refreshCatalog'
 import { useStatusFlip } from '../hooks/useStatusFlip'
 import { useToast } from '../components/Toast'
 
 export default function DiscoveryPage() {
   const qc = useQueryClient()
   const toast = useToast()
-  const discovery = useQuery({ queryKey: ['discovery'], queryFn: hermesApi.listDiscovery, refetchInterval: 15000 })
-  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary })
+  const discovery = useQuery({ queryKey: ['discovery'], queryFn: irisApi.listDiscovery, refetchInterval: 15000 })
+  const cluster = useQuery({ queryKey: ['cluster-summary'], queryFn: irisApi.clusterSummary })
 
   const publish = useMutation({
-    mutationFn: hermesApi.publish,
+    mutationFn: irisApi.publish,
     onSuccess: () => {
-      void refreshHermesData(qc)
+      void refreshIrisData(qc)
       toast('Service published')
     },
     onError: () => toast('Could not publish service', 'error'),
@@ -41,12 +41,12 @@ export default function DiscoveryPage() {
     mutationFn: async () => {
       const apps = discovery.data ?? []
       for (const app of apps.slice(0, 25)) {
-        await hermesApi.publish(app.id)
+        await irisApi.publish(app.id)
       }
       return apps.length
     },
     onSuccess: (count) => {
-      void refreshHermesData(qc)
+      void refreshIrisData(qc)
       toast(`Published ${count} service${count === 1 ? '' : 's'}`)
     },
     onError: () => toast('Could not publish services', 'error'),
@@ -56,21 +56,21 @@ export default function DiscoveryPage() {
     mutationFn: async () => {
       const ids = discoveryInsight.data?.suggestPublishIds ?? []
       for (const id of ids.slice(0, 10)) {
-        await hermesApi.publish(id)
+        await irisApi.publish(id)
       }
       return ids.length
     },
     onSuccess: (count) => {
-      void refreshHermesData(qc)
+      void refreshIrisData(qc)
       toast(`Published ${count} Zyra-picked service${count === 1 ? '' : 's'}`)
     },
     onError: () => toast('Could not publish Zyra picks', 'error'),
   })
 
   const hide = useMutation({
-    mutationFn: hermesApi.hide,
+    mutationFn: irisApi.hide,
     onSuccess: () => {
-      void refreshHermesData(qc)
+      void refreshIrisData(qc)
       toast('Hidden from discovery')
     },
     onError: () => toast('Could not hide service', 'error'),

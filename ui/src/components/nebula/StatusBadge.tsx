@@ -1,7 +1,7 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: Apache-2.0
 
-import { statusLabel, statusTone } from '../../services/hermesApi'
+import { statusLabel, statusTone } from '../../services/irisApi'
 
 interface StatusBadgeProps {
   status: string

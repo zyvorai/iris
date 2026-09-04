@@ -190,7 +190,7 @@ func IsDiscoverable(svc *corev1.Service) bool {
 	if denyNamespaces[svc.Namespace] {
 		return false
 	}
-	if svc.Labels["app.kubernetes.io/name"] == "hermes" {
+	if svc.Labels["app.kubernetes.io/name"] == "iris" {
 		return false
 	}
 	if svc.Spec.Type == corev1.ServiceTypeExternalName {

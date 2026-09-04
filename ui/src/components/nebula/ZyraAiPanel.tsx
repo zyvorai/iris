@@ -70,7 +70,7 @@ export default function ZyraAiPanel({
             title="Refresh insight"
             aria-label="Refresh insight"
           >
-            <RefreshCw size={14} className={refreshing ? 'hermes-nb-spin' : ''} />
+            <RefreshCw size={14} className={refreshing ? 'iris-nb-spin' : ''} />
           </Button>
         ) : null}
       </div>

@@ -22,7 +22,7 @@
 
 ## Operate from the console (UX)
 
-1. Open the Hermes UI (`/ui/`) on `https://<host>:…` (see Admin basics for the default port).
+1. Open the Iris UI (`/ui/`) on `https://<host>:…` (see Admin basics for the default port).
 2. Navigate to **Common workflows**.
 3. Complete the on-screen fields / actions for this surface (1. Open the home surface (`/`) from [Getting Started](getting-started.md).
 2. Use the [page index](PAGE_INDEX.md) to jum…).

@@ -3,12 +3,12 @@
 
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { HERMES_SPACES, spaceCounts } from '../utils/spaces'
+import { IRIS_SPACES, spaceCounts } from '../utils/spaces'
 import { accentColorFor } from '../utils/iconColor'
-import type { HermesApp } from '../types'
+import type { IrisApp } from '../types'
 
 interface SpaceGridProps {
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 export default function SpaceGrid({ apps }: SpaceGridProps) {
@@ -16,7 +16,7 @@ export default function SpaceGrid({ apps }: SpaceGridProps) {
 
   return (
     <div className="space-grid" data-testid="space-grid">
-      {HERMES_SPACES.filter((space) => counts[space.id] > 0).map((space) => {
+      {IRIS_SPACES.filter((space) => counts[space.id] > 0).map((space) => {
         const style = { '--icon-accent': accentColorFor(space.label, space.id).accent } as CSSProperties
         return (
           <Link key={space.id} to={`/spaces/${space.id}`} className="space-tile zeus-card">

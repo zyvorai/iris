@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "crates/hermes-core",
-    "crates/hermes-api",
-    "crates/hermes-gateway",
-    "crates/hermes-server",
+    "crates/iris-core",
+    "crates/iris-api",
+    "crates/iris-gateway",
+    "crates/iris-server",
 ]
 resolver = "2"
 

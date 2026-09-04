@@ -3,8 +3,8 @@
 
 import { useEffect, useState } from 'react'
 import CommandPalette from './CommandPalette'
-import HermesNavbar from './HermesNavbar'
-import HermesPageFooter from './HermesPageFooter'
+import IrisNavbar from './IrisNavbar'
+import IrisPageFooter from './IrisPageFooter'
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp'
 import DiagnosisDrawer from './nebula/DiagnosisDrawer'
 import ServiceInspectorDrawer from './command/ServiceInspectorDrawer'
@@ -39,10 +39,10 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="app-shell">
-      <HermesNavbar onPaletteOpen={() => openSpotlight()} onOpenShortcuts={() => setShortcutsOpen(true)} />
+      <IrisNavbar onPaletteOpen={() => openSpotlight()} onOpenShortcuts={() => setShortcutsOpen(true)} />
       <div className="main-scroll-area">
         {children}
-        <HermesPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
+        <IrisPageFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
       </div>
       {open ? <CommandPalette onClose={closeSpotlight} initialQuery={seed} /> : null}
       {shortcutsOpen ? <KeyboardShortcutsHelp onClose={() => setShortcutsOpen(false)} /> : null}

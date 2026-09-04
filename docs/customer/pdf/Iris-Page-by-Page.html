@@ -1,0 +1,638 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>Page-by-Page Product Manual — Iris</title>
+<style>
+@page{size:A4;margin:15mm 16mm}*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:#1f2937;line-height:1.58;font-size:10.5pt}
+.cover{height:262mm;margin:-15mm -16mm 0;background:linear-gradient(135deg,#1c0a12,#9f1239,#0d1b2a);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;page-break-after:always;position:relative}
+.cover .kicker{letter-spacing:5px;text-transform:uppercase;opacity:.72;margin-bottom:1.4em}
+.cover h1{font-size:3.2em;font-weight:800;letter-spacing:-2px}
+.cover h1 span{color:#fb7185}
+.cover .sub{font-size:1.3em;font-weight:300;opacity:.93;margin:1em 0;max-width:24em}
+.cover .badge{display:inline-block;background:rgba(96,165,250,.2);border:1px solid #fb7185;padding:8px 22px;border-radius:20px;margin-top:2em}
+.cover .foot{position:absolute;bottom:34px;font-size:.82em;opacity:.6}
+h2{page-break-before:always;margin:0 0 .35em;font-size:1.55em;font-weight:750;color:#12203a;border-bottom:2px solid #e5edfb;padding-bottom:.28em}
+h2:first-of-type{page-break-before:avoid}
+h3{margin:1.1em 0 .4em;font-size:1.12em;font-weight:700}
+p,li{margin:.4em 0}ul,ol{margin:.5em 0 .9em 1.4em}
+a{color:#2563eb;text-decoration:none}
+code{background:#eef2f7;padding:1px 6px;border-radius:4px;font-size:.86em;font-family:ui-monospace,Menlo,monospace}
+pre{background:#0f172a;color:#e2e8f0;padding:12px 15px;border-radius:9px;overflow-x:auto;margin:.8em 0}
+table{width:100%;border-collapse:collapse;margin:.8em 0 1.1em;font-size:9.5pt}
+th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f1f5f9}
+hr{border:none;border-top:1px solid #e5e7eb;margin:1.2em 0}
+</style></head><body>
+<section class="cover"><div class="kicker">ZyvorAI Labs · Customer Documentation</div>
+<h1>Her<span>mes</span></h1>
+<div class="sub">Page-by-Page Product Manual</div>
+<div class="badge">2026-08-29</div>
+<div class="foot">zyvor.dev · Apache License 2.0</div></section>
+<main><h2>Page-by-page guides</h2>
+<p>Each guide follows: Purpose → When to use it → How to get there → What you can do → Related pages.</p>
+<p>Every route is also listed in the <a href="../PAGE_INDEX.md">complete page index</a>.</p>
+<h3>Admin</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="admin/settings.md">Settings</a></td>
+<td>Settings — appearance and local shell preferences.</td>
+</tr>
+<tr>
+<td><a href="admin/teams.md">Teams</a></td>
+<td>Teams — Admin surface.</td>
+</tr>
+</tbody></table>
+<h3>Audit</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="audit/activity.md">Activity</a></td>
+<td>Activity — Audit surface.</td>
+</tr>
+</tbody></table>
+<h3>Explore</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="explore/discovery.md">Discovery</a></td>
+<td>Discovery — Explore surface.</td>
+</tr>
+<tr>
+<td><a href="explore/federated.md">Federated</a></td>
+<td>Federated — Explore surface.</td>
+</tr>
+<tr>
+<td><a href="explore/graph.md">Graph</a></td>
+<td>Graph — Explore surface.</td>
+</tr>
+</tbody></table>
+<h3>Primary</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="primary/apps.md">Catalog</a></td>
+<td>Catalog — Primary surface.</td>
+</tr>
+<tr>
+<td><a href="primary/cluster.md">Cluster</a></td>
+<td>Cluster — Primary surface.</td>
+</tr>
+<tr>
+<td><a href="primary/health.md">Health</a></td>
+<td>Health — Primary surface.</td>
+</tr>
+<tr>
+<td><a href="primary/home.md">Overview</a></td>
+<td>Overview — Primary surface.</td>
+</tr>
+<tr>
+<td><a href="primary/mission-control.md">Mission Control</a></td>
+<td>Mission Control — live departures board across namespaces and workspaces.</td>
+</tr>
+<tr>
+<td><a href="primary/spaces.md">Spaces</a></td>
+<td>Spaces — Primary surface.</td>
+</tr>
+</tbody></table>
+<h3>Support</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="support/help.md">Help</a></td>
+<td>Help — Support surface.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>13 guides. Regenerate: <code>node scripts/customer-docs/generate-guide-index.mjs</code>.</p>
+<hr>
+<h2>Settings</h2>
+<h3>Purpose</h3>
+<p>Settings — appearance and local shell preferences.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/settings</code></li>
+<li>Nav: <strong>Admin → Settings</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/settings</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Teams</h2>
+<h3>Purpose</h3>
+<p>Teams — Admin surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/teams</code></li>
+<li>Nav: <strong>Admin → Teams</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/teams</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Activity</h2>
+<h3>Purpose</h3>
+<p>Activity — Audit surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/activity</code></li>
+<li>Nav: <strong>Audit → Activity</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/activity</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Discovery</h2>
+<h3>Purpose</h3>
+<p>Discovery — Explore surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/discovery</code></li>
+<li>Nav: <strong>Explore → Discovery</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/discovery</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Federated</h2>
+<h3>Purpose</h3>
+<p>Federated — Explore surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/federated</code></li>
+<li>Nav: <strong>Explore → Federated</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/federated</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Graph</h2>
+<h3>Purpose</h3>
+<p>Graph — Explore surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/graph</code></li>
+<li>Nav: <strong>Explore → Graph</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/graph</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Catalog</h2>
+<h3>Purpose</h3>
+<p>Catalog — Primary surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/apps</code></li>
+<li>Nav: <strong>Primary → Catalog</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/apps</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Cluster</h2>
+<h3>Purpose</h3>
+<p>Cluster — Primary surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/cluster</code></li>
+<li>Nav: <strong>Primary → Cluster</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/cluster</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Health</h2>
+<h3>Purpose</h3>
+<p>Health — Primary surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/health</code></li>
+<li>Nav: <strong>Primary → Health</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/health</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Overview</h2>
+<h3>Purpose</h3>
+<p>Overview — Primary surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/</code></li>
+<li>Nav: <strong>Primary → Overview</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Mission Control</h2>
+<h3>Purpose</h3>
+<p>Mission Control — live departures board across namespaces and workspaces.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/mission-control</code></li>
+<li>Nav: <strong>Primary → Mission Control</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/mission-control</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Spaces</h2>
+<h3>Purpose</h3>
+<p>Spaces — Primary surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/spaces</code></li>
+<li>Nav: <strong>Primary → Spaces</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/spaces</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Help</h2>
+<h3>Purpose</h3>
+<p>Help — Support surface.</p>
+<h3>When to use it</h3>
+<ul>
+<li>Open this surface when the job matches the purpose above</li>
+<li>Start from the product home / dashboard if you are unsure where to begin</li>
+<li>Confirm auth and that required backends/operators are reachable if data looks empty</li>
+</ul>
+<h3>How to get there</h3>
+<ul>
+<li>Route / id: <code>/help</code></li>
+<li>Nav: <strong>Support → Help</strong> (sidebar, command palette, or desktop nav)</li>
+</ul>
+<h3>Operate from the console (UX)</h3>
+<ol>
+<li>Open <code>/help</code> and wait for live data from Iris.</li>
+<li>Use filters and search when the page provides them.</li>
+<li>Drill into a row or card for detail, then jump to related surfaces.</li>
+<li>For mutating actions: review impact, role gates, and confirmation dialogs first.</li>
+</ol>
+<p>If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.</p>
+<h3>Related pages</h3>
+<ul>
+<li><a href="../../getting-started.md">Getting Started</a></li>
+<li><a href="../../PAGE_INDEX.md">Page index</a></li>
+</ul>
+<hr>
+<h2>Iris — Complete page index</h2>
+<p>Every primary navigable dashboard route.</p>
+<p><em>Generated: 2026-08-29 · 13 routes</em></p>
+<p>Regenerate: <code>node scripts/customer-docs/generate-page-index.mjs</code></p>
+<h3>Primary</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Purpose</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Overview</td>
+<td><code>/</code></td>
+<td>Overview — Primary surface.</td>
+<td><a href="pages/primary/home.md">Open</a></td>
+</tr>
+<tr>
+<td>Catalog</td>
+<td><code>/apps</code></td>
+<td>Catalog — Primary surface.</td>
+<td><a href="pages/primary/apps.md">Open</a></td>
+</tr>
+<tr>
+<td>Cluster</td>
+<td><code>/cluster</code></td>
+<td>Cluster — Primary surface.</td>
+<td><a href="pages/primary/cluster.md">Open</a></td>
+</tr>
+<tr>
+<td>Health</td>
+<td><code>/health</code></td>
+<td>Health — Primary surface.</td>
+<td><a href="pages/primary/health.md">Open</a></td>
+</tr>
+<tr>
+<td>Spaces</td>
+<td><code>/spaces</code></td>
+<td>Spaces — Primary surface.</td>
+<td><a href="pages/primary/spaces.md">Open</a></td>
+</tr>
+<tr>
+<td>Mission Control</td>
+<td><code>/mission-control</code></td>
+<td>Mission Control — live departures board across namespaces and workspaces.</td>
+<td><a href="pages/primary/mission-control.md">Open</a></td>
+</tr>
+</tbody></table>
+<h3>Explore</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Purpose</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Graph</td>
+<td><code>/graph</code></td>
+<td>Graph — Explore surface.</td>
+<td><a href="pages/explore/graph.md">Open</a></td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td><code>/discovery</code></td>
+<td>Discovery — Explore surface.</td>
+<td><a href="pages/explore/discovery.md">Open</a></td>
+</tr>
+<tr>
+<td>Federated</td>
+<td><code>/federated</code></td>
+<td>Federated — Explore surface.</td>
+<td><a href="pages/explore/federated.md">Open</a></td>
+</tr>
+</tbody></table>
+<h3>Admin</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Purpose</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Teams</td>
+<td><code>/teams</code></td>
+<td>Teams — Admin surface.</td>
+<td><a href="pages/admin/teams.md">Open</a></td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>/settings</code></td>
+<td>Settings — appearance and local shell preferences.</td>
+<td><a href="pages/admin/settings.md">Open</a></td>
+</tr>
+</tbody></table>
+<h3>Audit</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Purpose</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Activity</td>
+<td><code>/activity</code></td>
+<td>Activity — Audit surface.</td>
+<td><a href="pages/audit/activity.md">Open</a></td>
+</tr>
+</tbody></table>
+<h3>Support</h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Route</th>
+<th>Purpose</th>
+<th>Guide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Help</td>
+<td><code>/help</code></td>
+<td>Help — Support surface.</td>
+<td><a href="pages/support/help.md">Open</a></td>
+</tr>
+</tbody></table>
+<h3>Related</h3>
+<ul>
+<li><a href="README.md">Customer docs home</a></li>
+<li><a href="pages/README.md">Page-by-page guides</a></li>
+</ul>
+</main></body></html>

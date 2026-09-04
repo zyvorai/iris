@@ -10,11 +10,11 @@ import CollapsibleGroup from '../nebula/CollapsibleGroup'
 import { useStatusFlip } from '../../hooks/useStatusFlip'
 import EmptyState from '../nebula/EmptyState'
 import Button from '../nebula/Button'
-import { HERMES_SPACES, groupAppsBySpace } from '../../utils/spaces'
-import type { HermesApp } from '../../types'
+import { IRIS_SPACES, groupAppsBySpace } from '../../utils/spaces'
+import type { IrisApp } from '../../types'
 
 interface MissionControlSpacesProps {
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 type FilterMode = 'all' | 'attention'
@@ -35,7 +35,7 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
     return next
   }, [grouped, filter])
 
-  const spacesWithApps = HERMES_SPACES.filter((s) => (filteredGrouped.get(s.id)?.length ?? 0) > 0)
+  const spacesWithApps = IRIS_SPACES.filter((s) => (filteredGrouped.get(s.id)?.length ?? 0) > 0)
   const attentionTotal = apps.filter((a) => a.status !== 'healthy').length
   const flipped = useStatusFlip(apps)
 
@@ -45,7 +45,7 @@ export default function MissionControlSpaces({ apps }: MissionControlSpacesProps
         <EmptyState
           icon={<Radar size={22} />}
           title="No services discovered yet"
-          description="Hermes will index cluster services as the controller syncs. Check Cluster for the full inventory."
+          description="Iris will index cluster services as the controller syncs. Check Cluster for the full inventory."
           action={
             <Button variant="primary" to="/cluster">
               Open Cluster

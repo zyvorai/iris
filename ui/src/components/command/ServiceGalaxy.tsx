@@ -11,17 +11,17 @@ import StatusBadge from '../nebula/StatusBadge'
 import Button from '../nebula/Button'
 import EmptyState from '../nebula/EmptyState'
 import AppIcon from '../AppIcon'
-import { hermesApi, openApp } from '../../services/hermesApi'
+import { irisApi, openApp } from '../../services/irisApi'
 import { useInspector } from '../../utils/inspectorContext'
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 interface ServiceGalaxyProps {
   onNodeClick?: (appId: string) => void
   publishedCount?: number
-  publishedApps?: HermesApp[]
+  publishedApps?: IrisApp[]
 }
 
-function ConstellationFallback({ apps, onNodeClick }: { apps: HermesApp[]; onNodeClick?: (id: string) => void }) {
+function ConstellationFallback({ apps, onNodeClick }: { apps: IrisApp[]; onNodeClick?: (id: string) => void }) {
   const { openDiagnose } = useInspector()
   if (!apps.length) return null
 
@@ -52,7 +52,7 @@ export default function ServiceGalaxy({
   publishedCount = 0,
   publishedApps = [],
 }: ServiceGalaxyProps) {
-  const graph = useQuery({ queryKey: ['graph'], queryFn: hermesApi.getGraph, refetchInterval: 30000 })
+  const graph = useQuery({ queryKey: ['graph'], queryFn: irisApi.getGraph, refetchInterval: 30000 })
   const nodes = graph.data?.nodes.length ?? 0
   const edges = graph.data?.edges.filter((e) => e.resolved).length ?? 0
 

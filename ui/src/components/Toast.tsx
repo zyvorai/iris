@@ -14,7 +14,7 @@ type ToastFn = (message: string, tone?: 'ok' | 'error') => void
 
 const ToastContext = createContext<ToastFn | null>(null)
 
-/** Lightweight toast system — Hermes had none. Wired at mutation call sites
+/** Lightweight toast system — Iris had none. Wired at mutation call sites
  * (publish, hide, share create/revoke, federation publish) that previously
  * gave no user-facing success/failure feedback beyond the button's own
  * pending state. */

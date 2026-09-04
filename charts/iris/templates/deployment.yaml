@@ -1,0 +1,188 @@
+{{- $publicBase := .Values.controller.publicBaseUrl -}}
+{{- if not $publicBase -}}
+{{- if eq .Values.service.type "NodePort" -}}
+{{- $publicBase = printf "https://%s:%v" .Values.global.domain (.Values.service.nodePort | default .Values.global.irisPort) -}}
+{{- else -}}
+{{- $publicBase = printf "https://%s" .Values.ingress.host -}}
+{{- end -}}
+{{- end -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iris
+  labels:
+    app.kubernetes.io/name: iris
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: iris
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: iris
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: controller
+          image: "{{ .Values.image.controller.repository }}:{{ .Values.image.controller.tag }}"
+          imagePullPolicy: {{ .Values.image.controller.pullPolicy }}
+          env:
+            - name: IRIS_DB_PATH
+              value: {{ .Values.database.path | quote }}
+            - name: IRIS_PUBLIC_BASE_URL
+              value: {{ $publicBase | quote }}
+            {{- $pathPrefix := .Values.controller.publicPathPrefix | default .Values.global.publicPathPrefix -}}
+            {{- if $pathPrefix }}
+            - name: IRIS_PUBLIC_PATH_PREFIX
+              value: {{ $pathPrefix | quote }}
+            {{- end }}
+            - name: IRIS_AUTO_PUBLISH
+              value: {{ .Values.controller.autoPublish | quote }}
+            - name: IRIS_AUTO_SUGGEST
+              value: {{ .Values.controller.autoSuggest | quote }}
+            - name: IRIS_DISCOVER_ALL
+              value: {{ .Values.controller.discoverAll | quote }}
+            - name: IRIS_DISCOVER_INGRESS
+              value: {{ .Values.controller.discoverIngress | quote }}
+            - name: IRIS_DISCOVER_GATEWAY_API
+              value: {{ .Values.controller.discoverGatewayAPI | quote }}
+            - name: IRIS_DISCOVER_MESH
+              value: {{ .Values.controller.discoverMesh | quote }}
+            {{- if .Values.controller.watchNamespaces }}
+            - name: IRIS_WATCH_NAMESPACES
+              value: {{ join "," .Values.controller.watchNamespaces | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data/iris
+          resources:
+            {{- toYaml .Values.resources.controller | nindent 12 }}
+        - name: server
+          image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag }}"
+          imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.global.irisPort }}
+          env:
+            - name: IRIS_BIND
+              value: {{ .Values.server.bind | quote }}
+            - name: IRIS_TLS_SAN_HOSTS
+              value: {{ .Values.global.domain | quote }}
+            - name: IRIS_DB_PATH
+              value: {{ .Values.database.path | quote }}
+            - name: IRIS_DEFAULT_USER
+              value: {{ .Values.server.defaultUser | quote }}
+            - name: IRIS_AUTH_MODE
+              value: {{ .Values.server.auth.mode | quote }}
+            {{- if and (eq .Values.server.auth.mode "api_key") .Values.server.auth.apiKey }}
+            - name: IRIS_API_KEY
+              value: {{ .Values.server.auth.apiKey | quote }}
+            {{- end }}
+            - name: IRIS_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: iris-session-secret
+                  key: session-secret
+            {{- if eq .Values.server.auth.mode "oidc" }}
+            - name: IRIS_OIDC_ISSUER
+              value: {{ .Values.server.auth.oidc.issuer | quote }}
+            - name: IRIS_OIDC_CLIENT_ID
+              value: {{ .Values.server.auth.oidc.clientId | quote }}
+            {{- if .Values.server.auth.oidc.existingSecret }}
+            - name: IRIS_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.server.auth.oidc.existingSecret | quote }}
+                  key: {{ .Values.server.auth.oidc.secretKey | default "clientSecret" | quote }}
+            {{- else }}
+            - name: IRIS_OIDC_CLIENT_SECRET
+              value: {{ .Values.server.auth.oidc.clientSecret | quote }}
+            {{- end }}
+            - name: IRIS_OIDC_REDIRECT_URL
+              value: {{ .Values.server.auth.oidc.redirectUrl | quote }}
+            {{- end }}
+            {{- if .Values.server.allowedNamespaces }}
+            - name: IRIS_ALLOWED_NAMESPACES
+              value: {{ join "," .Values.server.allowedNamespaces | quote }}
+            {{- end }}
+            {{- if .Values.server.adminUsers }}
+            - name: IRIS_ADMIN_USERS
+              value: {{ join "," .Values.server.adminUsers | quote }}
+            {{- end }}
+            {{- if .Values.server.adminGroups }}
+            - name: IRIS_ADMIN_GROUPS
+              value: {{ join "," .Values.server.adminGroups | quote }}
+            {{- end }}
+            - name: IRIS_CLUSTER_ID
+              value: {{ .Values.cluster.id | quote }}
+            - name: IRIS_CLUSTER_NAME
+              value: {{ .Values.cluster.name | quote }}
+            {{- if .Values.cluster.federated }}
+            - name: IRIS_FEDERATED_CLUSTERS
+              value: {{ .Values.cluster.federated | toJson | quote }}
+            {{- end }}
+            {{- if .Values.server.workspaceRules }}
+            - name: IRIS_WORKSPACE_RULES
+              value: {{ .Values.server.workspaceRules | quote }}
+            {{- end }}
+            {{- if .Values.server.roleRules }}
+            - name: IRIS_ROLE_RULES
+              value: {{ .Values.server.roleRules | quote }}
+            {{- end }}
+            {{- if .Values.server.k8sRbac }}
+            - name: IRIS_K8S_RBAC
+              value: "true"
+            {{- end }}
+            {{- if .Values.server.federation.trustHeaders }}
+            - name: IRIS_FEDERATION_TRUST_HEADERS
+              value: "true"
+            {{- end }}
+            {{- if .Values.server.llm.apiUrl }}
+            - name: IRIS_LLM_API_URL
+              value: {{ .Values.server.llm.apiUrl | quote }}
+            {{- end }}
+            {{- if .Values.server.llm.existingSecret }}
+            - name: IRIS_LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.server.llm.existingSecret | quote }}
+                  key: {{ .Values.server.llm.secretKey | default "apiKey" | quote }}
+            {{- else if .Values.server.llm.apiKey }}
+            - name: IRIS_LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: iris-llm
+                  key: {{ .Values.server.llm.secretKey | default "apiKey" | quote }}
+            {{- end }}
+            {{- if .Values.server.llm.model }}
+            - name: IRIS_LLM_MODEL
+              value: {{ .Values.server.llm.model | quote }}
+            {{- end }}
+            - name: IRIS_UI_DIR
+              value: /app/ui
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 8
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 4
+          volumeMounts:
+            - name: data
+              mountPath: /data/iris
+          resources:
+            {{- toYaml .Values.resources.server | nindent 12 }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: iris-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

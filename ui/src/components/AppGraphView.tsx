@@ -6,7 +6,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import EmptyState from './nebula/EmptyState'
-import { statusLabel, statusTone } from '../services/hermesApi'
+import { statusLabel, statusTone } from '../services/irisApi'
 import type { AppGraph, GraphEdge, GraphNode } from '../types'
 
 const NODE_W = 132

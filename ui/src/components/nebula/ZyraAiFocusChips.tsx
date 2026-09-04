@@ -1,11 +1,11 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 interface ZyraAiFocusChipsProps {
   appIds: string[]
-  catalog: HermesApp[]
+  catalog: IrisApp[]
   onSelect: (id: string) => void
   label?: string
   className?: string
@@ -20,7 +20,7 @@ export default function ZyraAiFocusChips({
 }: ZyraAiFocusChipsProps) {
   const apps = appIds
     .map((id) => catalog.find((app) => app.id === id))
-    .filter((app): app is HermesApp => !!app)
+    .filter((app): app is IrisApp => !!app)
 
   if (!apps.length) return null
 

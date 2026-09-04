@@ -7,12 +7,12 @@ import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Ho
 import { Link, useNavigate } from 'react-router-dom'
 import AppIcon from './AppIcon'
 import GlyphTile from './nebula/GlyphTile'
-import { hermesApi, openApp, statusLabel, statusTone } from '../services/hermesApi'
-import { refreshHermesData } from '../utils/refreshCatalog'
+import { irisApi, openApp, statusLabel, statusTone } from '../services/irisApi'
+import { refreshIrisData } from '../utils/refreshCatalog'
 import { loadSpotlightRecents, pushSpotlightRecent } from '../utils/recentStore'
 import { useInspector } from '../utils/inspectorContext'
 import { useWorkspace } from '../utils/workspaceContext'
-import type { HermesApp } from '../types'
+import type { IrisApp } from '../types'
 
 interface CommandPaletteProps {
   onClose: () => void
@@ -99,7 +99,7 @@ function parseSpotlightCommand(raw: string): { type: string; arg?: string } | nu
   return null
 }
 
-function findAppByName(catalog: HermesApp[], name: string): HermesApp | undefined {
+function findAppByName(catalog: IrisApp[], name: string): IrisApp | undefined {
   const needle = name.toLowerCase()
   return catalog.find(
     (a) =>
@@ -109,7 +109,7 @@ function findAppByName(catalog: HermesApp[], name: string): HermesApp | undefine
   )
 }
 
-function appDependsOn(app: HermesApp, dep: string): boolean {
+function appDependsOn(app: IrisApp, dep: string): boolean {
   const needle = dep.toLowerCase()
   return (app.meta?.dependsOn ?? []).some(
     (d) =>
@@ -128,8 +128,8 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
   const { setWorkspaceId, matchesWorkspace } = useWorkspace()
   const { openDiagnose, openInspector } = useInspector()
 
-  const recommended = useQuery({ queryKey: ['recommended'], queryFn: hermesApi.listRecommended })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
+  const recommended = useQuery({ queryKey: ['recommended'], queryFn: irisApi.listRecommended })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
 
   const catalogUnhealthy = useMemo(
     () => (catalog.data ?? []).filter((a) => a.status !== 'healthy' && matchesWorkspace(a)),
@@ -147,63 +147,63 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
 
   const diagnoseInsight = useQuery({
     queryKey: ['app-insight', diagnoseTarget?.id],
-    queryFn: () => hermesApi.getAppInsight(diagnoseTarget!.id),
+    queryFn: () => irisApi.getAppInsight(diagnoseTarget!.id),
     enabled: !!diagnoseTarget,
     staleTime: 30_000,
   })
 
   const fleetInsight = useQuery({
     queryKey: ['fleet-insight'],
-    queryFn: hermesApi.getFleetInsight,
+    queryFn: irisApi.getFleetInsight,
     enabled: command?.type === 'explain',
     staleTime: 45_000,
   })
 
   const discoveryInsight = useQuery({
     queryKey: ['discovery-insight'],
-    queryFn: hermesApi.getDiscoveryInsight,
+    queryFn: irisApi.getDiscoveryInsight,
     enabled: command?.type === 'suggest_publish',
     staleTime: 45_000,
   })
 
   const namespaceInsight = useQuery({
     queryKey: ['namespace-insight', command?.arg],
-    queryFn: () => hermesApi.getNamespaceInsight(command!.arg!),
+    queryFn: () => irisApi.getNamespaceInsight(command!.arg!),
     enabled: command?.type === 'ns_insight' && !!command.arg,
     staleTime: 45_000,
   })
 
   const graphInsight = useQuery({
     queryKey: ['graph-insight'],
-    queryFn: hermesApi.getGraphInsight,
+    queryFn: irisApi.getGraphInsight,
     enabled: command?.type === 'graph_insight',
     staleTime: 45_000,
   })
 
   const ownerInsightQuery = useQuery({
     queryKey: ['owner-insight', command?.arg],
-    queryFn: () => hermesApi.getOwnerInsight(command!.arg!),
+    queryFn: () => irisApi.getOwnerInsight(command!.arg!),
     enabled: command?.type === 'owner_insight' && !!command.arg,
     staleTime: 45_000,
   })
 
   const aiStatus = useQuery({
     queryKey: ['ai-status'],
-    queryFn: hermesApi.getAiStatus,
+    queryFn: irisApi.getAiStatus,
     enabled: command?.type === 'ai_status',
     staleTime: 60_000,
   })
 
   const federatedInsight = useQuery({
     queryKey: ['federated-insight'],
-    queryFn: hermesApi.getFederatedInsight,
+    queryFn: irisApi.getFederatedInsight,
     enabled: command?.type === 'federated_insight',
     staleTime: 45_000,
   })
 
   const activityInsight = useQuery({
     queryKey: ['activity-insight'],
-    queryFn: hermesApi.getActivityInsight,
+    queryFn: irisApi.getActivityInsight,
     enabled: command?.type === 'activity_insight',
     staleTime: 45_000,
   })
@@ -232,7 +232,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
 
   const { data: hits = [], isFetching: searchFetching } = useQuery({
     queryKey: ['search', q],
-    queryFn: () => hermesApi.search(q),
+    queryFn: () => irisApi.search(q),
     enabled:
       q.trim().length > 0 &&
       !isCommandQuery &&
@@ -259,17 +259,17 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
 
   const llm = useQuery({
     queryKey: ['search-llm', llmQuery],
-    queryFn: () => hermesApi.searchLlm(llmQuery),
+    queryFn: () => irisApi.searchLlm(llmQuery),
     enabled: isLlmQuery && llmQuery.length > 0,
   })
 
   const intent = useQuery({
     queryKey: ['search-llm-intent', q],
-    queryFn: () => hermesApi.searchLlm(q),
+    queryFn: () => irisApi.searchLlm(q),
     enabled: isIntentQuery,
   })
 
-  const recents = useQuery({ queryKey: ['recents'], queryFn: hermesApi.listRecents })
+  const recents = useQuery({ queryKey: ['recents'], queryFn: irisApi.listRecents })
 
   const isQueryPending = isSearchPending || (isLlmQuery && llm.isFetching) || (isIntentQuery && intent.isFetching)
 
@@ -357,7 +357,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
               kind: 'action',
               label: `Publish ${app.displayName}`,
               meta: `${app.namespace} · Zyra AI suggested`,
-              run: () => void hermesApi.publish(app.id).then(() => refreshHermesData(qc)),
+              run: () => void irisApi.publish(app.id).then(() => refreshIrisData(qc)),
             })
           }
         }
@@ -467,7 +467,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
               ? aiStatus.data.llmReachable === false
                 ? aiStatus.data.probeMessage || 'LLM configured but unreachable — falling back to rules'
                 : 'Zyra AI is generating insight responses from your configured model'
-              : 'Set HERMES_LLM_API_URL on the server for live LLM responses',
+              : 'Set IRIS_LLM_API_URL on the server for live LLM responses',
             run: () => navigate('/help'),
           },
           {
@@ -583,7 +583,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             kind: 'action' as const,
             label: `Publish ${app.displayName}`,
             meta: `${app.namespace} · add to launchpad`,
-            run: () => void hermesApi.publish(app.id).then(() => refreshHermesData(qc)),
+            run: () => void irisApi.publish(app.id).then(() => refreshIrisData(qc)),
           },
         ]
       }
@@ -597,7 +597,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
             kind: 'action' as const,
             label: `Pin ${app.displayName}`,
             meta: 'Add to favorites',
-            run: () => void hermesApi.addFavorite(app.id).then(() => qc.invalidateQueries({ queryKey: ['favorites'] })),
+            run: () => void irisApi.addFavorite(app.id).then(() => qc.invalidateQueries({ queryKey: ['favorites'] })),
           },
         ]
       }
@@ -621,7 +621,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           kind: 'action' as const,
           label: 'Refresh catalog',
           meta: 'Re-fetch discovery and health',
-          run: () => void refreshHermesData(qc),
+          run: () => void refreshIrisData(qc),
         },
       ]
     }
@@ -633,11 +633,11 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
           label: 'Export catalog JSON',
           meta: 'Download full service catalog',
           run: () => {
-            void hermesApi.exportCatalog().then((blob) => {
+            void irisApi.exportCatalog().then((blob) => {
               const url = URL.createObjectURL(blob)
               const a = document.createElement('a')
               a.href = url
-              a.download = `hermes-catalog-${new Date().toISOString().slice(0, 10)}.json`
+              a.download = `iris-catalog-${new Date().toISOString().slice(0, 10)}.json`
               a.click()
               URL.revokeObjectURL(url)
             })
@@ -876,7 +876,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
         <input
           ref={inputRef}
           className="palette-input"
-          placeholder="open grafana · publish prometheus · pin grafana · ns:hermes-system · refresh · export"
+          placeholder="open grafana · publish prometheus · pin grafana · ns:iris-system · refresh · export"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />

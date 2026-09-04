@@ -1,5 +1,5 @@
 /*
- * Axiom bridge — remap legacy Hermes classes to Liquid Glass palette.
+ * Axiom bridge — remap legacy Iris classes to Liquid Glass palette.
  * Loaded after index.css so these win over zeus-v9s-era surfaces.
  */
 
@@ -299,17 +299,17 @@
 }
 
 /* ── Footer ── */
-.hermes-page-footer {
+.iris-page-footer {
   border-top: 1px solid var(--border-soft);
   padding-top: 1.5rem;
 }
 
-.hermes-help-link {
+.iris-help-link {
   color: var(--text-muted, #94a3b8);
   border-radius: var(--radius-md, 12px);
 }
 
-.hermes-help-link:hover {
+.iris-help-link:hover {
   color: #f5a524;
   background: rgba(245, 165, 36, 0.08);
 }
@@ -317,26 +317,26 @@
 /* ── Palette & modals ── */
 .palette-backdrop,
 .diagnosis-drawer-backdrop,
-.hermes-nb-backdrop {
+.iris-nb-backdrop {
   background: rgba(5, 5, 5, 0.82) !important;
   backdrop-filter: blur(8px);
 }
 
 .palette,
-.hermes-nb-dropdown {
+.iris-nb-dropdown {
   border: 1px solid var(--border-soft) !important;
   background: var(--dropdown-bg) !important;
   box-shadow: var(--dropdown-shadow) !important;
 }
 
-.hermes-nb-drawer {
+.iris-nb-drawer {
   border: 1px solid var(--border-soft) !important;
   background: rgba(11, 15, 20, 0.92) !important;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.36) !important;
 }
 
-.hermes-nb-dropdown-item.active,
-.hermes-nb-drawer-item.active {
+.iris-nb-dropdown-item.active,
+.iris-nb-drawer-item.active {
   color: var(--axiom-primary, #f5a524) !important;
   background: rgba(245, 165, 36, 0.1) !important;
 }
@@ -443,13 +443,13 @@ html[data-theme='light'] .zeus-health-chip {
 
 html[data-theme='light'] .palette-backdrop,
 html[data-theme='light'] .diagnosis-drawer-backdrop,
-html[data-theme='light'] .hermes-nb-backdrop {
+html[data-theme='light'] .iris-nb-backdrop {
   background: rgba(20, 22, 26, 0.28) !important;
 }
 
 html[data-theme='light'] .palette,
-html[data-theme='light'] .hermes-nb-dropdown,
-html[data-theme='light'] .hermes-nb-drawer {
+html[data-theme='light'] .iris-nb-dropdown,
+html[data-theme='light'] .iris-nb-drawer {
   background: var(--dropdown-bg) !important;
   box-shadow: var(--dropdown-shadow) !important;
 }
@@ -467,9 +467,9 @@ html[data-theme='light'] .workspace-chip.active {
 
 html[data-theme='light'] .attention-filters button.active,
 html[data-theme='light'] .inspector-tabs button.active,
-html[data-theme='light'] .hermes-nb-nav-pill.active,
-html[data-theme='light'] .hermes-nb-dropdown-item.active,
-html[data-theme='light'] .hermes-nb-drawer-item.active,
+html[data-theme='light'] .iris-nb-nav-pill.active,
+html[data-theme='light'] .iris-nb-dropdown-item.active,
+html[data-theme='light'] .iris-nb-drawer-item.active,
 html[data-theme='light'] .mission-control-filters button.active,
 html[data-theme='light'] .filter-chip.active {
   color: var(--hs-text-heading);
@@ -479,7 +479,7 @@ html[data-theme='light'] .filter-chip.active {
 html[data-theme='light'] .chip-accent,
 html[data-theme='light'] .section-link:hover,
 html[data-theme='light'] .workspace-chip:hover:not(:disabled),
-html[data-theme='light'] .hermes-help-link:hover {
+html[data-theme='light'] .iris-help-link:hover {
   color: var(--hs-accent);
 }
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AppDiagnosis } from '../types'
-import { routePathPublicUrl, statusLabel, statusTone } from '../services/hermesApi'
+import { routePathPublicUrl, statusLabel, statusTone } from '../services/irisApi'
 
 interface RouteLensProps {
   diagnosis: AppDiagnosis

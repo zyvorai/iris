@@ -5,7 +5,7 @@ import { useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import GlassPanel from './GlassPanel'
 import { BoardHead } from './Board'
-import type { HermesApp } from '../../types'
+import type { IrisApp } from '../../types'
 
 function statusRank(status: string): number {
   if (status === 'broken') return 0
@@ -13,7 +13,7 @@ function statusRank(status: string): number {
   return 2
 }
 
-function sortApps(apps: HermesApp[]): HermesApp[] {
+function sortApps(apps: IrisApp[]): IrisApp[] {
   return [...apps].sort(
     (a, b) => statusRank(a.status) - statusRank(b.status) || a.displayName.localeCompare(b.displayName),
   )
@@ -21,8 +21,8 @@ function sortApps(apps: HermesApp[]): HermesApp[] {
 
 interface CollapsibleGroupProps {
   label: string
-  apps: HermesApp[]
-  renderApp: (app: HermesApp) => ReactNode
+  apps: IrisApp[]
+  renderApp: (app: IrisApp) => ReactNode
   headerExtra?: ReactNode
   /** Renders the group as its own bordered GlassPanel instead of a plain flat section. */
   wrap?: boolean

@@ -25,7 +25,7 @@ import EmptyState from '../components/nebula/EmptyState'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
-import { actionLabel, hermesApi } from '../services/hermesApi'
+import { actionLabel, irisApi } from '../services/irisApi'
 import { useActivityInsight } from '../hooks/useZyraAiInsight'
 import type { AuditEvent, FederatedAuditEvent } from '../types'
 
@@ -67,7 +67,7 @@ function exportAuditCsv(events: Array<AuditEvent & { clusterId?: string; cluster
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `hermes-activity-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `iris-activity-${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -80,19 +80,19 @@ export default function ActivityPage() {
 
   const audit = useQuery({
     queryKey: ['audit', federated],
-    queryFn: () => (federated ? hermesApi.listFederatedAudit(200) : hermesApi.listAudit(200)),
+    queryFn: () => (federated ? irisApi.listFederatedAudit(200) : irisApi.listAudit(200)),
     refetchInterval: 10000,
   })
   const activityInsight = useActivityInsight()
 
   const adminShares = useQuery({
     queryKey: ['shares', 'all'],
-    queryFn: hermesApi.listAllShares,
+    queryFn: irisApi.listAllShares,
     retry: false,
   })
 
   const revokeShare = useMutation({
-    mutationFn: hermesApi.revokeShare,
+    mutationFn: irisApi.revokeShare,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['shares'] })
       void qc.invalidateQueries({ queryKey: ['shares', 'all'] })

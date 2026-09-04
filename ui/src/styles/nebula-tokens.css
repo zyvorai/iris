@@ -1,5 +1,5 @@
 /*
- * Hermes design tokens — Apple / Zyvor Design System v2 (light-first)
+ * Iris design tokens — Apple / Zyvor Design System v2 (light-first)
  * Mirrors zyvor-web --hs-* scale; legacy aliases keep existing CSS working.
  */
 :root {
@@ -162,21 +162,21 @@
   --scrollbar-thumb: #cbd1d9;
   --scrollbar-thumb-hover: #aab2bd;
 
-  --hermes-bg: var(--bg-root);
-  --hermes-surface: var(--bg-panel);
-  --hermes-text: var(--text-primary);
-  --hermes-muted: var(--text-muted);
-  --hermes-border: var(--border-soft);
-  --hermes-accent: var(--axiom-primary);
-  --hermes-accent-soft: rgba(204, 66, 10, 0.1);
-  --hermes-green: var(--accent-green);
-  --hermes-amber: var(--accent-yellow);
-  --hermes-red: var(--accent-red);
-  --hermes-glass-blur: 20px;
-  --hermes-glass-chrome-blur: 20px;
-  --hermes-glass-card-blur: 20px;
-  --hermes-glass-popover-blur: 20px;
-  --hermes-glass-chrome-bg: rgba(255, 255, 255, 0.72);
+  --iris-bg: var(--bg-root);
+  --iris-surface: var(--bg-panel);
+  --iris-text: var(--text-primary);
+  --iris-muted: var(--text-muted);
+  --iris-border: var(--border-soft);
+  --iris-accent: var(--axiom-primary);
+  --iris-accent-soft: rgba(204, 66, 10, 0.1);
+  --iris-green: var(--accent-green);
+  --iris-amber: var(--accent-yellow);
+  --iris-red: var(--accent-red);
+  --iris-glass-blur: 20px;
+  --iris-glass-chrome-blur: 20px;
+  --iris-glass-card-blur: 20px;
+  --iris-glass-popover-blur: 20px;
+  --iris-glass-chrome-bg: rgba(255, 255, 255, 0.72);
 
   --zeus-bg-base: var(--bg-root);
   --zeus-bg-slate: var(--bg-elevated);
@@ -193,11 +193,11 @@
   --zeus-text-faint: var(--text-muted);
   --zeus-border: var(--border-soft);
   --zeus-border-strong: var(--border-strong);
-  --zeus-glass-blur: var(--hermes-glass-blur);
-  --zeus-glass-chrome-blur: var(--hermes-glass-chrome-blur);
-  --zeus-glass-card-blur: var(--hermes-glass-card-blur);
-  --zeus-glass-popover-blur: var(--hermes-glass-popover-blur);
-  --zeus-glass-chrome-bg: var(--hermes-glass-chrome-bg);
+  --zeus-glass-blur: var(--iris-glass-blur);
+  --zeus-glass-chrome-blur: var(--iris-glass-chrome-blur);
+  --zeus-glass-card-blur: var(--iris-glass-card-blur);
+  --zeus-glass-popover-blur: var(--iris-glass-popover-blur);
+  --zeus-glass-chrome-bg: var(--iris-glass-chrome-bg);
   --zeus-radius-panel: 1rem;
   --zeus-radius-window: 1.25rem;
 
@@ -322,9 +322,9 @@ html[data-theme='dark'] {
   --scrollbar-thumb: #2a2f36;
   --scrollbar-thumb-hover: #3d434c;
 
-  --hermes-surface: rgba(11, 15, 20, 0.72);
-  --hermes-accent-soft: rgba(245, 165, 36, 0.12);
-  --hermes-glass-chrome-bg: rgba(10, 10, 10, 0.88);
+  --iris-surface: rgba(11, 15, 20, 0.72);
+  --iris-accent-soft: rgba(245, 165, 36, 0.12);
+  --iris-glass-chrome-bg: rgba(10, 10, 10, 0.88);
   --zeus-bg-slate: var(--bg-elevated);
   --zeus-primary-soft: rgba(245, 165, 36, 0.18);
   --zeus-primary-border: rgba(245, 165, 36, 0.35);

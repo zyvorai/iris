@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from 'react-router-dom'
-import { openApp } from '../../services/hermesApi'
-import type { HermesApp } from '../../types'
+import { openApp } from '../../services/irisApi'
+import type { IrisApp } from '../../types'
 
 interface QuickLaunchBarProps {
-  apps: HermesApp[]
+  apps: IrisApp[]
 }
 
 export default function QuickLaunchBar({ apps }: QuickLaunchBarProps) {

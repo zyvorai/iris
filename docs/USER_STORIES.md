@@ -1,4 +1,4 @@
-# Hermes User Stories
+# Iris User Stories
 
 **Product:** The application operating layer for Kubernetes
 
@@ -16,7 +16,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 
 ### Story 1 — Discover cluster apps
 
-**As Morgan** (Platform Team), I want Hermes to automatically catalog every dashboard, API, and tool in the cluster, **so that** I stop maintaining spreadsheets of service URLs.
+**As Morgan** (Platform Team), I want Iris to automatically catalog every dashboard, API, and tool in the cluster, **so that** I stop maintaining spreadsheets of service URLs.
 
 | Acceptance criterion | Status |
 |---------------------|--------|
@@ -24,7 +24,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 | Catalog refreshes as the cluster changes (EndpointSlice readiness) | Shipped |
 | Signature recognition labels popular tools (Grafana, Prometheus, Argo CD, …) | Shipped |
 | Cluster page groups services by namespace with collapsible sections | Shipped |
-| Optional `hermes.zyvor.dev/*` annotations enrich custom apps | Shipped |
+| Optional `iris.zyvor.dev/*` annotations enrich custom apps | Shipped |
 
 ---
 
@@ -58,7 +58,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 
 ### Story 4 — Eliminate port-forward culture
 
-**As Alex** (Developer), I want to replace bookmark sprawl and tribal knowledge with Hermes, **so that** the cluster documents itself.
+**As Alex** (Developer), I want to replace bookmark sprawl and tribal knowledge with Iris, **so that** the cluster documents itself.
 
 | Acceptance criterion | Status |
 |---------------------|--------|
@@ -77,8 +77,8 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 |---------------------|--------|
 | `autoPublish: false` — apps require explicit publish or `published: true` annotation | Shipped |
 | Discovery queue shows unpublished services separately from launchpad | Shipped |
-| Namespace allow-list via `HERMES_ALLOWED_NAMESPACES` | Shipped |
-| OIDC auth with admin groups (`HERMES_ADMIN_GROUPS`) and role rules (`HERMES_ROLE_RULES`) | Shipped |
+| Namespace allow-list via `IRIS_ALLOWED_NAMESPACES` | Shipped |
+| OIDC auth with admin groups (`IRIS_ADMIN_GROUPS`) and role rules (`IRIS_ROLE_RULES`) | Shipped |
 | Optional Kubernetes SAR RBAC enforcement on API and gateway | Shipped |
 | NetworkPolicy Helm template restricts pod-to-pod traffic | Shipped |
 | Federation trust headers and cross-cluster RBAC sync | Shipped |
@@ -119,7 +119,7 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 
 | Acceptance criterion | Status |
 |---------------------|--------|
-| Federated page merges remote Hermes cluster catalogs | Shipped |
+| Federated page merges remote Iris cluster catalogs | Shipped |
 | Teams page groups apps by owner metadata | Shipped |
 | Graph page shows dependency topology with Zyra AI focus chips | Shipped |
 | Activity page aggregates audit events with fleet insight banner | Shipped |
@@ -148,7 +148,7 @@ Map each story to automated or manual checks before marking production-ready.
 make build && ./scripts/smoke-test.sh          # local smoke
 make deploy-remote                              # remote Helm deploy
 make test-remote-smoke                          # post-deploy API checks
-cd ui && HERMES_E2E_BASE=http://host:31847 npm run test:e2e
+cd ui && IRIS_E2E_BASE=http://host:31847 npm run test:e2e
 ```
 
 **Not yet validated (roadmap)**

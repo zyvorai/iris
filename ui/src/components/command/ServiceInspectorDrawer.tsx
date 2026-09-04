@@ -17,9 +17,9 @@ import {
   appLaunchPath,
   appPublicUrl,
   copyAppUrl,
-  hermesApi,
+  irisApi,
   openApp,
-} from '../../services/hermesApi'
+} from '../../services/irisApi'
 import { useZyraAiInsight } from '../../hooks/useZyraAiInsight'
 import { useInspector, type InspectorTab } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
@@ -57,21 +57,21 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const { openInspector } = useInspector()
   const qc = useQueryClient()
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites, enabled: !!appId })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, enabled: !!appId })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: irisApi.listFavorites, enabled: !!appId })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog, enabled: !!appId })
   const app = useQuery({
     queryKey: ['app', appId],
-    queryFn: () => hermesApi.getApp(appId!),
+    queryFn: () => irisApi.getApp(appId!),
     enabled: !!appId,
   })
   const diagnosis = useQuery({
     queryKey: ['diagnosis', appId],
-    queryFn: () => hermesApi.getDiagnosis(appId!),
+    queryFn: () => irisApi.getDiagnosis(appId!),
     enabled: !!appId,
   })
   const insight = useZyraAiInsight(appId, !!appId && tab === 'ai')
   const publish = useMutation({
-    mutationFn: () => hermesApi.publish(appId!),
+    mutationFn: () => irisApi.publish(appId!),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['app', appId] })
       void qc.invalidateQueries({ queryKey: ['catalog'] })
@@ -100,8 +100,8 @@ export default function ServiceInspectorDrawer({ appId, initialTab = 'overview',
 
   const toggleFavorite = async () => {
     if (!app.data) return
-    if (isFavorite) await hermesApi.removeFavorite(app.data.id)
-    else await hermesApi.addFavorite(app.data.id)
+    if (isFavorite) await irisApi.removeFavorite(app.data.id)
+    else await irisApi.addFavorite(app.data.id)
     void qc.invalidateQueries({ queryKey: ['favorites'] })
   }
 

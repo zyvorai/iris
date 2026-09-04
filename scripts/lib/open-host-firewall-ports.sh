@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Open Hermes NodePort on host firewall (iptables/firewalld/ufw).
+# Open Iris NodePort on host firewall (iptables/firewalld/ufw).
 # Returns 0 if at least one backend reported success, 1 if none applied.
-open_hermes_firewall_ports() {
-    local port="${HERMES_NODE_PORT:-31847}"
+open_iris_firewall_ports() {
+    local port="${IRIS_NODE_PORT:-31847}"
     local opened=0
 
     if command -v firewall-cmd >/dev/null 2>&1; then

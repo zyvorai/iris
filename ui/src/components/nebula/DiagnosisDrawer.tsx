@@ -7,7 +7,7 @@ import { AlertTriangle, Copy, Sparkles, Stethoscope, X } from 'lucide-react'
 import RouteLens from '../RouteLens'
 import StatusBadge from './StatusBadge'
 import Button from './Button'
-import { hermesApi, statusLabel, appPublicUrl } from '../../services/hermesApi'
+import { irisApi, statusLabel, appPublicUrl } from '../../services/irisApi'
 import { useZyraAiInsight } from '../../hooks/useZyraAiInsight'
 import { useInspector } from '../../utils/inspectorContext'
 import type { SuggestedAction } from '../../types'
@@ -17,7 +17,7 @@ interface DiagnosisDrawerProps {
   onClose: () => void
 }
 
-const KNOWN_ISSUES_KEY = 'hermes-known-issues'
+const KNOWN_ISSUES_KEY = 'iris-known-issues'
 
 function getKnownIssues(): Set<string> {
   try {
@@ -54,17 +54,17 @@ export default function DiagnosisDrawer({ appId, onClose }: DiagnosisDrawerProps
   const { openInspector } = useInspector()
   const app = useQuery({
     queryKey: ['app', appId],
-    queryFn: () => hermesApi.getApp(appId!),
+    queryFn: () => irisApi.getApp(appId!),
     enabled: !!appId,
   })
   const diagnosis = useQuery({
     queryKey: ['diagnosis', appId],
-    queryFn: () => hermesApi.getDiagnosis(appId!),
+    queryFn: () => irisApi.getDiagnosis(appId!),
     enabled: !!appId,
   })
   const audit = useQuery({
     queryKey: ['audit-recent', appId],
-    queryFn: () => hermesApi.listAudit(20),
+    queryFn: () => irisApi.listAudit(20),
     enabled: !!appId,
   })
   const insight = useZyraAiInsight(appId, !!appId)

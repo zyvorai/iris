@@ -1,13 +1,13 @@
-# Contributing to Hermes
+# Contributing to Iris
 
-Thank you for helping improve Hermes. This guide covers local development, testing, and the review bar we use before merging.
+Thank you for helping improve Iris. This guide covers local development, testing, and the review bar we use before merging.
 
 ## Prerequisites
 
 | Tool | Version | Used for |
 |------|---------|----------|
-| Rust | stable | `hermes-server`, `hermes-core`, `hermes-api` |
-| Go | 1.22+ | `hermes-controller` |
+| Rust | stable | `iris-server`, `iris-core`, `iris-api` |
+| Go | 1.22+ | `iris-controller` |
 | Node.js | 20+ | React UI (`ui/`) |
 | Helm | 3.x | Chart lint and deploy |
 | Docker | optional | Image builds |
@@ -35,7 +35,7 @@ cd ui && npm ci && npm run build
 # Playwright UI smoke
 cd ui && npm run test:e2e
 # Against a live deploy:
-HERMES_E2E_BASE=http://host:31847 npm run test:e2e
+IRIS_E2E_BASE=http://host:31847 npm run test:e2e
 
 # Remote post-deploy API checks
 make test-remote-smoke
@@ -57,7 +57,7 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 |-------------|--------|
 | UI behavior | [docs/ui.md](docs/ui.md) |
 | New API route | [docs/api.md](docs/api.md) + [docs/architecture.md](docs/architecture.md) + changelog |
-| Local dev / extending Hermes | [docs/development.md](docs/development.md) |
+| Local dev / extending Iris | [docs/development.md](docs/development.md) |
 | Install / deploy | [docs/install.md](docs/install.md) |
 | User-facing feature | [docs/USER_STORIES.md](docs/USER_STORIES.md) + [CHANGELOG.md](CHANGELOG.md) |
 

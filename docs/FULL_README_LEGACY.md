@@ -1,10 +1,10 @@
-# Hermes
+# Iris
 
 ### The Application Operating Layer for Kubernetes
 
 **Every Application. One Door.**
 
-Hermes transforms Kubernetes from an infrastructure platform into an application platform.
+Iris transforms Kubernetes from an infrastructure platform into an application platform.
 
 It automatically discovers applications running anywhere in your cluster, understands what they are, monitors their health, organizes them into a beautiful application experience, and provides a permanent front door to every workload.
 
@@ -50,55 +50,55 @@ Jenkins
 
 Click. Launch. Done.
 
-Hermes eliminates tribal knowledge, bookmark sprawl, and port-forward culture. The cluster becomes self-documenting.
+Iris eliminates tribal knowledge, bookmark sprawl, and port-forward culture. The cluster becomes self-documenting.
 
 ---
 
 **Docs:** [Documentation index](docs/README.md) · [User stories](docs/USER_STORIES.md)
 
-## What Hermes Is
+## What Iris Is
 
-Hermes is the application layer of **Zeus OS**.
+Iris is the application layer of **Zeus OS**.
 
-It continuously maps the Kubernetes universe and builds a living catalog of every application, dashboard, API, and internal workload. Users open Hermes and launch software — not infrastructure.
+It continuously maps the Kubernetes universe and builds a living catalog of every application, dashboard, API, and internal workload. Users open Iris and launch software — not infrastructure.
 
-Hermes is **not** a dashboard. Hermes is **not** an ingress controller. Hermes is **not** another portal.
+Iris is **not** a dashboard. Iris is **not** an ingress controller. Iris is **not** another portal.
 
-Hermes is the place where every workload becomes discoverable, every application gets a permanent identity, and users interact with software instead of cluster internals.
+Iris is the place where every workload becomes discoverable, every application gets a permanent identity, and users interact with software instead of cluster internals.
 
 ```mermaid
 flowchart BT
   Apps[Applications]
-  Hermes[Hermes]
+  Iris[Iris]
   K8s[Kubernetes]
   Infra[Infrastructure]
-  Apps --> Hermes --> K8s --> Infra
+  Apps --> Iris --> K8s --> Infra
 ```
 
-**Core philosophy:** Kubernetes manages infrastructure. Hermes manages application experience.
+**Core philosophy:** Kubernetes manages infrastructure. Iris manages application experience.
 
 Infrastructure asks: which pod, which node, which namespace, which service?
 
 Humans ask: where is Grafana, is it healthy, can I open it?
 
-Hermes translates between those worlds.
+Iris translates between those worlds.
 
 ---
 
 ## Category Creation
 
-Hermes is creating a new category: the **Application Operating Layer**.
+Iris is creating a new category: the **Application Operating Layer**.
 
 It sits above applications and below the human experience layer — making Kubernetes finally discoverable for the people who depend on it every day.
 
 | Layer | Role |
 |-------|------|
 | Applications | Workloads users actually care about |
-| **Hermes** | Discovery, memory, gateway, launch experience |
+| **Iris** | Discovery, memory, gateway, launch experience |
 | Kubernetes | Orchestration and infrastructure |
 | Infrastructure | Compute, network, storage |
 
-Infrastructure runs software. Hermes makes software usable.
+Infrastructure runs software. Iris makes software usable.
 
 ---
 
@@ -106,7 +106,7 @@ Infrastructure runs software. Hermes makes software usable.
 
 ### 1. Discovery — *shipped in v0.1*
 
-Hermes continuously discovers applications across your cluster.
+Iris continuously discovers applications across your cluster.
 
 **Available today:**
 
@@ -121,13 +121,13 @@ Hermes continuously discovers applications across your cluster.
 - Custom resources (Argo CD, KubeVirt, Crossplane, Backstage)
 - Zeus native applications (Transiva, Atlas, Athena, Kronos)
 
-No manual registration required for cluster services. Hermes watches the cluster and builds the catalog for you.
+No manual registration required for cluster services. Iris watches the cluster and builds the catalog for you.
 
 ---
 
 ### 2. Recognition Engine — *shipped in v0.1*
 
-Discovery alone is not enough. Hermes identifies popular software automatically through signature recognition.
+Discovery alone is not enough. Iris identifies popular software automatically through signature recognition.
 
 Recognized today (examples):
 
@@ -142,19 +142,19 @@ Recognized today (examples):
 
 Applications appear with name, category, icon, health, and launch URL — often without any manual configuration.
 
-Optional **annotations** (`hermes.zyvor.dev/*`) enrich display metadata for custom apps. See [docs/annotations.md](docs/annotations.md).
+Optional **annotations** (`iris.zyvor.dev/*`) enrich display metadata for custom apps. See [docs/annotations.md](docs/annotations.md).
 
 ---
 
 ### 3. Universal Gateway — *shipped in v0.1*
 
-Hermes exposes applications through stable gateway URLs.
+Iris exposes applications through stable gateway URLs.
 
 **Today:**
 
 ```text
-https://hermes.company.com/a/monitoring/grafana
-https://hermes.company.com/a/argocd/argocd-server
+https://iris.company.com/a/monitoring/grafana
+https://iris.company.com/a/argocd/argocd-server
 ```
 
 One URL pattern. Applications can move namespaces or clusters; gateway paths stay predictable.
@@ -162,9 +162,9 @@ One URL pattern. Applications can move namespaces or clusters; gateway paths sta
 **Vision:**
 
 ```text
-https://hermes.company.com/grafana
-https://hermes.company.com/argocd
-https://hermes.company.com/harbor
+https://iris.company.com/grafana
+https://iris.company.com/argocd
+https://iris.company.com/harbor
 ```
 
 **Capabilities today:**
@@ -179,7 +179,7 @@ https://hermes.company.com/harbor
 
 ### 4. Application Memory — *shipped in v0.1*
 
-Hermes remembers how people work.
+Iris remembers how people work.
 
 **Personal memory:**
 
@@ -250,11 +250,11 @@ See [docs/ui.md](docs/ui.md) for endpoints and Spotlight commands.
 
 ---
 
-## Hermes UI (Nebula)
+## Iris UI (Nebula)
 
 Most Kubernetes UIs look like namespaces, pods, services, and deployments.
 
-Hermes looks like applications.
+Iris looks like applications.
 
 ```text
 Grafana    Prometheus    Harbor    Jenkins    GitLab    Backstage
@@ -312,7 +312,7 @@ kubectl port-forward svc/grafana 3000:3000
 
 for routine application access.
 
-Hermes becomes: **Search → Launch → Work.**
+Iris becomes: **Search → Launch → Work.**
 
 ---
 
@@ -320,9 +320,9 @@ Hermes becomes: **Search → Launch → Work.**
 
 ```mermaid
 flowchart TB
-  UI[Hermes_UI_Nebula]
-  Server[hermes-server_Rust]
-  Controller[hermes-controller_Go]
+  UI[Iris_UI_Nebula]
+  Server[iris-server_Rust]
+  Controller[iris-controller_Go]
   SQLite[(SQLite_catalog)]
   Cluster[Kubernetes_Cluster]
   UI -->|REST| Server
@@ -334,9 +334,9 @@ flowchart TB
 
 | Component | Language | Role |
 |-----------|----------|------|
-| `hermes-controller` | Go | Discovery engine — watches Services and EndpointSlices, signature recognition, health polling, catalog writes |
-| `hermes-server` | Rust | API, universal gateway, embedded UI host |
-| **Hermes UI (Nebula)** | React | Service launchpad — search, browse, launch, Zeus AI |
+| `iris-controller` | Go | Discovery engine — watches Services and EndpointSlices, signature recognition, health polling, catalog writes |
+| `iris-server` | Rust | API, universal gateway, embedded UI host |
+| **Iris UI (Nebula)** | React | Service launchpad — search, browse, launch, Zeus AI |
 
 Shared SQLite catalog on a PVC keeps controller and server in sync.
 
@@ -348,15 +348,15 @@ See [docs/architecture.md](docs/architecture.md) for routes, data flow, and secu
 
 Honest checklist of what ships now:
 
-- [x] Cluster-wide service discovery (`HERMES_DISCOVER_ALL=true`, default in Helm)
+- [x] Cluster-wide service discovery (`IRIS_DISCOVER_ALL=true`, default in Helm)
 - [x] Signature recognition for popular platform tools
 - [x] Ingress and Gateway API (`HTTPRoute`) route discovery
-- [x] Optional annotation enrichment (`hermes.zyvor.dev/*`) including canonical slugs
+- [x] Optional annotation enrichment (`iris.zyvor.dev/*`) including canonical slugs
 - [x] Nebula UI — Home, Apps, Cluster, Discovery, Health, Activity, Graph, Federated, Teams
 - [x] Universal gateway at `/a/{namespace}/{slug}` and `/apps/{slug}` with WebSocket support
 - [x] Favorites, recents, cluster-wide search, audit log
 - [x] API key and OIDC authentication (optional)
-- [x] Namespace-scoped API filter (`HERMES_ALLOWED_NAMESPACES`)
+- [x] Namespace-scoped API filter (`IRIS_ALLOWED_NAMESPACES`)
 - [x] App metadata: environment, owner, dependencies, team recommendations
 - [x] Prometheus `/metrics` and catalog `/api/v1/stats`
 - [x] Bulk namespace publish and catalog JSON export
@@ -368,12 +368,12 @@ Honest checklist of what ships now:
 - [x] Share links with admin revoke, activity timeline, and CSV export
 - [x] Rule-based search intent API (`/api/v1/search/intent`)
 - [x] Cluster registry API (single-cluster MVP) and diagnosis actions
-- [x] OIDC admin groups (`HERMES_ADMIN_GROUPS`) and share admin (`HERMES_ADMIN_USERS`)
-- [x] Federated cluster registry (`HERMES_FEDERATED_CLUSTERS`) with remote health
-- [x] Workspace permissions via OIDC groups (`HERMES_WORKSPACE_RULES`)
+- [x] OIDC admin groups (`IRIS_ADMIN_GROUPS`) and share admin (`IRIS_ADMIN_USERS`)
+- [x] Federated cluster registry (`IRIS_FEDERATED_CLUSTERS`) with remote health
+- [x] Workspace permissions via OIDC groups (`IRIS_WORKSPACE_RULES`)
 - [x] Ingress host metadata on discovered apps
 - [x] Service mesh route discovery (Istio VirtualService + Linkerd annotations)
-- [x] Federated catalog merge across remote Hermes clusters
+- [x] Federated catalog merge across remote Iris clusters
 - [x] LLM search API with rule-based fallback (`/api/v1/search/llm`, Spotlight `ai:` prefix)
 - [x] Zeus AI insight APIs (`GET /api/v1/apps/{id}/insight`, `GET /api/v1/insights/fleet`) with LLM + rules fallback
 - [x] Discovery and namespace insight APIs with publish ranking and namespace rollups
@@ -385,11 +385,11 @@ Honest checklist of what ships now:
 - [x] Fleet and per-app AI panels (Home, Health, Activity, Graph, Diagnose drawer, inspector AI tab)
 - [x] Spotlight `diagnose <app>` insight preview and `explain` fleet summary command
 - [x] Gateway SSE streaming and gRPC content-type pass-through
-- [x] Enterprise role rules (`HERMES_ROLE_RULES`) and optional K8s SAR RBAC
+- [x] Enterprise role rules (`IRIS_ROLE_RULES`) and optional K8s SAR RBAC
 - [x] Multi-cluster write federation (`POST /api/v1/federation/publish/*`, remote recommend)
 - [x] Service mesh policy UI (Istio/Linkerd route panel + graph mesh filter)
 - [x] Native gRPC/HTTP2 backend connection pools in gateway
-- [x] Cross-cluster RBAC sync (forward groups + `HERMES_FEDERATION_TRUST_HEADERS`)
+- [x] Cross-cluster RBAC sync (forward groups + `IRIS_FEDERATION_TRUST_HEADERS`)
 - [x] Structured Istio/Linkerd mesh policies in discovery + UI panel
 - [x] Cross-cluster audit aggregation (`GET /api/v1/audit/federated`)
 - [x] Zyvor footer, Help center, and keyboard shortcuts (v9s-style chrome)
@@ -405,14 +405,14 @@ In-cluster mesh policy editing · federated activity export webhooks
 ### Install with Helm
 
 ```bash
-helm install hermes ./charts/hermes \
-  -n hermes-system \
+helm install iris ./charts/iris \
+  -n iris-system \
   --create-namespace \
   --set global.domain=zeus.local \
-  --set ingress.host=hermes.zeus.local
+  --set ingress.host=iris.zeus.local
 ```
 
-Open `https://hermes.zeus.local/` (or NodePort if ingress is disabled).
+Open `https://iris.zeus.local/` (or NodePort if ingress is disabled).
 
 ### Remote K3s deploy
 
@@ -438,12 +438,12 @@ See [docs/development.md](docs/development.md) for local development workflows.
 ```yaml
 metadata:
   annotations:
-    hermes.zyvor.dev/enabled: "true"
-    hermes.zyvor.dev/name: "Grafana"
-    hermes.zyvor.dev/category: "Monitoring"
-    hermes.zyvor.dev/icon: "grafana"
-    hermes.zyvor.dev/port: "80"
-    hermes.zyvor.dev/published: "true"
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Grafana"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/icon: "grafana"
+    iris.zyvor.dev/port: "80"
+    iris.zyvor.dev/published: "true"
 ```
 
 Full reference: [docs/annotations.md](docs/annotations.md) · Install guide: [docs/install.md](docs/install.md)
@@ -459,17 +459,17 @@ Full reference: [docs/annotations.md](docs/annotations.md) · Install guide: [do
 | OpenShift Console | Platform operations |
 | Lens | Developer-centric cluster UI |
 | Portainer | Container management |
-| **Hermes** | **Application experience** |
+| **Iris** | **Application experience** |
 
-Those tools help you manage infrastructure. Hermes helps you **use applications**.
+Those tools help you manage infrastructure. Iris helps you **use applications**.
 
-The closest analogy: if Spotlight, Launchpad, and a Kubernetes gateway had a child — but Hermes is bigger than that. It is the application operating layer.
+The closest analogy: if Spotlight, Launchpad, and a Kubernetes gateway had a child — but Iris is bigger than that. It is the application operating layer.
 
 ---
 
 ## Multi-Cluster Vision
 
-One Hermes aggregating development, production, edge, on-prem, and cloud clusters into a single application experience.
+One Iris aggregating development, production, edge, on-prem, and cloud clusters into a single application experience.
 
 **Roadmap v2.** v0.1 targets a single cluster with full catalog depth.
 
@@ -489,7 +489,7 @@ One Hermes aggregating development, production, edge, on-prem, and cloud cluster
 
 ## Powered by Zeus OS
 
-Hermes is a core platform service of **ZyvorAI Labs Zeus OS**.
+Iris is a core platform service of **ZyvorAI Labs Zeus OS**.
 
 Together they provide:
 
@@ -503,7 +503,7 @@ Together they provide:
 
 through a single platform.
 
-Hermes is how humans enter the software universe that Zeus runs.
+Iris is how humans enter the software universe that Zeus runs.
 
 ---
 
@@ -535,17 +535,17 @@ Hermes is how humans enter the software universe that Zeus runs.
 
 ## Ultimate One-Liner
 
-**Hermes is the Application Operating Layer for Kubernetes — discovering, organizing, securing, and launching every application running across your clusters through a single intelligent gateway.**
+**Iris is the Application Operating Layer for Kubernetes — discovering, organizing, securing, and launching every application running across your clusters through a single intelligent gateway.**
 
 ---
 
 ## Taglines
 
-> **Hermes — The Front Door to Everything Running in Kubernetes.**
+> **Iris — The Front Door to Everything Running in Kubernetes.**
 
-> **Hermes — Your Cluster's Application Universe.**
+> **Iris — Your Cluster's Application Universe.**
 
-> **Hermes — Kubernetes, Finally Discoverable.**
+> **Iris — Kubernetes, Finally Discoverable.**
 
 ---
 

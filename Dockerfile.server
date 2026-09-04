@@ -10,13 +10,13 @@ FROM docker.io/library/rust:1.88-bookworm AS rust-builder
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
-RUN cargo build --release -p hermes-server
+RUN cargo build --release -p iris-server
 
 FROM docker.io/library/debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY --from=rust-builder /src/target/release/hermes-server /usr/local/bin/hermes-server
+COPY --from=rust-builder /src/target/release/iris-server /usr/local/bin/iris-server
 COPY --from=ui-builder /ui/dist /app/ui
-ENV HERMES_UI_DIR=/app/ui
+ENV IRIS_UI_DIR=/app/ui
 EXPOSE 31847
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/hermes-server"]
+ENTRYPOINT ["/usr/local/bin/iris-server"]

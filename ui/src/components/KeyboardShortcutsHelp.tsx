@@ -56,7 +56,7 @@ export default function KeyboardShortcutsHelp({ onClose }: KeyboardShortcutsHelp
             <h2 id="shortcuts-title">
               <Keyboard size={16} /> Keyboard shortcuts
             </h2>
-            <p className="body-text">Hermes navigation</p>
+            <p className="body-text">Iris navigation</p>
           </div>
           <Button variant="ghost" onClick={onClose} aria-label="Close">
             <X size={16} />

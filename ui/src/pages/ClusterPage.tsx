@@ -20,7 +20,7 @@ import ActionMenu from '../components/nebula/ActionMenu'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import CollapsibleGroup from '../components/nebula/CollapsibleGroup'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useFleetInsight, useNamespaceInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
@@ -43,14 +43,14 @@ export default function ClusterPage() {
     if (ns) setNsFilter(ns)
   }, [searchParams])
 
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog, refetchInterval: 15000 })
-  const summary = useQuery({ queryKey: ['cluster-summary'], queryFn: hermesApi.clusterSummary, refetchInterval: 15000 })
-  const clusters = useQuery({ queryKey: ['clusters'], queryFn: hermesApi.listClusters, refetchInterval: 15000 })
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog, refetchInterval: 15000 })
+  const summary = useQuery({ queryKey: ['cluster-summary'], queryFn: irisApi.clusterSummary, refetchInterval: 15000 })
+  const clusters = useQuery({ queryKey: ['clusters'], queryFn: irisApi.listClusters, refetchInterval: 15000 })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: irisApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
 
   const publish = useMutation({
-    mutationFn: hermesApi.publish,
+    mutationFn: irisApi.publish,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['catalog'] })
       void qc.invalidateQueries({ queryKey: ['discovery'] })
@@ -67,7 +67,7 @@ export default function ClusterPage() {
   }, [catalog.data])
 
   const publishNs = useMutation({
-    mutationFn: hermesApi.publishNamespace,
+    mutationFn: irisApi.publishNamespace,
     onSuccess: (_data, ns) => {
       void qc.invalidateQueries({ queryKey: ['catalog'] })
       void qc.invalidateQueries({ queryKey: ['discovery'] })
@@ -104,11 +104,11 @@ export default function ClusterPage() {
   }
 
   const exportCatalog = () => {
-    void hermesApi.exportCatalog().then((blob) => {
+    void irisApi.exportCatalog().then((blob) => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'hermes-catalog.json'
+      a.download = 'iris-catalog.json'
       a.click()
       URL.revokeObjectURL(url)
     })
@@ -152,7 +152,7 @@ export default function ClusterPage() {
             <EmptyState
               icon={<Server size={22} />}
               title="No services discovered yet"
-              description="Hermes scans your cluster continuously. Check discovery settings or wait for the controller to finish its first pass."
+              description="Iris scans your cluster continuously. Check discovery settings or wait for the controller to finish its first pass."
               action={
                 <>
                   <Button variant="primary" to="/discovery">

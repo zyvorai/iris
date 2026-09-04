@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useQuery } from '@tanstack/react-query'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 
 export function useZyraAiInsight(appId: string | null, enabled = true) {
   const insight = useQuery({
     queryKey: ['app-insight', appId],
-    queryFn: () => hermesApi.getAppInsight(appId!),
+    queryFn: () => irisApi.getAppInsight(appId!),
     enabled: enabled && !!appId,
     staleTime: 60_000,
   })
@@ -28,7 +28,7 @@ export function useZyraAiInsight(appId: string | null, enabled = true) {
 export function useFleetInsight(enabled = true) {
   return useQuery({
     queryKey: ['fleet-insight'],
-    queryFn: hermesApi.getFleetInsight,
+    queryFn: irisApi.getFleetInsight,
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,
@@ -38,7 +38,7 @@ export function useFleetInsight(enabled = true) {
 export function useDiscoveryInsight(enabled = true) {
   return useQuery({
     queryKey: ['discovery-insight'],
-    queryFn: hermesApi.getDiscoveryInsight,
+    queryFn: irisApi.getDiscoveryInsight,
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,
@@ -48,7 +48,7 @@ export function useDiscoveryInsight(enabled = true) {
 export function useNamespaceInsight(namespace: string | null, enabled = true) {
   return useQuery({
     queryKey: ['namespace-insight', namespace],
-    queryFn: () => hermesApi.getNamespaceInsight(namespace!),
+    queryFn: () => irisApi.getNamespaceInsight(namespace!),
     enabled: enabled && !!namespace,
     staleTime: 45_000,
   })
@@ -57,7 +57,7 @@ export function useNamespaceInsight(namespace: string | null, enabled = true) {
 export function useGraphInsight(enabled = true) {
   return useQuery({
     queryKey: ['graph-insight'],
-    queryFn: hermesApi.getGraphInsight,
+    queryFn: irisApi.getGraphInsight,
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,
@@ -67,7 +67,7 @@ export function useGraphInsight(enabled = true) {
 export function useOwnerInsight(owner: string | null, enabled = true) {
   return useQuery({
     queryKey: ['owner-insight', owner],
-    queryFn: () => hermesApi.getOwnerInsight(owner!),
+    queryFn: () => irisApi.getOwnerInsight(owner!),
     enabled: enabled && !!owner,
     staleTime: 45_000,
   })
@@ -76,7 +76,7 @@ export function useOwnerInsight(owner: string | null, enabled = true) {
 export function useAiStatus() {
   return useQuery({
     queryKey: ['ai-status'],
-    queryFn: hermesApi.getAiStatus,
+    queryFn: irisApi.getAiStatus,
     staleTime: 60_000,
   })
 }
@@ -84,7 +84,7 @@ export function useAiStatus() {
 export function useFederatedInsight(enabled = true) {
   return useQuery({
     queryKey: ['federated-insight'],
-    queryFn: hermesApi.getFederatedInsight,
+    queryFn: irisApi.getFederatedInsight,
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,
@@ -94,7 +94,7 @@ export function useFederatedInsight(enabled = true) {
 export function useActivityInsight(enabled = true) {
   return useQuery({
     queryKey: ['activity-insight'],
-    queryFn: hermesApi.getActivityInsight,
+    queryFn: irisApi.getActivityInsight,
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,

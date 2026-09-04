@@ -15,13 +15,13 @@ import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
 import CollapsibleGroup from '../components/nebula/CollapsibleGroup'
 import GroupBySelect from '../components/nebula/GroupBySelect'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import { groupBy } from '../utils/groupBy'
 import { useStatusFlip } from '../hooks/useStatusFlip'
-import type { HermesApp } from '../types'
+import type { IrisApp } from '../types'
 
 type CatalogMode = 'published' | 'all'
 type SortKey = 'name' | 'status' | 'namespace' | 'updated'
@@ -34,7 +34,7 @@ const GROUP_OPTIONS: { value: GroupKey; label: string }[] = [
   { value: 'category', label: 'Group by category' },
 ]
 
-function sortApps(apps: HermesApp[], sort: SortKey): HermesApp[] {
+function sortApps(apps: IrisApp[], sort: SortKey): IrisApp[] {
   const rank = (s: string) => (s === 'broken' ? 0 : s === 'degraded' ? 1 : 2)
   return [...apps].sort((a, b) => {
     if (sort === 'status') return rank(a.status) - rank(b.status) || a.displayName.localeCompare(b.displayName)
@@ -52,7 +52,7 @@ const STATUS_LABEL: Record<string, string> = {
   healthy: 'Healthy',
 }
 
-function groupKeyFn(key: GroupKey): (app: HermesApp) => string {
+function groupKeyFn(key: GroupKey): (app: IrisApp) => string {
   if (key === 'namespace') return (a) => a.namespace
   if (key === 'status') return (a) => a.status
   return (a) => a.category || 'Uncategorized'
@@ -78,9 +78,9 @@ export default function AppsPage() {
   const [groupKey, setGroupKey] = useState<GroupKey>('none')
   const { matchesWorkspace } = useWorkspace()
   const { openDiagnose } = useInspector()
-  const published = useQuery({ queryKey: ['apps'], queryFn: hermesApi.listApps })
-  const catalog = useQuery({ queryKey: ['catalog'], queryFn: hermesApi.listCatalog })
-  const favorites = useQuery({ queryKey: ['favorites'], queryFn: hermesApi.listFavorites })
+  const published = useQuery({ queryKey: ['apps'], queryFn: irisApi.listApps })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
+  const favorites = useQuery({ queryKey: ['favorites'], queryFn: irisApi.listFavorites })
   const favIds = new Set(favorites.data?.map((a) => a.id) ?? [])
 
   const source = mode === 'published' ? published.data : catalog.data
@@ -156,7 +156,7 @@ export default function AppsPage() {
               description={
                 mode === 'published'
                   ? 'Publish services from the cluster catalog or discovery queue to populate the launchpad.'
-                  : 'Hermes will populate this view once the controller finishes scanning your cluster.'
+                  : 'Iris will populate this view once the controller finishes scanning your cluster.'
               }
               action={
                 <>

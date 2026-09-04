@@ -20,16 +20,16 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/zyvorai/hermes/controller/model"
-	"github.com/zyvorai/hermes/controller/signatures"
-	"github.com/zyvorai/hermes/controller/store"
+	"github.com/zyvorai/iris/controller/model"
+	"github.com/zyvorai/iris/controller/signatures"
+	"github.com/zyvorai/iris/controller/store"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 	gwexternalversions "sigs.k8s.io/gateway-api/pkg/client/informers/externalversions"
 	"k8s.io/client-go/dynamic"
 )
 
 const (
-	annoPrefix    = "hermes.zyvor.dev/"
+	annoPrefix    = "iris.zyvor.dev/"
 	annoEnabled   = annoPrefix + "enabled"
 	annoName      = annoPrefix + "name"
 	annoDesc      = annoPrefix + "description"

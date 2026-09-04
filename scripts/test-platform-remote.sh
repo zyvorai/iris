@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Delegate Axiom + Hermes platform E2E to the Axiom orchestrator.
+# Delegate Axiom + Iris platform E2E to the Axiom orchestrator.
 #
 # Usage:
 #   ./scripts/test-platform-remote.sh <host> [ssh_user]

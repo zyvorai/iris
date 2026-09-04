@@ -1,4 +1,4 @@
-# Hermes
+# Iris
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
@@ -7,13 +7,13 @@
 
 ## 📖 Feature Guide
 
-**[Hermes — Customer Feature Guide](docs/hermes-customer-feature-guide.md)** — a complete, customer-facing reference covering all **60 features** across **12 areas**, grounded in the product's actual capabilities. Also available as a print-ready **[PDF](docs/hermes-customer-feature-guide.pdf)**.
+**[Iris — Customer Feature Guide](docs/iris-customer-feature-guide.md)** — a complete, customer-facing reference covering all **60 features** across **12 areas**, grounded in the product's actual capabilities. Also available as a print-ready **[PDF](docs/iris-customer-feature-guide.pdf)**.
 
 **[Customer manual (page-by-page)](docs/customer/README.md)** — getting started, admin basics, and a guide for every product surface (PDFs under `docs/customer/pdf/`).
 
 **Every Application. One Door.**
 
-Hermes transforms Kubernetes from an infrastructure platform into an application platform — auto-discovering every dashboard, API, and internal tool, then giving users a permanent front door to launch software without `kubectl port-forward`.
+Iris transforms Kubernetes from an infrastructure platform into an application platform — auto-discovering every dashboard, API, and internal tool, then giving users a permanent front door to launch software without `kubectl port-forward`.
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
@@ -29,9 +29,9 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 
 ---
 
-## Why Hermes
+## Why Iris
 
-| Problem | Hermes answer |
+| Problem | Iris answer |
 |---------|---------------|
 | "Where is Grafana?" every Monday | Living app catalog with one-click launch |
 | Bookmark sprawl and tribal knowledge | Permanent URLs — cluster self-documents |
@@ -49,10 +49,10 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 | Layer | What's in the repo |
 |-------|-------------------|
 | **Controller** | Go discovery + gateway — `controller/`, `cmd/` |
-| **API** | Rust REST + gateway — `crates/hermes-api`, `crates/hermes-gateway` |
+| **API** | Rust REST + gateway — `crates/iris-api`, `crates/iris-gateway` |
 | **UI** | React Nebula launchpad — `ui/` |
-| **Zyra AI** | Insight APIs + Spotlight NL search — `crates/hermes-core/src/insight.rs`, `docs/ui.md` |
-| **Charts** | Helm install — `charts/hermes/` |
+| **Zyra AI** | Insight APIs + Spotlight NL search — `crates/iris-core/src/insight.rs`, `docs/ui.md` |
+| **Charts** | Helm install — `charts/iris/` |
 | **Deploy** | Remote k3s scripts — `scripts/` |
 
 ---
@@ -60,18 +60,18 @@ Hermes transforms Kubernetes from an infrastructure platform into an application
 ## Quick Start
 
 ```bash
-git clone https://github.com/zyvorai/hermes.git && cd hermes
+git clone https://github.com/zyvorai/iris.git && cd iris
 
 # Build from source (recommended) or pull published GHCR images when available
 make build
 
 # Helm install from the local chart (override image repos as needed)
-helm install hermes ./charts/hermes \
-  -n hermes-system --create-namespace \
-  --set global.domain=hermes.local \
+helm install iris ./charts/iris \
+  -n iris-system --create-namespace \
+  --set global.domain=iris.local \
   --set controller.publicBaseUrl=https://<node-ip>:31847 \
-  --set image.controller.repository=hermes-controller \
-  --set image.server.repository=hermes-server \
+  --set image.controller.repository=iris-controller \
+  --set image.server.repository=iris-server \
   --set image.controller.pullPolicy=Never \
   --set image.server.pullPolicy=Never
 
@@ -86,8 +86,8 @@ helm install hermes ./charts/hermes \
 Optional LLM for Zyra AI (rule-based fallback works without a key):
 
 ```bash
-export HERMES_LLM_API_URL=https://api.openai.com/v1
-export HERMES_LLM_API_KEY=sk-...
+export IRIS_LLM_API_URL=https://api.openai.com/v1
+export IRIS_LLM_API_KEY=sk-...
 ./scripts/deploy-remote.sh <host> <user>
 # Or local Ollama: ./scripts/setup-ollama-remote.sh <host> <user>
 ```
@@ -109,13 +109,13 @@ export HERMES_LLM_API_KEY=sk-...
 ```mermaid
 flowchart BT
   Apps[Applications in cluster]
-  Hermes[Hermes Gateway]
+  Iris[Iris Gateway]
   K8s[Kubernetes]
-  Apps --> Hermes --> K8s
+  Apps --> Iris --> K8s
 ```
 
 Humans ask: *Where is Grafana? Is it healthy? Can I open it?*  
-Hermes answers — without namespace archaeology.
+Iris answers — without namespace archaeology.
 
 ---
 
@@ -140,7 +140,7 @@ Hermes answers — without namespace archaeology.
 | **hypercluster** | Bare-metal Kubernetes bootstrap |
 | **machina** | Physical hypervisor OS (libvirt/KVM) |
 | **zeus-os** | Cloud / KubeVirt control plane |
-| **hermes** | Application layer for Kubernetes |
+| **iris** | Application layer for Kubernetes |
 | **forge** | AI infrastructure on Kubernetes |
 | **transiva / h2kvm** | Multi-cloud VM migration |
 | **guestkit** | Offline VM migration assurance |

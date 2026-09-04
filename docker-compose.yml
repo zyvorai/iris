@@ -1,7 +1,7 @@
 version: "3.9"
 
 # Local development — no Kubernetes required.
-# Runs hermes-server with a seeded SQLite database.
+# Runs iris-server with a seeded SQLite database.
 #
 # Usage:
 #   docker compose up --build
@@ -17,9 +17,9 @@ services:
       context: .
       dockerfile: Dockerfile.seed
     volumes:
-      - hermes-data:/data
+      - iris-data:/data
     environment:
-      HERMES_DB_PATH: /data/hermes.db
+      IRIS_DB_PATH: /data/iris.db
 
   server:
     build:
@@ -28,14 +28,14 @@ services:
     ports:
       - "31847:31847"
     volumes:
-      - hermes-data:/data
+      - iris-data:/data
     environment:
-      HERMES_BIND: "0.0.0.0:31847"
-      HERMES_DB_PATH: "/data/hermes.db"
-      HERMES_UI_DIR: "/app/ui"
-      HERMES_AUTH_MODE: "none"
-      HERMES_DEFAULT_USER: "dev"
-      RUST_LOG: "hermes_server=debug,tower_http=info"
+      IRIS_BIND: "0.0.0.0:31847"
+      IRIS_DB_PATH: "/data/iris.db"
+      IRIS_UI_DIR: "/app/ui"
+      IRIS_AUTH_MODE: "none"
+      IRIS_DEFAULT_USER: "dev"
+      RUST_LOG: "iris_server=debug,tower_http=info"
     depends_on:
       seed:
         condition: service_completed_successfully
@@ -47,4 +47,4 @@ services:
       start_period: 5s
 
 volumes:
-  hermes-data:
+  iris-data:

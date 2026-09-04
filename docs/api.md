@@ -1,10 +1,10 @@
-# Hermes API Reference
+# Iris API Reference
 
-HTTP surface for `hermes-server`. All paths are relative to the server origin (default `http://localhost:31847`).
+HTTP surface for `iris-server`. All paths are relative to the server origin (default `http://localhost:31847`).
 
-**Auth:** When `HERMES_AUTH_MODE` is `api_key` or `oidc`, protected routes require a valid session cookie or `Authorization: Bearer <api_key>`. Public routes: `/healthz`, `/metrics`, `/auth/*`, `/api/v1/ws-echo`.
+**Auth:** When `IRIS_AUTH_MODE` is `api_key` or `oidc`, protected routes require a valid session cookie or `Authorization: Bearer <api_key>`. Public routes: `/healthz`, `/metrics`, `/auth/*`, `/api/v1/ws-echo`.
 
-**Source:** Routes are registered in `crates/hermes-server/src/main.rs`, `crates/hermes-api/src/lib.rs`, `crates/hermes-gateway/src/lib.rs`, `crates/hermes-server/src/auth.rs`, and `crates/hermes-server/src/metrics.rs`.
+**Source:** Routes are registered in `crates/iris-server/src/main.rs`, `crates/iris-api/src/lib.rs`, `crates/iris-gateway/src/lib.rs`, `crates/iris-server/src/auth.rs`, and `crates/iris-server/src/metrics.rs`.
 
 ---
 
@@ -13,7 +13,7 @@ HTTP surface for `hermes-server`. All paths are relative to the server origin (d
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/healthz` | Liveness probe (200 OK) |
-| GET | `/metrics` | Prometheus metrics (`hermes_apps_total`, audit counters, uptime) |
+| GET | `/metrics` | Prometheus metrics (`iris_apps_total`, audit counters, uptime) |
 | GET | `/api/v1/ws-echo` | WebSocket echo test (upgrade + message echo) |
 
 ### Auth (`/auth/*`)
@@ -80,7 +80,7 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/insights/federated` | Cross-cluster federated insight |
 | GET | `/api/v1/insights/activity` | Audit activity patterns |
 
-Configure LLM via `HERMES_LLM_API_URL`, `HERMES_LLM_API_KEY`, `HERMES_LLM_MODEL`. See [ui.md](ui.md#zyra-ai).
+Configure LLM via `IRIS_LLM_API_URL`, `IRIS_LLM_API_KEY`, `IRIS_LLM_MODEL`. See [ui.md](ui.md#zyra-ai).
 
 ### Federation (write)
 
@@ -91,7 +91,7 @@ Configure LLM via `HERMES_LLM_API_URL`, `HERMES_LLM_API_KEY`, `HERMES_LLM_MODEL`
 | PUT | `/api/v1/federation/recommended/{cluster_id}/{id}` | Set recommended flag remotely |
 | GET | `/api/v1/federation/rbac/{cluster_id}` | Check RBAC on remote cluster |
 
-Peers configured via `HERMES_FEDERATED_CLUSTERS` (JSON). See `charts/hermes/values.yaml` → `cluster.federated`.
+Peers configured via `IRIS_FEDERATED_CLUSTERS` (JSON). See `charts/iris/values.yaml` → `cluster.federated`.
 
 ### User preferences
 
@@ -144,7 +144,7 @@ The gateway also:
 - Rewrites `Location` / `Refresh` redirects under the app mount
 - Scopes `Set-Cookie` `Path` to the mount
 - Sets `X-Forwarded-Proto` / `Host` / `Prefix` from the client request (not hardcoded HTTPS)
-- Honors `rewrite.addPrefix` when `hermes.zyvor.dev/serve-from-sub-path=true`
+- Honors `rewrite.addPrefix` when `iris.zyvor.dev/serve-from-sub-path=true`
 
 ### Legacy aliases (same handlers)
 
@@ -163,7 +163,7 @@ Gateway records audit events (`launch`, `share_access`) on successful proxy.
 
 ## SPA fallback
 
-Unmatched paths serve static files from `HERMES_UI_DIR` (`ui/dist/`). Unknown routes return `index.html` for client-side routing.
+Unmatched paths serve static files from `IRIS_UI_DIR` (`ui/dist/`). Unknown routes return `index.html` for client-side routing.
 
 ---
 
@@ -193,7 +193,7 @@ curl -s -X POST "$BASE/api/v1/discovery/publish/monitoring/grafana"
 curl -s -o /dev/null -w '%{http_code}\n' "$BASE/a/monitoring/grafana"
 
 # With API key auth
-curl -s -H "Authorization: Bearer $HERMES_API_KEY" "$BASE/api/v1/apps"
+curl -s -H "Authorization: Bearer $IRIS_API_KEY" "$BASE/api/v1/apps"
 ```
 
 Post-deploy verification: `./scripts/e2e-deploy-verify.sh http://host:31847` exercises most endpoints.

@@ -7,19 +7,19 @@ import {
   appLaunchPath,
   appPublicUrl,
   copyAppUrl,
-} from '../../services/hermesApi'
-import type { HermesApp } from '../../types'
+} from '../../services/irisApi'
+import type { IrisApp } from '../../types'
 
-export function canOpenApp(app: HermesApp): boolean {
+export function canOpenApp(app: IrisApp): boolean {
   return app.readyEndpoints > 0 && app.status !== 'broken'
 }
 
-export function isUnhealthy(app: HermesApp): boolean {
+export function isUnhealthy(app: IrisApp): boolean {
   return app.status === 'broken' || app.status === 'degraded'
 }
 
 export function buildServiceMenuItems(
-  app: HermesApp,
+  app: IrisApp,
   opts: {
     onDiagnose?: () => void
     onInspector?: () => void

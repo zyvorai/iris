@@ -1,6 +1,6 @@
-# Hermes annotations
+# Iris annotations
 
-Prefix: `hermes.zyvor.dev/`
+Prefix: `iris.zyvor.dev/`
 
 | Annotation | Required | Description |
 |------------|----------|-------------|
@@ -21,27 +21,27 @@ Prefix: `hermes.zyvor.dev/`
 | `published` | no | `"true"` to publish immediately |
 | `serve-from-sub-path` | no | `"true"` when the backend expects the full public mount path (Grafana `GF_SERVER_SERVE_FROM_SUB_PATH`, apps with a non-root `--web.route-prefix`, etc.). Sets gateway `rewrite.addPrefix` to the app route. |
 
-When `slug` is set, Hermes exposes a stable public URL at `/apps/{slug}` in addition to the namespace-scoped route `/a/{namespace}/{service-slug}`.
+When `slug` is set, Iris exposes a stable public URL at `/apps/{slug}` in addition to the namespace-scoped route `/a/{namespace}/{service-slug}`.
 
 ### Path rewrite modes
 
 - **Default (Mode A):** the gateway strips the launchpad mount and forwards `/…` to the backend. Use with apps that live at `/` (Prometheus with `--web.route-prefix=/`).
 - **Subpath (Mode B):** set `serve-from-sub-path: "true"`. The gateway re-attaches `routePath` so the backend sees `/launchpad/a/{ns}/{slug}/…`. Required for Grafana with `GF_SERVER_SERVE_FROM_SUB_PATH=true`.
 
-If `environment` is omitted, Hermes infers it from the namespace name (`*-prod`, `staging`, `dev`, etc.).
+If `environment` is omitted, Iris infers it from the namespace name (`*-prod`, `staging`, `dev`, etc.).
 
 Example:
 
 ```yaml
 metadata:
   annotations:
-    hermes.zyvor.dev/enabled: "true"
-    hermes.zyvor.dev/name: "Grafana"
-    hermes.zyvor.dev/slug: "grafana"
-    hermes.zyvor.dev/environment: "production"
-    hermes.zyvor.dev/owner: "platform-team"
-    hermes.zyvor.dev/depends-on: "prometheus"
-    hermes.zyvor.dev/recommended: "true"
-    hermes.zyvor.dev/category: "Monitoring"
-    hermes.zyvor.dev/port: "80"
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Grafana"
+    iris.zyvor.dev/slug: "grafana"
+    iris.zyvor.dev/environment: "production"
+    iris.zyvor.dev/owner: "platform-team"
+    iris.zyvor.dev/depends-on: "prometheus"
+    iris.zyvor.dev/recommended: "true"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/port: "80"
 ```

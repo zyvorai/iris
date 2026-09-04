@@ -14,7 +14,7 @@ import AskZyraButton from '../components/nebula/AskZyraButton'
 import Button from '../components/nebula/Button'
 import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
 import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
-import { hermesApi } from '../services/hermesApi'
+import { irisApi } from '../services/irisApi'
 import { useFederatedInsight } from '../hooks/useZyraAiInsight'
 import { useInspector } from '../utils/inspectorContext'
 import { useToast } from '../components/Toast'
@@ -26,12 +26,12 @@ export default function FederatedPage() {
   const toast = useToast()
   const federated = useQuery({
     queryKey: ['catalog-federated'],
-    queryFn: hermesApi.listFederatedCatalog,
+    queryFn: irisApi.listFederatedCatalog,
     refetchInterval: 20000,
   })
   const clusters = useQuery({
     queryKey: ['clusters'],
-    queryFn: hermesApi.listClusters,
+    queryFn: irisApi.listClusters,
     refetchInterval: 30000,
   })
   const federatedInsight = useFederatedInsight(Boolean(federated.data?.length))
@@ -42,7 +42,7 @@ export default function FederatedPage() {
 
   const publishRemote = useMutation({
     mutationFn: ({ clusterId, id }: { clusterId: string; id: string }) =>
-      hermesApi.federationPublish(clusterId, id),
+      irisApi.federationPublish(clusterId, id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['catalog-federated'] })
       toast('Published on remote cluster')
@@ -51,7 +51,7 @@ export default function FederatedPage() {
   })
 
   const rbacCheck = useMutation({
-    mutationFn: (clusterId: string) => hermesApi.federationRbacCheck(clusterId),
+    mutationFn: (clusterId: string) => irisApi.federationRbacCheck(clusterId),
   })
 
   const byCluster = new Map<string, FederatedApp[]>()
@@ -83,7 +83,7 @@ export default function FederatedPage() {
           <EmptyState
             icon={<Globe size={22} />}
             title="No federated apps"
-            description="Configure HERMES_FEDERATED_CLUSTERS to merge remote catalogs."
+            description="Configure IRIS_FEDERATED_CLUSTERS to merge remote catalogs."
           />
         </GlassPanel>
       }

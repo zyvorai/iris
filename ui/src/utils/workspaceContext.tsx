@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import type { HermesApp } from '../types'
+import type { IrisApp } from '../types'
 
-const STORAGE_KEY = 'hermes-workspace'
+const STORAGE_KEY = 'iris-workspace'
 
 interface WorkspaceContextValue {
   workspaceId: string
   setWorkspaceId: (id: string) => void
-  matchesWorkspace: (app: HermesApp) => boolean
+  matchesWorkspace: (app: IrisApp) => boolean
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null)
@@ -36,7 +36,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const matchesWorkspace = useCallback(
-    (app: HermesApp) => {
+    (app: IrisApp) => {
       if (!workspaceId) return true
       return app.meta?.environment === workspaceId
     },
@@ -57,7 +57,7 @@ export function useWorkspace() {
   return ctx
 }
 
-export function filterByWorkspace(apps: HermesApp[], workspaceId: string): HermesApp[] {
+export function filterByWorkspace(apps: IrisApp[], workspaceId: string): IrisApp[] {
   if (!workspaceId) return apps
   return apps.filter((a) => a.meta?.environment === workspaceId)
 }

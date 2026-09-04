@@ -16,7 +16,7 @@ source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh"
 
 STACK_SCRIPT="$(resolve_zyvor_script "${REPO_ROOT}" VMRogue "scripts/test-zyvor-stack-remote.sh")" || {
   echo "ERROR: VMRogue stack orchestrator not found." >&2
-  echo "  Clone sibling VMRogue/ next to Hermes/ or set VMROGUE_REPO." >&2
+  echo "  Clone sibling VMRogue/ next to Iris/ or set VMROGUE_REPO." >&2
   exit 1
 }
 

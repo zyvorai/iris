@@ -5,7 +5,7 @@ interface PulseGlyphProps {
   size?: number
 }
 
-/** Hermes's brand glyph — a heartbeat/pulse line, fitting a health &
+/** Iris's brand glyph — a heartbeat/pulse line, fitting a health &
  * monitoring dashboard. Thin-stroke, currentColor, sized to sit inside a
  * GlyphTile badge. */
 export default function PulseGlyph({ size = 18 }: PulseGlyphProps) {

@@ -1,8 +1,8 @@
 FROM docker.io/library/debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY target/release/hermes-server /usr/local/bin/hermes-server
+COPY target/release/iris-server /usr/local/bin/iris-server
 COPY ui/dist /app/ui
-ENV HERMES_UI_DIR=/app/ui
+ENV IRIS_UI_DIR=/app/ui
 EXPOSE 31847
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/hermes-server"]
+ENTRYPOINT ["/usr/local/bin/iris-server"]

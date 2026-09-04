@@ -6,8 +6,8 @@ import { Copy, Link2, Trash2 } from 'lucide-react'
 import GlassPanel from './nebula/GlassPanel'
 import Button from './nebula/Button'
 import EmptyState from './nebula/EmptyState'
-import type { HermesApp } from '../types'
-import { copyShareUrl, hermesApi, sharePublicUrl } from '../services/hermesApi'
+import type { IrisApp } from '../types'
+import { copyShareUrl, irisApi, sharePublicUrl } from '../services/irisApi'
 import { useToast } from './Toast'
 
 const TTL_OPTIONS = [
@@ -22,14 +22,14 @@ function formatExpiry(iso: string): string {
   return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-export default function ShareLinksPanel({ app }: { app: HermesApp }) {
+export default function ShareLinksPanel({ app }: { app: IrisApp }) {
   const qc = useQueryClient()
   const toast = useToast()
-  const shares = useQuery({ queryKey: ['shares'], queryFn: hermesApi.listShares })
+  const shares = useQuery({ queryKey: ['shares'], queryFn: irisApi.listShares })
   const appShares = (shares.data ?? []).filter((s) => s.appId === app.id)
 
   const createMutation = useMutation({
-    mutationFn: (ttlMinutes: number) => hermesApi.createShare({ appId: app.id, ttlMinutes }),
+    mutationFn: (ttlMinutes: number) => irisApi.createShare({ appId: app.id, ttlMinutes }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['shares'] })
       toast('Share link created')
@@ -38,7 +38,7 @@ export default function ShareLinksPanel({ app }: { app: HermesApp }) {
   })
 
   const revokeMutation = useMutation({
-    mutationFn: (token: string) => hermesApi.revokeShare(token),
+    mutationFn: (token: string) => irisApi.revokeShare(token),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['shares'] })
       toast('Share link revoked')

@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 # ============================================================================
-# test-all-features-remote.sh — orchestrate Hermes E2E tiers from laptop
+# test-all-features-remote.sh — orchestrate Iris E2E tiers from laptop
 # ============================================================================
 #
 # Usage:
 #   ./scripts/test-all-features-remote.sh <host> [ssh_user]
 #
 # Environment:
-#   HERMES_TEST_TIERS   Comma list, or preset: quick | full
+#   IRIS_TEST_TIERS   Comma list, or preset: quick | full
 #     quick → smoke
 #     full  → smoke,verify-remote
-#   HERMES_E2E_BASE     Base URL (default https://HOST:31847)
-#   HERMES_E2E_REPORT_JSON  Optional path for JSON summary
+#   IRIS_E2E_BASE     Base URL (default https://HOST:31847)
+#   IRIS_E2E_REPORT_JSON  Optional path for JSON summary
 # ============================================================================
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-HOST="${1:-${HERMES_REMOTE_HOST:-${DEPLOY_HOST:-}}}"
-USER="${2:-${HERMES_REMOTE_USER:-${DEPLOY_USER:-sus}}}"
-NODE_PORT="${HERMES_NODE_PORT:-31847}"
-TIERS_RAW="${HERMES_TEST_TIERS:-smoke}"
+HOST="${1:-${IRIS_REMOTE_HOST:-${DEPLOY_HOST:-}}}"
+USER="${2:-${IRIS_REMOTE_USER:-${DEPLOY_USER:-sus}}}"
+NODE_PORT="${IRIS_NODE_PORT:-31847}"
+TIERS_RAW="${IRIS_TEST_TIERS:-smoke}"
 
 if [[ -z "${HOST}" ]]; then
   echo "Usage: $0 <host> [ssh_user]" >&2
@@ -34,9 +34,9 @@ case "${TIERS_RAW}" in
   *) TIERS="${TIERS_RAW}" ;;
 esac
 
-export HERMES_E2E_BASE="${HERMES_E2E_BASE:-https://${HOST}:${NODE_PORT}}"
-export HERMES_REMOTE_HOST="${HOST}"
-export HERMES_REMOTE_USER="${USER}"
+export IRIS_E2E_BASE="${IRIS_E2E_BASE:-https://${HOST}:${NODE_PORT}}"
+export IRIS_REMOTE_HOST="${HOST}"
+export IRIS_REMOTE_USER="${USER}"
 export DEPLOY_HOST="${HOST}"
 export DEPLOY_USER="${USER}"
 
@@ -87,14 +87,14 @@ run_tier_cmd() {
 }
 
 write_report_json() {
-  local report="${HERMES_E2E_REPORT_JSON:-}"
+  local report="${IRIS_E2E_REPORT_JSON:-}"
   [[ -z "${report}" ]] && return 0
   local total_elapsed=$(( $(date +%s) - SUITE_START ))
   {
     echo "{"
-    echo "  \"product\": \"hermes\","
+    echo "  \"product\": \"iris\","
     echo "  \"host\": \"${HOST}\","
-    echo "  \"api\": \"${HERMES_E2E_BASE}\","
+    echo "  \"api\": \"${IRIS_E2E_BASE}\","
     echo "  \"tiers\": \"${TIERS}\","
     echo "  \"passed_tiers\": ${PASS_TIERS},"
     echo "  \"failed_tiers\": ${FAIL},"
@@ -114,15 +114,15 @@ write_report_json() {
   echo "  Report: ${report}"
 }
 
-echo -e "${B}Hermes feature test suite${N}"
-echo "  API:    ${HERMES_E2E_BASE}"
+echo -e "${B}Iris feature test suite${N}"
+echo "  API:    ${IRIS_E2E_BASE}"
 echo "  SSH:    ${USER}@${HOST}"
 echo "  Tiers:  ${TIERS}"
 echo ""
 
 if tier_enabled smoke; then
-  run_tier_cmd smoke env HERMES_E2E_BASE="${HERMES_E2E_BASE}" \
-    "${SCRIPT_DIR}/e2e-deploy-verify.sh" "${HERMES_E2E_BASE}" || true
+  run_tier_cmd smoke env IRIS_E2E_BASE="${IRIS_E2E_BASE}" \
+    "${SCRIPT_DIR}/e2e-deploy-verify.sh" "${IRIS_E2E_BASE}" || true
 fi
 
 if tier_enabled verify-remote; then

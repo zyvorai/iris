@@ -8,7 +8,7 @@ const OUT = resolve(ROOT, 'docs/customer/PAGE_INDEX.md')
 const GUIDES = resolve(ROOT, 'docs/customer/pages')
 const { routes } = JSON.parse(readFileSync(resolve(ROOT, 'scripts/customer-docs/routes.json'), 'utf8'))
 const purposes = JSON.parse(readFileSync(resolve(ROOT, 'scripts/customer-docs/page-purposes.json'), 'utf8'))
-const PRODUCT = process.env.CUSTOMER_DOCS_PRODUCT || 'Hermes'
+const PRODUCT = process.env.CUSTOMER_DOCS_PRODUCT || 'Iris'
 
 function discoverGuides(dir) {
   const map = new Map()

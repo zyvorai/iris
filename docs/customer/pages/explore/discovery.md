@@ -17,7 +17,7 @@ Discovery — Explore surface.
 
 ## Operate from the console (UX)
 
-1. Open `/discovery` and wait for live data from Hermes.
+1. Open `/discovery` and wait for live data from Iris.
 2. Use filters and search when the page provides them.
 3. Drill into a row or card for detail, then jump to related surfaces.
 4. For mutating actions: review impact, role gates, and confirmation dialogs first.
