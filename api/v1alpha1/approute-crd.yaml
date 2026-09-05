@@ -1,8 +1,13 @@
-# AppRoute CRD stub — full implementation planned for Iris v0.2
+# AppRoute CRD — experimental schema only (not installed by the Helm chart).
+# Discovery today uses Service / Ingress / Gateway API / mesh annotations.
+# A controller reconcile loop for AppRoute is deferred past v0.2.
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: approutes.iris.zyvor.dev
+  labels:
+    app.kubernetes.io/name: iris
+    app.kubernetes.io/component: experimental
 spec:
   group: iris.zyvor.dev
   names:

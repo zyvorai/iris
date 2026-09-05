@@ -160,7 +160,7 @@
 }
 
 .nebula-btn:focus-visible {
-  outline: 2px solid rgba(245, 165, 36, 0.45);
+  outline: 2px solid rgba(0, 113, 227, 0.45);
   outline-offset: 2px;
 }
 
@@ -171,7 +171,7 @@
 
 .nebula-btn-primary {
   border: none;
-  background: var(--hs-accent);
+  background: #0071e3;
   color: #fff;
   box-shadow: none;
   border-radius: var(--hs-radius-pill);
@@ -181,7 +181,7 @@
   opacity: 1;
   transform: none;
   color: #fff;
-  background: var(--hs-accent-deep);
+  background: #0077ed;
   filter: none;
 }
 
@@ -222,15 +222,15 @@
 }
 
 .nebula-btn-ai {
-  border-color: rgba(179, 106, 0, 0.28);
-  background: rgba(179, 106, 0, 0.1);
-  color: var(--sodium);
+  border-color: rgba(0, 113, 227, 0.28);
+  background: rgba(0, 113, 227, 0.1);
+  color: var(--hs-accent);
 }
 
 .nebula-btn-ai:hover:not(:disabled) {
-  border-color: rgba(179, 106, 0, 0.4);
-  background: rgba(179, 106, 0, 0.16);
-  color: #ffb27a;
+  border-color: rgba(0, 113, 227, 0.4);
+  background: rgba(0, 113, 227, 0.16);
+  color: var(--hs-accent-deep);
 }
 
 .nebula-btn-compact {
@@ -1472,8 +1472,8 @@
 
 .filter-chip.active {
   color: #fff;
-  border-color: var(--hs-accent);
-  background: var(--hs-accent);
+  border-color: #0071e3;
+  background: #0071e3;
 }
 
 /* Flat mission control groups */
@@ -1523,8 +1523,8 @@
 
 .hub-link-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(179, 106, 0, 0.3);
-  box-shadow: 0 14px 30px -14px rgba(179, 106, 0, 0.35);
+  border-color: rgba(0, 113, 227, 0.3);
+  box-shadow: 0 14px 30px -14px rgba(0, 113, 227, 0.35);
 }
 
 .hub-icon-tile {
@@ -1537,8 +1537,8 @@
   flex-shrink: 0;
   color: #fff;
   margin-bottom: 0.6rem;
-  background: linear-gradient(150deg, var(--sodium), #d2761a);
-  box-shadow: 0 6px 16px -4px rgba(245, 165, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--hs-accent);
+  box-shadow: 0 6px 16px -4px rgba(0, 113, 227, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.18s ease;
 }
 
@@ -1919,13 +1919,13 @@
 }
 
 .diagnosis-drawer-ai {
-  border: 1px solid rgba(179, 106, 0, 0.16);
+  border: 1px solid rgba(0, 113, 227, 0.16);
   border-radius: var(--radius-lg);
   padding: 0.85rem 1rem;
-  background: rgba(179, 106, 0, 0.06);
+  background: rgba(0, 113, 227, 0.06);
 }
 
-/* ── Light theme — pastel text tuned for dark surfaces, needs deeper ink on light tints ── */
+/* ── Light theme — Apple blue accents + black ink ── */
 html[data-theme='light'] .nebula-btn:hover:not(:disabled),
 html[data-theme='light'] .route-display-link,
 html[data-theme='light'] .workspace-dropdown-item.active,
@@ -1934,7 +1934,7 @@ html[data-theme='light'] .service-error-toggle,
 html[data-theme='light'] .service-route-hint,
 html[data-theme='light'] .section-link-nebula:hover,
 html[data-theme='light'] .diagnosis-drawer-commands {
-  color: #92400e;
+  color: var(--hs-accent);
 }
 
 html[data-theme='light'] .action-menu-item:hover {
@@ -1952,11 +1952,11 @@ html[data-theme='light'] .nebula-btn-danger:hover:not(:disabled) {
 }
 
 html[data-theme='light'] .nebula-btn-ai {
-  color: #92400e;
+  color: var(--hs-accent);
 }
 
 html[data-theme='light'] .nebula-btn-ai:hover:not(:disabled) {
-  color: #8a2a04;
+  color: var(--hs-accent-deep);
 }
 
 html[data-theme='light'] .service-error,

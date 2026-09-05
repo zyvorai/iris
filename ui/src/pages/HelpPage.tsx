@@ -92,7 +92,7 @@ export default function HelpPage() {
           </div>
 
           <p className="body-text help-brand" style={{ marginTop: '1.5rem' }}>
-            <ZyvorInline /> · Iris is part of the Zeus platform by ZyvorAI Labs
+            <ZyvorInline /> · Iris by Zyvor
           </p>
         </GlassPanel>
       </div>

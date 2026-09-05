@@ -2,29 +2,24 @@
 
 ## Purpose
 
-Settings — appearance and local shell preferences.
+Device theme plus operator guidance for auth, Zyra AI, and federation (configured via Helm / env).
 
 ## When to use it
 
-- Open this surface when the job matches the purpose above
-- Start from the product home / dashboard if you are unsure where to begin
-- Confirm auth and that required backends/operators are reachable if data looks empty
+- Switch light / dark appearance on this browser
+- Confirm how to enable OIDC, API keys, LLM, or federated peers
 
 ## How to get there
 
-- Route / id: `/settings`
-- Nav: **Admin → Settings** (sidebar, command palette, or desktop nav)
+- Route: `/settings`
+- Nav: **Settings**
 
-## Operate from the console (UX)
+## Operate from the console
 
-1. Open `/settings` and wait for live data from Iris.
-2. Use filters and search when the page provides them.
-3. Drill into a row or card for detail, then jump to related surfaces.
-4. For mutating actions: review impact, role gates, and confirmation dialogs first.
-
-If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.
+1. Choose **Light** or **Dark** — preference is stored locally.
+2. Read the Auth / Zyra AI / Federation panels for Helm keys (`server.auth.*`, `server.llm.*`, `cluster.federated`).
+3. Auth and LLM changes require a Helm upgrade; they are not edited in the UI.
 
 ## Related pages
 
-- [Getting Started](../../getting-started.md)
-- [Page index](../../PAGE_INDEX.md)
+- [Help](../support/help.md) · [Install](../../../install.md)

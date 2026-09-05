@@ -58,7 +58,7 @@ iris/
 └── docs/
 ```
 
-**Note:** `api/v1alpha1/` holds an experimental AppRoute CRD — not part of the main build. The REST API lives in `crates/iris-api/`.
+**Note:** `api/v1alpha1/` holds an **experimental** AppRoute CRD schema only — it is **not** installed by the Helm chart and has no controller reconcile loop yet. Catalog discovery uses Services, Ingress, Gateway API, and mesh annotations. The REST API lives in `crates/iris-api/`.
 
 ---
 

@@ -1,30 +1,29 @@
-# Overview
+# Overview (Home)
 
 ## Purpose
 
-Overview — Primary surface.
+Fleet snapshot for the launchpad: health attention, quick launch, and Zyra AI insight into what needs you first.
 
 ## When to use it
 
-- Open this surface when the job matches the purpose above
-- Start from the product home / dashboard if you are unsure where to begin
-- Confirm auth and that required backends/operators are reachable if data looks empty
+- Start of day / on-call glance at broken or degraded apps
+- Jump to a pinned or recent app without browsing the full catalog
+- Ask Zyra AI for a plain-language fleet summary
 
 ## How to get there
 
-- Route / id: `/`
-- Nav: **Primary → Overview** (sidebar, command palette, or desktop nav)
+- Route: `/`
+- Nav: **Home** (navbar or ⌘K → Home)
 
-## Operate from the console (UX)
+## Operate from the console
 
-1. Open `/` and wait for live data from Iris.
-2. Use filters and search when the page provides them.
-3. Drill into a row or card for detail, then jump to related surfaces.
-4. For mutating actions: review impact, role gates, and confirmation dialogs first.
+1. Open `/` and wait for the catalog and health summary to load.
+2. Use the attention queue to open Diagnose or the app inspector.
+3. Quick-launch published apps from the launch bar.
+4. Use Spotlight (`⌘K`) for search and Zyra AI commands (`explain`, `diagnose …`).
 
-If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.
+If the page is empty, confirm Iris pods are Ready and that discovery has synced Services in watched namespaces.
 
 ## Related pages
 
-- [Getting Started](../../getting-started.md)
-- [Page index](../../PAGE_INDEX.md)
+- [Apps](apps.md) · [Health](health.md) · [Getting Started](../../getting-started.md)

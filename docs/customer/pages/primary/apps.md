@@ -1,30 +1,27 @@
-# Catalog
+# Apps
 
 ## Purpose
 
-Catalog — Primary surface.
+Browse, filter, and launch every cataloged application (published and suggested).
 
 ## When to use it
 
-- Open this surface when the job matches the purpose above
-- Start from the product home / dashboard if you are unsure where to begin
-- Confirm auth and that required backends/operators are reachable if data looks empty
+- Find an app by name, namespace, category, or owner
+- Publish a suggested discovery into the launchpad
+- Open an app through the Iris gateway
 
 ## How to get there
 
-- Route / id: `/apps`
-- Nav: **Primary → Catalog** (sidebar, command palette, or desktop nav)
+- Route: `/apps`
+- Nav: **Apps**
 
-## Operate from the console (UX)
+## Operate from the console
 
-1. Open `/apps` and wait for live data from Iris.
-2. Use filters and search when the page provides them.
-3. Drill into a row or card for detail, then jump to related surfaces.
-4. For mutating actions: review impact, role gates, and confirmation dialogs first.
-
-If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.
+1. Toggle **Published** vs **All** to include suggested discoveries.
+2. Filter by category chips or search.
+3. Open a tile for detail, share links, mesh hints, and Diagnose.
+4. Launch opens `/launchpad/…` (or legacy `/a/…`) through the gateway.
 
 ## Related pages
 
-- [Getting Started](../../getting-started.md)
-- [Page index](../../PAGE_INDEX.md)
+- [Discovery](../explore/discovery.md) · [App health](health.md)

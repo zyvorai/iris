@@ -21,12 +21,28 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: iris
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.global.irisPort | quote }}
+        prometheus.io/path: /metrics
+        prometheus.io/scheme: https
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: controller
           image: "{{ .Values.image.controller.repository }}:{{ .Values.image.controller.tag }}"
           imagePullPolicy: {{ .Values.image.controller.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: health
+              containerPort: {{ .Values.controllerHealth.port | default 8080 }}
           env:
             - name: IRIS_DB_PATH
               value: {{ .Values.database.path | quote }}
@@ -49,10 +65,24 @@ spec:
               value: {{ .Values.controller.discoverGatewayAPI | quote }}
             - name: IRIS_DISCOVER_MESH
               value: {{ .Values.controller.discoverMesh | quote }}
+            - name: IRIS_HEALTH_ADDR
+              value: {{ printf ":%v" (.Values.controllerHealth.port | default 8080) | quote }}
             {{- if .Values.controller.watchNamespaces }}
             - name: IRIS_WATCH_NAMESPACES
               value: {{ join "," .Values.controller.watchNamespaces | quote }}
             {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.controllerHealth.path | default "/healthz" }}
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.controllerHealth.path | default "/healthz" }}
+              port: health
+            initialDelaySeconds: 3
+            periodSeconds: 10
           volumeMounts:
             - name: data
               mountPath: /data/iris
@@ -61,6 +91,10 @@ spec:
         - name: server
           image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag }}"
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: https
               containerPort: {{ .Values.global.irisPort }}
@@ -176,6 +210,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data/iris
+            - name: tmp
+              mountPath: /tmp
           resources:
             {{- toYaml .Values.resources.server | nindent 12 }}
       volumes:
@@ -186,3 +222,5 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: tmp
+          emptyDir: {}

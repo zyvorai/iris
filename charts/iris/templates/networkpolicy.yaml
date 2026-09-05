@@ -19,6 +19,8 @@ spec:
     - ports:
         - port: {{ .Values.service.port | default 31847 }}
           protocol: TCP
+        - port: {{ .Values.controllerHealth.port | default 8080 }}
+          protocol: TCP
   egress:
     # Allow DNS resolution
     - ports:

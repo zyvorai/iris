@@ -49,13 +49,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--axiom-primary, #f5a524) !important;
+  color: var(--axiom-primary, #0071e3) !important;
 }
 
 .hero-kicker {
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
-  color: var(--axiom-primary, #f5a524) !important;
+  color: var(--axiom-primary, #0071e3) !important;
 }
 
 .hero-title {
@@ -117,9 +117,9 @@
 }
 
 .chip-accent {
-  color: #f5a524;
-  border-color: rgba(245, 165, 36, 0.28);
-  background: rgba(245, 165, 36, 0.1);
+  color: var(--hs-accent);
+  border-color: rgba(0, 113, 227, 0.28);
+  background: rgba(0, 113, 227, 0.1);
 }
 
 .chip-ok,
@@ -170,15 +170,15 @@
 
 .view-toggle button.active {
   color: #fff !important;
-  border-color: var(--hs-accent) !important;
-  background: var(--hs-accent) !important;
+  border-color: #0071e3 !important;
+  background: #0071e3 !important;
   box-shadow: none;
 }
 
 .filter-bar button.active {
   color: #fff !important;
-  border-color: var(--hs-accent) !important;
-  background: var(--hs-accent) !important;
+  border-color: #0071e3 !important;
+  background: #0071e3 !important;
 }
 
 .filter-bar input,
@@ -245,7 +245,7 @@
 }
 
 .section-link:hover {
-  color: #f5a524;
+  color: var(--hs-accent);
 }
 
 /* ── Workspace & health chips ── */
@@ -310,8 +310,8 @@
 }
 
 .iris-help-link:hover {
-  color: #f5a524;
-  background: rgba(245, 165, 36, 0.08);
+  color: var(--hs-accent);
+  background: rgba(0, 113, 227, 0.08);
 }
 
 /* ── Palette & modals ── */
@@ -337,7 +337,7 @@
 
 .iris-nb-dropdown-item.active,
 .iris-nb-drawer-item.active {
-  color: var(--axiom-primary, #f5a524) !important;
+  color: var(--axiom-primary, #0071e3) !important;
   background: rgba(245, 165, 36, 0.1) !important;
 }
 
@@ -454,10 +454,10 @@ html[data-theme='light'] .iris-nb-drawer {
   box-shadow: var(--dropdown-shadow) !important;
 }
 
-/* ── Active/selected pill text — hardcoded near-white, invisible on light bg ── */
+/* ── Active/selected pill text — white on Apple blue fill ── */
 html[data-theme='light'] .view-toggle button.active,
 html[data-theme='light'] .filter-bar button.active {
-  color: #92400e !important;
+  color: #fff !important;
 }
 
 html[data-theme='light'] .workspace-chip.active {
@@ -472,7 +472,7 @@ html[data-theme='light'] .iris-nb-dropdown-item.active,
 html[data-theme='light'] .iris-nb-drawer-item.active,
 html[data-theme='light'] .mission-control-filters button.active,
 html[data-theme='light'] .filter-chip.active {
-  color: var(--hs-text-heading);
+  color: #fff;
 }
 
 /* ── Remaining pastel chip/link text tuned for dark surfaces ── */

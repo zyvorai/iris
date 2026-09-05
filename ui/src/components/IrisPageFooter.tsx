@@ -21,7 +21,7 @@ export default function IrisPageFooter({ onOpenShortcuts }: IrisPageFooterProps)
           Docs
         </a>
       </nav>
-      <p className="iris-product-line">Iris · ZyvorAI Labs</p>
+      <p className="iris-product-line">Zyvor</p>
     </footer>
   )
 }

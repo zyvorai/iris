@@ -67,7 +67,7 @@
   min-width: 140px;
   padding: 12px 22px;
   border-radius: var(--hs-radius-pill);
-  background: var(--hs-accent);
+  background: #0071e3;
   color: #fff;
   font-size: 17px;
   font-weight: 400;
@@ -79,7 +79,7 @@
 }
 
 .hs-btn-primary:hover {
-  background: var(--hs-accent-deep);
+  background: #0077ed;
   color: #fff;
   text-decoration: none;
 }

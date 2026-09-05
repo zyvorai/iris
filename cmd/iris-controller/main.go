@@ -6,16 +6,17 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/dynamic"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 
 	"github.com/zyvorai/iris/controller/discovery"
@@ -89,11 +90,25 @@ func main() {
 	}
 
 	go w.RefreshHealth(ctx, healthInterval)
+	go serveHealth(env("IRIS_HEALTH_ADDR", ":8080"))
 
 	log.Printf("iris-controller watching (autoPublish=%v autoSuggest=%v discoverAll=%v discoverIngress=%v discoverGatewayAPI=%v discoverMesh=%v)",
 		autoPublish, autoSuggest, discoverAll, discoverIngress, discoverGatewayAPI, discoverMesh)
 	if err := w.Run(ctx); err != nil {
 		log.Fatalf("watcher: %v", err)
+	}
+}
+
+func serveHealth(addr string) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
+	srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+	log.Printf("iris-controller health listening on %s", addr)
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Printf("health server: %v", err)
 	}
 }
 

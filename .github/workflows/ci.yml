@@ -102,4 +102,14 @@ jobs:
             --set global.domain=ci.test.local \
             --set demoApps.enabled=false \
             --set networkPolicy.enabled=true \
-          | grep -c "kind:" | xargs echo "rendered resources:"
+            --set serviceMonitor.enabled=true \
+            --set server.auth.mode=oidc \
+            --set server.auth.oidc.issuer=https://idp.example/realms/iris \
+            --set server.auth.oidc.clientId=iris \
+            --set server.auth.oidc.clientSecret=secret \
+            --set server.auth.oidc.redirectUrl=https://ci.test.local/auth/callback \
+          > /tmp/iris-render.yaml
+          grep -c "kind:" /tmp/iris-render.yaml | xargs echo "rendered resources:"
+          grep -q "IRIS_OIDC_ISSUER" /tmp/iris-render.yaml
+          grep -q "kind: ServiceMonitor" /tmp/iris-render.yaml
+          grep -q "IRIS_HEALTH_ADDR" /tmp/iris-render.yaml

@@ -296,14 +296,15 @@ a:hover > .app-icon,
 }
 
 .btn-primary {
-  background: linear-gradient(145deg, rgba(245, 165, 36, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border-color: rgba(245, 165, 36, 0.4);
-  color: #f5a524;
+  background: #0071e3;
+  border-color: #0071e3;
+  color: #fff;
 }
 
 .btn-primary:hover {
-  border-color: rgba(245, 165, 36, 0.55);
-  background: linear-gradient(145deg, rgba(245, 165, 36, 0.32) 0%, rgba(15, 23, 42, 0.9) 100%);
+  background: #0077ed;
+  border-color: #0077ed;
+  color: #fff;
 }
 
 .hero-stats {
@@ -1084,9 +1085,9 @@ a:hover > .space-tile-icon {
 }
 
 .btn-accent {
-  background: rgba(245, 165, 36, 0.18);
-  border-color: rgba(245, 165, 36, 0.4);
-  color: #f5a524;
+  background: rgba(0, 113, 227, 0.1);
+  border-color: rgba(0, 113, 227, 0.35);
+  color: var(--hs-accent);
 }
 
 .share-panel h3 {
@@ -2527,9 +2528,9 @@ a:hover > .space-tile-icon {
 }
 
 .iris-nb-pill-primary {
-  border-color: rgba(245, 165, 36, 0.35) !important;
-  background: rgba(245, 165, 36, 0.12) !important;
-  color: #f5a524 !important;
+  border-color: rgba(0, 113, 227, 0.35) !important;
+  background: var(--hs-accent) !important;
+  color: #fff !important;
 }
 
 .iris-nb-icon-pill {
@@ -2894,10 +2895,8 @@ html[data-theme='light'] .iris-nb-drawer-item:hover {
   color: var(--text-primary);
 }
 
-/* Light theme — remaining pastel text tuned for dark surfaces, needs deeper ink */
+/* Light theme — accent links use Apple blue; filled controls keep white on blue */
 html[data-theme='light'] .chip-env,
-html[data-theme='light'] .btn-primary,
-html[data-theme='light'] .view-toggle button.active,
 html[data-theme='light'] .chip-accent,
 html[data-theme='light'] .btn-accent,
 html[data-theme='light'] .dep-links a,
@@ -2909,11 +2908,13 @@ html[data-theme='light'] .mesh-kubectl,
 html[data-theme='light'] .diagnose-action-list a,
 html[data-theme='light'] .platform-pulse-hero .hero-title em,
 html[data-theme='light'] .iris-nb-drawer-cmd {
-  color: #92400e;
+  color: var(--hs-accent);
 }
 
-html[data-theme='light'] .iris-nb-pill-primary {
-  color: #92400e !important;
+html[data-theme='light'] .btn-primary,
+html[data-theme='light'] .iris-nb-pill-primary,
+html[data-theme='light'] .view-toggle button.active {
+  color: #fff !important;
 }
 
 html[data-theme='light'] .app-menu-danger,
@@ -2949,7 +2950,7 @@ html[data-theme='light'] .app-graph-node {
 }
 
 html[data-theme='light'] .activity-icon {
-  color: #92400e;
+  color: var(--hs-accent);
 }
 
 /* Reset old left-rail layout */

@@ -2,29 +2,19 @@
 
 ## Purpose
 
-Teams — Admin surface.
-
-## When to use it
-
-- Open this surface when the job matches the purpose above
-- Start from the product home / dashboard if you are unsure where to begin
-- Confirm auth and that required backends/operators are reachable if data looks empty
+Owner and team rollups across the catalog.
 
 ## How to get there
 
-- Route / id: `/teams`
-- Nav: **Admin → Teams** (sidebar, command palette, or desktop nav)
+- Route: `/teams`
+- Nav: **Teams**
 
-## Operate from the console (UX)
+## Operate from the console
 
-1. Open `/teams` and wait for live data from Iris.
-2. Use filters and search when the page provides them.
-3. Drill into a row or card for detail, then jump to related surfaces.
-4. For mutating actions: review impact, role gates, and confirmation dialogs first.
-
-If the page stays empty, check service health, auth configuration, and that dependencies for this domain are installed.
+1. Open `/teams` and wait for live data.
+2. Use filters, search, and row actions on the page.
+3. Jump to related apps via inspector, Diagnose, or Spotlight (`⌘K`).
 
 ## Related pages
 
-- [Getting Started](../../getting-started.md)
-- [Page index](../../PAGE_INDEX.md)
+- [Home](../primary/home.md) · [Getting Started](../../getting-started.md)

@@ -71,3 +71,19 @@ Full developer guide: [development.md](development.md) · API reference: [api.md
 | `IRIS_SESSION_SECRET` | server | HMAC secret for session cookies |
 | `IRIS_DISCOVER_GATEWAY_API` | controller | Discover apps from Gateway API HTTPRoutes (default `true`) |
 | `IRIS_ALLOWED_NAMESPACES` | server | Comma-separated namespace filter for API/gateway (optional) |
+| `IRIS_HEALTH_ADDR` | controller | Probe listen address (default `:8080`) |
+
+### Helm auth (OIDC)
+
+Set values under `server.auth` (not a top-level `server.oidc`):
+
+```bash
+helm upgrade --install iris ./charts/iris \
+  --set server.auth.mode=oidc \
+  --set server.auth.oidc.issuer=https://idp.example/realms/iris \
+  --set server.auth.oidc.clientId=iris \
+  --set server.auth.oidc.clientSecret=... \
+  --set server.auth.oidc.redirectUrl=https://iris.example/auth/callback
+```
+
+Optional Prometheus Operator scrape: `--set serviceMonitor.enabled=true`.
