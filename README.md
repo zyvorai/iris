@@ -166,5 +166,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build, test, and CI workflows. **`doc
 
 ## License
 
+Commercial subscriptions and support: see [docs/SUBSCRIPTION-MODEL.md](docs/SUBSCRIPTION-MODEL.md).
+
 Licensed under the [Apache License, Version 2.0](LICENSE).
 Copyright 2026 ZyvorAI Labs Private Limited. See [NOTICE](NOTICE).
