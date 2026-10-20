@@ -40,10 +40,11 @@ export default function DiscoveryPage() {
   const publishAll = useMutation({
     mutationFn: async () => {
       const apps = discovery.data ?? []
-      for (const app of apps.slice(0, 25)) {
+      const batch = apps.slice(0, 25)
+      for (const app of batch) {
         await irisApi.publish(app.id)
       }
-      return apps.length
+      return batch.length
     },
     onSuccess: (count) => {
       void refreshIrisData(qc)
@@ -55,10 +56,11 @@ export default function DiscoveryPage() {
   const publishZyraPicks = useMutation({
     mutationFn: async () => {
       const ids = discoveryInsight.data?.suggestPublishIds ?? []
-      for (const id of ids.slice(0, 10)) {
+      const batch = ids.slice(0, 10)
+      for (const id of batch) {
         await irisApi.publish(id)
       }
-      return ids.length
+      return batch.length
     },
     onSuccess: (count) => {
       void refreshIrisData(qc)

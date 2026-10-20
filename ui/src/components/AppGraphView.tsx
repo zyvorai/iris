@@ -19,8 +19,10 @@ function nodeDepths(nodes: GraphNode[], edges: GraphEdge[]): Map<string, number>
   const depths = new Map<string, number>()
   for (const node of nodes) depths.set(node.id, 0)
 
+  // A longest acyclic path has at most nodes.length - 1 edges, so cap the passes;
+  // otherwise a dependency cycle (or self-edge) would relax forever and freeze the page.
   let changed = true
-  while (changed) {
+  for (let pass = 0; changed && pass < nodes.length; pass++) {
     changed = false
     for (const edge of edges) {
       if (!edge.resolved) continue

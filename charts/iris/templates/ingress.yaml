@@ -25,7 +25,7 @@ spec:
               service:
                 name: iris-server
                 port:
-                  number: 80
+                  number: {{ .Values.service.port }}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
