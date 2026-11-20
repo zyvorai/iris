@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  annotations:
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Prometheus"
+    iris.zyvor.dev/description: "Metrics and alerting"
+    iris.zyvor.dev/icon: "prometheus"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/port: "9090"
+    iris.zyvor.dev/scheme: "http"
+    iris.zyvor.dev/path: "/"
+    iris.zyvor.dev/auth: "none"
+    iris.zyvor.dev/published: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090

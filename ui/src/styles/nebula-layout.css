@@ -1,0 +1,183 @@
+/*
+ * Iris layout — Apple / Zyvor light shell
+ */
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background-color: var(--hs-bg);
+  background-image: none;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+html[data-theme='dark'] body {
+  background-color: var(--hs-bg);
+}
+
+.app-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--hs-bg);
+  position: relative;
+}
+
+.main-scroll-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  padding-bottom: var(--hs-s6);
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.iris-status-strip {
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.35rem var(--hs-gutter);
+  min-height: 28px;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-top: 1px solid rgba(20, 22, 26, 0.08);
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  color: var(--hs-text-subtle);
+}
+
+html[data-theme='dark'] .iris-status-strip {
+  background: rgba(29, 29, 31, 0.85);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.iris-strip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hs-ok);
+  flex-shrink: 0;
+}
+
+.iris-strip-dot[data-tone='warn'] {
+  background: var(--hs-warn);
+}
+
+.iris-strip-dot[data-tone='bad'] {
+  background: var(--hs-err);
+}
+
+.iris-strip-item {
+  white-space: nowrap;
+}
+
+.iris-strip-bad {
+  color: var(--hs-err);
+}
+
+.iris-strip-warn {
+  color: var(--hs-warn);
+}
+
+.iris-strip-muted {
+  color: var(--hs-text-subtle);
+}
+
+.iris-strip-spacer {
+  flex: 1 1 auto;
+}
+
+.iris-strip-link {
+  color: var(--hs-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.iris-strip-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .iris-strip-muted {
+    display: none;
+  }
+}
+
+.main-scroll-area::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.main-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+.main-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+.page-grid {
+  display: grid;
+  gap: var(--hs-s5);
+  max-width: var(--hs-max-width);
+  margin: 0 auto;
+  padding: var(--hs-s6) var(--hs-gutter) var(--hs-s8);
+}
+
+@media (max-width: 900px) {
+  .page-grid {
+    gap: var(--hs-s4);
+    padding: var(--hs-s5) var(--hs-gutter) var(--hs-s7);
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toast-host {
+  position: fixed;
+  right: 16px;
+  bottom: 44px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@keyframes iris-nb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.iris-nb-spin {
+  animation: iris-nb-spin 0.6s linear;
+}

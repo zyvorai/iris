@@ -1,0 +1,22 @@
+# Build stage — Rust server + UI
+FROM docker.io/library/node:22-alpine AS ui-builder
+WORKDIR /ui
+COPY ui/package.json ui/package-lock.json ./
+RUN npm ci
+COPY ui/ ./
+RUN npm run build
+
+FROM docker.io/library/rust:1.88-bookworm AS rust-builder
+WORKDIR /src
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+RUN cargo build --release -p iris-server
+
+FROM docker.io/library/debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=rust-builder /src/target/release/iris-server /usr/local/bin/iris-server
+COPY --from=ui-builder /ui/dist /app/ui
+ENV IRIS_UI_DIR=/app/ui
+EXPOSE 31847
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/iris-server"]

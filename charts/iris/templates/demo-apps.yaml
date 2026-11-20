@@ -1,0 +1,168 @@
+{{- if .Values.demoApps.enabled }}
+{{- $publicBase := .Values.controller.publicBaseUrl | default (printf "https://%s:%v" .Values.global.domain .Values.service.nodePort) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iris-demo
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: iris
+  annotations:
+    meta.helm.sh/release-name: iris
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-demo
+  namespace: iris-demo
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.3.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: "{{ $publicBase }}/launchpad/a/iris-demo/grafana/"
+            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Viewer
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: iris-demo
+  annotations:
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Grafana"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/icon: "grafana"
+    iris.zyvor.dev/port: "80"
+    iris.zyvor.dev/published: "true"
+    iris.zyvor.dev/recommended: "true"
+    iris.zyvor.dev/depends-on: "prometheus"
+    iris.zyvor.dev/owner: "platform-team"
+    iris.zyvor.dev/environment: "production"
+    iris.zyvor.dev/serve-from-sub-path: "true"
+spec:
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-demo
+  namespace: iris-demo
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--web.enable-lifecycle"
+            - "--web.external-url={{ $publicBase }}/launchpad/a/iris-demo/prometheus-server/"
+            - "--web.route-prefix=/"
+          ports:
+            - containerPort: 9090
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: iris-demo
+  annotations:
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Prometheus"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/icon: "prometheus"
+    iris.zyvor.dev/port: "9090"
+    iris.zyvor.dev/published: "true"
+    iris.zyvor.dev/recommended: "true"
+    iris.zyvor.dev/owner: "platform-team"
+    iris.zyvor.dev/environment: "production"
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+{{- end }}

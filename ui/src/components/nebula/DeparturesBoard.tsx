@@ -1,0 +1,123 @@
+// Copyright 2026 ZyvorAI Labs Private Limited
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ExternalLink, Stethoscope } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import AppIcon from '../AppIcon'
+import StatusBadge from './StatusBadge'
+import ActionMenu from './ActionMenu'
+import { buildServiceMenuItems, canOpenApp, isUnhealthy } from './serviceActions'
+import { appDetailPath, appLaunchPath, irisApi, openApp, statusTone } from '../../services/irisApi'
+import { useInspector } from '../../utils/inspectorContext'
+import { useToast } from '../Toast'
+import type { IrisApp } from '../../types'
+
+interface DeparturesRowProps {
+  app: IrisApp
+  favorite?: boolean
+  /** Omit to use the row's own local-publish mutation (the default for most
+   * pages); pass a function to override it (e.g. federation publish); pass
+   * `null` to hide the Publish button entirely (e.g. a read-only remote). */
+  onPublish?: (() => void) | null
+  onHide?: () => void
+  compact?: boolean
+  flipped?: boolean
+}
+
+/** One departures-board row — the dense table-row replacement for AppCard's
+ * grid card, used across every app-listing page. Same drop-in props as
+ * AppCard so it slots into existing app-grid/CollapsibleGroup call sites. */
+export default function DeparturesRow({ app, favorite = false, onPublish, onHide, compact = false, flipped = false }: DeparturesRowProps) {
+  const { openDiagnose, openInspector } = useInspector()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const publish = useMutation({
+    mutationFn: () => irisApi.publish(app.id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['catalog'] })
+      void qc.invalidateQueries({ queryKey: ['cluster-summary'] })
+      void qc.invalidateQueries({ queryKey: ['apps'] })
+      toast(`${app.displayName} published`)
+    },
+    onError: () => toast(`Could not publish ${app.displayName}`, 'error'),
+  })
+  const favMutation = useMutation({
+    mutationFn: () => (favorite ? irisApi.removeFavorite(app.id) : irisApi.addFavorite(app.id)),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['favorites'] }),
+  })
+
+  const canOpen = canOpenApp(app)
+  const unhealthy = isUnhealthy(app)
+  const publishHidden = onPublish === null
+  const handlePublish = onPublish ?? (() => void publish.mutate())
+
+  const menuItems = buildServiceMenuItems(app, {
+    onDiagnose: () => openDiagnose(app.id),
+    onInspector: () => openInspector(app.id, 'ai'),
+    onPublish: !app.visibility.published && !publishHidden ? handlePublish : undefined,
+    onHide,
+    onPin: () => void favMutation.mutate(),
+    favorite,
+  })
+
+  const hint = unhealthy && app.statusMessage?.trim()
+    ? app.statusMessage.trim()
+    : app.visibility.published
+      ? appLaunchPath(app)
+      : 'Not published'
+
+  return (
+    <div
+      className={`dep dep-${statusTone(app.status)}${compact ? ' dep-compact' : ''}${flipped ? ' dep-flip' : ''}`}
+      onClick={() => openInspector(app.id)}
+      role="row"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') openInspector(app.id)
+      }}
+    >
+      <span className="dep-chit">
+        <AppIcon icon={app.icon} name={app.displayName} size="sm" />
+      </span>
+      <div className="dep-id">
+        <Link
+          to={appDetailPath(app)}
+          className="dep-name"
+          title={app.displayName}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {app.displayName}
+        </Link>
+        <span className="dep-terminal">{app.namespace}{!compact && app.category ? ` · ${app.category}` : ''}</span>
+      </div>
+      <StatusBadge status={app.status} className="dep-flag" />
+      <span className={`dep-hint${unhealthy ? ' dep-hint-warn' : ''}`} title={hint}>
+        {hint}
+      </span>
+      <div className="dep-actions" onClick={(e) => e.stopPropagation()}>
+        {unhealthy || !canOpen ? (
+          <button type="button" className="dep-action-btn" title="Diagnose" onClick={() => openDiagnose(app.id)}>
+            <Stethoscope size={16} strokeWidth={1.5} />
+          </button>
+        ) : (
+          <button type="button" className="dep-action-btn" title="Open" onClick={() => void openApp(app)}>
+            <ExternalLink size={16} strokeWidth={1.5} />
+          </button>
+        )}
+        {!app.visibility.published && !publishHidden ? (
+          <button
+            type="button"
+            className="dep-action-btn dep-action-btn-publish"
+            title="Publish"
+            disabled={publish.isPending}
+            onClick={handlePublish}
+          >
+            Publish
+          </button>
+        ) : null}
+        <ActionMenu items={menuItems} label={`Actions for ${app.displayName}`} />
+      </div>
+    </div>
+  )
+}

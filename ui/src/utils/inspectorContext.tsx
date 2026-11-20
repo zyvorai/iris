@@ -1,0 +1,54 @@
+// Copyright 2026 ZyvorAI Labs Private Limited
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+
+export type InspectorTab = 'overview' | 'route' | 'share' | 'deps' | 'ai'
+
+interface InspectorContextValue {
+  appId: string | null
+  inspectorTab: InspectorTab
+  diagnoseAppId: string | null
+  openInspector: (appId: string, tab?: InspectorTab) => void
+  closeInspector: () => void
+  openDiagnose: (appId: string) => void
+  closeDiagnose: () => void
+}
+
+const InspectorContext = createContext<InspectorContextValue | null>(null)
+
+export function InspectorProvider({ children }: { children: ReactNode }) {
+  const [appId, setAppId] = useState<string | null>(null)
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('overview')
+  const [diagnoseAppId, setDiagnoseAppId] = useState<string | null>(null)
+
+  const openInspector = useCallback((id: string, tab: InspectorTab = 'overview') => {
+    setDiagnoseAppId(null)
+    setAppId(id)
+    setInspectorTab(tab)
+  }, [])
+
+  const closeInspector = useCallback(() => {
+    setAppId(null)
+    setInspectorTab('overview')
+  }, [])
+
+  const openDiagnose = useCallback((id: string) => {
+    setAppId(null)
+    setDiagnoseAppId(id)
+  }, [])
+
+  const closeDiagnose = useCallback(() => setDiagnoseAppId(null), [])
+
+  const value = useMemo(
+    () => ({ appId, inspectorTab, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose }),
+    [appId, inspectorTab, diagnoseAppId, openInspector, closeInspector, openDiagnose, closeDiagnose],
+  )
+  return <InspectorContext.Provider value={value}>{children}</InspectorContext.Provider>
+}
+
+export function useInspector() {
+  const ctx = useContext(InspectorContext)
+  if (!ctx) throw new Error('useInspector must be used within InspectorProvider')
+  return ctx
+}

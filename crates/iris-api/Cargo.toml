@@ -1,0 +1,15 @@
+[package]
+name = "iris-api"
+version = "0.1.0"
+description = "Iris REST API routes"
+license.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+iris-core = { path = "../iris-core" }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }

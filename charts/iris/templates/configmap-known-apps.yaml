@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iris-known-apps
+  labels:
+    app.kubernetes.io/name: iris
+data:
+  README: |
+    Known app signatures are compiled into iris-controller.
+    Future versions may load additional rules from this ConfigMap.

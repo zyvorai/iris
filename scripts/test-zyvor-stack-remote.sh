@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Copyright 2026 Zyvor AI Labs · https://zyvor.dev
+# SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+
+# Delegate full Zyvor stack E2E (VMRogue + PacketWolf + Axiom) to the VMRogue orchestrator.
+#
+# Usage:
+#   ./scripts/test-zyvor-stack-remote.sh <host> [vmrogue_port] [ssh_user]
+#   ./scripts/test-zyvor-stack-remote.sh <host> 30151 <user>
+#
+# Environment:
+#   VMROGUE_REPO — override sibling path (default: ../VMRogue under tt/)
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=lib/resolve-zyvor-sibling.sh
+source "${SCRIPT_DIR}/lib/resolve-zyvor-sibling.sh"
+
+STACK_SCRIPT="$(resolve_zyvor_script "${REPO_ROOT}" VMRogue "scripts/test-zyvor-stack-remote.sh")" || {
+  echo "ERROR: VMRogue stack orchestrator not found." >&2
+  echo "  Clone sibling VMRogue/ next to Iris/ or set VMROGUE_REPO." >&2
+  exit 1
+}
+
+exec "${STACK_SCRIPT}" "$@"

@@ -1,0 +1,11 @@
+FROM docker.io/library/golang:1.23-alpine AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+COPY cmd ./cmd
+COPY controller ./controller
+RUN cd cmd/iris-seed && go build -o /iris-seed .
+
+FROM docker.io/library/alpine:3.21
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /iris-seed /usr/local/bin/iris-seed
+ENTRYPOINT ["/usr/local/bin/iris-seed"]

@@ -1,0 +1,178 @@
+// Copyright 2026 ZyvorAI Labs Private Limited
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+
+import type { CSSProperties } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { GitBranch, Users } from 'lucide-react'
+import DeparturesRow from '../components/nebula/DeparturesBoard'
+import Board from '../components/nebula/Board'
+import GlassPanel from '../components/nebula/GlassPanel'
+import GlyphTile from '../components/nebula/GlyphTile'
+import PageFrame from '../components/nebula/PageFrame'
+import EmptyState from '../components/nebula/EmptyState'
+import Button from '../components/nebula/Button'
+import AskZyraButton from '../components/nebula/AskZyraButton'
+import ZyraAiPanel from '../components/nebula/ZyraAiPanel'
+import ZyraAiFocusChips from '../components/nebula/ZyraAiFocusChips'
+import type { IrisApp } from '../types'
+import { irisApi } from '../services/irisApi'
+import { useOwnerInsight } from '../hooks/useZyraAiInsight'
+import { useInspector } from '../utils/inspectorContext'
+import { iconColorFor } from '../utils/iconColor'
+import { useStatusFlip } from '../hooks/useStatusFlip'
+
+function ownerInitials(label: string): string {
+  const parts = label.replace(/[-_]/g, ' ').trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return label.slice(0, 2).toUpperCase()
+}
+
+function OwnerAvatar({ label }: { label: string }) {
+  const { accent } = iconColorFor(label)
+  const style = { '--icon-accent': accent } as CSSProperties
+  return (
+    <span className="app-icon app-icon-sm owner-avatar" style={style} aria-hidden>
+      {ownerInitials(label)}
+    </span>
+  )
+}
+
+export default function TeamsPage() {
+  const { openDiagnose } = useInspector()
+  const owners = useQuery({ queryKey: ['owners'], queryFn: irisApi.listOwners })
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: irisApi.listCatalog })
+
+  const appsByOwner = useMemo(() => {
+    const map = new Map<string, IrisApp[]>()
+    for (const app of catalog.data ?? []) {
+      const owner = app.meta?.owner?.trim()
+      if (!owner) continue
+      const list = map.get(owner) ?? []
+      list.push(app)
+      map.set(owner, list)
+    }
+    return map
+  }, [catalog.data])
+
+  const focusOwner = useMemo(() => {
+    if (!owners.data?.length) return null
+    const troubled = [...owners.data]
+      .filter((o) => o.unhealthy > 0)
+      .sort((a, b) => b.unhealthy - a.unhealthy || b.appCount - a.appCount)
+    if (troubled[0]) return troubled[0].id
+    return owners.data[0]?.id ?? null
+  }, [owners.data])
+
+  const ownerInsight = useOwnerInsight(focusOwner, Boolean(focusOwner && catalog.data))
+
+  const loading = (owners.isLoading && !owners.data) || (catalog.isLoading && !catalog.data)
+  const error = owners.isError || catalog.isError
+
+  const onRetry = () => {
+    void owners.refetch()
+    void catalog.refetch()
+  }
+
+  const focusLabel = owners.data?.find((o) => o.id === focusOwner)?.label ?? focusOwner
+  const flipped = useStatusFlip(catalog.data ?? [])
+
+  return (
+    <PageFrame
+      loading={loading}
+      error={error}
+      hasData={Boolean(owners.data && catalog.data)}
+      onRetry={onRetry}
+      errorTitle="Could not load teams"
+    >
+      <div className="hs-page">
+        <section className="hs-hero">
+          <div className="hs-wrap">
+            <p className="hs-eyebrow">Team ownership</p>
+            <h1 className="h-hero" style={{ maxWidth: '14ch' }}>Who owns what</h1>
+            <p className="hs-lede">
+              Owners from service annotations — a lightweight org map over your catalog.
+            </p>
+          </div>
+        </section>
+      <div className="page-grid">
+        {focusOwner && (ownerInsight.data || ownerInsight.isLoading) ? (
+          <ZyraAiPanel
+            title={focusLabel ? `Team · ${focusLabel}` : 'Team insight'}
+            summary={ownerInsight.data?.summary}
+            explanation={ownerInsight.data?.explanation ?? 'Zyra AI is analyzing team ownership health…'}
+            source={ownerInsight.data?.source}
+            remediation={ownerInsight.data?.highlights}
+            loading={ownerInsight.isLoading}
+            compact
+            onRefresh={() => void ownerInsight.refetch()}
+            refreshing={ownerInsight.isFetching && !ownerInsight.isLoading}
+            action={
+              <ZyraAiFocusChips
+                appIds={ownerInsight.data?.focusAppIds ?? []}
+                catalog={catalog.data ?? []}
+                onSelect={openDiagnose}
+              />
+            }
+          />
+        ) : null}
+
+        {focusOwner ? (
+          <GlassPanel className="glass-panel-section">
+            <div className="section-head-nebula">
+              <GlyphTile tone="brand" icon={<Users size={14} />} size="sm" />
+              <div>
+                <p className="hs-eyebrow">Focus</p>
+                <h2 className="h-tile">Ask Zyra about ownership</h2>
+              </div>
+              <AskZyraButton compact command={`owner insight ${focusOwner}`} />
+            </div>
+          </GlassPanel>
+        ) : null}
+
+        {!owners.data?.length ? (
+          <GlassPanel className="glass-panel-section">
+            <EmptyState
+              icon={<Users size={22} />}
+              title="No owner metadata yet"
+              description="Add iris.zyvor.dev/owner annotations to services."
+            />
+          </GlassPanel>
+        ) : (
+          owners.data.map((owner) => {
+            const apps = appsByOwner.get(owner.id) ?? []
+            return (
+              <GlassPanel key={owner.id} className="glass-panel-section">
+                <div className="section-head-nebula">
+                  <OwnerAvatar label={owner.label} />
+                  <div>
+                    <h2 className="section-title">{owner.label}</h2>
+                    <p className="body-text">
+                      {owner.appCount} apps
+                      {owner.recommended ? ` · ${owner.recommended} team picks` : ''}
+                      {owner.unhealthy ? ` · ${owner.unhealthy} need attention` : ''}
+                    </p>
+                  </div>
+                </div>
+                {apps.length ? (
+                  <Board style={{ marginTop: '1rem' }}>
+                    {apps.map((app) => (
+                      <DeparturesRow key={app.id} app={app} flipped={flipped.has(app.id)} />
+                    ))}
+                  </Board>
+                ) : (
+                  <EmptyState icon={<Users size={22} />} title="No linked apps" description="No apps linked to this owner in the current catalog." />
+                )}
+              </GlassPanel>
+            )
+          })
+        )}
+
+        <Button variant="secondary" to="/graph">
+          <GitBranch size={14} /> View dependency graph
+        </Button>
+      </div>
+      </div>
+    </PageFrame>
+  )
+}

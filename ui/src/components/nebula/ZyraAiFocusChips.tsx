@@ -1,0 +1,36 @@
+// Copyright 2026 ZyvorAI Labs Private Limited
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+
+import type { IrisApp } from '../../types'
+
+interface ZyraAiFocusChipsProps {
+  appIds: string[]
+  catalog: IrisApp[]
+  onSelect: (id: string) => void
+  label?: string
+  className?: string
+}
+
+export default function ZyraAiFocusChips({
+  appIds,
+  catalog,
+  onSelect,
+  label = 'Diagnose',
+  className = '',
+}: ZyraAiFocusChipsProps) {
+  const apps = appIds
+    .map((id) => catalog.find((app) => app.id === id))
+    .filter((app): app is IrisApp => !!app)
+
+  if (!apps.length) return null
+
+  return (
+    <div className={`graph-ai-focus-chips${className ? ` ${className}` : ''}`} data-testid="zyra-ai-focus-chips">
+      {apps.map((app) => (
+        <button key={app.id} type="button" className="filter-chip" onClick={() => onSelect(app.id)}>
+          {label} {app.displayName}
+        </button>
+      ))}
+    </div>
+  )
+}

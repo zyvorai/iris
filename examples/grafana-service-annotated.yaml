@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  annotations:
+    iris.zyvor.dev/enabled: "true"
+    iris.zyvor.dev/name: "Grafana"
+    iris.zyvor.dev/description: "Observability dashboard"
+    iris.zyvor.dev/icon: "grafana"
+    iris.zyvor.dev/category: "Monitoring"
+    iris.zyvor.dev/port: "80"
+    iris.zyvor.dev/scheme: "http"
+    iris.zyvor.dev/path: "/"
+    iris.zyvor.dev/auth: "none"
+    iris.zyvor.dev/published: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000

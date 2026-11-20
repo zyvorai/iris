@@ -1,0 +1,87 @@
+# Contributing to Iris
+
+Thank you for helping improve Iris. This guide covers local development, testing, and the review bar we use before merging.
+
+## Prerequisites
+
+| Tool | Version | Used for |
+|------|---------|----------|
+| Rust | stable | `iris-server`, `iris-core`, `iris-api` |
+| Go | 1.22+ | `iris-controller` |
+| Node.js | 20+ | React UI (`ui/`) |
+| Helm | 3.x | Chart lint and deploy |
+| Docker | optional | Image builds |
+
+## Build
+
+```bash
+make build          # Go controller + Rust server + UI bundle
+make build-go       # Controller only
+make build-rust     # Server only
+make build-ui       # UI only → ui/dist/
+```
+
+## Test
+
+```bash
+# Unit / integration
+cargo test --workspace --locked
+go test ./...
+cd ui && npm ci && npm run build
+
+# Local smoke (requires running server)
+./scripts/smoke-test.sh
+
+# Playwright UI smoke
+cd ui && npm run test:e2e
+# Against a live deploy:
+IRIS_E2E_BASE=http://host:31847 npm run test:e2e
+
+# Remote post-deploy API checks
+make test-remote-smoke
+```
+
+CI runs Rust tests/clippy/fmt, Go tests/vet, UI build, and Helm lint on every push to `main` and on pull requests (see `.github/workflows/ci.yml`).
+
+## User stories & acceptance
+
+Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.md). Add or extend:
+
+1. Acceptance criteria rows
+2. Playwright smoke test (when UI-facing)
+3. `e2e-deploy-verify.sh` check (when API-facing)
+
+## Docs
+
+| Change type | Update |
+|-------------|--------|
+| UI behavior | [docs/ui.md](docs/ui.md) |
+| New API route | [docs/api.md](docs/api.md) + [docs/architecture.md](docs/architecture.md) + changelog |
+| Local dev / extending Iris | [docs/development.md](docs/development.md) |
+| Install / deploy | [docs/install.md](docs/install.md) |
+| User-facing feature | [docs/USER_STORIES.md](docs/USER_STORIES.md) + [CHANGELOG.md](CHANGELOG.md) |
+
+## Pull request checklist
+
+- [ ] `cargo test`, `go test`, and `npm run build` pass locally
+- [ ] Playwright smoke updated if UI behavior changed
+- [ ] Changelog entry under `[Unreleased]`
+- [ ] User story acceptance criteria updated when applicable
+
+## License and conduct
+
+Contributions are accepted under the [Zyvor Production License v1.0](LICENSE). By opening a
+pull request you agree that your contribution may be distributed under that
+license. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Security issues: see [SECURITY.md](SECURITY.md) — do not file public issues for vulnerabilities.
+
+## Code style
+
+- **Rust:** `cargo fmt` + `cargo clippy -- -D warnings`
+- **Go:** `go vet ./...`
+- **UI:** Match existing Nebula components (`PageFrame`, `GlassPanel`, `Button`) — avoid new legacy `glass-section` / `.btn` patterns
+
+## Questions
+
+Open an issue or see [docs/development.md](docs/development.md) and [docs/README.md](docs/README.md).
