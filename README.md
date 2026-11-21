@@ -174,3 +174,5 @@ Commercial subscriptions and support: see [docs/SUBSCRIPTION-MODEL.md](docs/SUBS
 
 Licensed under the [Zyvor Production License v1.0](LICENSE) (SPDX `LicenseRef-Zyvor-Production-1.0`); evaluation is free for 30 days per organization, production use requires a commercial license ([zyvor.dev/buy](https://zyvor.dev/buy), sales@zyvor.dev).
 Copyright 2026 ZyvorAI Labs Private Limited. See [NOTICE](NOTICE).
+
+**Price:** INR 49,999 per cluster per year incl. 18% GST in India; US$504 per cluster per year excl. tax elsewhere. Buy: [zyvor.dev/buy](https://zyvor.dev/buy). Orders of USD 5,000 or more and quotes are invoiced in USD through Skydo.
