@@ -82,6 +82,7 @@ struct OidcDiscovery {
 struct TokenResponse {
     access_token: String,
     #[serde(default)]
+    #[allow(dead_code)]
     id_token: Option<String>,
 }
 
@@ -175,16 +176,15 @@ pub async fn require_auth(
                 .map(|v| v == auth.api_key)
                 .unwrap_or(false);
         if authorized {
-            if federation_trust_headers() {
-                if req
+            if federation_trust_headers()
+                && req
                     .headers()
                     .get("x-iris-user")
                     .and_then(|v| v.to_str().ok())
                     .map(|s| !s.is_empty())
                     .unwrap_or(false)
-                {
-                    return next.run(req).await;
-                }
+            {
+                return next.run(req).await;
             }
             let _ = req.headers_mut().insert(
                 HeaderName::from_static("x-iris-user"),

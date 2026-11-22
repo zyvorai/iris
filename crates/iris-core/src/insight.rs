@@ -965,7 +965,7 @@ pub fn rule_activity_insight(events: &[AuditEvent]) -> ActivityInsight {
     };
 
     let mut ranked: Vec<_> = action_counts.iter().map(|(a, c)| (*a, *c)).collect();
-    ranked.sort_by(|a, b| b.1.cmp(&a.1));
+    ranked.sort_by_key(|a| std::cmp::Reverse(a.1));
     let mut highlights: Vec<String> = ranked
         .iter()
         .take(4)

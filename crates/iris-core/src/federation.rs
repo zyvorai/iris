@@ -357,7 +357,7 @@ pub struct FederatedAuditEvent {
 pub async fn build_federated_audit(local_events: Vec<AuditEvent>, limit: usize) -> Vec<FederatedAuditEvent> {
     let local_id = std::env::var("IRIS_CLUSTER_ID").unwrap_or_else(|_| "local".into());
     let local_name = std::env::var("IRIS_CLUSTER_NAME").unwrap_or_else(|_| "Local cluster".into());
-    let per_cluster = limit.max(20).min(500);
+    let per_cluster = limit.clamp(20, 500);
     let mut out: Vec<FederatedAuditEvent> = local_events
         .into_iter()
         .take(per_cluster)
