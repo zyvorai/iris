@@ -1,5 +1,5 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
-// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 // Glossy gradient-tile icon palette — App Store-tray style (accent →
 // accentLight diagonal gradient + colored glow + white glyph), matching the

@@ -534,6 +534,6 @@ Iris is how humans enter the software universe that Zeus runs.
 
 ## License
 
-Copyright 2026 ZyvorAI Labs Private Limited. Licensed under the Zyvor Production License v1.0.
+Copyright 2026 ZyvorAI Labs Private Limited. Licensed under the Zyvor Production Licence v2.0.
 
 https://zyvor.dev · info@zyvor.dev

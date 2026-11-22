@@ -8,4 +8,4 @@ Brief description of the change.
 - [ ] Helm lint / chart templates checked (if chart changed)
 
 ## License
-By submitting this PR, I confirm my contribution is licensed under the Zyvor Production License v1.0 and I have the right to contribute it.
+By submitting this PR, I confirm my contribution is licensed under the Zyvor Production Licence v2.0 and I have the right to contribute it.

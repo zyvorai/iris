@@ -70,7 +70,7 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 
 ## License and conduct
 
-Contributions are accepted under the [Zyvor Production License v1.0](LICENSE). By opening a
+Contributions are accepted under the [Zyvor Production Licence v2.0](LICENSE). By opening a
 pull request you agree that your contribution may be distributed under that
 license. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
