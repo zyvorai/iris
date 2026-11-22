@@ -151,7 +151,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
             format!("{APP_SELECT} FROM apps ORDER BY display_name")
         };
         let mut stmt = conn.prepare(&sql)?;
-        let rows = stmt.query_map([], |row| row_to_app(row))?;
+        let rows = stmt.query_map([], row_to_app)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
@@ -166,7 +166,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
              ORDER BY score DESC, display_name"
             ),
         )?;
-        let rows = stmt.query_map([], |row| row_to_app(row))?;
+        let rows = stmt.query_map([], row_to_app)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
@@ -180,7 +180,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
              ORDER BY namespace, display_name"
             ),
         )?;
-        let rows = stmt.query_map([], |row| row_to_app(row))?;
+        let rows = stmt.query_map([], row_to_app)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
@@ -222,7 +222,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
         let mut stmt = conn.prepare(&format!("{APP_SELECT} FROM apps WHERE id = ?1"))?;
         let mut rows = stmt.query([id])?;
         if let Some(row) = rows.next()? {
-            return Ok(Some(row_to_app(&row)?));
+            return Ok(Some(row_to_app(row)?));
         }
         Ok(None)
     }
@@ -246,7 +246,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
         )?;
         let mut rows = stmt.query([slug])?;
         if let Some(row) = rows.next()? {
-            return Ok(Some(row_to_app(&row)?));
+            return Ok(Some(row_to_app(row)?));
         }
         Ok(None)
     }
@@ -377,7 +377,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
                 }
             })
             .collect();
-        hits.sort_by(|a, b| b.score.cmp(&a.score));
+        hits.sort_by_key(|h| std::cmp::Reverse(h.score));
         hits.truncate(limit);
         Ok(hits)
     }
@@ -694,6 +694,19 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
     })
 }
 
+fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::LabelCount> {
+    map.into_iter()
+        .map(|(label, count)| crate::LabelCount { label, count })
+        .collect()
+}
+
+fn is_expired(expires_at: &str) -> bool {
+    chrono::DateTime::parse_from_rfc3339(expires_at)
+        .ok()
+        .map(|t| t.with_timezone(&Utc) < Utc::now())
+        .unwrap_or(true)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -738,17 +751,4 @@ mod tests {
         let favs = store.list_favorites("alice").unwrap();
         assert!(!favs.contains(&"ns/grafana".to_string()));
     }
-}
-
-fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::LabelCount> {
-    map.into_iter()
-        .map(|(label, count)| crate::LabelCount { label, count })
-        .collect()
-}
-
-fn is_expired(expires_at: &str) -> bool {
-    chrono::DateTime::parse_from_rfc3339(expires_at)
-        .ok()
-        .map(|t| t.with_timezone(&Utc) < Utc::now())
-        .unwrap_or(true)
 }

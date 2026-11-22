@@ -417,9 +417,7 @@ async fn http_proxy(app: iris_core::App, rest: String, req: Request<Body>) -> Re
                     .unwrap_or(false)
             {
                 let stream = resp.bytes_stream().map(|chunk| {
-                    chunk
-                        .map(Bytes::from)
-                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+                    chunk.map_err(std::io::Error::other)
                 });
                 let body = Body::from_stream(stream);
                 return (status, out_headers, body).into_response();
@@ -744,17 +742,17 @@ async fn tunnel_websocket(
                 }
                 Ok(axum::extract::ws::Message::Binary(b)) => {
                     upstream_sink
-                        .send(tokio_tungstenite::tungstenite::Message::Binary(b.into()))
+                        .send(tokio_tungstenite::tungstenite::Message::Binary(b))
                         .await?;
                 }
                 Ok(axum::extract::ws::Message::Ping(p)) => {
                     upstream_sink
-                        .send(tokio_tungstenite::tungstenite::Message::Ping(p.into()))
+                        .send(tokio_tungstenite::tungstenite::Message::Ping(p))
                         .await?;
                 }
                 Ok(axum::extract::ws::Message::Pong(p)) => {
                     upstream_sink
-                        .send(tokio_tungstenite::tungstenite::Message::Pong(p.into()))
+                        .send(tokio_tungstenite::tungstenite::Message::Pong(p))
                         .await?;
                 }
                 Ok(axum::extract::ws::Message::Close(_)) => break,
@@ -774,17 +772,17 @@ async fn tunnel_websocket(
                 }
                 Ok(tokio_tungstenite::tungstenite::Message::Binary(b)) => {
                     client_sink
-                        .send(axum::extract::ws::Message::Binary(b.into()))
+                        .send(axum::extract::ws::Message::Binary(b))
                         .await?;
                 }
                 Ok(tokio_tungstenite::tungstenite::Message::Ping(p)) => {
                     client_sink
-                        .send(axum::extract::ws::Message::Ping(p.into()))
+                        .send(axum::extract::ws::Message::Ping(p))
                         .await?;
                 }
                 Ok(tokio_tungstenite::tungstenite::Message::Pong(p)) => {
                     client_sink
-                        .send(axum::extract::ws::Message::Pong(p.into()))
+                        .send(axum::extract::ws::Message::Pong(p))
                         .await?;
                 }
                 Ok(tokio_tungstenite::tungstenite::Message::Close(_)) => break,
