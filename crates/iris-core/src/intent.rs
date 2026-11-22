@@ -105,7 +105,8 @@ pub fn resolve_search_intent(apps: &[App], query: &str) -> SearchIntent {
 
     SearchIntent {
         intent: "unknown".into(),
-        answer: "Try: unhealthy apps, depends on prometheus, owner:platform-team, production".into(),
+        answer: "Try: unhealthy apps, depends on prometheus, owner:platform-team, production"
+            .into(),
         apps: vec![],
     }
 }
@@ -164,13 +165,15 @@ fn normalize_env(raw: &str) -> Option<String> {
     if raw.is_empty() {
         return None;
     }
-    Some(match raw {
-        "prod" => "production",
-        "stage" => "staging",
-        "dev" => "development",
-        other => other,
-    }
-    .to_string())
+    Some(
+        match raw {
+            "prod" => "production",
+            "stage" => "staging",
+            "dev" => "development",
+            other => other,
+        }
+        .to_string(),
+    )
 }
 
 fn extract_namespace(lower: &str) -> Option<String> {

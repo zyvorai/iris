@@ -31,7 +31,10 @@ pub fn user_allowed_environment(env: &str, groups: &[String], rules: &[Workspace
     if rules.is_empty() || env.is_empty() {
         return true;
     }
-    let Some(rule) = rules.iter().find(|r| r.environment.eq_ignore_ascii_case(env)) else {
+    let Some(rule) = rules
+        .iter()
+        .find(|r| r.environment.eq_ignore_ascii_case(env))
+    else {
         return true;
     };
     if rule.groups.is_empty() {
@@ -42,7 +45,11 @@ pub fn user_allowed_environment(env: &str, groups: &[String], rules: &[Workspace
         .any(|g| rule.groups.iter().any(|rg| rg.eq_ignore_ascii_case(g)))
 }
 
-pub fn filter_apps_by_workspace(apps: &[App], groups: &[String], rules: &[WorkspaceRule]) -> Vec<App> {
+pub fn filter_apps_by_workspace(
+    apps: &[App],
+    groups: &[String],
+    rules: &[WorkspaceRule],
+) -> Vec<App> {
     if rules.is_empty() {
         return apps.to_vec();
     }
@@ -114,9 +121,8 @@ mod tests {
 
     #[test]
     fn filters_production_for_platform_team() {
-        let rules = parse_workspace_rules(
-            r#"[{"environment":"production","groups":["platform-team"]}]"#,
-        );
+        let rules =
+            parse_workspace_rules(r#"[{"environment":"production","groups":["platform-team"]}]"#);
         let apps = vec![app("production"), app("staging")];
         let filtered = filter_apps_by_workspace(&apps, &["platform-team".into()], &rules);
         assert_eq!(filtered.len(), 2);

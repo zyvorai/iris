@@ -25,9 +25,7 @@ impl Store {
             std::fs::create_dir_all(parent).ok();
         }
         let conn = Connection::open(path).context("open sqlite")?;
-        conn.execute_batch(
-            "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;",
-        )?;
+        conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;")?;
         let store = Self {
             conn: Arc::new(Mutex::new(conn)),
         };
@@ -88,12 +86,18 @@ CREATE TABLE IF NOT EXISTS audit_events (
 );
 "#,
         )?;
-        let _ = conn.execute("ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''", []);
+        let _ = conn.execute(
+            "ALTER TABLE apps ADD COLUMN canonical_slug TEXT DEFAULT ''",
+            [],
+        );
         let _ = conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_apps_canonical_slug ON apps(canonical_slug)",
             [],
         );
-        let _ = conn.execute("ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'", []);
+        let _ = conn.execute(
+            "ALTER TABLE apps ADD COLUMN meta_json TEXT DEFAULT '{}'",
+            [],
+        );
         let _ = conn.execute(
             "ALTER TABLE apps ADD COLUMN diagnosis_json TEXT DEFAULT ''",
             [],
@@ -157,29 +161,25 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
 
     pub fn list_discovery(&self) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            &format!(
-                "{APP_SELECT}
+        let mut stmt = conn.prepare(&format!(
+            "{APP_SELECT}
              FROM apps
              WHERE json_extract(visibility_json, '$.published') = 0
                AND json_extract(visibility_json, '$.hidden') = 0
              ORDER BY score DESC, display_name"
-            ),
-        )?;
+        ))?;
         let rows = stmt.query_map([], row_to_app)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
     pub fn list_catalog(&self) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            &format!(
-                "{APP_SELECT}
+        let mut stmt = conn.prepare(&format!(
+            "{APP_SELECT}
              FROM apps
              WHERE json_extract(visibility_json, '$.hidden') = 0
              ORDER BY namespace, display_name"
-            ),
-        )?;
+        ))?;
         let rows = stmt.query_map([], row_to_app)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
@@ -234,16 +234,14 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
 
     pub fn get_app_by_canonical_slug(&self, slug: &str) -> Result<Option<App>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            &format!(
-                "{APP_SELECT}
+        let mut stmt = conn.prepare(&format!(
+            "{APP_SELECT}
              FROM apps
              WHERE canonical_slug = ?1
                AND json_extract(visibility_json, '$.hidden') = 0
              ORDER BY json_extract(visibility_json, '$.published') DESC, score DESC
              LIMIT 1"
-            ),
-        )?;
+        ))?;
         let mut rows = stmt.query([slug])?;
         if let Some(row) = rows.next()? {
             return Ok(Some(row_to_app(row)?));
@@ -275,7 +273,11 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
              WHERE namespace = ?3
                AND json_extract(visibility_json, '$.hidden') = 0
                AND json_extract(visibility_json, '$.published') = 0",
-            params![serde_json::to_string(&vis)?, Utc::now().to_rfc3339(), namespace],
+            params![
+                serde_json::to_string(&vis)?,
+                Utc::now().to_rfc3339(),
+                namespace
+            ],
         )?;
         Ok(n)
     }
@@ -444,10 +446,7 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
             healthy,
             degraded,
             broken,
-            apps: apps
-                .into_iter()
-                .filter(|a| a.status != "healthy")
-                .collect(),
+            apps: apps.into_iter().filter(|a| a.status != "healthy").collect(),
         })
     }
 
@@ -649,11 +648,8 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
 
     pub fn count_audit(&self) -> Result<u64> {
         let conn = self.conn.lock().unwrap();
-        let count: u64 = conn.query_row(
-            "SELECT COUNT(*) FROM audit_events",
-            [],
-            |row| row.get(0),
-        )?;
+        let count: u64 =
+            conn.query_row("SELECT COUNT(*) FROM audit_events", [], |row| row.get(0))?;
         Ok(count)
     }
 }
@@ -733,7 +729,9 @@ mod tests {
     fn list_audit_respects_limit() {
         let store = in_memory();
         for i in 0..10 {
-            store.record_audit("user", "launch", &format!("ns/app{i}"), "").unwrap();
+            store
+                .record_audit("user", "launch", &format!("ns/app{i}"), "")
+                .unwrap();
         }
         assert_eq!(store.list_audit(3).unwrap().len(), 3);
         assert_eq!(store.list_audit(100).unwrap().len(), 10);

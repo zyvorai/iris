@@ -104,7 +104,10 @@ pub fn offline_remote_cluster(cfg: &FederatedClusterConfig) -> ClusterInfo {
     }
 }
 
-fn remote_cluster_from_summary(cfg: &FederatedClusterConfig, summary: &RemoteClusterSummary) -> ClusterInfo {
+fn remote_cluster_from_summary(
+    cfg: &FederatedClusterConfig,
+    summary: &RemoteClusterSummary,
+) -> ClusterInfo {
     ClusterInfo {
         id: cfg.id.clone(),
         name: cfg.name.clone(),
@@ -122,10 +125,7 @@ pub async fn fetch_remote_cluster(
     client: &reqwest::Client,
     cfg: &FederatedClusterConfig,
 ) -> ClusterInfo {
-    let url = format!(
-        "{}/api/v1/cluster/summary",
-        cfg.url.trim_end_matches('/')
-    );
+    let url = format!("{}/api/v1/cluster/summary", cfg.url.trim_end_matches('/'));
     match client.get(url).send().await {
         Ok(resp) if resp.status().is_success() => {
             if let Ok(summary) = resp.json::<RemoteClusterSummary>().await {

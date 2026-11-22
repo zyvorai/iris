@@ -183,28 +183,31 @@ pub use cluster::{
     federated_cluster_configs, fetch_remote_cluster, list_clusters, list_clusters_with_federation,
     local_cluster, ClusterInfo, FederatedClusterConfig,
 };
-pub use workspace_acl::{
-    allowed_workspaces, filter_apps_by_workspace, workspace_rules_from_env, WorkspaceRule,
-};
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
-pub use graph::{build_graph, AppGraph, GraphEdge, GraphNode, resolve_dependency};
 pub use federation::{
-    build_federated_audit, build_federated_catalog, federation_cluster, remote_publish, remote_publish_namespace,
-    remote_rbac_check, remote_set_recommended, FederatedApp, FederatedAuditEvent, FederationActionResult,
-    FederationRbacStatus,
+    build_federated_audit, build_federated_catalog, federation_cluster, remote_publish,
+    remote_publish_namespace, remote_rbac_check, remote_set_recommended, FederatedApp,
+    FederatedAuditEvent, FederationActionResult, FederationRbacStatus,
 };
+pub use graph::{build_graph, resolve_dependency, AppGraph, GraphEdge, GraphNode};
 pub use insight::{
-    resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight, resolve_graph_insight,
-    resolve_namespace_insight, resolve_owner_insight, resolve_federated_insight, resolve_activity_insight,
-    AppInsight, DiscoveryInsight, FleetInsight, GraphInsight, NamespaceInsight, OwnerInsight,
-    FederatedInsight, ActivityInsight,
+    resolve_activity_insight, resolve_app_insight, resolve_discovery_insight,
+    resolve_federated_insight, resolve_fleet_insight, resolve_graph_insight,
+    resolve_namespace_insight, resolve_owner_insight, ActivityInsight, AppInsight,
+    DiscoveryInsight, FederatedInsight, FleetInsight, GraphInsight, NamespaceInsight, OwnerInsight,
 };
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
-pub use llm::{ai_status, ai_status_with_probe, llm_chat_json, llm_config_from_env, llm_probe, resolve_search_with_llm, AiStatus, LlmConfig};
+pub use llm::{
+    ai_status, ai_status_with_probe, llm_chat_json, llm_config_from_env, llm_probe,
+    resolve_search_with_llm, AiStatus, LlmConfig,
+};
 pub use rbac::{
     allowed_actions_for_groups, allowed_namespaces_for_groups, can_perform_action,
     role_rules_from_env, RoleRule,
 };
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
 pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};
+pub use workspace_acl::{
+    allowed_workspaces, filter_apps_by_workspace, workspace_rules_from_env, WorkspaceRule,
+};

@@ -25,9 +25,8 @@ pub async fn namespace_allowed(namespace: &str, groups: &[String]) -> bool {
     if !k8s_rbac_enabled() {
         return true;
     }
-    let token = match std::fs::read_to_string(
-        "/var/run/secrets/kubernetes.io/serviceaccount/token",
-    ) {
+    let token = match std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")
+    {
         Ok(t) => t,
         Err(_) => return true,
     };
@@ -36,9 +35,8 @@ pub async fn namespace_allowed(namespace: &str, groups: &[String]) -> bool {
     if host.is_empty() {
         return true;
     }
-    let url = format!(
-        "https://{host}:{port}/apis/authorization.k8s.io/v1/selfsubjectaccessreviews"
-    );
+    let url =
+        format!("https://{host}:{port}/apis/authorization.k8s.io/v1/selfsubjectaccessreviews");
     let body = serde_json::json!({
         "apiVersion": "authorization.k8s.io/v1",
         "kind": "SelfSubjectAccessReview",

@@ -78,7 +78,11 @@ pub fn allowed_namespaces_for_groups(groups: &[String], rules: &[RoleRule]) -> O
     }
 }
 
-pub fn allowed_actions_for_groups(groups: &[String], rules: &[RoleRule], is_admin: bool) -> Vec<String> {
+pub fn allowed_actions_for_groups(
+    groups: &[String],
+    rules: &[RoleRule],
+    is_admin: bool,
+) -> Vec<String> {
     if is_admin || rules.is_empty() {
         return vec![
             "launch".into(),

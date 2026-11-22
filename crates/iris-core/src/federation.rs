@@ -193,7 +193,9 @@ pub async fn remote_set_recommended(
     );
     let client = federation_client();
     let req = apply_federation_auth(
-        client.put(url).json(&serde_json::json!({ "recommended": recommended })),
+        client
+            .put(url)
+            .json(&serde_json::json!({ "recommended": recommended })),
         cfg,
         user,
         groups,
@@ -240,7 +242,10 @@ pub async fn remote_rbac_check(
     match req.send().await {
         Ok(resp) if resp.status().is_success() => {
             if let Ok(body) = resp.json::<RemoteAuthMe>().await {
-                let ok = body.allowed_actions.iter().any(|a| a == "publish" || a == "admin" || a == "*");
+                let ok = body
+                    .allowed_actions
+                    .iter()
+                    .any(|a| a == "publish" || a == "admin" || a == "*");
                 return FederationRbacStatus {
                     cluster_id: cfg.id.clone(),
                     cluster_name: cfg.name.clone(),
@@ -354,7 +359,10 @@ pub struct FederatedAuditEvent {
     pub cluster_name: String,
 }
 
-pub async fn build_federated_audit(local_events: Vec<AuditEvent>, limit: usize) -> Vec<FederatedAuditEvent> {
+pub async fn build_federated_audit(
+    local_events: Vec<AuditEvent>,
+    limit: usize,
+) -> Vec<FederatedAuditEvent> {
     let local_id = std::env::var("IRIS_CLUSTER_ID").unwrap_or_else(|_| "local".into());
     let local_name = std::env::var("IRIS_CLUSTER_NAME").unwrap_or_else(|_| "Local cluster".into());
     let per_cluster = limit.clamp(20, 500);

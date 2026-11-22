@@ -43,7 +43,10 @@ pub async fn resolve(
             .is_some_and(|stored| stored.trim() == expected_fingerprint);
 
     if reuse {
-        tracing::info!("reusing self-signed TLS certificate in {}", self_signed_dir.display());
+        tracing::info!(
+            "reusing self-signed TLS certificate in {}",
+            self_signed_dir.display()
+        );
     } else {
         if cert_file.exists() || key_file.exists() {
             tracing::warn!(
@@ -89,8 +92,8 @@ fn san_fingerprint(names: &[String]) -> String {
 }
 
 fn generate_self_signed(names: &[String]) -> anyhow::Result<(Vec<u8>, Vec<u8>)> {
-    let certified =
-        rcgen::generate_simple_self_signed(names.to_vec()).context("generate self-signed certificate")?;
+    let certified = rcgen::generate_simple_self_signed(names.to_vec())
+        .context("generate self-signed certificate")?;
     Ok((
         certified.cert.pem().into_bytes(),
         certified.signing_key.serialize_pem().into_bytes(),

@@ -44,10 +44,7 @@ pub fn resolve_dependency<'a>(dep: &str, apps: &'a [App]) -> Option<&'a App> {
         return None;
     }
     apps.iter().find(|app| {
-        app.id == dep
-            || app.slug == dep
-            || app.canonical_slug == dep
-            || app.backend.name == dep
+        app.id == dep || app.slug == dep || app.canonical_slug == dep || app.backend.name == dep
     })
 }
 
