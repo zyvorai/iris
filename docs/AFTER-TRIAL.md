@@ -1,6 +1,6 @@
 # Licensing
 
-Iris is source-available under the [Zyvor Production License v1.0](../LICENSE). Non-production use is free; production use requires a commercial license from Zyvor AI Labs (sales@zyvor.dev, https://zyvor.dev/buy; a 30-day trial key is available for production evaluation).
+Iris is source-available under the [Zyvor Production Licence v2.0](../LICENSE). A 30-day trial is available on request from sales@zyvor.dev (a paid evaluation Order at no charge); production and any other use needs a paid Order under the Zyvor Production Licence v2.0 (https://zyvor.dev/buy).
 
 Build from
 source or use published container images, then install with Helm as described in

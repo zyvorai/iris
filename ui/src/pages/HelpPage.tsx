@@ -1,5 +1,5 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
-// SPDX-License-Identifier: LicenseRef-Zyvor-Production-1.0
+// SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import { BookOpen, Compass, Globe, Rocket, Search, Sparkles } from 'lucide-react'
 import GlassPanel from '../components/nebula/GlassPanel'

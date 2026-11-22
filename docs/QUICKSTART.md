@@ -34,4 +34,4 @@ helm upgrade iris oci://ghcr.io/zyvorai/charts/iris --reuse-values \
 
 - Enable authentication before exposing Iris on the public internet (`server.auth.mode`).
 - See [docs/development.md](development.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).
-- Iris is licensed under the Zyvor Production License v1.0 — see [LICENSE](../LICENSE).
+- Iris is licensed under the Zyvor Production Licence v2.0 — see [LICENSE](../LICENSE).

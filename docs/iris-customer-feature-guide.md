@@ -264,4 +264,4 @@ _Ship Iris with a Helm chart, monitor it with Prometheus, and run it on a lean s
 > **Good to know:** Feature availability reflects Iris v0.2. Some capabilities are roadmap-only and not yet shipped, including in-cluster mesh policy editing and federated activity export webhooks. Discovery covers Kubernetes Services, Ingress/Gateway API routes, and Istio/Linkerd mesh routes today; discovery of arbitrary custom resources is on the roadmap. The multi-cluster registry is an early single-cluster-first MVP.
 
 ---
-_Iris is developed by ZyvorAI Labs and released under the Zyvor Production License v1.0. Contact **info@zyvor.dev** · [zyvor.dev](https://zyvor.dev)._
+_Iris is developed by ZyvorAI Labs and released under the Zyvor Production Licence v2.0. Contact **info@zyvor.dev** · [zyvor.dev](https://zyvor.dev)._
