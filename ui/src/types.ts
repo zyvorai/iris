@@ -295,3 +295,44 @@ export interface AppDiagnosis {
   chain: DiagnosisChainNode[]
   suggestedActions: SuggestedAction[]
 }
+
+export interface AppImpact {
+  id: string
+  label: string
+  namespace: string
+  ownStatus: string
+  effectiveStatus: string
+  blockedBy: string[]
+  directDependents: number
+  dependents: number
+  inCycle: boolean
+  unresolved: string[]
+}
+
+export interface ImpactReport {
+  apps: AppImpact[]
+  cycles: string[][]
+  summary: { total: number; healthy: number; degradedByDependency: number; inCycle: number; unresolvedRefs: number }
+  truncated: boolean
+}
+
+export interface ConformanceFinding {
+  rule: string
+  severity: 'error' | 'warning' | 'info'
+  message: string
+}
+
+export interface AppConformance {
+  id: string
+  label: string
+  namespace: string
+  owner?: string
+  score: number
+  findings: ConformanceFinding[]
+}
+
+export interface ConformanceReport {
+  required: string[]
+  apps: AppConformance[]
+  summary: { total: number; conforming: number; errors: number; warnings: number; infos: number; score: number }
+}

@@ -12,18 +12,19 @@ use axum::{
 };
 use iris_core::store::Store;
 use iris_core::{
-    ai_status_with_probe, allowed_namespaces_for_groups, build_diagnosis, build_federated_audit,
-    build_federated_catalog, build_graph, build_team_owners, build_workspaces, can_perform_action,
-    federation_cluster, filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
+    ai_status_with_probe, allowed_namespaces_for_groups, analyze_app_impact, analyze_impact,
+    build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
+    build_team_owners, build_workspaces, can_perform_action, check_conformance, federation_cluster,
+    filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
     remote_publish_namespace, remote_rbac_check, remote_set_recommended, resolve_activity_insight,
     resolve_app_insight, resolve_discovery_insight, resolve_federated_insight,
     resolve_fleet_insight, resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
     resolve_search_intent, resolve_search_with_llm, ActivityInsight, AiStatus, App, AppDiagnosis,
-    AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary,
-    CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent, FederatedInsight,
-    FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight, HealthSummary,
-    NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
-    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, ConformancePolicy,
+    ConformanceReport, CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent,
+    FederatedInsight, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
+    HealthSummary, ImpactReport, NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent,
+    ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
 
@@ -62,6 +63,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/cluster/summary", get(cluster_summary))
         .route("/clusters", get(list_clusters_route))
         .route("/graph", get(app_graph))
+        .route("/impact", get(impact_report))
+        .route("/conformance", get(conformance_report))
         .route("/workspaces", get(list_workspaces))
         .route("/owners", get(list_owners))
         .route("/discovery", get(list_discovery))
@@ -591,6 +594,50 @@ async fn app_graph(
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(build_graph(&apps)))
+}
+
+#[derive(Deserialize)]
+struct ImpactQuery {
+    /// Optional app id (`namespace/slug`): return the detail view for one app.
+    app: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct ConformanceQuery {
+    owner: Option<String>,
+    namespace: Option<String>,
+}
+
+async fn impact_report(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<ImpactQuery>,
+) -> Result<Response, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    match q.app {
+        Some(id) => match analyze_app_impact(&apps, &id) {
+            Some(detail) => Ok(Json(detail).into_response()),
+            None => Ok((StatusCode::NOT_FOUND, "app not found").into_response()),
+        },
+        None => Ok(Json::<ImpactReport>(analyze_impact(&apps)).into_response()),
+    }
+}
+
+async fn conformance_report(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<ConformanceQuery>,
+) -> Result<Json<ConformanceReport>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let mut report = check_conformance(&apps, &ConformancePolicy::from_env());
+    let owner = q.owner.filter(|v| !v.is_empty() && v.len() <= 253);
+    let ns = q.namespace.filter(|v| !v.is_empty() && v.len() <= 253);
+    report.filter(owner.as_deref(), ns.as_deref());
+    Ok(Json(report))
 }
 
 async fn list_workspaces(

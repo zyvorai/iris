@@ -46,6 +46,8 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/cluster/summary` | Cluster-level counts by status and visibility |
 | GET | `/api/v1/clusters` | Local + federated cluster registry |
 | GET | `/api/v1/graph` | Dependency graph (`nodes`, `edges`) |
+| GET | `/api/v1/impact` | Dependency impact report: effective health propagated along `dependsOn`, blast radius (`dependents`), cycles, unresolved refs. `?app=namespace/slug` returns one app with `upstream`/`downstream` lists (404 if unknown) |
+| GET | `/api/v1/conformance` | Catalog conformance report (score, findings per app). Optional `?owner=` and `?namespace=`. Required fields come from `IRIS_CONFORMANCE_REQUIRE` (comma list of `owner`, `environment`, `description`; default `owner,environment`) |
 | GET | `/api/v1/workspaces` | Workspace groupings |
 | GET | `/api/v1/owners` | Team/owner groupings |
 | GET | `/api/v1/health/apps` | Fleet health summary (healthy/degraded/broken counts) |

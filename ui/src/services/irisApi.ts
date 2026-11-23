@@ -4,6 +4,8 @@
 import type {
   AppDiagnosis,
   AppGraph,
+  ConformanceReport,
+  ImpactReport,
   AppInsight,
   AiStatus,
   AuditEvent,
@@ -82,6 +84,14 @@ export const irisApi = {
   federationRbacCheck: (clusterId: string) =>
     req<FederationRbacStatus>(`/federation/rbac/${encodeURIComponent(clusterId)}`),
   getGraph: () => req<AppGraph>('/graph'),
+  getImpact: () => req<ImpactReport>('/impact'),
+  getConformance: (params: { owner?: string; namespace?: string } = {}) => {
+    const q = new URLSearchParams()
+    if (params.owner) q.set('owner', params.owner)
+    if (params.namespace) q.set('namespace', params.namespace)
+    const qs = q.toString()
+    return req<ConformanceReport>(`/conformance${qs ? `?${qs}` : ''}`)
+  },
   listWorkspaces: () => req<Workspace[]>('/workspaces'),
   listOwners: () => req<TeamOwner[]>('/owners'),
   getApp: (id: string) => req<IrisApp>(appPath(id)),
