@@ -12,17 +12,17 @@ use axum::{
 };
 use iris_core::store::Store;
 use iris_core::{
-    allowed_namespaces_for_groups, build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
-    build_team_owners, build_workspaces, can_perform_action, federation_cluster, filter_apps_by_workspace,
-    list_clusters_with_federation, remote_publish, remote_publish_namespace, remote_rbac_check,
-    remote_set_recommended, resolve_app_insight, resolve_discovery_insight, resolve_fleet_insight,
-    resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
-    resolve_federated_insight, resolve_activity_insight,
-    resolve_search_intent,
-    resolve_search_with_llm, ai_status_with_probe, App, AppDiagnosis, AppGraph, AppInsight, AiStatus, AuditEvent, CatalogStats,
-    ClusterInfo, ClusterSummary, CreateShareRequest, DiscoveryInsight, FederatedApp,
-    FederatedAuditEvent, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
-    HealthSummary, NamespaceInsight, OwnerInsight, FederatedInsight, ActivityInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
+    ai_status_with_probe, allowed_namespaces_for_groups, build_diagnosis, build_federated_audit,
+    build_federated_catalog, build_graph, build_team_owners, build_workspaces, can_perform_action,
+    federation_cluster, filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
+    remote_publish_namespace, remote_rbac_check, remote_set_recommended, resolve_activity_insight,
+    resolve_app_insight, resolve_discovery_insight, resolve_federated_insight,
+    resolve_fleet_insight, resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
+    resolve_search_intent, resolve_search_with_llm, ActivityInsight, AiStatus, App, AppDiagnosis,
+    AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary,
+    CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent, FederatedInsight,
+    FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight, HealthSummary,
+    NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent, ShareLink,
     ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
 };
 use serde::Deserialize;
@@ -44,7 +44,10 @@ pub fn routes(state: ApiState) -> Router {
         .route("/apps/{*id}", get(get_app_or_diagnosis))
         .route("/catalog", get(list_catalog))
         .route("/catalog/federated", get(list_federated_catalog))
-        .route("/federation/publish/{cluster_id}/{*id}", post(federation_publish))
+        .route(
+            "/federation/publish/{cluster_id}/{*id}",
+            post(federation_publish),
+        )
         .route(
             "/federation/publish-namespace/{cluster_id}/{*namespace}",
             post(federation_publish_namespace),
@@ -63,7 +66,10 @@ pub fn routes(state: ApiState) -> Router {
         .route("/owners", get(list_owners))
         .route("/discovery", get(list_discovery))
         .route("/discovery/publish/{*id}", post(publish_app))
-        .route("/discovery/publish-namespace/{*namespace}", post(publish_namespace))
+        .route(
+            "/discovery/publish-namespace/{*namespace}",
+            post(publish_namespace),
+        )
         .route("/discovery/hide/{*id}", post(hide_app))
         .route("/search", get(search))
         .route("/search/intent", get(search_intent))
@@ -77,7 +83,10 @@ pub fn routes(state: ApiState) -> Router {
         .route("/insights/federated", get(federated_insight))
         .route("/insights/activity", get(activity_insight))
         .route("/favorites", get(list_favorites))
-        .route("/favorites/{*id}", put(add_favorite).delete(remove_favorite))
+        .route(
+            "/favorites/{*id}",
+            put(add_favorite).delete(remove_favorite),
+        )
         .route("/recents", get(list_recents))
         .route("/recents/{*id}", post(record_recent))
         .route("/health/apps", get(health_apps))
@@ -136,12 +145,7 @@ fn filter_apps(st: &ApiState, apps: Vec<App>) -> Vec<App> {
     apps
 }
 
-fn filter_apps_for_user(
-    st: &ApiState,
-    user: &str,
-    groups: &[String],
-    apps: Vec<App>,
-) -> Vec<App> {
+fn filter_apps_for_user(st: &ApiState, user: &str, groups: &[String], apps: Vec<App>) -> Vec<App> {
     let admin = is_admin(st, user, groups);
     let mut apps = filter_apps(st, apps);
     if !admin {
@@ -156,7 +160,12 @@ fn filter_apps_for_user(
     }
 }
 
-fn require_action(st: &ApiState, user: &str, groups: &[String], action: &str) -> Result<(), AppError> {
+fn require_action(
+    st: &ApiState,
+    user: &str,
+    groups: &[String],
+    action: &str,
+) -> Result<(), AppError> {
     if can_perform_action(groups, &st.role_rules, action, is_admin(st, user, groups)) {
         Ok(())
     } else {
@@ -165,11 +174,7 @@ fn require_action(st: &ApiState, user: &str, groups: &[String], action: &str) ->
 }
 
 fn app_allowed(st: &ApiState, app: &App) -> bool {
-    st.allowed_namespaces.is_empty()
-        || st
-            .allowed_namespaces
-            .iter()
-            .any(|ns| ns == &app.namespace)
+    st.allowed_namespaces.is_empty() || st.allowed_namespaces.iter().any(|ns| ns == &app.namespace)
 }
 
 fn is_admin(st: &ApiState, user: &str, groups: &[String]) -> bool {
@@ -177,7 +182,9 @@ fn is_admin(st: &ApiState, user: &str, groups: &[String]) -> bool {
         return true;
     }
     if !st.admin_groups.is_empty() {
-        return groups.iter().any(|g| st.admin_groups.iter().any(|ag| ag == g));
+        return groups
+            .iter()
+            .any(|g| st.admin_groups.iter().any(|ag| ag == g));
     }
     st.admin_users.is_empty() && st.admin_groups.is_empty() && user == st.default_user
 }
@@ -223,10 +230,7 @@ async fn get_app_or_diagnosis(
         let app_id = app_id.trim_end_matches('/');
         return Ok(Json(insight_for_app(&st, app_id).await?).into_response());
     }
-    let app = st
-        .store
-        .get_app(&raw)?
-        .ok_or(AppError::NotFound)?;
+    let app = st.store.get_app(&raw)?.ok_or(AppError::NotFound)?;
     if !app_allowed(&st, &app) {
         return Err(AppError::NotFound);
     }
@@ -234,10 +238,7 @@ async fn get_app_or_diagnosis(
 }
 
 fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppError> {
-    let app = st
-        .store
-        .get_app(app_id)?
-        .ok_or(AppError::NotFound)?;
+    let app = st.store.get_app(app_id)?.ok_or(AppError::NotFound)?;
     if !app_allowed(st, &app) {
         return Err(AppError::NotFound);
     }
@@ -250,10 +251,7 @@ fn diagnosis_for_app(st: &ApiState, app_id: &str) -> Result<AppDiagnosis, AppErr
 }
 
 async fn insight_for_app(st: &ApiState, app_id: &str) -> Result<AppInsight, AppError> {
-    let app = st
-        .store
-        .get_app(app_id)?
-        .ok_or(AppError::NotFound)?;
+    let app = st.store.get_app(app_id)?.ok_or(AppError::NotFound)?;
     if !app_allowed(st, &app) {
         return Err(AppError::NotFound);
     }
@@ -637,7 +635,9 @@ async fn publish_app(
         }
     }
     st.store.publish_app(&id)?;
-    let _ = st.store.record_audit(&uid, "publish", &id, "published from discovery");
+    let _ = st
+        .store
+        .record_audit(&uid, "publish", &id, "published from discovery");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -650,9 +650,7 @@ async fn publish_namespace(
     let groups = user_groups(&headers);
     require_action(&st, &uid, &groups, "publish")?;
     let ns = normalize_id(namespace);
-    if !st.allowed_namespaces.is_empty()
-        && !st.allowed_namespaces.iter().any(|n| n == &ns)
-    {
+    if !st.allowed_namespaces.is_empty() && !st.allowed_namespaces.iter().any(|n| n == &ns) {
         return Err(AppError::NotFound);
     }
     let n = st.store.publish_namespace(&ns)?;
@@ -680,7 +678,9 @@ async fn hide_app(
         }
     }
     st.store.hide_app(&id)?;
-    let _ = st.store.record_audit(&uid, "hide", &id, "hidden from discovery");
+    let _ = st
+        .store
+        .record_audit(&uid, "hide", &id, "hidden from discovery");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -695,12 +695,9 @@ async fn search(
         .into_iter()
         .filter(|h| app_allowed(&st, &h.app))
         .collect();
-    let _ = st.store.record_audit(
-        &uid,
-        "search",
-        "",
-        &format!("q={}", q.q.trim()),
-    );
+    let _ = st
+        .store
+        .record_audit(&uid, "search", "", &format!("q={}", q.q.trim()));
     Ok(Json(filtered))
 }
 
@@ -762,7 +759,9 @@ async fn add_favorite(
         }
     }
     st.store.add_favorite(&uid, &id)?;
-    let _ = st.store.record_audit(&uid, "favorite", &id, "added favorite");
+    let _ = st
+        .store
+        .record_audit(&uid, "favorite", &id, "added favorite");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -774,7 +773,9 @@ async fn remove_favorite(
     let uid = user_id(&headers, &st.default_user);
     let id = normalize_id(id);
     st.store.remove_favorite(&uid, &id)?;
-    let _ = st.store.record_audit(&uid, "unfavorite", &id, "removed favorite");
+    let _ = st
+        .store
+        .record_audit(&uid, "unfavorite", &id, "removed favorite");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -808,7 +809,9 @@ async fn record_recent(
         }
     }
     st.store.record_recent(&uid, &id)?;
-    let _ = st.store.record_audit(&uid, "recent", &id, "opened from dock");
+    let _ = st
+        .store
+        .record_audit(&uid, "recent", &id, "opened from dock");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -831,10 +834,7 @@ async fn health_apps(
             _ => {}
         }
     }
-    let unhealthy: Vec<App> = apps
-        .into_iter()
-        .filter(|a| a.status != "healthy")
-        .collect();
+    let unhealthy: Vec<App> = apps.into_iter().filter(|a| a.status != "healthy").collect();
     Ok(Json(HealthSummary {
         total,
         healthy,
@@ -867,9 +867,7 @@ async fn list_recommended(
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_apps(true)?);
     Ok(Json(
-        apps.into_iter()
-            .filter(|a| a.meta.recommended)
-            .collect(),
+        apps.into_iter().filter(|a| a.meta.recommended).collect(),
     ))
 }
 
@@ -886,10 +884,7 @@ async fn set_recommended(
 ) -> Result<Json<App>, AppError> {
     let uid = user_id(&headers, &st.default_user);
     let id = normalize_id(id);
-    let app = st
-        .store
-        .get_app(&id)?
-        .ok_or(AppError::NotFound)?;
+    let app = st.store.get_app(&id)?.ok_or(AppError::NotFound)?;
     if !app_allowed(&st, &app) {
         return Err(AppError::NotFound);
     }
@@ -904,10 +899,7 @@ async fn set_recommended(
         &id,
         "team pick updated from dock",
     );
-    let mut updated = st
-        .store
-        .get_app(&id)?
-        .ok_or(AppError::NotFound)?;
+    let mut updated = st.store.get_app(&id)?.ok_or(AppError::NotFound)?;
     updated.meta.recommended = body.recommended;
     Ok(Json(updated))
 }
@@ -937,22 +929,16 @@ async fn create_share(
     if body.app_id.trim().is_empty() {
         return Err(AppError::BadRequest);
     }
-    let app = st
-        .store
-        .get_app(&body.app_id)?
-        .ok_or(AppError::NotFound)?;
+    let app = st.store.get_app(&body.app_id)?.ok_or(AppError::NotFound)?;
     if !app_allowed(&st, &app) {
         return Err(AppError::NotFound);
     }
     if !app.visibility.published {
         return Err(AppError::BadRequest);
     }
-    let link = st.store.create_share(
-        &body.app_id,
-        &uid,
-        body.ttl_minutes,
-        &body.label,
-    )?;
+    let link = st
+        .store
+        .create_share(&body.app_id, &uid, body.ttl_minutes, &body.label)?;
     let _ = st.store.record_audit(
         &uid,
         "share_create",
@@ -989,12 +975,9 @@ async fn delete_share(
     if !deleted {
         return Err(AppError::NotFound);
     }
-    let _ = st.store.record_audit(
-        &uid,
-        "share_revoke",
-        "",
-        &format!("token={share_token}"),
-    );
+    let _ = st
+        .store
+        .record_audit(&uid, "share_revoke", "", &format!("token={share_token}"));
     Ok(StatusCode::NO_CONTENT)
 }
 

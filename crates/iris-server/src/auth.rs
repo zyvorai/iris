@@ -39,8 +39,8 @@ pub struct AuthConfig {
 impl AuthConfig {
     pub fn from_env(fallback_user: String) -> Result<Self> {
         const DEV_SECRET: &str = "iris-dev-session-secret-change-me";
-        let session_secret = std::env::var("IRIS_SESSION_SECRET")
-            .unwrap_or_else(|_| DEV_SECRET.into());
+        let session_secret =
+            std::env::var("IRIS_SESSION_SECRET").unwrap_or_else(|_| DEV_SECRET.into());
         if session_secret == DEV_SECRET {
             tracing::warn!(
                 "IRIS_SESSION_SECRET is using the insecure development default. \
@@ -260,7 +260,10 @@ async fn login(State(auth): State<AuthConfig>) -> Result<Response, AppAuthError>
         .as_secs();
     {
         let mut pending = auth.pending_states.lock().unwrap();
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
         pending.retain(|_, exp| *exp > now);
         pending.insert(state.clone(), expiry);
     }
@@ -301,12 +304,13 @@ async fn callback(
     let code = q
         .code
         .ok_or(AppAuthError::BadRequest("missing authorization code"))?;
-    let state = q
-        .state
-        .ok_or(AppAuthError::BadRequest("missing state"))?;
+    let state = q.state.ok_or(AppAuthError::BadRequest("missing state"))?;
     {
         let mut pending = auth.pending_states.lock().unwrap();
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
         match pending.remove(&state) {
             None => return Err(AppAuthError::BadRequest("invalid or unknown state")),
             Some(exp) if exp < now => return Err(AppAuthError::BadRequest("state token expired")),
@@ -342,9 +346,10 @@ async fn callback(
         .unwrap_or_else(|| "/".into());
 
     let mut response = Redirect::temporary(&return_to).into_response();
-    response
-        .headers_mut()
-        .append(header::SET_COOKIE, HeaderValue::from_str(&cookie.to_string()).unwrap());
+    response.headers_mut().append(
+        header::SET_COOKIE,
+        HeaderValue::from_str(&cookie.to_string()).unwrap(),
+    );
     Ok(response)
 }
 
@@ -357,9 +362,10 @@ async fn logout(State(_auth): State<AuthConfig>) -> Response {
         .max_age(time::Duration::seconds(0))
         .build();
     let mut response = (StatusCode::NO_CONTENT).into_response();
-    response
-        .headers_mut()
-        .append(header::SET_COOKIE, HeaderValue::from_str(&cleared.to_string()).unwrap());
+    response.headers_mut().append(
+        header::SET_COOKIE,
+        HeaderValue::from_str(&cleared.to_string()).unwrap(),
+    );
     response
 }
 
@@ -381,8 +387,7 @@ async fn me(State(auth): State<AuthConfig>, headers: HeaderMap) -> Json<AuthMe> 
         .get("x-iris-groups")
         .and_then(|v| v.to_str().ok())
         .map(|raw| {
-            raw
-                .split(',')
+            raw.split(',')
                 .map(str::trim)
                 .filter(|s| !s.is_empty())
                 .map(str::to_string)
@@ -413,7 +418,11 @@ async fn me(State(auth): State<AuthConfig>, headers: HeaderMap) -> Json<AuthMe> 
         mode: auth.mode.clone(),
         groups: groups.clone(),
         allowed_workspaces: iris_core::workspace_acl::allowed_workspaces(&groups, &rules),
-        allowed_actions: iris_core::rbac::allowed_actions_for_groups(&groups, &role_rules, is_admin),
+        allowed_actions: iris_core::rbac::allowed_actions_for_groups(
+            &groups,
+            &role_rules,
+            is_admin,
+        ),
     })
 }
 
@@ -483,7 +492,9 @@ async fn exchange_code(
     code: &str,
 ) -> Result<TokenResponse> {
     if auth.oidc_client_id.is_empty() || auth.oidc_redirect_url.is_empty() {
-        return Err(anyhow!("IRIS_OIDC_CLIENT_ID and IRIS_OIDC_REDIRECT_URL are required"));
+        return Err(anyhow!(
+            "IRIS_OIDC_CLIENT_ID and IRIS_OIDC_REDIRECT_URL are required"
+        ));
     }
     let mut form = vec![
         ("grant_type", "authorization_code"),

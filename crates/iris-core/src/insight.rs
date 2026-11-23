@@ -4,7 +4,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::llm::{llm_chat_json, llm_config_from_env, LlmConfig};
-use crate::{App, AppDiagnosis, AppGraph, AuditEvent, ClusterSummary, FederatedApp, SuggestedAction};
+use crate::{
+    App, AppDiagnosis, AppGraph, AuditEvent, ClusterSummary, FederatedApp, SuggestedAction,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -142,7 +144,10 @@ pub fn rule_app_insight(app: &App, diagnosis: &AppDiagnosis) -> AppInsight {
     }
 
     let summary = if app.status == "healthy" {
-        format!("{} is healthy with {} ready endpoint(s).", app.display_name, app.ready_endpoints)
+        format!(
+            "{} is healthy with {} ready endpoint(s).",
+            app.display_name, app.ready_endpoints
+        )
     } else {
         format!(
             "{} is {} — {} ready endpoint(s).",
@@ -173,7 +178,11 @@ pub fn rule_app_insight(app: &App, diagnosis: &AppDiagnosis) -> AppInsight {
     }
 }
 
-async fn llm_app_insight(app: &App, diagnosis: &AppDiagnosis, cfg: &LlmConfig) -> Option<AppInsight> {
+async fn llm_app_insight(
+    app: &App,
+    diagnosis: &AppDiagnosis,
+    cfg: &LlmConfig,
+) -> Option<AppInsight> {
     let chain: Vec<_> = diagnosis
         .chain
         .iter()
@@ -202,7 +211,10 @@ async fn llm_app_insight(app: &App, diagnosis: &AppDiagnosis, cfg: &LlmConfig) -
         "chain": chain,
     });
     let system = "You are Zyra AI for Iris Kubernetes app platform. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences for operators\",\"remediation\":[\"actionable step\"]}. Be concise and practical. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Diagnose this service:\n{}", serde_json::to_string_pretty(&context).ok()?);
+    let user = format!(
+        "Diagnose this service:\n{}",
+        serde_json::to_string_pretty(&context).ok()?
+    );
     let llm: LlmAppInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() && llm.explanation.trim().is_empty() {
         return None;
@@ -232,10 +244,14 @@ pub fn rule_fleet_insight(apps: &[App], summary: &ClusterSummary) -> FleetInsigh
     let degraded = unhealthy.iter().filter(|a| a.status == "degraded").count();
     let mut highlights = Vec::new();
     if broken > 0 {
-        highlights.push(format!("{broken} broken service(s) need immediate attention"));
+        highlights.push(format!(
+            "{broken} broken service(s) need immediate attention"
+        ));
     }
     if degraded > 0 {
-        highlights.push(format!("{degraded} degraded service(s) have partial failures"));
+        highlights.push(format!(
+            "{degraded} degraded service(s) have partial failures"
+        ));
     }
     let mut ns_counts = std::collections::BTreeMap::<String, usize>::new();
     for app in &unhealthy {
@@ -249,20 +265,17 @@ pub fn rule_fleet_insight(apps: &[App], summary: &ClusterSummary) -> FleetInsigh
     let timeout_count = unhealthy
         .iter()
         .filter(|a| {
-            a.status_message
-                .to_lowercase()
-                .contains("timeout") || a.status_message.to_lowercase().contains("deadline")
+            a.status_message.to_lowercase().contains("timeout")
+                || a.status_message.to_lowercase().contains("deadline")
         })
         .count();
     if timeout_count > 0 {
-        highlights.push(format!("{timeout_count} failures look probe-timeout related"));
+        highlights.push(format!(
+            "{timeout_count} failures look probe-timeout related"
+        ));
     }
 
-    let focus_app_ids: Vec<String> = unhealthy
-        .iter()
-        .take(5)
-        .map(|a| a.id.clone())
-        .collect();
+    let focus_app_ids: Vec<String> = unhealthy.iter().take(5).map(|a| a.id.clone()).collect();
 
     let summary_line = if unhealthy.is_empty() {
         format!(
@@ -297,7 +310,11 @@ pub fn rule_fleet_insight(apps: &[App], summary: &ClusterSummary) -> FleetInsigh
     }
 }
 
-async fn llm_fleet_insight(apps: &[App], summary: &ClusterSummary, cfg: &LlmConfig) -> Option<FleetInsight> {
+async fn llm_fleet_insight(
+    apps: &[App],
+    summary: &ClusterSummary,
+    cfg: &LlmConfig,
+) -> Option<FleetInsight> {
     let unhealthy: Vec<_> = apps
         .iter()
         .filter(|a| a.status != "healthy")
@@ -318,7 +335,10 @@ async fn llm_fleet_insight(apps: &[App], summary: &ClusterSummary, cfg: &LlmConf
         "unhealthySample": unhealthy,
     });
     let system = "You are Zyra AI fleet analyst for Iris. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken services and shared namespaces. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Summarize fleet health:\n{}", serde_json::to_string_pretty(&context).ok()?);
+    let user = format!(
+        "Summarize fleet health:\n{}",
+        serde_json::to_string_pretty(&context).ok()?
+    );
     let llm: LlmFleetInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() {
         return None;
@@ -350,7 +370,11 @@ fn publish_priority(app: &App) -> i32 {
     }
     score += app.ready_endpoints.min(10) * 5;
     let cat = app.category.to_lowercase();
-    if cat.contains("monitor") || cat.contains("observ") || cat.contains("grafana") || cat.contains("prometheus") {
+    if cat.contains("monitor")
+        || cat.contains("observ")
+        || cat.contains("grafana")
+        || cat.contains("prometheus")
+    {
         score += 25;
     }
     if !app.meta.depends_on.is_empty() {
@@ -363,7 +387,9 @@ pub fn rule_discovery_insight(discovery: &[App]) -> DiscoveryInsight {
     if discovery.is_empty() {
         return DiscoveryInsight {
             summary: "Discovery queue is empty.".into(),
-            explanation: "All discovered services are published. Use Cluster to review the full inventory.".into(),
+            explanation:
+                "All discovered services are published. Use Cluster to review the full inventory."
+                    .into(),
             source: "rules".into(),
             highlights: vec![],
             suggest_publish_ids: vec![],
@@ -381,10 +407,14 @@ pub fn rule_discovery_insight(discovery: &[App]) -> DiscoveryInsight {
     let broken = discovery.iter().filter(|a| a.status == "broken").count();
     let mut highlights = Vec::new();
     if healthy > 0 {
-        highlights.push(format!("{healthy} unpublished service(s) are healthy and safe to publish"));
+        highlights.push(format!(
+            "{healthy} unpublished service(s) are healthy and safe to publish"
+        ));
     }
     if broken > 0 {
-        highlights.push(format!("{broken} unpublished service(s) are broken — fix probes before publishing"));
+        highlights.push(format!(
+            "{broken} unpublished service(s) are broken — fix probes before publishing"
+        ));
     }
     let mut ns_counts = std::collections::BTreeMap::<String, usize>::new();
     for app in discovery {
@@ -440,7 +470,10 @@ async fn llm_discovery_insight(discovery: &[App], cfg: &LlmConfig) -> Option<Dis
         })
         .collect();
     let system = "You are Zyra AI for Iris discovery queue. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"suggestPublishIds\":[\"app-id\"]}. Prefer healthy observability and platform services. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Rank unpublished services to publish:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    let user = format!(
+        "Rank unpublished services to publish:\n{}",
+        serde_json::to_string_pretty(&sample).ok()?
+    );
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct LlmDiscoveryInsight {
@@ -498,17 +531,20 @@ pub fn rule_namespace_insight(namespace: &str, apps: &[App]) -> NamespaceInsight
         highlights.push(format!("{degraded} degraded service(s) in {namespace}"));
     }
     if published < in_ns.len() {
-        highlights.push(format!("{} of {} services unpublished", in_ns.len() - published, in_ns.len()));
+        highlights.push(format!(
+            "{} of {} services unpublished",
+            in_ns.len() - published,
+            in_ns.len()
+        ));
     }
 
-    let focus_app_ids: Vec<String> = unhealthy
-        .iter()
-        .take(5)
-        .map(|a| a.id.clone())
-        .collect();
+    let focus_app_ids: Vec<String> = unhealthy.iter().take(5).map(|a| a.id.clone()).collect();
 
     let summary = if unhealthy.is_empty() {
-        format!("Namespace {namespace} is healthy — {} service(s), {published} published.", in_ns.len())
+        format!(
+            "Namespace {namespace} is healthy — {} service(s), {published} published.",
+            in_ns.len()
+        )
     } else {
         format!(
             "Namespace {namespace}: {} of {} services need attention ({} broken, {} degraded).",
@@ -537,7 +573,11 @@ pub fn rule_namespace_insight(namespace: &str, apps: &[App]) -> NamespaceInsight
     }
 }
 
-async fn llm_namespace_insight(namespace: &str, apps: &[App], cfg: &LlmConfig) -> Option<NamespaceInsight> {
+async fn llm_namespace_insight(
+    namespace: &str,
+    apps: &[App],
+    cfg: &LlmConfig,
+) -> Option<NamespaceInsight> {
     let in_ns: Vec<_> = apps
         .iter()
         .filter(|a| a.namespace == namespace)
@@ -596,12 +636,17 @@ pub async fn resolve_namespace_insight(namespace: &str, apps: &[App]) -> Namespa
 
 pub fn rule_graph_insight(graph: &AppGraph) -> GraphInsight {
     let unresolved: Vec<_> = graph.edges.iter().filter(|e| !e.resolved).collect();
-    let node_status: std::collections::HashMap<&str, &str> =
-        graph.nodes.iter().map(|n| (n.id.as_str(), n.status.as_str())).collect();
+    let node_status: std::collections::HashMap<&str, &str> = graph
+        .nodes
+        .iter()
+        .map(|n| (n.id.as_str(), n.status.as_str()))
+        .collect();
 
     let mut focus = Vec::new();
     for edge in &unresolved {
-        if node_status.get(edge.to.as_str()) == Some(&"broken") || node_status.get(edge.to.as_str()) == Some(&"degraded") {
+        if node_status.get(edge.to.as_str()) == Some(&"broken")
+            || node_status.get(edge.to.as_str()) == Some(&"degraded")
+        {
             focus.push(edge.to.clone());
         }
         if node_status.get(edge.from.as_str()) == Some(&"broken") {
@@ -614,7 +659,10 @@ pub fn rule_graph_insight(graph: &AppGraph) -> GraphInsight {
 
     let mut highlights = Vec::new();
     if !unresolved.is_empty() {
-        highlights.push(format!("{} unresolved dependency link(s)", unresolved.len()));
+        highlights.push(format!(
+            "{} unresolved dependency link(s)",
+            unresolved.len()
+        ));
     }
     let broken_targets = unresolved
         .iter()
@@ -623,7 +671,11 @@ pub fn rule_graph_insight(graph: &AppGraph) -> GraphInsight {
     if broken_targets > 0 {
         highlights.push(format!("{broken_targets} broken downstream consumer(s)"));
     }
-    let mesh_nodes = graph.nodes.iter().filter(|n| !n.mesh_routes.is_empty()).count();
+    let mesh_nodes = graph
+        .nodes
+        .iter()
+        .filter(|n| !n.mesh_routes.is_empty())
+        .count();
     if mesh_nodes > 0 {
         highlights.push(format!("{mesh_nodes} service(s) expose mesh routes"));
     }
@@ -674,7 +726,10 @@ async fn llm_graph_insight(graph: &AppGraph, cfg: &LlmConfig) -> Option<GraphIns
         .collect();
     let context = serde_json::json!({ "unresolvedEdges": unresolved, "unhealthyNodes": broken });
     let system = "You are Zyra AI topology analyst for Iris. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize broken downstream dependencies. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Analyze dependency graph:\n{}", serde_json::to_string_pretty(&context).ok()?);
+    let user = format!(
+        "Analyze dependency graph:\n{}",
+        serde_json::to_string_pretty(&context).ok()?
+    );
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct LlmGraphInsight {
@@ -789,7 +844,10 @@ async fn llm_owner_insight(owner: &str, apps: &[App], cfg: &LlmConfig) -> Option
         return None;
     }
     let system = "You are Zyra AI team analyst for Iris. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-3 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Summarize owner team {owner}:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    let user = format!(
+        "Summarize owner team {owner}:\n{}",
+        serde_json::to_string_pretty(&sample).ok()?
+    );
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct LlmOwnerInsight {
@@ -827,9 +885,13 @@ pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
     if entries.is_empty() {
         return FederatedInsight {
             summary: "No federated apps in catalog.".into(),
-            explanation: "Configure IRIS_FEDERATED_CLUSTERS to merge remote cluster catalogs into Iris.".into(),
+            explanation:
+                "Configure IRIS_FEDERATED_CLUSTERS to merge remote cluster catalogs into Iris."
+                    .into(),
             source: "rules".into(),
-            highlights: vec!["Add peer cluster URLs in Helm values or IRIS_FEDERATED_CLUSTERS".into()],
+            highlights: vec![
+                "Add peer cluster URLs in Helm values or IRIS_FEDERATED_CLUSTERS".into(),
+            ],
             focus_app_ids: vec![],
         };
     }
@@ -838,8 +900,14 @@ pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
     for entry in entries {
         cluster_ids.insert(entry.cluster_id.as_str());
     }
-    let unhealthy: Vec<_> = entries.iter().filter(|e| e.app.status != "healthy").collect();
-    let broken = unhealthy.iter().filter(|e| e.app.status == "broken").count();
+    let unhealthy: Vec<_> = entries
+        .iter()
+        .filter(|e| e.app.status != "healthy")
+        .collect();
+    let broken = unhealthy
+        .iter()
+        .filter(|e| e.app.status == "broken")
+        .count();
 
     let summary = if unhealthy.is_empty() {
         format!(
@@ -857,25 +925,30 @@ pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
     };
 
     let explanation = if unhealthy.is_empty() {
-        "Remote catalogs merged successfully. Use write federation to publish across peer clusters.".into()
+        "Remote catalogs merged successfully. Use write federation to publish across peer clusters."
+            .into()
     } else {
         "Inspect unhealthy remote services on their origin cluster before cross-cluster publish or dependency changes.".into()
     };
 
     let mut highlights: Vec<String> = unhealthy
         .iter()
-        .map(|e| format!("{} ({}) · {} ({})", e.app.display_name, e.app.namespace, e.cluster_name, e.app.status))
+        .map(|e| {
+            format!(
+                "{} ({}) · {} ({})",
+                e.app.display_name, e.app.namespace, e.cluster_name, e.app.status
+            )
+        })
         .take(4)
         .collect();
     if highlights.is_empty() {
-        highlights.push(format!("{} read-only peer cluster(s) synced", cluster_ids.len()));
+        highlights.push(format!(
+            "{} read-only peer cluster(s) synced",
+            cluster_ids.len()
+        ));
     }
 
-    let focus_app_ids: Vec<String> = unhealthy
-        .iter()
-        .map(|e| e.app.id.clone())
-        .take(6)
-        .collect();
+    let focus_app_ids: Vec<String> = unhealthy.iter().map(|e| e.app.id.clone()).take(6).collect();
 
     FederatedInsight {
         summary,
@@ -886,7 +959,10 @@ pub fn rule_federated_insight(entries: &[FederatedApp]) -> FederatedInsight {
     }
 }
 
-async fn llm_federated_insight(entries: &[FederatedApp], cfg: &LlmConfig) -> Option<FederatedInsight> {
+async fn llm_federated_insight(
+    entries: &[FederatedApp],
+    cfg: &LlmConfig,
+) -> Option<FederatedInsight> {
     let sample: Vec<_> = entries
         .iter()
         .take(40)
@@ -902,7 +978,10 @@ async fn llm_federated_insight(entries: &[FederatedApp], cfg: &LlmConfig) -> Opt
         })
         .collect();
     let system = "You are Zyra AI federation analyst for Iris. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"],\"focusAppIds\":[\"app-id\"]}. Prioritize unhealthy remote services. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Federated catalog:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    let user = format!(
+        "Federated catalog:\n{}",
+        serde_json::to_string_pretty(&sample).ok()?
+    );
     let llm: LlmFleetInsight = llm_chat_json(cfg, system, &user).await?;
     if llm.summary.trim().is_empty() {
         return None;
@@ -940,11 +1019,9 @@ pub fn rule_activity_insight(events: &[AuditEvent]) -> ActivityInsight {
         *action_counts.entry(event.action.as_str()).or_default() += 1;
     }
 
-    let launches = *action_counts.get("launch").unwrap_or(&0) + *action_counts.get("recent").unwrap_or(&0);
-    let discovery = action_counts
-        .get("publish")
-        .copied()
-        .unwrap_or(0)
+    let launches =
+        *action_counts.get("launch").unwrap_or(&0) + *action_counts.get("recent").unwrap_or(&0);
+    let discovery = action_counts.get("publish").copied().unwrap_or(0)
         + action_counts.get("publish_namespace").copied().unwrap_or(0);
     let searches = *action_counts.get("search").unwrap_or(&0);
 
@@ -1010,7 +1087,10 @@ async fn llm_activity_insight(events: &[AuditEvent], cfg: &LlmConfig) -> Option<
         })
         .collect();
     let system = "You are Zyra AI platform activity analyst for Iris. Return JSON only: {\"summary\":\"one line\",\"explanation\":\"2-4 sentences\",\"highlights\":[\"bullet\"]}. Surface operator patterns and anomalies. Never invent specific error text, certificate details, hostnames, or other technical specifics that are not present in the provided data.";
-    let user = format!("Recent audit events:\n{}", serde_json::to_string_pretty(&sample).ok()?);
+    let user = format!(
+        "Recent audit events:\n{}",
+        serde_json::to_string_pretty(&sample).ok()?
+    );
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct LlmActivityInsight {
@@ -1071,7 +1151,10 @@ mod tests {
                 scheme: "http".into(),
                 path: "/".into(),
             },
-            visibility: Visibility { published: true, ..Default::default() },
+            visibility: Visibility {
+                published: true,
+                ..Default::default()
+            },
             meta: crate::AppMeta {
                 owner: owner.into(),
                 ..Default::default()

@@ -3,6 +3,7 @@
 
 use std::sync::{Arc, OnceLock};
 
+use axum::body::Bytes;
 use axum::{
     body::Body,
     extract::{FromRequestParts, Path, State, WebSocketUpgrade},
@@ -11,7 +12,6 @@ use axum::{
     routing::any,
     Router,
 };
-use axum::body::Bytes;
 use futures_util::{SinkExt, StreamExt};
 use iris_core::store::Store;
 
@@ -64,7 +64,12 @@ async fn share_proxy_path(
     share_proxy(st, token, rest, req).await
 }
 
-async fn share_proxy(st: GatewayState, token: String, rest: String, req: Request<Body>) -> Response {
+async fn share_proxy(
+    st: GatewayState,
+    token: String,
+    rest: String,
+    req: Request<Body>,
+) -> Response {
     let link = match st.store.get_share(&token) {
         Ok(Some(link)) => link,
         Ok(None) => {
@@ -97,12 +102,9 @@ async fn share_proxy(st: GatewayState, token: String, rest: String, req: Request
         .map(str::to_string)
         .unwrap_or_else(|| st.default_user.clone());
 
-    let _ = st.store.record_audit(
-        &user,
-        "share_access",
-        &app.id,
-        &format!("token={token}"),
-    );
+    let _ = st
+        .store
+        .record_audit(&user, "share_access", &app.id, &format!("token={token}"));
 
     proxy_app(st, app, rest, req).await
 }
@@ -167,7 +169,12 @@ async fn proxy_path(
     }
 }
 
-async fn proxy_app(st: GatewayState, app: iris_core::App, rest: String, req: Request<Body>) -> Response {
+async fn proxy_app(
+    st: GatewayState,
+    app: iris_core::App,
+    rest: String,
+    req: Request<Body>,
+) -> Response {
     if !app.visibility.published {
         return (StatusCode::FORBIDDEN, "app not published").into_response();
     }
@@ -184,7 +191,10 @@ async fn proxy_app(st: GatewayState, app: iris_core::App, rest: String, req: Req
     if app.rewrite.add_prefix.is_empty() && req.method() == axum::http::Method::GET {
         if let Some(q) = req.uri().query() {
             if (rest == "login" || rest.ends_with("/login"))
-                && (q == "next=%2F" || q == "next=/" || q.starts_with("next=%2F&") || q.starts_with("next=/&"))
+                && (q == "next=%2F"
+                    || q == "next=/"
+                    || q.starts_with("next=%2F&")
+                    || q.starts_with("next=/&"))
             {
                 let mount = route_mount(&app);
                 let next = percent_encode_path(&format!("{mount}/"));
@@ -207,12 +217,9 @@ async fn proxy_app(st: GatewayState, app: iris_core::App, rest: String, req: Req
         .map(str::to_string)
         .unwrap_or_else(|| st.default_user.clone());
 
-    let _ = st.store.record_audit(
-        &user,
-        "launch",
-        &app.id,
-        &app.route_path,
-    );
+    let _ = st
+        .store
+        .record_audit(&user, "launch", &app.id, &app.route_path);
 
     if is_websocket_upgrade(req.headers()) {
         let query = req.uri().query().map(str::to_string);
@@ -360,11 +367,7 @@ async fn http_proxy(app: iris_core::App, rest: String, req: Request<Body>) -> Re
     let backend_path = build_backend_path(&app, &rest);
     let mut target = format!(
         "{}://{}.{}.svc.cluster.local:{}{}",
-        app.backend.scheme,
-        app.backend.name,
-        app.namespace,
-        app.backend.port,
-        backend_path
+        app.backend.scheme, app.backend.name, app.namespace, app.backend.port, backend_path
     );
     if let Some(q) = query.as_deref().filter(|q| !q.is_empty()) {
         target.push('?');
@@ -382,7 +385,9 @@ async fn http_proxy(app: iris_core::App, rest: String, req: Request<Body>) -> Re
         Err(_) => return (StatusCode::BAD_REQUEST, "body read error").into_response(),
     };
 
-    let mut rb = client.request(method, &target).headers(to_reqwest_headers(&headers));
+    let mut rb = client
+        .request(method, &target)
+        .headers(to_reqwest_headers(&headers));
     if !body_bytes.is_empty() {
         rb = rb.body(body_bytes.to_vec());
     }
@@ -416,9 +421,9 @@ async fn http_proxy(app: iris_core::App, rest: String, req: Request<Body>) -> Re
                     .map(|v| v.contains("text/event-stream"))
                     .unwrap_or(false)
             {
-                let stream = resp.bytes_stream().map(|chunk| {
-                    chunk.map_err(std::io::Error::other)
-                });
+                let stream = resp
+                    .bytes_stream()
+                    .map(|chunk| chunk.map_err(std::io::Error::other));
                 let body = Body::from_stream(stream);
                 return (status, out_headers, body).into_response();
             }
@@ -469,11 +474,7 @@ fn resolve_app_from_referer(st: &GatewayState, referer: &str) -> Option<iris_cor
     } else if parts.len() >= 3 && parts[0] == "a" {
         (parts[1], parts[2])
     } else if parts.len() >= 3 && parts[0] == "launchpad" && parts[1] == "apps" {
-        return st
-            .store
-            .get_app_by_canonical_slug(parts[2])
-            .ok()
-            .flatten();
+        return st.store.get_app_by_canonical_slug(parts[2]).ok().flatten();
     } else {
         return None;
     };
@@ -568,7 +569,10 @@ fn rewrite_forward_query(app: &iris_core::App, query: Option<&str>) -> Option<St
         let mount = route_mount(app);
         if let Some(q) = query {
             if q == "next=%2F" || q == "next=/" {
-                return Some(format!("next={}", percent_encode_path(&format!("{mount}/"))));
+                return Some(format!(
+                    "next={}",
+                    percent_encode_path(&format!("{mount}/"))
+                ));
             }
             if let Some(rest) = q.strip_prefix("next=%2F&") {
                 return Some(format!(
@@ -601,7 +605,10 @@ fn percent_encode_path(s: &str) -> String {
 /// Rewrite root-absolute refs (`/_next/…`, `/api/…`) so they stay under `mount`.
 pub fn rewrite_root_absolute_refs(mount: &str, input: &str) -> String {
     let mut out = input.to_string();
-    out = out.replace("\"assetPrefix\":\"\"", &format!("\"assetPrefix\":\"{mount}\""));
+    out = out.replace(
+        "\"assetPrefix\":\"\"",
+        &format!("\"assetPrefix\":\"{mount}\""),
+    );
     out = out.replace("'assetPrefix':''", &format!("'assetPrefix':'{mount}'"));
     // Next.js RSC / flight payloads escape quotes inside the pushed JSON string.
     out = out.replace(
@@ -609,7 +616,10 @@ pub fn rewrite_root_absolute_refs(mount: &str, input: &str) -> String {
         &format!("\\\"assetPrefix\\\":\\\"{mount}\\\""),
     );
     // RSC flight payloads also carry post-login `next` as root `/`.
-    out = out.replace("\\\"next\\\":\\\"/\\\"", &format!("\\\"next\\\":\\\"{mount}/\\\""));
+    out = out.replace(
+        "\\\"next\\\":\\\"/\\\"",
+        &format!("\\\"next\\\":\\\"{mount}/\\\""),
+    );
     for root in ["/_next/", "/assets/"] {
         out = prefix_unmounted_root(&out, mount, root);
     }
@@ -625,7 +635,10 @@ fn rewrite_root_app_paths(input: &str, mount: &str) -> String {
     out = rewrite_quoted_root_paths(&out, mount, "href='");
     out = rewrite_quoted_root_paths(&out, mount, "\\\"href\\\":\\\"");
     out = out.replace("\"next\":\"/\"", &format!("\"next\":\"{mount}/\""));
-    out = out.replace("\\\"next\\\":\\\"/\\\"", &format!("\\\"next\\\":\\\"{mount}/\\\""));
+    out = out.replace(
+        "\\\"next\\\":\\\"/\\\"",
+        &format!("\\\"next\\\":\\\"{mount}/\\\""),
+    );
     out
 }
 
@@ -662,7 +675,12 @@ fn prefix_unmounted_root_except(input: &str, mount: &str, root: &str, except: &[
         let at_boundary = before
             .chars()
             .last()
-            .map(|c| matches!(c, '"' | '\'' | '`' | '=' | '(' | '[' | ',' | ' ' | '\n' | '\r' | '\t' | ':'))
+            .map(|c| {
+                matches!(
+                    c,
+                    '"' | '\'' | '`' | '=' | '(' | '[' | ',' | ' ' | '\n' | '\r' | '\t' | ':'
+                )
+            })
             .unwrap_or(true);
         let skip = !at_boundary
             || before.ends_with(mount)
@@ -695,17 +713,26 @@ async fn tunnel_websocket(
         if !forward.host.is_empty() {
             let _ = headers.insert(
                 "x-forwarded-host",
-                forward.host.parse().unwrap_or_else(|_| "unknown".parse().unwrap()),
+                forward
+                    .host
+                    .parse()
+                    .unwrap_or_else(|_| "unknown".parse().unwrap()),
             );
         }
         let _ = headers.insert(
             "x-forwarded-proto",
-            forward.proto.parse().unwrap_or_else(|_| "https".parse().unwrap()),
+            forward
+                .proto
+                .parse()
+                .unwrap_or_else(|_| "https".parse().unwrap()),
         );
         if !forward.prefix.is_empty() {
             let _ = headers.insert(
                 "x-forwarded-prefix",
-                forward.prefix.parse().unwrap_or_else(|_| "/".parse().unwrap()),
+                forward
+                    .prefix
+                    .parse()
+                    .unwrap_or_else(|_| "/".parse().unwrap()),
             );
         }
         if let Some(cookie) = &forward.cookie {
@@ -737,7 +764,9 @@ async fn tunnel_websocket(
             match msg {
                 Ok(axum::extract::ws::Message::Text(t)) => {
                     upstream_sink
-                        .send(tokio_tungstenite::tungstenite::Message::Text(t.to_string().into()))
+                        .send(tokio_tungstenite::tungstenite::Message::Text(
+                            t.to_string().into(),
+                        ))
                         .await?;
                 }
                 Ok(axum::extract::ws::Message::Binary(b)) => {
@@ -1223,7 +1252,9 @@ mod tests {
             strip_prefix: "/launchpad/a/iris-demo/grafana".into(),
             add_prefix: String::new(),
         });
-        let raw = Bytes::from_static(br#"<!DOCTYPE html><html><head><title>t</title></head><body>hi</body></html>"#);
+        let raw = Bytes::from_static(
+            br#"<!DOCTYPE html><html><head><title>t</title></head><body>hi</body></html>"#,
+        );
         let out = rewrite_mode_a_body(&app, Some("text/html; charset=utf-8"), raw);
         let s = std::str::from_utf8(&out).unwrap();
         assert!(s.contains("data-iris-mount-shim"));

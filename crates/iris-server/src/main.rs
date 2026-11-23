@@ -60,7 +60,8 @@ async fn main() -> anyhow::Result<()> {
     let tls_san_hosts = auth::split_csv(&env::var("IRIS_TLS_SAN_HOSTS").unwrap_or_default());
     let ui_dir = env::var("IRIS_UI_DIR").unwrap_or_else(|_| "./ui/dist".into());
     let default_user = env::var("IRIS_DEFAULT_USER").unwrap_or_else(|_| "local".into());
-    let allowed_namespaces = auth::split_csv(&env::var("IRIS_ALLOWED_NAMESPACES").unwrap_or_default());
+    let allowed_namespaces =
+        auth::split_csv(&env::var("IRIS_ALLOWED_NAMESPACES").unwrap_or_default());
     let admin_users = auth::split_csv(&env::var("IRIS_ADMIN_USERS").unwrap_or_default());
     let admin_groups = auth::split_csv(&env::var("IRIS_ADMIN_GROUPS").unwrap_or_default());
     let workspace_rules = iris_core::workspace_acl::workspace_rules_from_env();
@@ -101,10 +102,14 @@ async fn main() -> anyhow::Result<()> {
     let index = ui_path.join("index.html");
     let spa = ServeDir::new(&ui_path).not_found_service(ServeFile::new(index));
 
-    let protected = Router::new()
-        .nest("/api/v1", api)
-        .merge(gateway)
-        .layer(middleware::from_fn_with_state(auth_cfg.clone(), auth::require_auth));
+    let protected =
+        Router::new()
+            .nest("/api/v1", api)
+            .merge(gateway)
+            .layer(middleware::from_fn_with_state(
+                auth_cfg.clone(),
+                auth::require_auth,
+            ));
 
     let app = Router::new()
         .route("/healthz", get(|| async { StatusCode::OK }))
@@ -128,7 +133,10 @@ async fn main() -> anyhow::Result<()> {
         shutdown_handle.graceful_shutdown(Some(Duration::from_secs(20)));
     });
 
-    tracing::info!("iris-server listening on https://{addr} (auth={})", auth_cfg.mode);
+    tracing::info!(
+        "iris-server listening on https://{addr} (auth={})",
+        auth_cfg.mode
+    );
     axum_server::bind_rustls(addr, tls_config)
         .handle(handle)
         .serve(app.into_make_service())
@@ -171,11 +179,38 @@ fn is_iris_dock_path(path: &str) -> bool {
         return true;
     }
     // Exact segments / prefixes for Iris Dock — avoid bare "/s" matching "/simulate".
-    const EXACT: &[&str] = &["/apps", "/health", "/cluster", "/graph", "/federated", "/teams", "/spaces", "/discovery", "/activity", "/mission-control", "/settings", "/help", "/healthz", "/metrics"];
-    if EXACT.iter().any(|p| path == *p || path.starts_with(&format!("{p}/"))) {
+    const EXACT: &[&str] = &[
+        "/apps",
+        "/health",
+        "/cluster",
+        "/graph",
+        "/federated",
+        "/teams",
+        "/spaces",
+        "/discovery",
+        "/activity",
+        "/mission-control",
+        "/settings",
+        "/help",
+        "/healthz",
+        "/metrics",
+    ];
+    if EXACT
+        .iter()
+        .any(|p| path == *p || path.starts_with(&format!("{p}/")))
+    {
         return true;
     }
-    const PREFIXES: &[&str] = &["/api/", "/auth/", "/launchpad/", "/a/", "/s/", "/fonts/", "/assets/", "/_next/"];
+    const PREFIXES: &[&str] = &[
+        "/api/",
+        "/auth/",
+        "/launchpad/",
+        "/a/",
+        "/s/",
+        "/fonts/",
+        "/assets/",
+        "/_next/",
+    ];
     PREFIXES.iter().any(|p| path.starts_with(p))
         || path == "/api"
         || path == "/auth"
@@ -189,11 +224,7 @@ fn is_iris_dock_path(path: &str) -> bool {
 
 fn launchpad_mount_from_referer(headers: &axum::http::HeaderMap) -> Option<String> {
     let referer = headers.get(header::REFERER)?.to_str().ok()?;
-    let path = referer
-        .parse::<axum::http::Uri>()
-        .ok()?
-        .path()
-        .to_string();
+    let path = referer.parse::<axum::http::Uri>().ok()?.path().to_string();
     let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
     if parts.len() >= 4 && parts[0] == "launchpad" && parts[1] == "a" {
         return Some(format!("/launchpad/a/{}/{}", parts[2], parts[3]));
