@@ -13,7 +13,7 @@ jobs:
   # ── Rust ──────────────────────────────────────────────────────────────────
   rust:
     name: Rust (test · clippy · fmt)
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '"ubuntu-latest"' || '["self-hosted","Linux","ARM64","fluxvm"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -37,7 +37,7 @@ jobs:
   # ── Go ────────────────────────────────────────────────────────────────────
   go:
     name: Go (test · vet)
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '"ubuntu-latest"' || '["self-hosted","Linux","ARM64","fluxvm"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -56,7 +56,7 @@ jobs:
   # ── UI ────────────────────────────────────────────────────────────────────
   ui:
     name: UI (build · typecheck · lint)
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '"ubuntu-latest"' || '["self-hosted","Linux","ARM64","fluxvm"]') }}
     defaults:
       run:
         working-directory: ui
@@ -86,7 +86,7 @@ jobs:
   # ── Helm ──────────────────────────────────────────────────────────────────
   helm:
     name: Helm (lint · template)
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '"ubuntu-latest"' || '["self-hosted","Linux","ARM64","fluxvm"]') }}
     steps:
       - uses: actions/checkout@v7
 
