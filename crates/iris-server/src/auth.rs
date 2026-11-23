@@ -17,7 +17,7 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use rand::RngCore;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 const SESSION_COOKIE: &str = "iris_session";
@@ -454,7 +454,7 @@ fn sign_session(claims: &SessionClaims, secret: &str) -> Result<String> {
     encode(
         &Header::default(),
         claims,
-        &EncodingKey::from_secret(secret.as_bytes()),
+        &EncodingKey::from_secret(secret.as_bytes()).map_err(|e| anyhow::anyhow!(e))?,
     )
     .map_err(Into::into)
 }
@@ -462,7 +462,7 @@ fn sign_session(claims: &SessionClaims, secret: &str) -> Result<String> {
 fn decode_session(token: &str, secret: &str) -> Result<SessionClaims> {
     let data = decode::<SessionClaims>(
         token,
-        &DecodingKey::from_secret(secret.as_bytes()),
+        &DecodingKey::from_secret(secret.as_bytes()).map_err(|e| anyhow::anyhow!(e))?,
         &Validation::default(),
     )?;
     Ok(data.claims)
@@ -538,7 +538,7 @@ async fn fetch_userinfo(discovery: &OidcDiscovery, access_token: &str) -> Result
 
 fn random_token() -> String {
     let mut bytes = [0u8; 8];
-    rand::thread_rng().fill_bytes(&mut bytes);
+    rand::rng().fill_bytes(&mut bytes);
     format!("oidc-{}", hex_encode(&bytes))
 }
 
