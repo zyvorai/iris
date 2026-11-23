@@ -648,9 +648,9 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
 
     pub fn count_audit(&self) -> Result<u64> {
         let conn = self.conn.lock().unwrap();
-        let count: u64 =
+        let count: i64 =
             conn.query_row("SELECT COUNT(*) FROM audit_events", [], |row| row.get(0))?;
-        Ok(count)
+        Ok(count.max(0) as u64)
     }
 }
 

@@ -130,6 +130,12 @@ test('graph page renders', async ({ page }) => {
   await expect(page.getByText(/application graph/i)).toBeVisible()
 })
 
+test('graph page shows impact and conformance panel', async ({ page }) => {
+  await page.goto('/graph')
+  await waitForPageReady(page)
+  await expect(page.getByTestId('impact-panel')).toBeVisible()
+})
+
 test('spotlight explain shows fleet insight', async ({ page }) => {
   await page.goto('/')
   await waitForPageReady(page)

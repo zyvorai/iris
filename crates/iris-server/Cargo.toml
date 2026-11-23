@@ -15,8 +15,8 @@ iris-core = { path = "../iris-core" }
 iris-api = { path = "../iris-api" }
 iris-gateway = { path = "../iris-gateway" }
 axum = { workspace = true }
-axum-extra = { version = "0.10", features = ["cookie"] }
-axum-server = { version = "0.8", default-features = false, features = ["tls-rustls-no-provider"] }
+axum-extra = { version = "0.12", features = ["cookie"] }
+axum-server = { version = "0.9", default-features = false, features = ["tls-rustls-no-provider"] }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 rcgen = "0.14"
 tokio = { workspace = true }
@@ -28,8 +28,8 @@ tower = { workspace = true }
 tower-http = { workspace = true }
 anyhow = { workspace = true }
 futures-util = { workspace = true }
-jsonwebtoken = "9"
-rand = "0.8"
-reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+jsonwebtoken = { version = "12", features = ["rust_crypto"] }
+rand = "0.10"
+reqwest = { workspace = true, features = ["json", "form"] }
 time = "0.3"
 chrono = { workspace = true }

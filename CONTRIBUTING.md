@@ -7,8 +7,8 @@ Thank you for helping improve Iris. This guide covers local development, testing
 | Tool | Version | Used for |
 |------|---------|----------|
 | Rust | stable | `iris-server`, `iris-core`, `iris-api` |
-| Go | 1.22+ | `iris-controller` |
-| Node.js | 20+ | React UI (`ui/`) |
+| Go | 1.27+ | `iris-controller` |
+| Node.js | 24+ | React UI (`ui/`) |
 | Helm | 3.x | Chart lint and deploy |
 | Docker | optional | Image builds |
 

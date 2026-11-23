@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GitBranch } from 'lucide-react'
 import AppGraphView from '../components/AppGraphView'
+import ImpactPanel from '../components/ImpactPanel'
 import AskZyraButton from '../components/nebula/AskZyraButton'
 import GlassPanel from '../components/nebula/GlassPanel'
 import GlyphTile from '../components/nebula/GlyphTile'
@@ -181,6 +182,7 @@ export default function GraphPage() {
             <AppGraphView graph={filtered} />
           ) : null}
         </GlassPanel>
+        <ImpactPanel />
       </div>
       </div>
     </PageFrame>

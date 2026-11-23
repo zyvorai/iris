@@ -148,3 +148,7 @@ cd ui && npm run build
 See the repository root `Makefile` and `scripts/deploy-remote.sh` for cluster deploy helpers.
 
 For backend and API details see [development.md](development.md) and [api.md](api.md).
+
+## Dependency impact and conformance
+
+The Graph page ends with an `ImpactPanel` (`data-testid="impact-panel"`) backed by `GET /api/v1/impact` and `GET /api/v1/conformance`: top blast-radius apps, health inherited from dependencies, dependency cycles, and the worst-scoring apps by catalog conformance.

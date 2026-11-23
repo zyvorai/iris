@@ -166,9 +166,11 @@ pub struct AuditEvent {
 pub struct CurrentUser(pub String);
 
 pub mod cluster;
+pub mod conformance;
 pub mod diagnosis;
 pub mod federation;
 pub mod graph;
+pub mod impact;
 pub mod insight;
 pub mod intent;
 pub mod k8s_rbac;
@@ -183,6 +185,7 @@ pub use cluster::{
     federated_cluster_configs, fetch_remote_cluster, list_clusters, list_clusters_with_federation,
     local_cluster, ClusterInfo, FederatedClusterConfig,
 };
+pub use conformance::{check_conformance, ConformancePolicy, ConformanceReport};
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use federation::{
     build_federated_audit, build_federated_catalog, federation_cluster, remote_publish,
@@ -190,6 +193,7 @@ pub use federation::{
     FederatedAuditEvent, FederationActionResult, FederationRbacStatus,
 };
 pub use graph::{build_graph, resolve_dependency, AppGraph, GraphEdge, GraphNode};
+pub use impact::{analyze_app_impact, analyze_impact, AppImpactDetail, ImpactReport};
 pub use insight::{
     resolve_activity_insight, resolve_app_insight, resolve_discovery_insight,
     resolve_federated_insight, resolve_fleet_insight, resolve_graph_insight,

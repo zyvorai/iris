@@ -131,6 +131,19 @@ Cross-reference: [Documentation index](README.md) · [Main README](../README.md)
 
 Map each story to automated or manual checks before marking production-ready.
 
+### Story 9 — Dependency impact and catalog conformance
+
+As a platform owner I want to see which apps are affected when a dependency fails and which apps lack ownership metadata.
+
+Acceptance criteria:
+
+| # | Criterion |
+|---|-----------|
+| 9.1 | `GET /api/v1/impact` reports effective status degraded for apps whose transitive dependency is degraded or broken |
+| 9.2 | Dependency cycles and unresolved `dependsOn` references are listed, not silently dropped |
+| 9.3 | `GET /api/v1/conformance` scores apps against `IRIS_CONFORMANCE_REQUIRE` and supports owner/namespace filters |
+| 9.4 | Graph page shows the impact panel (Playwright: `graph page shows impact and conformance panel`) |
+
 | Story | Playwright (`ui/tests/smoke.spec.ts`) | Remote E2E (`scripts/e2e-deploy-verify.sh`) | CI (`.github/workflows/ci.yml`) |
 |-------|--------------------------------------|-----------------------------------------------|--------------------------------|
 | 1 Discover | `cluster page renders toolbar` | `apps`, `catalog`, `cluster summary` | Go controller tests |

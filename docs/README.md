@@ -12,6 +12,7 @@ The application operating layer for Kubernetes
 | Install | [install.md](install.md) |
 | UI & Zyra AI | [ui.md](ui.md) |
 | Annotations | [annotations.md](annotations.md) |
+| Research & ideas | [RESEARCH.md](RESEARCH.md) |
 | **User journeys & acceptance criteria** | [User Stories](USER_STORIES.md) |
 | Full product deep dive | [FULL_README_LEGACY.md](FULL_README_LEGACY.md) |
 | Contributing | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
