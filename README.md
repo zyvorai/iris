@@ -176,3 +176,17 @@ Licensed under the [Zyvor Production Licence v2.0](LICENSE) (SPDX `LicenseRef-Zy
 Copyright 2026 ZyvorAI Labs Private Limited. See [NOTICE](NOTICE).
 
 **Price:** INR 49,999 per cluster per year incl. 18% GST in India; US$504 per cluster per year excl. tax elsewhere. Buy: [zyvor.dev/buy](https://zyvor.dev/buy). Orders of USD 5,000 or more and quotes are invoiced in USD through Skydo.
+
+## Optional: Gateway API front door (Setura)
+
+Besides the classic Ingress, the Helm chart can expose the service through a [Setura](https://github.com/zyvorai/zyvor-setura-gateway) Gateway API front door. It is off by default and the Ingress is unchanged.
+
+```sh
+# once per cluster: install the Setura controller
+setura gateway install --image ghcr.io/zyvorai/zyvor-setura-gateway:0.7.0 --namespace setura-system | kubectl apply -f -
+
+# then switch the chart from Ingress to Gateway (enable one, not both)
+helm upgrade --install iris charts/iris --set gateway.enabled=true --set ingress.enabled=false
+```
+
+The Gateway and HTTPRoute mirror the Ingress hosts, paths and backends. Set `gateway.tls.enabled=true` for an HTTPS listener, and `gateway.backendTLS.enabled=true` (with a CA ConfigMap) to verify iris-server's HTTPS backend.

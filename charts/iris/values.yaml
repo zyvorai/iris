@@ -137,7 +137,21 @@ resources:
       cpu: 500m
       memory: 512Mi
 
+# Gateway API front door served by Setura (`enabled`), an alternative to `ingress` (enable one, not both).
+# Needs the Setura controller: setura gateway install --image ghcr.io/zyvorai/zyvor-setura-gateway:0.7.0
 gateway:
+  enabled: false
+  className: setura
+  httpPort: 80
+  httpsPort: 443
+  tls:
+    enabled: false
+    secretName: iris-tls
+  # iris-server serves HTTPS (self-signed by default). Provide its CA in a ConfigMap (key ca.crt) to verify it.
+  backendTLS:
+    enabled: false
+    hostname: iris-server
+    caConfigMap: iris-server-ca
   websocket:
     enabled: true
 
