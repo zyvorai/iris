@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.23-alpine AS go-builder
+FROM docker.io/library/golang:1.27-alpine AS go-builder
 RUN apk add --no-cache git
 WORKDIR /src
 COPY go.mod go.sum ./
@@ -6,7 +6,7 @@ COPY cmd ./cmd
 COPY controller ./controller
 RUN cd cmd/iris-controller && go build -o /iris-controller .
 
-FROM docker.io/library/alpine:3.21
+FROM docker.io/library/alpine:3.24
 RUN apk add --no-cache ca-certificates
 COPY --from=go-builder /iris-controller /usr/local/bin/iris-controller
 USER 65532:65532
