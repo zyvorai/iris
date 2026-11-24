@@ -13,7 +13,7 @@ HTTP surface for `iris-server`. All paths are relative to the server origin (def
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/healthz` | Liveness probe (200 OK) |
-| GET | `/metrics` | Prometheus metrics (`iris_apps_total`, audit counters, uptime) |
+| GET | `/metrics` | Prometheus metrics (`iris_apps_total`, audit counters, uptime, per-app `iris_app_status{app,namespace,status}` and `iris_app_conformance_score{app,namespace}`) |
 | GET | `/api/v1/ws-echo` | WebSocket echo test (upgrade + message echo) |
 
 ### Auth (`/auth/*`)
@@ -41,13 +41,15 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/apps/{id}/insight` | Zyra AI per-app insight |
 | GET | `/api/v1/catalog` | Published catalog for current user |
 | GET | `/api/v1/catalog/federated` | Merged catalog across federated clusters |
-| GET | `/api/v1/catalog/export` | Download catalog as JSON |
+| GET | `/api/v1/catalog/export` | Download catalog as JSON; `?format=csv` returns RFC 4180 CSV (formula-injection safe), other values 400 |
 | GET | `/api/v1/stats` | Catalog statistics (totals, published, recommended) |
 | GET | `/api/v1/cluster/summary` | Cluster-level counts by status and visibility |
 | GET | `/api/v1/clusters` | Local + federated cluster registry |
 | GET | `/api/v1/graph` | Dependency graph (`nodes`, `edges`) |
 | GET | `/api/v1/impact` | Dependency impact report: effective health propagated along `dependsOn`, blast radius (`dependents`), cycles, unresolved refs. `?app=namespace/slug` returns one app with `upstream`/`downstream` lists (404 if unknown) |
 | GET | `/api/v1/conformance` | Catalog conformance report (score, findings per app). Optional `?owner=` and `?namespace=`. Required fields come from `IRIS_CONFORMANCE_REQUIRE` (comma list of `owner`, `environment`, `description`; default `owner,environment`) |
+| GET | `/api/v1/scorecard` | Maturity levels per published app derived from conformance: `gold` (no findings), `silver` (no errors, at most one warning), `bronze` (no errors), `none` (any error), with `nextSteps`. Same `?owner=`/`?namespace=` filters |
+| GET | `/api/v1/stale` | Apps not refreshed by the controller in `?days=` (default 30, clamped 1-3650, non-integer 400), oldest first; apps with no parseable `updatedAt` counted in `unknown` |
 | GET | `/api/v1/workspaces` | Workspace groupings |
 | GET | `/api/v1/owners` | Team/owner groupings |
 | GET | `/api/v1/health/apps` | Fleet health summary (healthy/degraded/broken counts) |

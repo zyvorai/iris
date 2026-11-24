@@ -6,11 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Maturity scorecard** — `GET /api/v1/scorecard` grades published apps gold/silver/bronze/none from conformance findings and lists next steps (modelled on Cortex/OpsLevel service maturity levels)
+- **Stale app report** — `GET /api/v1/stale?days=` lists apps the controller has not refreshed
+- **CSV catalog export** — `GET /api/v1/catalog/export?format=csv` (formula-injection safe)
+- **Per-app Prometheus series** — `iris_app_status` and `iris_app_conformance_score` on `/metrics`
+- `Store::upsert_app`; first handler-level tests for iris-api and `/metrics`
 - **Dependency impact analysis** — `GET /api/v1/impact` propagates degraded/broken health along `dependsOn` (effective status, `blockedBy`), reports transitive blast radius and dependency cycles; `?app=` gives upstream/downstream lists. Bounded: 2000 apps, 64 deps per app, 20000 edges, 253-char references. Surfaced on the Graph page.
 - **Catalog conformance report** — `GET /api/v1/conformance` scores published apps against `IRIS_CONFORMANCE_REQUIRE` (owner, environment, description) plus no-ready-endpoints, dependency-cycle and unresolved-dependency rules; `owner`/`namespace` filters.
 - [docs/RESEARCH.md](docs/RESEARCH.md) — application-operations landscape survey and ranked ideas
 
 ### Dependency upgrades
+- Round 2: `cargo update` (hyper 1.13; all other Rust deps already at latest majors), Go indirect bumps (kube-openapi still pinned), `@tanstack/react-query` 5.108.4
 - Rust: `cargo update`; majors rusqlite 0.32→0.43, tower-http 0.6→0.7, reqwest 0.12→0.13 (kept the ring provider: `rustls-no-provider` + `webpki-roots`, no aws-lc), tokio-tungstenite 0.29→0.30, axum-extra 0.10→0.12, axum-server 0.8→0.9, jsonwebtoken 9→12 (`rust_crypto` backend, key constructors now return `Result`), rand 0.8→0.10 (`rand::rng`)
 - Go: `go get -u`; client-go/api/apimachinery 0.31→0.37, gateway-api 1.2→1.7, modernc sqlite 1.34→1.63; `go` directive 1.23→1.27. Held back: `k8s.io/kube-openapi` pinned to 20260721 (newest revision pulls structured-merge-diff/v7, which breaks apimachinery 0.37.2)
 - UI: vite 6→8, @vitejs/plugin-react 4→6, typescript 5→7 (no typescript-eslint in this repo, so no peer-range block), lucide-react 0.511→1.x, plus react/react-query/react-router/playwright minors
