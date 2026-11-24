@@ -176,6 +176,7 @@ pub mod intent;
 pub mod k8s_rbac;
 pub mod llm;
 pub mod rbac;
+pub mod scorecard;
 pub mod share;
 pub mod store;
 pub mod workspace;
@@ -209,6 +210,10 @@ pub use llm::{
 pub use rbac::{
     allowed_actions_for_groups, allowed_namespaces_for_groups, can_perform_action,
     role_rules_from_env, RoleRule,
+};
+pub use scorecard::{
+    catalog_csv, render_app_metrics, scorecard, stale_apps, Scorecard, StaleReport,
+    DEFAULT_STALE_DAYS,
 };
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
 pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};

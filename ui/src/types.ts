@@ -336,3 +336,24 @@ export interface ConformanceReport {
   apps: AppConformance[]
   summary: { total: number; conforming: number; errors: number; warnings: number; infos: number; score: number }
 }
+
+export interface ScorecardApp {
+  id: string
+  label: string
+  namespace: string
+  owner?: string
+  level: 'gold' | 'silver' | 'bronze' | 'none'
+  score: number
+  nextSteps: string[]
+}
+
+export interface Scorecard {
+  apps: ScorecardApp[]
+  summary: { gold: number; silver: number; bronze: number; none: number }
+}
+
+export interface StaleReport {
+  days: number
+  unknown: number
+  apps: { id: string; label: string; namespace: string; owner?: string; updatedAt: string; ageDays: number }[]
+}

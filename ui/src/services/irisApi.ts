@@ -5,6 +5,8 @@ import type {
   AppDiagnosis,
   AppGraph,
   ConformanceReport,
+  Scorecard,
+  StaleReport,
   ImpactReport,
   AppInsight,
   AiStatus,
@@ -65,7 +67,16 @@ export const irisApi = {
   listApps: () => req<IrisApp[]>('/apps'),
   listCatalog: () => req<IrisApp[]>('/catalog'),
   listFederatedCatalog: () => req<FederatedApp[]>('/catalog/federated'),
-  exportCatalog: () => fetch('/api/v1/catalog/export').then((r) => r.blob()),
+  exportCatalog: (format: 'json' | 'csv' = 'json') =>
+    fetch(`/api/v1/catalog/export${format === 'csv' ? '?format=csv' : ''}`).then((r) => r.blob()),
+  getScorecard: (params: { owner?: string; namespace?: string } = {}) => {
+    const q = new URLSearchParams()
+    if (params.owner) q.set('owner', params.owner)
+    if (params.namespace) q.set('namespace', params.namespace)
+    const qs = q.toString()
+    return req<Scorecard>(`/scorecard${qs ? `?${qs}` : ''}`)
+  },
+  getStale: (days = 30) => req<StaleReport>(`/stale?days=${encodeURIComponent(days)}`),
   catalogStats: () => req<CatalogStats>('/stats'),
   clusterSummary: () => req<ClusterSummary>('/cluster/summary'),
   listClusters: () => req<ClusterInfo[]>('/clusters'),

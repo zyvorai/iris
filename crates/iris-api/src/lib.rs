@@ -14,17 +14,18 @@ use iris_core::store::Store;
 use iris_core::{
     ai_status_with_probe, allowed_namespaces_for_groups, analyze_app_impact, analyze_impact,
     build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
-    build_team_owners, build_workspaces, can_perform_action, check_conformance, federation_cluster,
-    filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
+    build_team_owners, build_workspaces, can_perform_action, catalog_csv, check_conformance,
+    federation_cluster, filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
     remote_publish_namespace, remote_rbac_check, remote_set_recommended, resolve_activity_insight,
     resolve_app_insight, resolve_discovery_insight, resolve_federated_insight,
     resolve_fleet_insight, resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
-    resolve_search_intent, resolve_search_with_llm, ActivityInsight, AiStatus, App, AppDiagnosis,
-    AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo, ClusterSummary, ConformancePolicy,
-    ConformanceReport, CreateShareRequest, DiscoveryInsight, FederatedApp, FederatedAuditEvent,
-    FederatedInsight, FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight,
-    HealthSummary, ImpactReport, NamespaceInsight, OwnerInsight, RoleRule, SearchHit, SearchIntent,
-    ShareLink, ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule,
+    resolve_search_intent, resolve_search_with_llm, scorecard, stale_apps, ActivityInsight,
+    AiStatus, App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo,
+    ClusterSummary, ConformancePolicy, ConformanceReport, CreateShareRequest, DiscoveryInsight,
+    FederatedApp, FederatedAuditEvent, FederatedInsight, FederationActionResult,
+    FederationRbacStatus, FleetInsight, GraphInsight, HealthSummary, ImpactReport,
+    NamespaceInsight, OwnerInsight, RoleRule, Scorecard, SearchHit, SearchIntent, ShareLink,
+    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule, DEFAULT_STALE_DAYS,
 };
 use serde::Deserialize;
 
@@ -65,6 +66,8 @@ pub fn routes(state: ApiState) -> Router {
         .route("/graph", get(app_graph))
         .route("/impact", get(impact_report))
         .route("/conformance", get(conformance_report))
+        .route("/scorecard", get(scorecard_report))
+        .route("/stale", get(stale_report))
         .route("/workspaces", get(list_workspaces))
         .route("/owners", get(list_owners))
         .route("/discovery", get(list_discovery))
@@ -519,13 +522,38 @@ async fn list_catalog(
     )))
 }
 
+#[derive(Deserialize)]
+struct ExportQuery {
+    format: Option<String>,
+}
+
 async fn export_catalog(
     State(st): State<ApiState>,
     headers: HeaderMap,
+    Query(q): Query<ExportQuery>,
 ) -> Result<Response, AppError> {
     let uid = user_id(&headers, &st.default_user);
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    match q.format.as_deref() {
+        None | Some("") | Some("json") => {}
+        Some("csv") => {
+            return Ok((
+                [
+                    (axum::http::header::CONTENT_TYPE, "text/csv; charset=utf-8"),
+                    (
+                        axum::http::header::CONTENT_DISPOSITION,
+                        "attachment; filename=\"iris-catalog.csv\"",
+                    ),
+                ],
+                catalog_csv(&apps),
+            )
+                .into_response())
+        }
+        Some(_) => {
+            return Ok((StatusCode::BAD_REQUEST, "format must be json or csv").into_response())
+        }
+    }
     let body = serde_json::to_string_pretty(&apps)?;
     Ok((
         [(axum::http::header::CONTENT_TYPE, "application/json")],
@@ -638,6 +666,46 @@ async fn conformance_report(
     let ns = q.namespace.filter(|v| !v.is_empty() && v.len() <= 253);
     report.filter(owner.as_deref(), ns.as_deref());
     Ok(Json(report))
+}
+
+async fn scorecard_report(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<ConformanceQuery>,
+) -> Result<Json<Scorecard>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    let mut report = check_conformance(&apps, &ConformancePolicy::from_env());
+    let owner = q.owner.filter(|v| !v.is_empty() && v.len() <= 253);
+    let ns = q.namespace.filter(|v| !v.is_empty() && v.len() <= 253);
+    report.filter(owner.as_deref(), ns.as_deref());
+    Ok(Json(scorecard(&report)))
+}
+
+#[derive(Deserialize)]
+struct StaleQuery {
+    days: Option<String>,
+}
+
+async fn stale_report(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<StaleQuery>,
+) -> Result<Response, AppError> {
+    let days = match q.days.as_deref() {
+        None | Some("") => DEFAULT_STALE_DAYS,
+        Some(v) => match v.parse::<i64>() {
+            Ok(d) => d,
+            Err(_) => {
+                return Ok((StatusCode::BAD_REQUEST, "days must be an integer").into_response())
+            }
+        },
+    };
+    let uid = user_id(&headers, &st.default_user);
+    let groups = user_groups(&headers);
+    let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
+    Ok(Json(stale_apps(&apps, days, chrono::Utc::now())).into_response())
 }
 
 async fn list_workspaces(
@@ -1070,5 +1138,135 @@ impl IntoResponse for AppError {
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::body::{to_bytes, Body};
+    use axum::http::Request;
+    use iris_core::{AppMeta, Backend, Visibility};
+    use tower::ServiceExt;
+
+    fn app(slug: &str, ns: &str, owner: &str, updated: &str) -> App {
+        App {
+            id: format!("{ns}/{slug}"),
+            slug: slug.into(),
+            canonical_slug: slug.into(),
+            display_name: slug.into(),
+            description: String::new(),
+            namespace: ns.into(),
+            category: "Tools".into(),
+            icon: "app".into(),
+            backend: Backend {
+                kind: "Service".into(),
+                name: slug.into(),
+                port: 80,
+                scheme: "http".into(),
+                path: "/".into(),
+            },
+            route_path: format!("/a/{ns}/{slug}"),
+            public_url: String::new(),
+            status: "healthy".into(),
+            status_message: String::new(),
+            source: "annotation".into(),
+            auth_mode: "none".into(),
+            score: 0,
+            visibility: Visibility {
+                published: true,
+                hidden: false,
+                favorite: false,
+            },
+            rewrite: Default::default(),
+            ready_endpoints: 1,
+            updated_at: updated.into(),
+            meta: AppMeta {
+                owner: owner.into(),
+                environment: "prod".into(),
+                ..Default::default()
+            },
+        }
+    }
+
+    fn router() -> Router {
+        let store = Arc::new(Store::open(":memory:").unwrap());
+        let now = chrono::Utc::now().to_rfc3339();
+        store.upsert_app(&app("good", "a", "team", &now)).unwrap();
+        let mut bad = app("bad", "a", "", "2020-01-01T00:00:00Z");
+        bad.ready_endpoints = 0;
+        store.upsert_app(&bad).unwrap();
+        store.upsert_app(&app("=evil", "b", "team", &now)).unwrap();
+        routes(ApiState {
+            store,
+            default_user: "tester".into(),
+            allowed_namespaces: vec![],
+            admin_users: vec![],
+            admin_groups: vec![],
+            workspace_rules: vec![],
+            role_rules: vec![],
+        })
+    }
+
+    async fn get_path(path: &str) -> (StatusCode, String, String) {
+        let resp = router()
+            .oneshot(Request::get(path).body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        let status = resp.status();
+        let ct = resp
+            .headers()
+            .get("content-type")
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap_or_default();
+        let body =
+            String::from_utf8(to_bytes(resp.into_body(), 1 << 20).await.unwrap().to_vec()).unwrap();
+        (status, ct, body)
+    }
+
+    #[tokio::test]
+    async fn scorecard_levels_and_filters() {
+        let (s, _, body) = get_path("/scorecard").await;
+        assert_eq!(s, StatusCode::OK);
+        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(v["summary"]["gold"], 2);
+        assert_eq!(v["summary"]["none"], 1);
+        assert_eq!(v["apps"][0]["id"], "a/bad");
+        assert_eq!(v["apps"][0]["level"], "none");
+        let (_, _, body) = get_path("/scorecard?namespace=b").await;
+        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(v["apps"].as_array().unwrap().len(), 1);
+    }
+
+    #[tokio::test]
+    async fn stale_validates_days() {
+        let (s, _, body) = get_path("/stale?days=30").await;
+        assert_eq!(s, StatusCode::OK);
+        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(v["days"], 30);
+        assert_eq!(v["apps"].as_array().unwrap().len(), 1);
+        assert_eq!(v["apps"][0]["id"], "a/bad");
+        let (_, _, body) = get_path("/stale").await;
+        assert!(body.contains("\"days\":30"));
+        let (_, _, body) = get_path("/stale?days=999999").await;
+        assert!(body.contains("\"days\":3650"));
+        assert_eq!(get_path("/stale?days=abc").await.0, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn export_csv_and_formats() {
+        let (s, ct, body) = get_path("/catalog/export?format=csv").await;
+        assert_eq!(s, StatusCode::OK);
+        assert!(ct.starts_with("text/csv"));
+        assert!(body.starts_with("id,name,namespace"));
+        assert!(body.contains("'=evil"), "{body}");
+        assert_eq!(body.matches("\r\n").count(), 4);
+        let (_, ct, body) = get_path("/catalog/export").await;
+        assert_eq!(ct, "application/json");
+        assert!(body.starts_with('['));
+        assert_eq!(
+            get_path("/catalog/export?format=xml").await.0,
+            StatusCode::BAD_REQUEST
+        );
     }
 }

@@ -33,3 +33,6 @@ rand = "0.10"
 reqwest = { workspace = true, features = ["json", "form"] }
 time = "0.3"
 chrono = { workspace = true }
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }

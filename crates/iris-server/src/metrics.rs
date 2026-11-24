@@ -38,7 +38,16 @@ async fn prometheus(State(st): State<MetricsState>) -> impl IntoResponse {
     let audit_count = st.store.count_audit().unwrap_or(0);
     let uptime = chrono::Utc::now().timestamp() - st.started_at;
 
-    let body = format!(
+    let published_apps: Vec<_> = apps
+        .iter()
+        .filter(|a| a.visibility.published)
+        .cloned()
+        .collect();
+    let conformance =
+        iris_core::check_conformance(&published_apps, &iris_core::ConformancePolicy::from_env());
+    let app_series = iris_core::render_app_metrics(&apps, &conformance);
+
+    let mut body = format!(
         "# HELP iris_apps_total Total apps in catalog\n\
 # TYPE iris_apps_total gauge\n\
 iris_apps_total {}\n\
@@ -68,6 +77,7 @@ iris_uptime_seconds {}\n",
         audit_count,
         uptime,
     );
+    body.push_str(&app_series);
 
     (
         StatusCode::OK,
@@ -77,4 +87,47 @@ iris_uptime_seconds {}\n",
         )],
         body,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tower::ServiceExt;
+
+    #[tokio::test]
+    async fn metrics_include_per_app_series() {
+        let store = Arc::new(Store::open(":memory:").unwrap());
+        let a: iris_core::App = serde_json::from_value(serde_json::json!({
+            "id": "demo/grafana", "slug": "grafana", "displayName": "grafana",
+            "namespace": "demo", "category": "Tools", "icon": "app",
+            "backend": {"kind":"Service","name":"grafana","port":80,"scheme":"http","path":"/"},
+            "routePath": "/a/demo/grafana", "publicUrl": "", "status": "broken",
+            "source": "annotation", "authMode": "none",
+            "visibility": {"published": true, "hidden": false, "favorite": false},
+            "readyEndpoints": 1, "updatedAt": ""
+        }))
+        .unwrap();
+        store.upsert_app(&a).unwrap();
+        let app = routes(MetricsState {
+            store,
+            started_at: 0,
+        });
+        let resp = app
+            .oneshot(
+                axum::http::Request::get("/metrics")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = axum::body::to_bytes(resp.into_body(), 1 << 20)
+            .await
+            .unwrap();
+        let text = String::from_utf8(body.to_vec()).unwrap();
+        assert!(text.contains("iris_apps_total 1"));
+        assert!(text
+            .contains("iris_app_status{app=\"grafana\",namespace=\"demo\",status=\"broken\"} 1"));
+        assert!(text.contains("iris_app_conformance_score{app=\"grafana\""));
+    }
 }

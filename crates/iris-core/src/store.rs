@@ -159,6 +159,42 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
+    /// Insert or replace an app row. The Go controller is the production
+    /// writer; this exists for seeding and for handler-level tests.
+    pub fn upsert_app(&self, app: &App) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT OR REPLACE INTO apps (id, slug, canonical_slug, display_name, description, namespace,
+               category, icon, backend_json, route_path, public_url, status, status_message, source,
+               auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at, meta_json)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21)",
+            rusqlite::params![
+                app.id,
+                app.slug,
+                app.canonical_slug,
+                app.display_name,
+                app.description,
+                app.namespace,
+                app.category,
+                app.icon,
+                serde_json::to_string(&app.backend)?,
+                app.route_path,
+                app.public_url,
+                app.status,
+                app.status_message,
+                app.source,
+                app.auth_mode,
+                app.score,
+                serde_json::to_string(&app.visibility)?,
+                serde_json::to_string(&app.rewrite)?,
+                app.ready_endpoints,
+                app.updated_at,
+                serde_json::to_string(&app.meta)?,
+            ],
+        )?;
+        Ok(())
+    }
+
     pub fn list_discovery(&self) -> Result<Vec<App>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(&format!(
