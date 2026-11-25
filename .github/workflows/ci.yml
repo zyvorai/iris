@@ -55,7 +55,7 @@ jobs:
 
   # ── UI ────────────────────────────────────────────────────────────────────
   ui:
-    name: UI (build · typecheck · lint)
+    name: UI (build · typecheck · lint · test)
     runs-on: ${{ fromJSON(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && '"ubuntu-latest"' || '["self-hosted","Linux","ARM64","fluxvm"]') }}
     defaults:
       run:
@@ -80,8 +80,10 @@ jobs:
         run: npm run build
 
       - name: Lint
-        run: npx eslint src --max-warnings 0
-        continue-on-error: true
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
 
   # ── Helm ──────────────────────────────────────────────────────────────────
   helm:

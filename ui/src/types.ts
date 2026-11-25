@@ -23,6 +23,15 @@ export interface AppMeta {
   ingressHosts?: string[]
   meshRoutes?: string[]
   meshPolicies?: MeshPolicy[]
+  links?: AppLink[]
+  tags?: string[]
+  lifecycle?: string
+}
+
+export interface AppLink {
+  title: string
+  url: string
+  type?: string
 }
 
 export interface MeshPolicy {
@@ -329,6 +338,7 @@ export interface AppConformance {
   owner?: string
   score: number
   findings: ConformanceFinding[]
+  exempted?: ConformanceFinding[]
 }
 
 export interface ConformanceReport {
@@ -350,6 +360,72 @@ export interface ScorecardApp {
 export interface Scorecard {
   apps: ScorecardApp[]
   summary: { gold: number; silver: number; bronze: number; none: number }
+}
+
+export interface Exemption {
+  id: string
+  appId: string
+  rule: string
+  reason: string
+  createdBy: string
+  createdAt: string
+  expiresAt: string
+  status: 'active' | 'expired'
+}
+
+export interface CreateExemptionRequest {
+  appId: string
+  rule: string
+  reason: string
+  days: number
+}
+
+export interface CampaignProgress {
+  id: string
+  name: string
+  description: string
+  rules: string[]
+  namespace: string
+  owner: string
+  dueDate: string
+  status: 'empty' | 'complete' | 'active' | 'overdue'
+  daysLeft: number
+  total: number
+  passing: number
+  failing: number
+  percent: number
+  owners: { owner: string; total: number; failing: number }[]
+  failingApps: { id: string; label: string; owner?: string; rules: string[] }[]
+}
+
+export interface CreateCampaignRequest {
+  name: string
+  rules: string[]
+  dueDate: string
+  namespace?: string
+  owner?: string
+  description?: string
+}
+
+export interface AppUptime {
+  id: string
+  label: string
+  namespace: string
+  uptimePercent?: number
+  observedSeconds: number
+  downSeconds: number
+  transitions: number
+  currentStatus: string
+}
+
+export interface AppHistory extends AppUptime {
+  days: number
+  events: { appId: string; status: string; message?: string; at: string }[]
+}
+
+export interface UptimeReport {
+  days: number
+  apps: AppUptime[]
 }
 
 export interface StaleReport {

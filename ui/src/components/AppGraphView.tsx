@@ -3,7 +3,7 @@
 
 import { GitBranch } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import AppIcon from './AppIcon'
 import EmptyState from './nebula/EmptyState'
 import { statusLabel, statusTone } from '../services/irisApi'

@@ -8,13 +8,35 @@
 //! Modelled on Backstage's required `owner`/`lifecycle` fields and on policy
 //! attachment in Kyverno/OPA, but read-only: Iris reports, it never mutates.
 
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 
+use crate::governance::Exemption;
 use crate::impact::analyze_impact;
 use crate::App;
 
 /// Metadata fields a policy may require.
-pub const KNOWN_FIELDS: [&str; 3] = ["owner", "environment", "description"];
+pub const KNOWN_FIELDS: [&str; 6] = [
+    "owner",
+    "environment",
+    "description",
+    "runbook",
+    "lifecycle",
+    "tags",
+];
+/// Every rule id a finding can carry.
+pub const KNOWN_RULES: [&str; 10] = [
+    "owner-missing",
+    "environment-missing",
+    "description-missing",
+    "runbook-missing",
+    "lifecycle-missing",
+    "tags-missing",
+    "no-ready-endpoints",
+    "dependency-cycle",
+    "dependency-unresolved",
+    "dependency-deprecated",
+];
 /// Maximum findings reported per app.
 pub const MAX_FINDINGS_PER_APP: usize = 20;
 /// Maximum length of the policy string read from the environment.
@@ -79,6 +101,9 @@ pub struct AppConformance {
     /// 0 to 100, higher is better.
     pub score: u32,
     pub findings: Vec<Finding>,
+    /// Findings waived by an active exemption; they do not affect the score.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub exempted: Vec<Finding>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Default)]
@@ -118,26 +143,48 @@ fn penalty(severity: &str) -> u32 {
     }
 }
 
+fn score_of(findings: &[Finding]) -> u32 {
+    100u32.saturating_sub(findings.iter().map(|x| penalty(&x.severity)).sum())
+}
+
 /// Evaluate every published, non-hidden app against `policy`.
 pub fn check_conformance(apps: &[App], policy: &ConformancePolicy) -> ConformanceReport {
     let impact = analyze_impact(apps);
     let by_id: std::collections::HashMap<&str, &crate::impact::AppImpact> =
         impact.apps.iter().map(|a| (a.id.as_str(), a)).collect();
 
+    let published = || {
+        apps.iter()
+            .filter(|a| a.visibility.published && !a.visibility.hidden)
+            .take(crate::impact::MAX_APPS)
+    };
+    // Same identifiers and "first app wins" order as the impact analysis.
+    let mut lookup: std::collections::HashMap<&str, &App> = std::collections::HashMap::new();
+    for a in published() {
+        for key in [&a.id, &a.slug, &a.canonical_slug, &a.backend.name] {
+            if !key.is_empty() {
+                lookup.entry(key.as_str()).or_insert(a);
+            }
+        }
+    }
+
     let mut out: Vec<AppConformance> = Vec::new();
-    for app in apps
-        .iter()
-        .filter(|a| a.visibility.published && !a.visibility.hidden)
-        .take(crate::impact::MAX_APPS)
-    {
+    for app in published() {
         let mut f: Vec<Finding> = Vec::new();
         for field in &policy.require {
-            let value = match field.as_str() {
-                "owner" => &app.meta.owner,
-                "environment" => &app.meta.environment,
-                _ => &app.description,
+            let missing = match field.as_str() {
+                "owner" => app.meta.owner.trim().is_empty(),
+                "environment" => app.meta.environment.trim().is_empty(),
+                "lifecycle" => app.meta.lifecycle.trim().is_empty(),
+                "tags" => app.meta.tags.is_empty(),
+                "runbook" => !app
+                    .meta
+                    .links
+                    .iter()
+                    .any(|l| l.kind == "runbook" && crate::links::is_safe_link(&l.url)),
+                _ => app.description.trim().is_empty(),
             };
-            if value.trim().is_empty() {
+            if missing {
                 f.push(finding(
                     &format!("{field}-missing"),
                     "warning",
@@ -168,8 +215,28 @@ pub fn check_conformance(apps: &[App], policy: &ConformancePolicy) -> Conformanc
                 ));
             }
         }
+        if app.meta.lifecycle != "deprecated" {
+            let mut seen = std::collections::HashSet::new();
+            for dep in app
+                .meta
+                .depends_on
+                .iter()
+                .take(crate::impact::MAX_DEPS_PER_APP)
+            {
+                let Some(target) = lookup.get(dep.trim()) else {
+                    continue;
+                };
+                if target.meta.lifecycle == "deprecated" && seen.insert(target.id.as_str()) {
+                    f.push(finding(
+                        "dependency-deprecated",
+                        "warning",
+                        format!("depends on deprecated app `{}`", target.id),
+                    ));
+                }
+            }
+        }
         f.truncate(MAX_FINDINGS_PER_APP);
-        let score = 100u32.saturating_sub(f.iter().map(|x| penalty(&x.severity)).sum());
+        let score = score_of(&f);
         out.push(AppConformance {
             id: app.id.clone(),
             label: app.display_name.clone(),
@@ -177,6 +244,7 @@ pub fn check_conformance(apps: &[App], policy: &ConformancePolicy) -> Conformanc
             owner: app.meta.owner.clone(),
             score,
             findings: f,
+            exempted: Vec::new(),
         });
     }
 
@@ -210,6 +278,30 @@ fn summarize(out: &[AppConformance]) -> ConformanceSummary {
 }
 
 impl ConformanceReport {
+    /// Move findings covered by an active exemption to `exempted`, then
+    /// recompute scores, ordering and the summary.
+    pub fn apply_exemptions(&mut self, exemptions: &[Exemption], now: DateTime<Utc>) {
+        let active: std::collections::HashSet<(&str, &str)> = exemptions
+            .iter()
+            .filter(|e| e.is_active(now))
+            .map(|e| (e.app_id.as_str(), e.rule.as_str()))
+            .collect();
+        if active.is_empty() {
+            return;
+        }
+        for app in &mut self.apps {
+            let (waived, kept): (Vec<Finding>, Vec<Finding>) = std::mem::take(&mut app.findings)
+                .into_iter()
+                .partition(|f| active.contains(&(app.id.as_str(), f.rule.as_str())));
+            app.findings = kept;
+            app.exempted.extend(waived);
+            app.score = score_of(&app.findings);
+        }
+        self.apps
+            .sort_by(|a, b| a.score.cmp(&b.score).then_with(|| a.id.cmp(&b.id)));
+        self.summary = summarize(&self.apps);
+    }
+
     /// Keep only apps matching the optional owner / namespace and recompute the summary.
     pub fn filter(&mut self, owner: Option<&str>, namespace: Option<&str>) {
         self.apps.retain(|a| {
@@ -284,6 +376,79 @@ mod tests {
         assert_eq!(r.summary.score, 100);
         r.filter(None, Some("other-ns"));
         assert_eq!(r.summary.total, 0);
+    }
+
+    #[test]
+    fn runbook_lifecycle_and_tags_can_be_required() {
+        let mut a = app("a", "healthy", &[]);
+        let policy = ConformancePolicy::parse("runbook,lifecycle,tags");
+        let r = check_conformance(std::slice::from_ref(&a), &policy);
+        let rules: Vec<&str> = r.apps[0].findings.iter().map(|f| f.rule.as_str()).collect();
+        assert_eq!(
+            rules,
+            ["runbook-missing", "lifecycle-missing", "tags-missing"]
+        );
+        a.meta.lifecycle = "production".into();
+        a.meta.tags = vec!["go".into()];
+        a.meta.links = vec![crate::AppLink {
+            title: "Runbook".into(),
+            url: "javascript:alert(1)".into(),
+            kind: "runbook".into(),
+        }];
+        let r = check_conformance(std::slice::from_ref(&a), &policy);
+        assert_eq!(r.apps[0].findings.len(), 1, "unsafe runbook does not count");
+        a.meta.links[0].url = "https://wiki.example/run".into();
+        let r = check_conformance(&[a], &policy);
+        assert!(r.apps[0].findings.is_empty());
+    }
+
+    #[test]
+    fn dependency_on_deprecated_app_is_flagged_once() {
+        let mut old = app("old", "healthy", &[]);
+        old.meta.lifecycle = "deprecated".into();
+        let user = app("user", "healthy", &["old", "demo/old"]);
+        let mut also_old = app("also", "healthy", &["old"]);
+        also_old.meta.lifecycle = "deprecated".into();
+        let r = check_conformance(&[old, user, also_old], &ConformancePolicy::parse(""));
+        let count = |id: &str| {
+            r.apps
+                .iter()
+                .find(|a| a.id == id)
+                .unwrap()
+                .findings
+                .iter()
+                .filter(|f| f.rule == "dependency-deprecated")
+                .count()
+        };
+        assert_eq!(count("demo/user"), 1);
+        assert_eq!(count("demo/also"), 0);
+    }
+
+    #[test]
+    fn exemptions_waive_only_active_matching_findings() {
+        let a = app("a", "healthy", &[]);
+        let mut r = check_conformance(&[a], &ConformancePolicy::default());
+        assert_eq!(r.apps[0].score, 70);
+        let ex = |rule: &str, expires: &str| Exemption {
+            id: rule.into(),
+            app_id: "demo/a".into(),
+            rule: rule.into(),
+            reason: "r".into(),
+            created_by: "u".into(),
+            created_at: String::new(),
+            expires_at: expires.into(),
+        };
+        r.apply_exemptions(
+            &[
+                ex("owner-missing", "2999-01-01T00:00:00Z"),
+                ex("environment-missing", "2000-01-01T00:00:00Z"),
+            ],
+            Utc::now(),
+        );
+        assert_eq!(r.apps[0].score, 85);
+        assert_eq!(r.apps[0].findings[0].rule, "environment-missing");
+        assert_eq!(r.apps[0].exempted[0].rule, "owner-missing");
+        assert_eq!(r.summary.warnings, 1);
     }
 
     #[test]

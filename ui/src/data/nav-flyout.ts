@@ -54,6 +54,7 @@ export const NAV_FLYOUT_PANELS: FlyPanel[] = [
         heading: 'Org',
         links: [
           { label: 'Teams', to: '/teams' },
+          { label: 'Quality', to: '/quality', sub: 'Scorecard & uptime' },
           { label: 'Activity', to: '/activity' },
           { label: 'Settings', to: '/settings' },
           { label: 'Help', to: '/help' },

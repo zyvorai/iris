@@ -88,9 +88,10 @@ UI: Home and Health fleet panels with diagnose chips, per-app insight on app det
 | `/graph` | Dependency graph with filters and Zyra AI focus chips |
 | `/federated` | Merged remote catalogs |
 | `/teams` | Owner metadata grouped by team |
+| `/quality` | Scorecard, campaigns, rule exemptions, uptime, stale apps, per-app metrics, CSV/JSON export |
 | `/activity` | Audit log with fleet insight banner and optional share-admin panel |
 | `/help` | Static guide wrapped in `PageFrame` |
-| `/apps/:id` | App detail — Nebula panels, share links, mesh policies; diagnose opens global drawer |
+| `/apps/:id` | App detail — Nebula panels, catalog links/tags/lifecycle, status history, share links, mesh policies; diagnose opens global drawer |
 
 ## Diagnose flow
 
@@ -127,6 +128,8 @@ cd ui
 npm ci
 npm run dev          # Vite dev server (proxies API to IRIS_API or localhost:31847)
 npm run build        # Production bundle → ui/dist/
+npm run lint         # oxlint
+npm test             # Vitest + Testing Library (jsdom)
 npm run test:e2e     # Playwright smoke tests (starts preview server if IRIS_E2E_BASE unset)
 ```
 

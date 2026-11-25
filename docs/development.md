@@ -179,7 +179,7 @@ Copy [.env.example](../.env.example) to `.env` for local reference.
 | `IRIS_K8S_RBAC` | `false` | Enable Kubernetes SAR checks |
 | `IRIS_CLUSTER_ID` / `IRIS_CLUSTER_NAME` | `local` | Local cluster identity |
 | `IRIS_FEDERATED_CLUSTERS` | — | JSON array of peer Iris clusters |
-| `IRIS_FEDERATION_TRUST_HEADERS` | `false` | Trust `x-iris-user` from peers |
+| `IRIS_FEDERATION_TRUST_HEADERS` | `false` | Trust `x-iris-user` / `x-iris-groups` from peers holding the API key |
 | `IRIS_LLM_API_URL` / `IRIS_LLM_API_KEY` / `IRIS_LLM_MODEL` | — | Zyra AI LLM (rule fallback when unset) |
 | `RUST_LOG` | `iris_server=info` | Tracing filter |
 
@@ -213,6 +213,7 @@ Helm values mirror these under `charts/iris/values.yaml` → `controller.*` and 
 4. **Ingress / Gateway API / mesh** — optional route metadata when `IRIS_DISCOVER_*` enabled.
 5. **Health refresh** — polls backends every 30s; updates `status`, `ready_count`, diagnosis.
 6. **SQLite upsert** — `controller/store` writes `apps` table; prunes stale discoveries.
+7. **Status history** — a row in `status_events` for each status change (500 kept per app, dropped with the app). The server reads it for `/api/v1/history` and `/api/v1/uptime`. Time while the controller is down counts as the last recorded status.
 
 ### Adding a signature
 
@@ -282,6 +283,8 @@ cd ui
 npm ci
 npm run dev          # Vite on :5173, proxies to :31847
 npm run build        # → ui/dist/
+npm run lint         # oxlint
+npm test             # Vitest component and unit tests (src/**/*.test.ts[x])
 npm run test:e2e     # Playwright smoke tests
 ```
 
@@ -301,12 +304,13 @@ Add a page:
 | Rust | `cargo test --workspace --locked` |
 | Go | `go test ./...` |
 | UI build | `cd ui && npm run build` |
+| UI lint and tests | `cd ui && npm run lint && npm test` |
 | Local smoke | `./scripts/smoke-test.sh` |
 | Playwright | `cd ui && npm run test:e2e` |
 | Live deploy E2E | `./scripts/e2e-deploy-verify.sh http://host:31847` |
 | Remote tiers | `make test-remote-smoke` / `test-remote-quick` / `test-remote-all` |
 
-CI (`.github/workflows/ci.yml`): Rust test/clippy/fmt, Go test/vet, UI build, Helm lint.
+CI (`.github/workflows/ci.yml`): Rust test/clippy/fmt, Go test/vet, UI type-check/build/lint/test, Helm lint.
 
 ---
 

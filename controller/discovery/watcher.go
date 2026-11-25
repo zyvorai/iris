@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -23,38 +24,44 @@ import (
 	"github.com/zyvorai/iris/controller/model"
 	"github.com/zyvorai/iris/controller/signatures"
 	"github.com/zyvorai/iris/controller/store"
+	"k8s.io/client-go/dynamic"
 	gwclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 	gwexternalversions "sigs.k8s.io/gateway-api/pkg/client/informers/externalversions"
-	"k8s.io/client-go/dynamic"
 )
 
 const (
-	annoPrefix    = "iris.zyvor.dev/"
-	annoEnabled   = annoPrefix + "enabled"
-	annoName      = annoPrefix + "name"
-	annoDesc      = annoPrefix + "description"
-	annoIcon      = annoPrefix + "icon"
-	annoCategory  = annoPrefix + "category"
-	annoPort      = annoPrefix + "port"
-	annoScheme    = annoPrefix + "scheme"
-	annoPath      = annoPrefix + "path"
-	annoAuth      = annoPrefix + "auth"
-	annoFavorite  = annoPrefix + "favorite"
-	annoPublished = annoPrefix + "published"
-	annoSlug        = annoPrefix + "slug"
-	annoEnvironment = annoPrefix + "environment"
-	annoOwner       = annoPrefix + "owner"
-	annoDependsOn   = annoPrefix + "depends-on"
-	annoRecommended = annoPrefix + "recommended"
+	annoPrefix           = "iris.zyvor.dev/"
+	annoEnabled          = annoPrefix + "enabled"
+	annoName             = annoPrefix + "name"
+	annoDesc             = annoPrefix + "description"
+	annoIcon             = annoPrefix + "icon"
+	annoCategory         = annoPrefix + "category"
+	annoPort             = annoPrefix + "port"
+	annoScheme           = annoPrefix + "scheme"
+	annoPath             = annoPrefix + "path"
+	annoAuth             = annoPrefix + "auth"
+	annoFavorite         = annoPrefix + "favorite"
+	annoPublished        = annoPrefix + "published"
+	annoSlug             = annoPrefix + "slug"
+	annoEnvironment      = annoPrefix + "environment"
+	annoOwner            = annoPrefix + "owner"
+	annoDependsOn        = annoPrefix + "depends-on"
+	annoRecommended      = annoPrefix + "recommended"
 	annoServeFromSubPath = annoPrefix + "serve-from-sub-path"
+	annoRunbook          = annoPrefix + "runbook"
+	annoDocs             = annoPrefix + "docs"
+	annoRepository       = annoPrefix + "repository"
+	annoLinks            = annoPrefix + "links"
+	annoTags             = annoPrefix + "tags"
+	annoLifecycle        = annoPrefix + "lifecycle"
 )
 
 type Config struct {
-	PublicBaseURL    string
-	PublicPathPrefix string
-	AutoPublish      bool
-	AutoSuggest     bool
-	DiscoverAll     bool
+	PublicBaseURL      string
+	PublicPathPrefix   string
+	AutoPublish        bool
+	AutoSuggest        bool
+	DiscoverAll        bool
 	DiscoverIngress    bool
 	DiscoverGatewayAPI bool
 	DiscoverMesh       bool
@@ -67,7 +74,9 @@ type Watcher struct {
 	dynClient    dynamic.Interface
 	store        *store.Store
 	cfg          Config
-	endpoints    map[string]int // key: ns/name -> ready count
+	endpointsMu  sync.RWMutex
+	endpoints    map[string]int            // key: ns/name -> ready count
+	slices       map[string]map[string]int // key: ns/name -> slice name -> ready count
 	ingressHosts map[string][]string
 	meshRoutes   map[string][]string
 	meshPolicies map[string][]model.MeshPolicy
@@ -108,7 +117,7 @@ func (w *Watcher) Run(ctx context.Context) error {
 	epsInf.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    func(obj interface{}) { w.onEndpointSlice(obj) },
 		UpdateFunc: func(_, newObj interface{}) { w.onEndpointSlice(newObj) },
-		DeleteFunc: func(obj interface{}) { w.onEndpointSlice(obj) },
+		DeleteFunc: func(obj interface{}) { w.onEndpointSliceDelete(obj) },
 	})
 
 	if w.cfg.DiscoverIngress {
@@ -142,19 +151,33 @@ func (w *Watcher) Run(ctx context.Context) error {
 }
 
 func (w *Watcher) onEndpointSlice(obj interface{}) {
+	if ns, name, ok := w.recordEndpointSlice(obj, false); ok {
+		w.refreshServiceByName(ns, name)
+	}
+}
+
+func (w *Watcher) onEndpointSliceDelete(obj interface{}) {
+	if ns, name, ok := w.recordEndpointSlice(obj, true); ok {
+		w.refreshServiceByName(ns, name)
+	}
+}
+
+// recordEndpointSlice updates the ready count of the owning service. A service
+// may have several slices, so the count is the sum over all of them.
+func (w *Watcher) recordEndpointSlice(obj interface{}, deleted bool) (string, string, bool) {
 	eps, ok := obj.(*discoveryv1.EndpointSlice)
 	if !ok {
-		if t, ok := obj.(cache.DeletedFinalStateUnknown); ok {
-			eps, ok = t.Obj.(*discoveryv1.EndpointSlice)
+		if t, isTombstone := obj.(cache.DeletedFinalStateUnknown); isTombstone {
+			eps, _ = t.Obj.(*discoveryv1.EndpointSlice)
 		}
 	}
 	if eps == nil {
-		return
+		return "", "", false
 	}
 	ns := eps.Namespace
 	svcName := eps.Labels[discoveryv1.LabelServiceName]
 	if svcName == "" {
-		return
+		return "", "", false
 	}
 	ready := 0
 	for _, ep := range eps.Endpoints {
@@ -163,8 +186,36 @@ func (w *Watcher) onEndpointSlice(obj interface{}) {
 		}
 	}
 	key := ns + "/" + svcName
-	w.endpoints[key] = ready
-	w.refreshServiceByName(ns, svcName)
+
+	w.endpointsMu.Lock()
+	defer w.endpointsMu.Unlock()
+	if w.slices == nil {
+		w.slices = map[string]map[string]int{}
+	}
+	if w.endpoints == nil {
+		w.endpoints = map[string]int{}
+	}
+	if w.slices[key] == nil {
+		w.slices[key] = map[string]int{}
+	}
+	if deleted {
+		delete(w.slices[key], eps.Name)
+	} else {
+		w.slices[key][eps.Name] = ready
+	}
+	total := 0
+	for _, n := range w.slices[key] {
+		total += n
+	}
+	w.endpoints[key] = total
+	return ns, svcName, true
+}
+
+func (w *Watcher) readyCount(key string) (int, bool) {
+	w.endpointsMu.RLock()
+	defer w.endpointsMu.RUnlock()
+	n, ok := w.endpoints[key]
+	return n, ok
 }
 
 func (w *Watcher) onIngress(obj interface{}) {
@@ -250,7 +301,10 @@ func (w *Watcher) onServiceDelete(obj interface{}) {
 		return
 	}
 	id := fmt.Sprintf("%s/%s", svc.Namespace, svc.Name)
+	w.endpointsMu.Lock()
 	delete(w.endpoints, id)
+	delete(w.slices, id)
+	w.endpointsMu.Unlock()
 	if err := w.store.DeleteApp(id); err != nil {
 		log.Printf("delete app %s: %v", id, err)
 	}
@@ -285,7 +339,7 @@ func (w *Watcher) onService(obj interface{}) {
 		return
 	}
 	key := svc.Namespace + "/" + svc.Name
-	if ready, exists := w.endpoints[key]; exists {
+	if ready, exists := w.readyCount(key); exists {
 		app.ReadyCount = ready
 	}
 	app.Status, app.StatusMsg = w.healthStatus(app)
@@ -436,10 +490,10 @@ func (w *Watcher) buildApp(svc *corev1.Service) (model.App, bool) {
 		Slug:          slug,
 		CanonicalSlug: canonicalSlug,
 		DisplayName:   displayName,
-		Description: desc,
-		Namespace:   svc.Namespace,
-		Category:    category,
-		Icon:        icon,
+		Description:   desc,
+		Namespace:     svc.Namespace,
+		Category:      category,
+		Icon:          icon,
 		Backend: model.Backend{
 			Kind:   "Service",
 			Name:   svc.Name,
@@ -528,7 +582,7 @@ func (w *Watcher) RefreshHealth(ctx context.Context, interval time.Duration) {
 			}
 			for _, app := range apps {
 				key := app.Namespace + "/" + app.Backend.Name
-				if ready, ok := w.endpoints[key]; ok {
+				if ready, ok := w.readyCount(key); ok {
 					app.ReadyCount = ready
 				}
 				base := strings.TrimRight(w.cfg.PublicBaseURL, "/")
@@ -552,6 +606,16 @@ func (w *Watcher) RefreshHealth(ctx context.Context, interval time.Duration) {
 
 // ResyncAll lists all services once at startup.
 func (w *Watcher) ResyncAll(ctx context.Context) error {
+	// Count ready endpoints first: indexing routes below already refreshes
+	// services, and without counts every restart would briefly mark each app
+	// broken and record that in its history.
+	if epsList, err := w.client.DiscoveryV1().EndpointSlices("").List(ctx, metav1.ListOptions{}); err != nil {
+		log.Printf("list endpoint slices: %v", err)
+	} else {
+		for i := range epsList.Items {
+			w.recordEndpointSlice(&epsList.Items[i], false)
+		}
+	}
 	if w.cfg.DiscoverIngress {
 		ingList, e := w.client.NetworkingV1().Ingresses("").List(ctx, metav1.ListOptions{})
 		if e == nil {
@@ -604,12 +668,6 @@ func (w *Watcher) ResyncAll(ctx context.Context) error {
 		log.Printf("prune stale apps: %v", err)
 	} else if pruned > 0 {
 		log.Printf("pruned %d stale discovered apps", pruned)
-	}
-	epsList, err := w.client.DiscoveryV1().EndpointSlices("").List(ctx, metav1.ListOptions{})
-	if err == nil {
-		for i := range epsList.Items {
-			w.onEndpointSlice(&epsList.Items[i])
-		}
 	}
 	return nil
 }

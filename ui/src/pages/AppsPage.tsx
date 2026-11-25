@@ -20,6 +20,7 @@ import { useFleetInsight } from '../hooks/useZyraAiInsight'
 import { useWorkspace } from '../utils/workspaceContext'
 import { useInspector } from '../utils/inspectorContext'
 import { groupBy } from '../utils/groupBy'
+import { matchesCatalogQuery } from '../utils/catalogFilter'
 import { useStatusFlip } from '../hooks/useStatusFlip'
 import type { IrisApp } from '../types'
 
@@ -76,6 +77,8 @@ export default function AppsPage() {
   const [sort, setSort] = useState<SortKey>('name')
   const [statusFilter, setStatusFilter] = useState('')
   const [groupKey, setGroupKey] = useState<GroupKey>('none')
+  const [tagFilter, setTagFilter] = useState('')
+  const [lifecycleFilter, setLifecycleFilter] = useState('')
   const { matchesWorkspace } = useWorkspace()
   const { openDiagnose } = useInspector()
   const published = useQuery({ queryKey: ['apps'], queryFn: irisApi.listApps })
@@ -89,22 +92,24 @@ export default function AppsPage() {
   const hasData = Boolean(source)
 
   const filtered = useMemo(() => {
-    const q = filter.trim().toLowerCase()
     const cat = categoryFilter.trim().toLowerCase()
     const list = (source ?? []).filter((a) => {
       if (!matchesWorkspace(a)) return false
       if (statusFilter && a.status !== statusFilter) return false
       if (cat && a.category.toLowerCase() !== cat) return false
-      if (!q) return true
-      return (
-        a.displayName.toLowerCase().includes(q) ||
-        a.namespace.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q) ||
-        (a.meta?.environment ?? '').toLowerCase().includes(q)
-      )
+      return matchesCatalogQuery(a, { text: filter, tag: tagFilter, lifecycle: lifecycleFilter })
     })
     return sortApps(list, sort)
-  }, [source, filter, categoryFilter, matchesWorkspace, sort, statusFilter])
+  }, [source, filter, categoryFilter, matchesWorkspace, sort, statusFilter, tagFilter, lifecycleFilter])
+
+  const tags = useMemo(
+    () => [...new Set((source ?? []).flatMap((a) => a.meta?.tags ?? []))].sort(),
+    [source],
+  )
+  const lifecycles = useMemo(
+    () => [...new Set((source ?? []).flatMap((a) => (a.meta?.lifecycle ? [a.meta.lifecycle] : [])))].sort(),
+    [source],
+  )
 
   const categories = useMemo(() => {
     const set = new Set((source ?? []).map((a) => a.category))
@@ -126,10 +131,14 @@ export default function AppsPage() {
     setFilter('')
     setCategoryFilter('')
     setStatusFilter('')
+    setTagFilter('')
+    setLifecycleFilter('')
   }
 
   const catalogCount = source?.length ?? 0
-  const hasActiveFilters = Boolean(filter.trim() || categoryFilter || statusFilter)
+  const hasActiveFilters = Boolean(
+    filter.trim() || categoryFilter || statusFilter || tagFilter || lifecycleFilter,
+  )
   const isTrulyEmpty = hasData && catalogCount === 0
   const isFilterEmpty = hasData && catalogCount > 0 && !filtered.length
   const [showAllCategories, setShowAllCategories] = useState(false)
@@ -251,6 +260,18 @@ export default function AppsPage() {
               <option value="degraded">Degraded</option>
               <option value="broken">Broken</option>
             </select>
+            {tags.length ? (
+              <select className="page-toolbar-select" value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
+                <option value="">All tags</option>
+                {tags.map((t) => <option key={t} value={t}>#{t}</option>)}
+              </select>
+            ) : null}
+            {lifecycles.length ? (
+              <select className="page-toolbar-select" value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} aria-label="Filter by lifecycle">
+                <option value="">All lifecycles</option>
+                {lifecycles.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            ) : null}
           </PageToolbar>
 
           {categories.length ? (

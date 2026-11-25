@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, MoreHorizontal, RefreshCw, Rocket } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { irisApi } from '../../services/irisApi'
 import { refreshIrisData } from '../../utils/refreshCatalog'
 

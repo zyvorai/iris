@@ -41,13 +41,23 @@ type Rewrite struct {
 }
 
 type AppMeta struct {
-	Environment  string   `json:"environment,omitempty"`
-	Owner        string   `json:"owner,omitempty"`
-	DependsOn    []string `json:"dependsOn,omitempty"`
-	Recommended  bool     `json:"recommended,omitempty"`
-	IngressHosts []string `json:"ingressHosts,omitempty"`
-	MeshRoutes   []string      `json:"meshRoutes,omitempty"`
-	MeshPolicies []MeshPolicy  `json:"meshPolicies,omitempty"`
+	Environment  string       `json:"environment,omitempty"`
+	Owner        string       `json:"owner,omitempty"`
+	DependsOn    []string     `json:"dependsOn,omitempty"`
+	Recommended  bool         `json:"recommended,omitempty"`
+	IngressHosts []string     `json:"ingressHosts,omitempty"`
+	MeshRoutes   []string     `json:"meshRoutes,omitempty"`
+	MeshPolicies []MeshPolicy `json:"meshPolicies,omitempty"`
+	Links        []AppLink    `json:"links,omitempty"`
+	Tags         []string     `json:"tags,omitempty"`
+	Lifecycle    string       `json:"lifecycle,omitempty"`
+}
+
+// AppLink is an external link (runbook, docs, repository, ...) on an app.
+type AppLink struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+	Type  string `json:"type,omitempty"`
 }
 
 type MeshPolicy struct {
@@ -65,23 +75,23 @@ type App struct {
 	Slug          string     `json:"slug"`
 	CanonicalSlug string     `json:"canonicalSlug,omitempty"`
 	DisplayName   string     `json:"displayName"`
-	Description string     `json:"description,omitempty"`
-	Namespace   string     `json:"namespace"`
-	Category    string     `json:"category"`
-	Icon        string     `json:"icon"`
-	Backend     Backend    `json:"backend"`
-	RoutePath   string     `json:"routePath"`
-	PublicURL   string     `json:"publicUrl"`
-	Status      string     `json:"status"`
-	StatusMsg   string     `json:"statusMessage,omitempty"`
-	Source      string     `json:"source"`
-	AuthMode    string     `json:"authMode"`
-	Score       int        `json:"score"`
-	Visibility  Visibility `json:"visibility"`
-	Rewrite     Rewrite    `json:"rewrite,omitempty"`
-	ReadyCount  int        `json:"readyEndpoints"`
-	UpdatedAt   string     `json:"updatedAt"`
-	Meta        AppMeta    `json:"meta,omitempty"`
+	Description   string     `json:"description,omitempty"`
+	Namespace     string     `json:"namespace"`
+	Category      string     `json:"category"`
+	Icon          string     `json:"icon"`
+	Backend       Backend    `json:"backend"`
+	RoutePath     string     `json:"routePath"`
+	PublicURL     string     `json:"publicUrl"`
+	Status        string     `json:"status"`
+	StatusMsg     string     `json:"statusMessage,omitempty"`
+	Source        string     `json:"source"`
+	AuthMode      string     `json:"authMode"`
+	Score         int        `json:"score"`
+	Visibility    Visibility `json:"visibility"`
+	Rewrite       Rewrite    `json:"rewrite,omitempty"`
+	ReadyCount    int        `json:"readyEndpoints"`
+	UpdatedAt     string     `json:"updatedAt"`
+	Meta          AppMeta    `json:"meta,omitempty"`
 }
 
 func (a App) BackendJSON() string {

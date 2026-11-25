@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import { useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import PlatformPulseHero from '../components/command/PlatformPulseHero'
 import QuickLaunchBar from '../components/command/QuickLaunchBar'

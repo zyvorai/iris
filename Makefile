@@ -75,7 +75,7 @@ build-ui:
 test:
 	cd cmd/iris-controller && go test ./...
 	cargo test --workspace
-	cd ui && npm test --if-present
+	cd ui && npm test
 
 clean:
 	rm -rf bin/ ui/dist/ target/

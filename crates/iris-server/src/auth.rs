@@ -142,13 +142,24 @@ pub async fn require_auth(
         return next.run(req).await;
     }
 
+    // Identity headers decide authorization, so a client may not supply them.
+    // They are removed here and only re-added from a verified source: the
+    // session, or a federation peer that holds the API key.
+    let client_user = req.headers_mut().remove("x-iris-user");
+    let client_groups = req.headers_mut().remove("x-iris-groups");
+
     let jar = jar_from_headers(req.headers());
     if let Some(user) = user_from_session(&auth, &jar) {
         let groups = groups_from_session(&auth, &jar);
-        let _ = req.headers_mut().insert(
-            HeaderName::from_static("x-iris-user"),
-            HeaderValue::from_str(&user).unwrap_or(HeaderValue::from_static("local")),
-        );
+        // Never fall back to an empty value or the default user (an admin when
+        // no admins are configured) for a name that cannot be a header.
+        let user = HeaderValue::from_str(&user)
+            .ok()
+            .filter(|v| !v.is_empty())
+            .unwrap_or(HeaderValue::from_static("unrepresentable-user"));
+        let _ = req
+            .headers_mut()
+            .insert(HeaderName::from_static("x-iris-user"), user);
         if !groups.is_empty() {
             let _ = req.headers_mut().insert(
                 HeaderName::from_static("x-iris-groups"),
@@ -176,20 +187,18 @@ pub async fn require_auth(
                 .map(|v| v == auth.api_key)
                 .unwrap_or(false);
         if authorized {
-            if federation_trust_headers()
-                && req
-                    .headers()
-                    .get("x-iris-user")
-                    .and_then(|v| v.to_str().ok())
-                    .map(|s| !s.is_empty())
-                    .unwrap_or(false)
-            {
-                return next.run(req).await;
+            let mut user = HeaderValue::from_static("api-key");
+            if federation_trust_headers() {
+                if let Some(peer_user) = client_user.filter(|v| !v.is_empty()) {
+                    user = peer_user;
+                    if let Some(groups) = client_groups {
+                        req.headers_mut()
+                            .insert(HeaderName::from_static("x-iris-groups"), groups);
+                    }
+                }
             }
-            let _ = req.headers_mut().insert(
-                HeaderName::from_static("x-iris-user"),
-                HeaderValue::from_static("api-key"),
-            );
+            req.headers_mut()
+                .insert(HeaderName::from_static("x-iris-user"), user);
             return next.run(req).await;
         }
         return (StatusCode::UNAUTHORIZED, "unauthorized").into_response();
@@ -203,6 +212,7 @@ pub async fn require_auth(
             .into_response();
     }
 
+    // An unrecognised mode is not a licence to trust the caller's headers.
     next.run(req).await
 }
 
@@ -588,5 +598,114 @@ impl From<anyhow::Error> for AppAuthError {
 impl From<jsonwebtoken::errors::Error> for AppAuthError {
     fn from(e: jsonwebtoken::errors::Error) -> Self {
         AppAuthError::Internal(e.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::middleware::from_fn_with_state;
+    use tower::ServiceExt;
+
+    fn config(mode: &str) -> AuthConfig {
+        AuthConfig {
+            mode: mode.into(),
+            api_key: "k".into(),
+            fallback_user: "local".into(),
+            session_secret: "test-secret".into(),
+            oidc_issuer: String::new(),
+            oidc_client_id: String::new(),
+            oidc_client_secret: String::new(),
+            oidc_redirect_url: String::new(),
+            pending_states: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+
+    /// Status plus `user|groups` as the protected handler sees them.
+    async fn identity(cfg: AuthConfig, headers: &[(&str, String)]) -> (StatusCode, String) {
+        let app = Router::new()
+            .route(
+                "/who",
+                get(|h: HeaderMap| async move {
+                    let v = |k: &str| {
+                        h.get_all(k)
+                            .iter()
+                            .map(|v| v.to_str().unwrap().to_string())
+                            .collect::<Vec<_>>()
+                            .join(";")
+                    };
+                    format!("{}|{}", v("x-iris-user"), v("x-iris-groups"))
+                }),
+            )
+            .layer(from_fn_with_state(cfg, require_auth));
+        let mut req = Request::get("/who");
+        for (k, v) in headers {
+            req = req.header(*k, v);
+        }
+        let resp = app.oneshot(req.body(Body::empty()).unwrap()).await.unwrap();
+        let status = resp.status();
+        let body = axum::body::to_bytes(resp.into_body(), 4096).await.unwrap();
+        (status, String::from_utf8(body.to_vec()).unwrap())
+    }
+
+    fn session(groups: &[&str]) -> (&'static str, String) {
+        let claims = SessionClaims {
+            sub: "u1".into(),
+            email: Some("dev@example.com".into()),
+            groups: groups.iter().map(|g| g.to_string()).collect(),
+            exp: (SystemTime::now() + Duration::from_secs(600))
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as usize,
+        };
+        (
+            "cookie",
+            format!(
+                "{SESSION_COOKIE}={}",
+                sign_session(&claims, "test-secret").unwrap()
+            ),
+        )
+    }
+
+    #[tokio::test]
+    async fn session_identity_replaces_client_headers() {
+        let spoof = [
+            ("x-iris-user", "root".to_string()),
+            ("x-iris-groups", "iris-admins".to_string()),
+        ];
+        // A session without groups must not inherit the client's groups.
+        let mut headers = vec![session(&[])];
+        headers.extend(spoof.clone());
+        let (s, who) = identity(config("oidc"), &headers).await;
+        assert_eq!(s, StatusCode::OK);
+        assert_eq!(who, "dev@example.com|");
+        let mut headers = vec![session(&["devs"])];
+        headers.extend(spoof.clone());
+        let (_, who) = identity(config("oidc"), &headers).await;
+        assert_eq!(who, "dev@example.com|devs");
+        let (s, _) = identity(config("oidc"), &spoof).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn api_key_callers_cannot_claim_groups_without_federation_trust() {
+        // IRIS_FEDERATION_TRUST_HEADERS is unset in the test environment.
+        let headers = [
+            ("x-iris-key", "k".to_string()),
+            ("x-iris-user", "root".to_string()),
+            ("x-iris-groups", "iris-admins".to_string()),
+        ];
+        let (s, who) = identity(config("api_key"), &headers).await;
+        assert_eq!(s, StatusCode::OK);
+        assert_eq!(who, "api-key|");
+        let (s, _) = identity(config("api_key"), &headers[1..]).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn open_mode_passes_headers_through() {
+        let headers = [("x-iris-user", "alice".to_string())];
+        let (_, who) = identity(config("none"), &headers).await;
+        assert_eq!(who, "alice|");
     }
 }

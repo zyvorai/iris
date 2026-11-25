@@ -2,7 +2,7 @@
 
 HTTP surface for `iris-server`. All paths are relative to the server origin (default `http://localhost:31847`).
 
-**Auth:** When `IRIS_AUTH_MODE` is `api_key` or `oidc`, protected routes require a valid session cookie or `Authorization: Bearer <api_key>`. Public routes: `/healthz`, `/metrics`, `/auth/*`, `/api/v1/ws-echo`.
+**Auth:** When `IRIS_AUTH_MODE` is `api_key` or `oidc`, protected routes require a valid session cookie or `Authorization: Bearer <api_key>`. In those modes client-supplied `x-iris-user` / `x-iris-groups` headers are discarded; only an API-key caller with `IRIS_FEDERATION_TRUST_HEADERS=true` may forward them. Public routes: `/healthz`, `/metrics`, `/auth/*`, `/api/v1/ws-echo`.
 
 **Source:** Routes are registered in `crates/iris-server/src/main.rs`, `crates/iris-api/src/lib.rs`, `crates/iris-gateway/src/lib.rs`, `crates/iris-server/src/auth.rs`, and `crates/iris-server/src/metrics.rs`.
 
@@ -41,18 +41,35 @@ All routes below require auth when auth mode is enabled.
 | GET | `/api/v1/apps/{id}/insight` | Zyra AI per-app insight |
 | GET | `/api/v1/catalog` | Published catalog for current user |
 | GET | `/api/v1/catalog/federated` | Merged catalog across federated clusters |
-| GET | `/api/v1/catalog/export` | Download catalog as JSON; `?format=csv` returns RFC 4180 CSV (formula-injection safe), other values 400 |
+| GET | `/api/v1/catalog/export` | Download catalog as JSON; `?format=csv` returns RFC 4180 CSV (formula-injection safe; last columns `lifecycle,tags,runbook`), other values 400 |
 | GET | `/api/v1/stats` | Catalog statistics (totals, published, recommended) |
 | GET | `/api/v1/cluster/summary` | Cluster-level counts by status and visibility |
 | GET | `/api/v1/clusters` | Local + federated cluster registry |
 | GET | `/api/v1/graph` | Dependency graph (`nodes`, `edges`) |
 | GET | `/api/v1/impact` | Dependency impact report: effective health propagated along `dependsOn`, blast radius (`dependents`), cycles, unresolved refs. `?app=namespace/slug` returns one app with `upstream`/`downstream` lists (404 if unknown) |
-| GET | `/api/v1/conformance` | Catalog conformance report (score, findings per app). Optional `?owner=` and `?namespace=`. Required fields come from `IRIS_CONFORMANCE_REQUIRE` (comma list of `owner`, `environment`, `description`; default `owner,environment`) |
+| GET | `/api/v1/conformance` | Catalog conformance report (score, findings per app). Optional `?owner=` and `?namespace=`. Required fields come from `IRIS_CONFORMANCE_REQUIRE` (comma list of `owner`, `environment`, `description`, `runbook`, `lifecycle`, `tags`; default `owner,environment`). Active exemptions are applied |
 | GET | `/api/v1/scorecard` | Maturity levels per published app derived from conformance: `gold` (no findings), `silver` (no errors, at most one warning), `bronze` (no errors), `none` (any error), with `nextSteps`. Same `?owner=`/`?namespace=` filters |
 | GET | `/api/v1/stale` | Apps not refreshed by the controller in `?days=` (default 30, clamped 1-3650, non-integer 400), oldest first; apps with no parseable `updatedAt` counted in `unknown` |
+| GET | `/api/v1/history` | Status transitions and uptime of one app: `?app=namespace/slug` (required, 404 if not visible), `?days=` (default 7, clamped 1-90, non-integer 400). `uptimePercent` is the healthy share of observed time and is omitted when nothing was observed; at most 200 events, newest first |
+| GET | `/api/v1/uptime` | Uptime of every visible published app over `?days=`, lowest first, apps without history last |
 | GET | `/api/v1/workspaces` | Workspace groupings |
 | GET | `/api/v1/owners` | Team/owner groupings |
 | GET | `/api/v1/health/apps` | Fleet health summary (healthy/degraded/broken counts) |
+
+### Exemptions & campaigns
+
+Writes need an administrator (`IRIS_ADMIN_USERS` / `IRIS_ADMIN_GROUPS`; with neither set, only the default user). With `api_key` auth the caller is `api-key`, so add that to `IRIS_ADMIN_USERS`. Every write is audited.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/exemptions` | Exemptions with `status` `active` or `expired` (non-admins: visible apps only) |
+| POST | `/api/v1/exemptions` | Admin. `{"appId","rule","reason","days"}`; `days` 1-365, `reason` up to 500 characters. 201, 400 invalid, 404 unknown app, 409 an active one exists or 1000 are stored |
+| DELETE | `/api/v1/exemptions/{id}` | Admin. Revoke (204, 404) |
+| GET | `/api/v1/campaigns` | Every campaign with progress over the apps you can see: `status` (`empty`, `complete`, `active`, `overdue`), `daysLeft`, `passing`, `failing`, `percent`, per-owner counts and failing apps (at most 200) |
+| POST | `/api/v1/campaigns` | Admin. `{"name","rules":[...],"dueDate":"YYYY-MM-DD","namespace"?,"owner"?,"description"?}`. 201, 400, 409 after 50 campaigns |
+| DELETE | `/api/v1/campaigns/{id}` | Admin (204, 404) |
+
+Rule ids: `owner-missing`, `environment-missing`, `description-missing`, `runbook-missing`, `lifecycle-missing`, `tags-missing`, `no-ready-endpoints`, `dependency-cycle`, `dependency-unresolved`, `dependency-deprecated`. An active exemption removes the finding from conformance, scorecard, campaign progress and `iris_app_conformance_score`; conformance lists it under `exempted`. A campaign that names a `<field>-missing` rule checks that field even when `IRIS_CONFORMANCE_REQUIRE` does not.
 
 ### Discovery & publishing
 

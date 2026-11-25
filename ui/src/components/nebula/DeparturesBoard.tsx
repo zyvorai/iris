@@ -3,7 +3,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Stethoscope } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import AppIcon from '../AppIcon'
 import StatusBadge from './StatusBadge'
 import ActionMenu from './ActionMenu'

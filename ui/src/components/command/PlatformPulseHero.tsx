@@ -1,7 +1,7 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { healthTier } from '../nebula/HealthRing'
 
 interface PlatformPulseHeroProps {
