@@ -27,7 +27,7 @@ make build-ui       # UI only → ui/dist/
 # Unit / integration
 cargo test --workspace --locked
 go test ./...
-cd ui && npm ci && npm run build
+cd ui && npm ci && npm run build && npm run lint && npm test
 
 # Local smoke (requires running server)
 ./scripts/smoke-test.sh
@@ -41,7 +41,7 @@ IRIS_E2E_BASE=http://host:31847 npm run test:e2e
 make test-remote-smoke
 ```
 
-CI runs Rust tests/clippy/fmt, Go tests/vet, UI build, and Helm lint on every push to `main` and on pull requests (see `.github/workflows/ci.yml`).
+CI runs Rust tests/clippy/fmt, Go tests/vet, UI build/lint/tests, and Helm lint on every push to `main` and on pull requests (see `.github/workflows/ci.yml`).
 
 ## User stories & acceptance
 
@@ -63,7 +63,7 @@ Feature work should map to a story in [docs/USER_STORIES.md](docs/USER_STORIES.m
 
 ## Pull request checklist
 
-- [ ] `cargo test`, `go test`, and `npm run build` pass locally
+- [ ] `cargo test`, `go test`, `npm run build`, `npm run lint` and `npm test` pass locally
 - [ ] Playwright smoke updated if UI behavior changed
 - [ ] Changelog entry under `[Unreleased]`
 - [ ] User story acceptance criteria updated when applicable

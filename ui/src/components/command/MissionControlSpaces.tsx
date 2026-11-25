@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { LayoutGrid, Radar } from 'lucide-react'
 import GlassPanel from '../nebula/GlassPanel'
 import DeparturesRow from '../nebula/DeparturesBoard'

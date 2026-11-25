@@ -2223,3 +2223,13 @@ html[data-theme='light'] .service-status-endpoint {
 .board-footer .gap {
   flex: 1;
 }
+
+/* Catalog quality page and app catalog panels */
+.quality-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+.quality-card { border-top: 1px solid rgba(148, 163, 184, 0.2); padding: 0.75rem 0; }
+.quality-card progress { width: 100%; }
+.quality-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 1rem; }
+.quality-rules { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; width: 100%; border: 0; padding: 0; margin: 0; }
+.quality-links { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+.quality-links a { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.5rem; }
+.quality-events { max-height: 16rem; overflow: auto; }

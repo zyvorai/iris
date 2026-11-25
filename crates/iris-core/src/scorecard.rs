@@ -172,7 +172,7 @@ fn csv_cell(raw: &str) -> String {
 /// RFC 4180 CSV of the catalog.
 pub fn catalog_csv(apps: &[App]) -> String {
     let mut out = String::from(
-        "id,name,namespace,category,status,published,owner,environment,url,dependsOn,updatedAt\r\n",
+        "id,name,namespace,category,status,published,owner,environment,url,dependsOn,updatedAt,lifecycle,tags,runbook\r\n",
     );
     for a in apps {
         let cells = [
@@ -191,6 +191,13 @@ pub fn catalog_csv(apps: &[App]) -> String {
             a.public_url.as_str(),
             &a.meta.depends_on.join(";"),
             a.updated_at.as_str(),
+            a.meta.lifecycle.as_str(),
+            &a.meta.tags.join(";"),
+            a.meta
+                .links
+                .iter()
+                .find(|l| l.kind == "runbook" && crate::links::is_safe_link(&l.url))
+                .map_or("", |l| l.url.as_str()),
         ];
         let row: Vec<String> = cells.iter().map(|c| csv_cell(c)).collect();
         out.push_str(&row.join(","));
@@ -319,6 +326,25 @@ mod tests {
         );
         assert!(row.contains("\"team, one\""));
         assert!(row.contains("b;c"));
+    }
+
+    #[test]
+    fn csv_includes_lifecycle_tags_and_runbook() {
+        let mut a = app("a", "healthy", &[]);
+        a.meta.lifecycle = "deprecated".into();
+        a.meta.tags = vec!["go".into(), "api".into()];
+        a.meta.links = vec![crate::AppLink {
+            title: "Runbook".into(),
+            url: "https://wiki.example/r".into(),
+            kind: "runbook".into(),
+        }];
+        let csv = catalog_csv(&[a]);
+        let mut lines = csv.split("\r\n");
+        assert!(lines.next().unwrap().ends_with(",lifecycle,tags,runbook"));
+        assert!(lines
+            .next()
+            .unwrap()
+            .ends_with(",deprecated,go;api,https://wiki.example/r"));
     }
 
     #[test]

@@ -5,7 +5,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+- With `oidc` or `api_key` auth, client-supplied `x-iris-user` / `x-iris-groups` headers are now discarded. Before this, a signed-in OIDC user with no groups (or any API-key caller) could send `x-iris-groups` and be treated as an administrator. **Behaviour change:** API-key callers that relied on sending groups need `IRIS_FEDERATION_TRUST_HEADERS=true`
+- A session user whose name cannot be sent as a header is no longer mapped to `local`
+
+### Fixed
+- Controller: ready endpoints are summed over all EndpointSlices of a service (the last slice seen used to win, and a deleted slice kept counting); a restart no longer marks every app broken for a moment; concurrent access to the endpoint counts is guarded
+- UI CI lint step always failed (no ESLint config) and was hidden by `continue-on-error`; replaced with `oxlint`, and the one error it found (stale callback in the command palette keyboard handler) is fixed
+- Removed the unused `thiserror` dependency that raised a Cargo warning
+
 ### Added
+- **Catalog links, tags and lifecycle** — `iris.zyvor.dev/runbook`, `docs`, `repository`, `links`, `tags`, `lifecycle` annotations (modelled on Backstage `metadata.links` / `tags` / `lifecycle`); shown on app detail, searchable and filterable in the catalog, exported in CSV; `runbook`, `lifecycle`, `tags` can be required; new `dependency-deprecated` rule
+- **Rule exemptions** — time-boxed, audited waivers of one conformance rule for one app (`/api/v1/exemptions`, as in Cortex Scorecard exemptions)
+- **Campaigns** — conformance rules with a due date and per-owner progress (`/api/v1/campaigns`, as in Datadog / OpsLevel campaigns)
+- **Status history and uptime** — the controller records status changes; `/api/v1/history`, `/api/v1/uptime` (as in Gatus uptime and events)
+- **Quality page** (`/quality`) — UI for the scorecard, stale report, CSV export and per-app metrics added earlier, plus campaigns, exemptions and uptime
+- UI unit and component tests (Vitest) run in CI
 - **Maturity scorecard** — `GET /api/v1/scorecard` grades published apps gold/silver/bronze/none from conformance findings and lists next steps (modelled on Cortex/OpsLevel service maturity levels)
 - **Stale app report** — `GET /api/v1/stale?days=` lists apps the controller has not refreshed
 - **CSV catalog export** — `GET /api/v1/catalog/export?format=csv` (formula-injection safe)
@@ -16,6 +31,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [docs/RESEARCH.md](docs/RESEARCH.md) — application-operations landscape survey and ranked ideas
 
 ### Dependency upgrades
+- Round 3: UI `react-router-dom` 7 replaced by `react-router` 8; added vitest 5, jsdom 31, Testing Library, oxlint. Rust: reqwest 0.13.1 → 0.13.5 (its `webpki-roots` feature is gone, so TLS roots now come from the system store; the images install `ca-certificates`), h2 and other lockfile updates. Go: go-openapi/swag 0.29.2, go-restful 3.14 and other indirect bumps; `k8s.io/kube-openapi` stays pinned to 20260721
 - Round 2: `cargo update` (hyper 1.13; all other Rust deps already at latest majors), Go indirect bumps (kube-openapi still pinned), `@tanstack/react-query` 5.108.4
 - Rust: `cargo update`; majors rusqlite 0.32→0.43, tower-http 0.6→0.7, reqwest 0.12→0.13 (kept the ring provider: `rustls-no-provider` + `webpki-roots`, no aws-lc), tokio-tungstenite 0.29→0.30, axum-extra 0.10→0.12, axum-server 0.8→0.9, jsonwebtoken 9→12 (`rust_crypto` backend, key constructors now return `Result`), rand 0.8→0.10 (`rand::rng`)
 - Go: `go get -u`; client-go/api/apimachinery 0.31→0.37, gateway-api 1.2→1.7, modernc sqlite 1.34→1.63; `go` directive 1.23→1.27. Held back: `k8s.io/kube-openapi` pinned to 20260721 (newest revision pulls structured-merge-diff/v7, which breaks apimachinery 0.37.2)

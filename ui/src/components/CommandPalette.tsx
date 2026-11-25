@@ -1,10 +1,10 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, LayoutGrid, Server, Settings as SettingsIcon, Users } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Award, Compass, GitBranch, Globe, Grid3X3, HeartPulse, HelpCircle, History, Home, Layers, LayoutGrid, Server, Settings as SettingsIcon, Users } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
 import AppIcon from './AppIcon'
 import GlyphTile from './nebula/GlyphTile'
 import { irisApi, openApp, statusLabel, statusTone } from '../services/irisApi'
@@ -28,6 +28,7 @@ const navItems = [
   { label: 'Topology', path: '/graph', icon: GitBranch },
   { label: 'Mission control', path: '/mission-control', icon: LayoutGrid },
   { label: 'Teams', path: '/teams', icon: Users },
+  { label: 'Quality', path: '/quality', icon: Award },
   { label: 'Discovery', path: '/discovery', icon: Compass },
   { label: 'Health', path: '/health', icon: HeartPulse },
   { label: 'Activity', path: '/activity', icon: History },
@@ -808,7 +809,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     setSelected(0)
   }, [q, rows.length])
 
-  const activate = (row: Row) => {
+  const activate = useCallback((row: Row) => {
     if (row.kind === 'nav') {
       navigate(row.path)
       onClose()
@@ -827,7 +828,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     pushSpotlightRecent(row.app.id)
     openApp(row.app)
     onClose()
-  }
+  }, [navigate, onClose, openDiagnose])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -846,7 +847,7 @@ export default function CommandPalette({ onClose, initialQuery = '' }: CommandPa
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [rows, selected, onClose, navigate])
+  }, [rows, selected, onClose, activate])
 
   const sectionLabel = (() => {
     if (!q.trim()) return 'Suggested'

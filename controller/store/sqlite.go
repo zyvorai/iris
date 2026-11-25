@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	_ "modernc.org/sqlite"
 	"github.com/zyvorai/iris/controller/model"
+	_ "modernc.org/sqlite"
 )
 
 type Store struct {
@@ -95,7 +95,8 @@ CREATE TABLE IF NOT EXISTS share_links (
   label TEXT DEFAULT ''
 )`)
 	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id)`)
-	return nil
+	_, err = s.db.Exec(statusEventsSchema)
+	return err
 }
 
 const appSelectCols = `id, slug, canonical_slug, display_name, description, namespace, category, icon,
@@ -153,7 +154,10 @@ ON CONFLICT(id) DO UPDATE SET
 		app.BackendJSON(), app.RoutePath, app.PublicURL, app.Status, app.StatusMsg, app.Source,
 		app.AuthMode, app.Score, app.VisibilityJSON(), app.RewriteJSON(), app.ReadyCount, app.UpdatedAt, app.MetaJSON(),
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return s.recordStatus(app.ID, app.Status, app.StatusMsg, now)
 }
 
 func (s *Store) GetApp(id string) (*model.App, error) {
@@ -229,7 +233,11 @@ WHERE namespace = ?
 }
 
 func (s *Store) DeleteApp(id string) error {
-	_, err := s.db.Exec(`DELETE FROM apps WHERE id = ?`, id)
+	if _, err := s.db.Exec(`DELETE FROM apps WHERE id = ?`, id); err != nil {
+		return err
+	}
+	// A service that comes back starts a new history; the gap was not observed.
+	_, err := s.db.Exec(`DELETE FROM status_events WHERE app_id = ?`, id)
 	return err
 }
 

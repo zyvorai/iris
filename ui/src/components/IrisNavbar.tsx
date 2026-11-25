@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Moon, Search, Sun } from 'lucide-react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router'
 import WorkspaceSwitcher from './WorkspaceSwitcher'
 import { irisApi } from '../services/irisApi'
 import { loadTheme, saveTheme, type IrisTheme } from '../utils/irisShellPreferences'

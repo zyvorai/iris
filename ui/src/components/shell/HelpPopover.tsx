@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BookOpen, Copy, HelpCircle, Keyboard, Search, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 interface HelpPopoverProps {
   onOpenShortcuts: () => void

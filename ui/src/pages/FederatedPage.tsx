@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Globe, ShieldCheck } from 'lucide-react'
 import DeparturesRow from '../components/nebula/DeparturesBoard'
 import Board from '../components/nebula/Board'

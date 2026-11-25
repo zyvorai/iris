@@ -35,6 +35,15 @@ Iris discovers Services into a catalog, health-probes them, shows a dependency g
 - had no **metadata policy**: no way to see which apps lack an owner/environment, in the Backstage sense;
 - has no drift detection, environment promotion, SLO model or cost labels.
 
+## Second survey: catalog quality and status (pages read for this pass)
+
+| Source | What it does | Taken into Iris |
+|--------|--------------|-----------------|
+| https://backstage.io/docs/features/software-catalog/descriptor-format | `metadata.links` (url, title, type), `metadata.tags` with a strict format, `spec.lifecycle` experimental / production / deprecated | links, tags, lifecycle annotations |
+| https://docs.cortex.io/standardize/scorecards/rule-exemptions | Per-entity, per-rule exemptions with reason, expiry, approval and revocation; exempt rules do not count | time-boxed exemptions (administrator granted, no request/approve flow) |
+| https://docs.datadoghq.com/internal_developer_portal/campaigns/ | Scorecard rules under a deadline with scope and progress by team or rule | campaigns |
+| https://github.com/TwiN/gatus (README) | Health badges, announcements, maintenance windows, uptime and event history | status history and uptime; badges and announcements not built |
+
 ## Ranked ideas
 
 1. **Dependency health propagation and blast radius** (built). Argo CD aggregates worst-of, Flux gates on dependency Ready, Score/Flux both require acyclic graphs. Cheap, pure function over the existing catalog, and directly answers "what is actually affected".

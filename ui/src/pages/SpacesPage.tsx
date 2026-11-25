@@ -1,7 +1,7 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Layers } from 'lucide-react'
 import QuickLaunchTile from '../components/nebula/QuickLaunchTile'

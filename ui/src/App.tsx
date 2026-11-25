@@ -1,7 +1,7 @@
 // Copyright 2026 ZyvorAI Labs Private Limited
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import AppsPage from './pages/AppsPage'
@@ -16,6 +16,7 @@ import HelpPage from './pages/HelpPage'
 import SpacesPage, { SpaceDetailPage } from './pages/SpacesPage'
 import MissionControlPage from './pages/MissionControlPage'
 import SettingsPage from './pages/SettingsPage'
+import QualityPage from './pages/QualityPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { InspectorProvider } from './utils/inspectorContext'
 import { SpotlightProvider } from './utils/spotlightContext'
@@ -33,6 +34,7 @@ function AppRoutes() {
       <Route path="/graph" element={<GraphPage />} />
       <Route path="/federated" element={<FederatedPage />} />
       <Route path="/teams" element={<TeamsPage />} />
+      <Route path="/quality" element={<QualityPage />} />
       <Route path="/apps/:id" element={<AppDetailPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
       <Route path="/spaces/:spaceId" element={<SpaceDetailPage />} />

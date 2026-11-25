@@ -13,19 +13,22 @@ use axum::{
 use iris_core::store::Store;
 use iris_core::{
     ai_status_with_probe, allowed_namespaces_for_groups, analyze_app_impact, analyze_impact,
-    build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
-    build_team_owners, build_workspaces, can_perform_action, catalog_csv, check_conformance,
-    federation_cluster, filter_apps_by_workspace, list_clusters_with_federation, remote_publish,
-    remote_publish_namespace, remote_rbac_check, remote_set_recommended, resolve_activity_insight,
-    resolve_app_insight, resolve_discovery_insight, resolve_federated_insight,
-    resolve_fleet_insight, resolve_graph_insight, resolve_namespace_insight, resolve_owner_insight,
-    resolve_search_intent, resolve_search_with_llm, scorecard, stale_apps, ActivityInsight,
-    AiStatus, App, AppDiagnosis, AppGraph, AppInsight, AuditEvent, CatalogStats, ClusterInfo,
-    ClusterSummary, ConformancePolicy, ConformanceReport, CreateShareRequest, DiscoveryInsight,
-    FederatedApp, FederatedAuditEvent, FederatedInsight, FederationActionResult,
-    FederationRbacStatus, FleetInsight, GraphInsight, HealthSummary, ImpactReport,
-    NamespaceInsight, OwnerInsight, RoleRule, Scorecard, SearchHit, SearchIntent, ShareLink,
-    ShareLinkResponse, TeamOwner, Workspace, WorkspaceRule, DEFAULT_STALE_DAYS,
+    app_history, build_diagnosis, build_federated_audit, build_federated_catalog, build_graph,
+    build_team_owners, build_workspaces, campaign_progress, can_perform_action, catalog_csv,
+    check_conformance, federation_cluster, filter_apps_by_workspace, list_clusters_with_federation,
+    remote_publish, remote_publish_namespace, remote_rbac_check, remote_set_recommended,
+    resolve_activity_insight, resolve_app_insight, resolve_discovery_insight,
+    resolve_federated_insight, resolve_fleet_insight, resolve_graph_insight,
+    resolve_namespace_insight, resolve_owner_insight, resolve_search_intent,
+    resolve_search_with_llm, scorecard, stale_apps, uptime_report, ActivityInsight, AiStatus, App,
+    AppDiagnosis, AppGraph, AppHistory, AppInsight, AuditEvent, Campaign, CampaignProgress,
+    CatalogStats, ClusterInfo, ClusterSummary, ConformancePolicy, ConformanceReport,
+    CreateCampaignRequest, CreateExemptionRequest, CreateShareRequest, Created, DiscoveryInsight,
+    Exemption, ExemptionView, FederatedApp, FederatedAuditEvent, FederatedInsight,
+    FederationActionResult, FederationRbacStatus, FleetInsight, GraphInsight, HealthSummary,
+    ImpactReport, NamespaceInsight, OwnerInsight, RoleRule, Scorecard, SearchHit, SearchIntent,
+    ShareLink, ShareLinkResponse, TeamOwner, UptimeReport, Workspace, WorkspaceRule,
+    DEFAULT_HISTORY_DAYS, DEFAULT_STALE_DAYS, MAX_HISTORY_DAYS,
 };
 use serde::Deserialize;
 
@@ -68,6 +71,12 @@ pub fn routes(state: ApiState) -> Router {
         .route("/conformance", get(conformance_report))
         .route("/scorecard", get(scorecard_report))
         .route("/stale", get(stale_report))
+        .route("/exemptions", get(list_exemptions).post(create_exemption))
+        .route("/exemptions/{id}", delete(delete_exemption))
+        .route("/campaigns", get(list_campaigns).post(create_campaign))
+        .route("/campaigns/{id}", delete(delete_campaign))
+        .route("/history", get(status_history))
+        .route("/uptime", get(fleet_uptime))
         .route("/workspaces", get(list_workspaces))
         .route("/owners", get(list_owners))
         .route("/discovery", get(list_discovery))
@@ -661,11 +670,22 @@ async fn conformance_report(
     let uid = user_id(&headers, &st.default_user);
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
-    let mut report = check_conformance(&apps, &ConformancePolicy::from_env());
+    Ok(Json(evaluate_conformance(&st, &apps, q)?))
+}
+
+/// Conformance under the configured policy, with active exemptions applied and
+/// the optional owner / namespace filters.
+fn evaluate_conformance(
+    st: &ApiState,
+    apps: &[App],
+    q: ConformanceQuery,
+) -> Result<ConformanceReport, AppError> {
+    let mut report = check_conformance(apps, &ConformancePolicy::from_env());
+    report.apply_exemptions(&st.store.list_exemptions()?, chrono::Utc::now());
     let owner = q.owner.filter(|v| !v.is_empty() && v.len() <= 253);
     let ns = q.namespace.filter(|v| !v.is_empty() && v.len() <= 253);
     report.filter(owner.as_deref(), ns.as_deref());
-    Ok(Json(report))
+    Ok(report)
 }
 
 async fn scorecard_report(
@@ -676,11 +696,7 @@ async fn scorecard_report(
     let uid = user_id(&headers, &st.default_user);
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
-    let mut report = check_conformance(&apps, &ConformancePolicy::from_env());
-    let owner = q.owner.filter(|v| !v.is_empty() && v.len() <= 253);
-    let ns = q.namespace.filter(|v| !v.is_empty() && v.len() <= 253);
-    report.filter(owner.as_deref(), ns.as_deref());
-    Ok(Json(scorecard(&report)))
+    Ok(Json(scorecard(&evaluate_conformance(&st, &apps, q)?)))
 }
 
 #[derive(Deserialize)]
@@ -706,6 +722,210 @@ async fn stale_report(
     let groups = user_groups(&headers);
     let apps = filter_apps_for_user(&st, &uid, &groups, st.store.list_catalog()?);
     Ok(Json(stale_apps(&apps, days, chrono::Utc::now())).into_response())
+}
+
+fn require_admin(st: &ApiState, user: &str, groups: &[String]) -> Result<(), AppError> {
+    if is_admin(st, user, groups) {
+        Ok(())
+    } else {
+        Err(AppError::Forbidden)
+    }
+}
+
+/// Catalog apps the caller may see.
+fn visible_catalog(st: &ApiState, headers: &HeaderMap) -> Result<Vec<App>, AppError> {
+    let uid = user_id(headers, &st.default_user);
+    let groups = user_groups(headers);
+    Ok(filter_apps_for_user(
+        st,
+        &uid,
+        &groups,
+        st.store.list_catalog()?,
+    ))
+}
+
+/// Admins see every exemption (so orphaned ones can be removed); others only
+/// those of apps they can see.
+async fn list_exemptions(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<ExemptionView>>, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    let admin = is_admin(&st, &uid, &user_groups(&headers));
+    let visible: std::collections::HashSet<String> = visible_catalog(&st, &headers)?
+        .into_iter()
+        .map(|a| a.id)
+        .collect();
+    let now = chrono::Utc::now();
+    Ok(Json(
+        st.store
+            .list_exemptions()?
+            .into_iter()
+            .filter(|e| admin || visible.contains(&e.app_id))
+            .map(|e| ExemptionView {
+                status: if e.is_active(now) {
+                    "active".into()
+                } else {
+                    "expired".into()
+                },
+                exemption: e,
+            })
+            .collect(),
+    ))
+}
+
+async fn create_exemption(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Json(body): Json<CreateExemptionRequest>,
+) -> Result<(StatusCode, Json<Exemption>), AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    require_admin(&st, &uid, &user_groups(&headers))?;
+    body.validate().map_err(AppError::Invalid)?;
+    if !visible_catalog(&st, &headers)?
+        .iter()
+        .any(|a| a.id == body.app_id)
+    {
+        return Err(AppError::NotFound);
+    }
+    match st.store.create_exemption(&body, &uid, chrono::Utc::now())? {
+        Created::Ok(e) => {
+            let _ = st.store.record_audit(
+                &uid,
+                "exemption_create",
+                &e.app_id,
+                &format!("rule={} expires={}", e.rule, e.expires_at),
+            );
+            Ok((StatusCode::CREATED, Json(e)))
+        }
+        Created::Duplicate => Err(AppError::Conflict(
+            "an active exemption already covers this app and rule",
+        )),
+        Created::Full => Err(AppError::Conflict("exemption limit reached")),
+    }
+}
+
+async fn delete_exemption(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    require_admin(&st, &uid, &user_groups(&headers))?;
+    if !st.store.delete_exemption(&id)? {
+        return Err(AppError::NotFound);
+    }
+    let _ = st
+        .store
+        .record_audit(&uid, "exemption_revoke", "", &format!("id={id}"));
+    Ok(StatusCode::NO_CONTENT)
+}
+
+async fn list_campaigns(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<CampaignProgress>>, AppError> {
+    let apps = visible_catalog(&st, &headers)?;
+    let policy = ConformancePolicy::from_env();
+    let exemptions = st.store.list_exemptions()?;
+    let now = chrono::Utc::now();
+    Ok(Json(
+        st.store
+            .list_campaigns()?
+            .iter()
+            .map(|c| campaign_progress(c, &apps, &policy, &exemptions, now))
+            .collect(),
+    ))
+}
+
+async fn create_campaign(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Json(body): Json<CreateCampaignRequest>,
+) -> Result<(StatusCode, Json<Campaign>), AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    require_admin(&st, &uid, &user_groups(&headers))?;
+    let body = body.normalize().map_err(AppError::Invalid)?;
+    match st.store.create_campaign(body, &uid, chrono::Utc::now())? {
+        Created::Ok(c) => {
+            let _ = st.store.record_audit(
+                &uid,
+                "campaign_create",
+                "",
+                &format!("id={} due={}", c.id, c.due_date),
+            );
+            Ok((StatusCode::CREATED, Json(c)))
+        }
+        Created::Duplicate | Created::Full => Err(AppError::Conflict("campaign limit reached")),
+    }
+}
+
+async fn delete_campaign(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    let uid = user_id(&headers, &st.default_user);
+    require_admin(&st, &uid, &user_groups(&headers))?;
+    if !st.store.delete_campaign(&id)? {
+        return Err(AppError::NotFound);
+    }
+    let _ = st
+        .store
+        .record_audit(&uid, "campaign_delete", "", &format!("id={id}"));
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(Deserialize)]
+struct HistoryQuery {
+    app: Option<String>,
+    days: Option<String>,
+}
+
+fn parse_days(raw: Option<&str>) -> Result<i64, AppError> {
+    match raw {
+        None | Some("") => Ok(DEFAULT_HISTORY_DAYS),
+        Some(v) => v
+            .parse::<i64>()
+            .map(|d| d.clamp(1, MAX_HISTORY_DAYS))
+            .map_err(|_| AppError::Invalid("days must be an integer".into())),
+    }
+}
+
+async fn status_history(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<HistoryQuery>,
+) -> Result<Json<AppHistory>, AppError> {
+    let days = parse_days(q.days.as_deref())?;
+    let id = q
+        .app
+        .filter(|v| !v.is_empty())
+        .ok_or_else(|| AppError::Invalid("app is required".into()))?;
+    let app = visible_catalog(&st, &headers)?
+        .into_iter()
+        .find(|a| a.id == id)
+        .ok_or(AppError::NotFound)?;
+    let now = chrono::Utc::now();
+    let events = st
+        .store
+        .list_status_events(Some(&app.id), now - chrono::Duration::days(days))?;
+    Ok(Json(app_history(&app, &events, days, now)))
+}
+
+async fn fleet_uptime(
+    State(st): State<ApiState>,
+    headers: HeaderMap,
+    Query(q): Query<HistoryQuery>,
+) -> Result<Json<UptimeReport>, AppError> {
+    let days = parse_days(q.days.as_deref())?;
+    let mut apps = visible_catalog(&st, &headers)?;
+    apps.retain(|a| a.visibility.published);
+    let now = chrono::Utc::now();
+    let events = st
+        .store
+        .list_status_events(None, now - chrono::Duration::days(days))?;
+    Ok(Json(uptime_report(&apps, &events, days, now)))
 }
 
 async fn list_workspaces(
@@ -1112,6 +1332,9 @@ pub enum AppError {
     NotFound,
     BadRequest,
     Forbidden,
+    /// 400 with an explanation that is safe to show the caller.
+    Invalid(String),
+    Conflict(&'static str),
     Internal(anyhow::Error),
 }
 
@@ -1133,6 +1356,8 @@ impl IntoResponse for AppError {
             AppError::NotFound => (StatusCode::NOT_FOUND, "not found").into_response(),
             AppError::BadRequest => (StatusCode::BAD_REQUEST, "bad request").into_response(),
             AppError::Forbidden => (StatusCode::FORBIDDEN, "forbidden").into_response(),
+            AppError::Invalid(msg) => (StatusCode::BAD_REQUEST, msg).into_response(),
+            AppError::Conflict(msg) => (StatusCode::CONFLICT, msg).into_response(),
             AppError::Internal(e) => {
                 tracing::error!("api error: {e:#}");
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
@@ -1190,6 +1415,10 @@ mod tests {
     }
 
     fn router() -> Router {
+        routes(state(vec![]))
+    }
+
+    fn state(admin_users: Vec<String>) -> ApiState {
         let store = Arc::new(Store::open(":memory:").unwrap());
         let now = chrono::Utc::now().to_rfc3339();
         store.upsert_app(&app("good", "a", "team", &now)).unwrap();
@@ -1197,15 +1426,42 @@ mod tests {
         bad.ready_endpoints = 0;
         store.upsert_app(&bad).unwrap();
         store.upsert_app(&app("=evil", "b", "team", &now)).unwrap();
-        routes(ApiState {
+        ApiState {
             store,
             default_user: "tester".into(),
             allowed_namespaces: vec![],
-            admin_users: vec![],
+            admin_users,
             admin_groups: vec![],
             workspace_rules: vec![],
             role_rules: vec![],
-        })
+        }
+    }
+
+    /// Send a request to an existing router so writes are visible to reads.
+    async fn send(
+        r: &Router,
+        method: &str,
+        path: &str,
+        user: &str,
+        body: Option<serde_json::Value>,
+    ) -> (StatusCode, serde_json::Value) {
+        let mut req = Request::builder().method(method).uri(path);
+        if !user.is_empty() {
+            req = req.header("x-iris-user", user);
+        }
+        let body = match body {
+            Some(v) => {
+                req = req.header("content-type", "application/json");
+                Body::from(v.to_string())
+            }
+            None => Body::empty(),
+        };
+        let resp = r.clone().oneshot(req.body(body).unwrap()).await.unwrap();
+        let status = resp.status();
+        let bytes = to_bytes(resp.into_body(), 1 << 20).await.unwrap();
+        let value = serde_json::from_slice(&bytes)
+            .unwrap_or_else(|_| String::from_utf8_lossy(&bytes).into_owned().into());
+        (status, value)
     }
 
     async fn get_path(path: &str) -> (StatusCode, String, String) {
@@ -1268,5 +1524,145 @@ mod tests {
             get_path("/catalog/export?format=xml").await.0,
             StatusCode::BAD_REQUEST
         );
+    }
+
+    #[tokio::test]
+    async fn exemptions_waive_findings_until_revoked() {
+        let r = routes(state(vec!["boss".into()]));
+        let body = serde_json::json!({
+            "appId": "a/bad", "rule": "no-ready-endpoints", "reason": "scaled to zero", "days": 7
+        });
+        let (s, _) = send(&r, "POST", "/exemptions", "dev", Some(body.clone())).await;
+        assert_eq!(s, StatusCode::FORBIDDEN);
+        let (s, created) = send(&r, "POST", "/exemptions", "boss", Some(body.clone())).await;
+        assert_eq!(s, StatusCode::CREATED, "{created}");
+        assert_eq!(created["createdBy"], "boss");
+        let (s, _) = send(&r, "POST", "/exemptions", "boss", Some(body.clone())).await;
+        assert_eq!(s, StatusCode::CONFLICT);
+
+        let (_, sc) = send(&r, "GET", "/scorecard?namespace=a", "", None).await;
+        assert_eq!(sc["summary"]["none"], 0, "{sc}");
+        let (_, c) = send(&r, "GET", "/conformance?namespace=a", "", None).await;
+        assert_eq!(c["apps"][0]["exempted"][0]["rule"], "no-ready-endpoints");
+
+        let (_, list) = send(&r, "GET", "/exemptions", "dev", None).await;
+        assert_eq!(list[0]["status"], "active");
+        let path = format!("/exemptions/{}", created["id"].as_str().unwrap());
+        let (s, _) = send(&r, "DELETE", &path, "dev", None).await;
+        assert_eq!(s, StatusCode::FORBIDDEN);
+        let (s, _) = send(&r, "DELETE", &path, "boss", None).await;
+        assert_eq!(s, StatusCode::NO_CONTENT);
+        let (s, _) = send(&r, "DELETE", &path, "boss", None).await;
+        assert_eq!(s, StatusCode::NOT_FOUND);
+        let (_, sc) = send(&r, "GET", "/scorecard?namespace=a", "", None).await;
+        assert_eq!(sc["summary"]["none"], 1);
+        let (_, audit) = send(&r, "GET", "/audit", "boss", None).await;
+        assert!(audit.to_string().contains("exemption_revoke"));
+    }
+
+    #[tokio::test]
+    async fn exemption_input_is_validated() {
+        let r = router();
+        let ok = serde_json::json!({
+            "appId": "a/bad", "rule": "owner-missing", "reason": "x", "days": 1
+        });
+        for (field, value, want) in [
+            ("rule", serde_json::json!("nope"), StatusCode::BAD_REQUEST),
+            ("days", serde_json::json!(0), StatusCode::BAD_REQUEST),
+            ("days", serde_json::json!(366), StatusCode::BAD_REQUEST),
+            ("reason", serde_json::json!(""), StatusCode::BAD_REQUEST),
+            ("appId", serde_json::json!("a/ghost"), StatusCode::NOT_FOUND),
+        ] {
+            let mut body = ok.clone();
+            body[field] = value;
+            let (s, msg) = send(&r, "POST", "/exemptions", "", Some(body)).await;
+            assert_eq!(s, want, "{field}: {msg}");
+        }
+    }
+
+    #[tokio::test]
+    async fn campaigns_report_progress_per_owner() {
+        let r = routes(state(vec!["boss".into()]));
+        let body = serde_json::json!({
+            "name": "Own everything", "rules": ["owner-missing"], "dueDate": "2000-01-01"
+        });
+        let (s, _) = send(&r, "POST", "/campaigns", "dev", Some(body.clone())).await;
+        assert_eq!(s, StatusCode::FORBIDDEN);
+        let (s, created) = send(&r, "POST", "/campaigns", "boss", Some(body.clone())).await;
+        assert_eq!(s, StatusCode::CREATED, "{created}");
+        let (_, list) = send(&r, "GET", "/campaigns", "dev", None).await;
+        assert_eq!(list[0]["status"], "overdue", "{list}");
+        assert_eq!(list[0]["total"], 3);
+        assert_eq!(list[0]["failing"], 1);
+        assert_eq!(list[0]["percent"], 66);
+        assert_eq!(list[0]["failingApps"][0]["id"], "a/bad");
+        assert_eq!(list[0]["owners"][0]["owner"], "");
+
+        let mut bad = body.clone();
+        bad["dueDate"] = serde_json::json!("soon");
+        let (s, msg) = send(&r, "POST", "/campaigns", "boss", Some(bad)).await;
+        assert_eq!(s, StatusCode::BAD_REQUEST);
+        assert!(msg.as_str().unwrap().contains("YYYY-MM-DD"));
+
+        let path = format!("/campaigns/{}", created["id"].as_str().unwrap());
+        let (s, _) = send(&r, "DELETE", &path, "boss", None).await;
+        assert_eq!(s, StatusCode::NO_CONTENT);
+        let (_, list) = send(&r, "GET", "/campaigns", "dev", None).await;
+        assert_eq!(list, serde_json::json!([]));
+    }
+
+    #[tokio::test]
+    async fn history_and_uptime() {
+        let st = state(vec![]);
+        let at = |hours: i64| {
+            (chrono::Utc::now() - chrono::Duration::hours(hours))
+                .format("%Y-%m-%dT%H:%M:%SZ")
+                .to_string()
+        };
+        for (status, hours) in [("healthy", 10), ("broken", 5)] {
+            st.store
+                .record_status_event(&iris_core::StatusEvent {
+                    app_id: "a/bad".into(),
+                    status: status.into(),
+                    message: String::new(),
+                    at: at(hours),
+                })
+                .unwrap();
+        }
+        let r = routes(st);
+        let (s, h) = send(&r, "GET", "/history?app=a/bad&days=1", "", None).await;
+        assert_eq!(s, StatusCode::OK, "{h}");
+        assert_eq!(h["transitions"], 1);
+        assert_eq!(h["events"][0]["status"], "broken");
+        let pct = h["uptimePercent"].as_f64().unwrap();
+        assert!((49.0..=51.0).contains(&pct), "{pct}");
+        let (_, u) = send(&r, "GET", "/uptime", "", None).await;
+        assert_eq!(u["days"], 7);
+        assert_eq!(u["apps"][0]["id"], "a/bad");
+        assert!(u["apps"][1].get("uptimePercent").is_none());
+        for (path, want) in [
+            ("/history", StatusCode::BAD_REQUEST),
+            ("/history?app=a/ghost", StatusCode::NOT_FOUND),
+            ("/history?app=a/bad&days=x", StatusCode::BAD_REQUEST),
+            ("/uptime?days=x", StatusCode::BAD_REQUEST),
+        ] {
+            assert_eq!(send(&r, "GET", path, "", None).await.0, want, "{path}");
+        }
+    }
+
+    #[tokio::test]
+    async fn new_reads_respect_namespace_allow_list() {
+        let mut st = state(vec![]);
+        st.allowed_namespaces = vec!["b".into()];
+        let r = routes(st);
+        let (s, _) = send(&r, "GET", "/history?app=a/bad", "", None).await;
+        assert_eq!(s, StatusCode::NOT_FOUND);
+        let (_, u) = send(&r, "GET", "/uptime", "", None).await;
+        assert_eq!(u["apps"].as_array().unwrap().len(), 1);
+        let body = serde_json::json!({
+            "appId": "a/bad", "rule": "owner-missing", "reason": "x", "days": 1
+        });
+        let (s, _) = send(&r, "POST", "/exemptions", "", Some(body)).await;
+        assert_eq!(s, StatusCode::NOT_FOUND);
     }
 }

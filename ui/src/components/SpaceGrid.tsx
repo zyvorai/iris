@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import type { CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { IRIS_SPACES, spaceCounts } from '../utils/spaces'
 import { accentColorFor } from '../utils/iconColor'
 import type { IrisApp } from '../types'

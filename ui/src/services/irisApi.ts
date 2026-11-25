@@ -3,6 +3,12 @@
 
 import type {
   AppDiagnosis,
+  AppHistory,
+  CampaignProgress,
+  CreateCampaignRequest,
+  CreateExemptionRequest,
+  Exemption,
+  UptimeReport,
   AppGraph,
   ConformanceReport,
   Scorecard,
@@ -44,14 +50,22 @@ function appPath(id: string, suffix = '') {
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${base}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   })
   if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`)
+    // Validation and conflict responses explain themselves in the body.
+    const detail = res.status === 400 || res.status === 409 ? await res.text().catch(() => '') : ''
+    throw new Error(detail || `${res.status} ${res.statusText}`)
   }
   if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
+}
+
+async function fetchOk(url: string): Promise<Response> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+  return res
 }
 
 function federationPath(clusterId: string, suffix: string) {
@@ -68,7 +82,19 @@ export const irisApi = {
   listCatalog: () => req<IrisApp[]>('/catalog'),
   listFederatedCatalog: () => req<FederatedApp[]>('/catalog/federated'),
   exportCatalog: (format: 'json' | 'csv' = 'json') =>
-    fetch(`/api/v1/catalog/export${format === 'csv' ? '?format=csv' : ''}`).then((r) => r.blob()),
+    fetchOk(`${base}/catalog/export${format === 'csv' ? '?format=csv' : ''}`).then((r) => r.blob()),
+  getMetricsText: () => fetchOk('/metrics').then((r) => r.text()),
+  listExemptions: () => req<Exemption[]>('/exemptions'),
+  createExemption: (body: CreateExemptionRequest) =>
+    req<Exemption>('/exemptions', { method: 'POST', body: JSON.stringify(body) }),
+  deleteExemption: (id: string) => req<void>(`/exemptions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  listCampaigns: () => req<CampaignProgress[]>('/campaigns'),
+  createCampaign: (body: CreateCampaignRequest) =>
+    req<unknown>('/campaigns', { method: 'POST', body: JSON.stringify(body) }),
+  deleteCampaign: (id: string) => req<void>(`/campaigns/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  getHistory: (appId: string, days = 7) =>
+    req<AppHistory>(`/history?app=${encodeURIComponent(appId)}&days=${days}`),
+  getUptime: (days = 7) => req<UptimeReport>(`/uptime?days=${days}`),
   getScorecard: (params: { owner?: string; namespace?: string } = {}) => {
     const q = new URLSearchParams()
     if (params.owner) q.set('owner', params.owner)

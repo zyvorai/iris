@@ -20,6 +20,7 @@ User opens app → Gateway /a/{ns}/{slug} → ClusterIP service
 - API: `/api/v1/*`
 - Gateway: `/a/{namespace}/{slug}/*`
 - Impact and conformance: `/api/v1/impact`, `/api/v1/conformance` (pure functions in `iris-core::impact` / `conformance`)
+- Governance and history: `/api/v1/exemptions`, `/api/v1/campaigns`, `/api/v1/history`, `/api/v1/uptime` (`iris-core::governance` / `history`; the controller writes `status_events`)
 - Insights: `/api/v1/insights/*`, `/api/v1/apps/{id}/insight`
 - Health: `/healthz`, `/api/v1/ws-echo` (WebSocket smoke test)
 

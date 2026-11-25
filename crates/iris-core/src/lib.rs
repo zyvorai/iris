@@ -68,6 +68,14 @@ pub struct AppMeta {
     pub mesh_routes: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub mesh_policies: Vec<MeshPolicy>,
+    /// Runbook, docs and other external links.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub links: Vec<AppLink>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+    /// `experimental`, `production`, `deprecated` or a custom value.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub lifecycle: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -169,16 +177,20 @@ pub mod cluster;
 pub mod conformance;
 pub mod diagnosis;
 pub mod federation;
+pub mod governance;
 pub mod graph;
+pub mod history;
 pub mod impact;
 pub mod insight;
 pub mod intent;
 pub mod k8s_rbac;
+pub mod links;
 pub mod llm;
 pub mod rbac;
 pub mod scorecard;
 pub mod share;
 pub mod store;
+mod store_governance;
 pub mod workspace;
 pub mod workspace_acl;
 
@@ -186,14 +198,22 @@ pub use cluster::{
     federated_cluster_configs, fetch_remote_cluster, list_clusters, list_clusters_with_federation,
     local_cluster, ClusterInfo, FederatedClusterConfig,
 };
-pub use conformance::{check_conformance, ConformancePolicy, ConformanceReport};
+pub use conformance::{check_conformance, ConformancePolicy, ConformanceReport, KNOWN_RULES};
 pub use diagnosis::{build_diagnosis, AppDiagnosis, DiagnosisChainNode, SuggestedAction};
 pub use federation::{
     build_federated_audit, build_federated_catalog, federation_cluster, remote_publish,
     remote_publish_namespace, remote_rbac_check, remote_set_recommended, FederatedApp,
     FederatedAuditEvent, FederationActionResult, FederationRbacStatus,
 };
+pub use governance::{
+    campaign_progress, Campaign, CampaignProgress, CreateCampaignRequest, CreateExemptionRequest,
+    Exemption, ExemptionView, MAX_CAMPAIGNS, MAX_EXEMPTIONS,
+};
 pub use graph::{build_graph, resolve_dependency, AppGraph, GraphEdge, GraphNode};
+pub use history::{
+    app_history, uptime_report, AppHistory, AppUptime, StatusEvent, UptimeReport,
+    DEFAULT_HISTORY_DAYS, MAX_HISTORY_DAYS,
+};
 pub use impact::{analyze_app_impact, analyze_impact, AppImpactDetail, ImpactReport};
 pub use insight::{
     resolve_activity_insight, resolve_app_insight, resolve_discovery_insight,
@@ -203,6 +223,7 @@ pub use insight::{
 };
 pub use intent::{resolve_search_intent, SearchIntent};
 pub use k8s_rbac::{k8s_rbac_enabled, namespace_allowed};
+pub use links::{is_safe_link, AppLink};
 pub use llm::{
     ai_status, ai_status_with_probe, llm_chat_json, llm_config_from_env, llm_probe,
     resolve_search_with_llm, AiStatus, LlmConfig,
@@ -216,6 +237,7 @@ pub use scorecard::{
     DEFAULT_STALE_DAYS,
 };
 pub use share::{CreateShareRequest, ShareLink, ShareLinkResponse};
+pub use store_governance::Created;
 pub use workspace::{build_team_owners, build_workspaces, TeamOwner, Workspace};
 pub use workspace_acl::{
     allowed_workspaces, filter_apps_by_workspace, workspace_rules_from_env, WorkspaceRule,

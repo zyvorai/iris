@@ -15,7 +15,7 @@ const APP_SELECT: &str = "SELECT id, slug, canonical_slug, display_name, descrip
               auth_mode, score, visibility_json, rewrite_json, ready_endpoints, updated_at, meta_json";
 
 pub struct Store {
-    conn: Arc<Mutex<Connection>>,
+    pub(crate) conn: Arc<Mutex<Connection>>,
 }
 
 impl Store {
@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS share_links (
 CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
 "#,
         )?;
+        conn.execute_batch(crate::store_governance::SCHEMA)?;
         Ok(())
     }
 
@@ -403,6 +404,12 @@ CREATE INDEX IF NOT EXISTS idx_share_links_app ON share_links(app_id);
                     score += 20;
                 }
                 if app.backend.name.to_lowercase().contains(&q) {
+                    score += 15;
+                }
+                if app.meta.tags.iter().any(|t| t.contains(&q)) {
+                    score += 25;
+                }
+                if app.meta.lifecycle.contains(&q) {
                     score += 15;
                 }
                 if score > 0 {
@@ -722,8 +729,14 @@ fn row_to_app(row: &rusqlite::Row<'_>) -> rusqlite::Result<App> {
         rewrite: serde_json::from_str(&rewrite_json).unwrap_or_default(),
         ready_endpoints: row.get(18)?,
         updated_at: row.get(19)?,
-        meta: serde_json::from_str(&meta_json).unwrap_or_default(),
+        meta: parse_meta(&meta_json),
     })
+}
+
+fn parse_meta(raw: &str) -> crate::AppMeta {
+    let mut meta: crate::AppMeta = serde_json::from_str(raw).unwrap_or_default();
+    crate::links::sanitize_links(&mut meta.links);
+    meta
 }
 
 fn counts_to_vec(map: std::collections::BTreeMap<String, usize>) -> Vec<crate::LabelCount> {

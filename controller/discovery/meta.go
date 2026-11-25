@@ -28,6 +28,9 @@ func metaFromAnnotations(ann map[string]string) model.AppMeta {
 	if ann[annoRecommended] == "true" {
 		meta.Recommended = true
 	}
+	meta.Links = linksFromAnnotations(ann)
+	meta.Tags = parseTags(ann[annoTags])
+	meta.Lifecycle = normalizeLifecycle(ann[annoLifecycle])
 	return meta
 }
 

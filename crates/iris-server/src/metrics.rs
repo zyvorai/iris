@@ -43,8 +43,12 @@ async fn prometheus(State(st): State<MetricsState>) -> impl IntoResponse {
         .filter(|a| a.visibility.published)
         .cloned()
         .collect();
-    let conformance =
+    let mut conformance =
         iris_core::check_conformance(&published_apps, &iris_core::ConformancePolicy::from_env());
+    conformance.apply_exemptions(
+        &st.store.list_exemptions().unwrap_or_default(),
+        chrono::Utc::now(),
+    );
     let app_series = iris_core::render_app_metrics(&apps, &conformance);
 
     let mut body = format!(

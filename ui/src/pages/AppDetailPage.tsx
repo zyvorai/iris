@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, HeartPulse, Stethoscope } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -26,6 +26,8 @@ import RouteDisplay from '../components/nebula/RouteDisplay'
 import ServiceStatusMessage from '../components/nebula/ServiceStatusMessage'
 import ShareLinksPanel from '../components/ShareLinksPanel'
 import MeshPolicyPanel from '../components/MeshPolicyPanel'
+import AppLinksPanel from '../components/app/AppLinksPanel'
+import UptimePanel from '../components/app/UptimePanel'
 import { AppGraphPanel } from '../pages/GraphPage'
 import { useInspector } from '../utils/inspectorContext'
 import { useStatusFlip } from '../hooks/useStatusFlip'
@@ -193,6 +195,8 @@ export default function AppDetailPage() {
           }
         />
 
+        <AppLinksPanel meta={a.meta} />
+
         <GlassPanel className="glass-panel-section">
           <p className="section-label">Routing</p>
           <div className="route-display-list">
@@ -274,6 +278,8 @@ export default function AppDetailPage() {
             </div>
           ) : null}
         </GlassPanel>
+
+        <UptimePanel appId={a.id} />
 
         <ShareLinksPanel app={a} />
 

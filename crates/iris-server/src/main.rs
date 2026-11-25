@@ -190,6 +190,7 @@ fn is_iris_dock_path(path: &str) -> bool {
         "/discovery",
         "/activity",
         "/mission-control",
+        "/quality",
         "/settings",
         "/help",
         "/healthz",

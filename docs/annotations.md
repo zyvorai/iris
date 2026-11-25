@@ -10,6 +10,12 @@ Prefix: `iris.zyvor.dev/`
 | `environment` | no | Environment label (`production`, `staging`, `development`) |
 | `owner` | no | Team or owner (shown in catalog and search) |
 | `depends-on` | no | Comma-separated dependency slugs (e.g. `prometheus,loki`) |
+| `runbook` | no | Runbook URL (`http`/`https`); satisfies the `runbook` conformance field |
+| `docs` | no | Documentation URL |
+| `repository` | no | Source repository URL |
+| `links` | no | More links, one `Title\|URL` (or bare URL) per line |
+| `tags` | no | Comma-separated tags: lowercase letters, digits, `:` `+` `#`, `-` separated, at most 63 characters, 16 per app |
+| `lifecycle` | no | `experimental`, `production`, `deprecated` or a custom value in tag format |
 | `recommended` | no | `"true"` to surface in Team picks on Home |
 | `description` | no | Card description |
 | `icon` | no | Icon key (`grafana`, `prometheus`, etc.) |
@@ -22,6 +28,17 @@ Prefix: `iris.zyvor.dev/`
 | `serve-from-sub-path` | no | `"true"` when the backend expects the full public mount path (Grafana `GF_SERVER_SERVE_FROM_SUB_PATH`, apps with a non-root `--web.route-prefix`, etc.). Sets gateway `rewrite.addPrefix` to the app route. |
 
 When `slug` is set, Iris exposes a stable public URL at `/apps/{slug}` in addition to the namespace-scoped route `/a/{namespace}/{service-slug}`.
+
+Only absolute `http`/`https` URLs are accepted; others are dropped. At most 10 links per app, titles cut to 64 characters, URLs to 2048. Published apps depending on a `deprecated` app get a `dependency-deprecated` conformance warning.
+
+```yaml
+    iris.zyvor.dev/lifecycle: "production"
+    iris.zyvor.dev/tags: "observability,dashboards"
+    iris.zyvor.dev/runbook: "https://wiki.example.com/grafana-runbook"
+    iris.zyvor.dev/links: |
+      Dashboards|https://grafana.example.com/dashboards
+      On-call|https://oncall.example.com/platform
+```
 
 ### Path rewrite modes
 

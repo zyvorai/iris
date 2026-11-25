@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Zyvor-Production-2.0
 
 import type { ReactNode, ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'ai'
 
